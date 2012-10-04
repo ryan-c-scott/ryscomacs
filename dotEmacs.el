@@ -111,18 +111,26 @@
 ;; Protobufs
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
 
+;; Markdown Mode
+(autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 
 (setq auto-mode-alist
       (append
        (list
         '("\\.xsl" . xsl-mode)
+        '("\\.xml$" . xml-mode)
+        '("\\.rml$" . xml-mode)
+        '("\\.css$" . css-mode)
+        '("\\.rcss$" . css-mode)
         '("\\.cs" . csharp-mode)
         '("\\.cg" . cg-mode)
+        '("\\.glsl$" . cg-mode)
         '("\\.shader" . cg-mode)
         '("\\.lua" . lua-mode)
         '("\\.json" . json-mode)
         '("\\.php" . php-mode)
         '("\\.proto" . protobuf-mode)
+	'("\\.markdown$" . markdown-mode)
 		)
        auto-mode-alist))
 
@@ -201,6 +209,16 @@
   (interactive)
   (create-tags "~/src/Muh-Protos/" )
   (visit-tags-table "~/src/Muh-Protos/TAGS")
+)
+
+(defun vltags()
+  "Tag VL"
+  (interactive)
+  ;(create-tags "~/vl/src/")
+  (setq dir-name (expand-file-name "~/vl/src/") )
+  (shell-command
+   (format "find \"%s\" -iname \"*.cpp\" -or -iname \"*.h\" | etags -o \"%sTAGS\" -" dir-name dir-name))
+  (visit-tags-table "~/vl/src/TAGS")
 )
 
 (defun replace-regexp-and-return (from to)
