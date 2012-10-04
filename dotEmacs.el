@@ -2,7 +2,7 @@
 
 (setq make-backup-files nil)
 
-(add-to-list 'load-path "~/elisp" )
+(add-to-list 'load-path "~/ryscomacs/elisp" )
 
 (server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
@@ -160,7 +160,7 @@
 (global-set-key "\C-h" 'backward-delete-char)
 
 ;;;;;;;;;
-(add-to-list 'load-path "~/elisp/color-theme-6.6.0/" )
+(add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/" )
 (require 'color-theme)
 ;(color-theme-charcoal-black)
 ;;;;;;;;;

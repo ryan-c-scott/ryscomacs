@@ -1,0 +1,1 @@
+(load "~/ryscomacs/dotEmacs")
