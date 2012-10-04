@@ -162,7 +162,8 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/" )
 (require 'color-theme)
-;(color-theme-charcoal-black)
+(color-theme-initialize)
+(color-theme-charcoal-black)
 ;;;;;;;;;
 
 ;CTags setup
