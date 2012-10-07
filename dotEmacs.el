@@ -24,6 +24,7 @@
 ( normal-erase-is-backspace-mode 1 )
 ( show-paren-mode t )
 ( setq indent-tabs-mode nil )
+( setq truncate-partial-width-windows nil )
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
