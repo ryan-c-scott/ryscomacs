@@ -184,34 +184,6 @@
    (format "find \"%s\" -iname \"*.cxx\" -or -iname \"*.hxx\" | etags -o \"%sTAGS\" -" dir-name dir-name))
   )
 
-(defun nemo()
-  "Tag Nemo"
-  (interactive)
-  (create-tags "~/Perforce/nemo/rscott_rcscott-pa_3364/Nemo/" )
-  (visit-tags-table "~/Perforce/nemo/rscott_rcscott-pa_3364/Nemo/TAGS")
-)
-
-(defun dwarfs()
-  "Tag Dwarfs"
-  (interactive)
-  (create-tags "~/src/Dwarfs/" )
-  (visit-tags-table "~/src/Dwarfs/TAGS")
-)
-
-(defun merlin()
-  "Tag Nemo"
-  (interactive)
-  (create-tags "~/src/merlin/" )
-  (visit-tags-table "~/src/merlin/TAGS")
-)
-
-(defun muhproto()
-  "Tag Muh Proto"
-  (interactive)
-  (create-tags "~/src/Muh-Protos/" )
-  (visit-tags-table "~/src/Muh-Protos/TAGS")
-)
-
 (defun vltags()
   "Tag VL"
   (interactive)
