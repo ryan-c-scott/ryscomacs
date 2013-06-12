@@ -175,6 +175,11 @@
 (color-theme-charcoal-black)
 ;;;;;;;;;
 
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/ess-13.05/lisp/" )
+(require 'ess-site)
+;;;;;;;;;
+
 ;CTags setup
 (defun create-tags (dir-name-raw)
   "Create tags file."
@@ -193,6 +198,7 @@
    (format "find \"%s\" -iname \"*.cpp\" -or -iname \"*.h\" | etags -o \"%sTAGS\" -" dir-name dir-name))
   (visit-tags-table "~/vl/src/TAGS")
 )
+
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
