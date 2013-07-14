@@ -32,6 +32,8 @@
 (setq uniquify-after-kill-buffer-p t)
 (setq uniquify-ignore-buffers-re "^\\*")
 
+(require 'windmove)
+(windmove-default-keybindings 'meta)
 
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
@@ -101,7 +103,7 @@
 (autoload 'cg-mode "cg-mode" "Major mode for editing CG program code." t)
 
 ;; Json
-(autoload 'json-mode "json-mode" "Major mode for editing CG json data." t)
+(autoload 'json-mode "json-mode" "Major mode for editing json data." t)
 
 ;; Lua
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
@@ -128,6 +130,7 @@
         '("\\.glsl$" . cg-mode)
         '("\\.shader" . cg-mode)
         '("\\.lua" . lua-mode)
+        '("\\.particle" . lua-mode)
         '("\\.json" . json-mode)
         '("\\.php" . php-mode)
         '("\\.proto" . protobuf-mode)
