@@ -3,6 +3,7 @@
 (setq make-backup-files nil)
 
 (add-to-list 'load-path "~/ryscomacs/elisp" )
+(add-to-list 'load-path "~/.emacs.d/elisp" )
 
 (server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
@@ -184,6 +185,18 @@
 (global-set-key [f8] 'nav-toggle)
 ;;;;;;;;;
 
+;;;;;;;;; Customizing colors used in diff mode
+(defun custom-diff-colors ()
+  "update the colors for diff faces"
+  (set-face-attribute
+   'diff-added nil :background "grey18" :foreground "green")
+  (set-face-attribute
+   'diff-removed nil :background "grey13" :foreground "red3")
+  (set-face-attribute
+   'diff-changed nil :background "grey15" :foreground "purple"))
+(eval-after-load "diff-mode" '(custom-diff-colors))
+;;;;;;;;;
+
 ;CTags setup
 (defun create-tags (dir-name-raw)
   "Create tags file."
@@ -258,3 +271,7 @@
 
 ;; when using ido, the confirmation is rather annoying...
 (setq confirm-nonexistent-file-or-buffer nil)
+
+
+;;;;;;;;;;;;;
+(load "localprojects" :missing-ok t)
