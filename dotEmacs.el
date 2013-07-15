@@ -13,10 +13,6 @@
 ( global-set-key (quote [wheel-up]) 'scroll-down )
 ( global-set-key (quote [wheel-down]) 'scroll-up )
 
-; PHP Mode
-;(require 'php-mode)
-;(add-hook 'php-mode-user-hook 'turn-on-font-lock)
-
 ; Random setting
 ( transient-mark-mode t )
 ( global-font-lock-mode t )
@@ -91,28 +87,14 @@
 ;;;;;;;;;;;
 
 
-;; XSL Mode
+;; Modes
 (autoload 'xsl-mode "xslide" "Major mode for XSL stylesheets." t)
-
-;; C# Mode
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
-
-;; CG Mode
 (autoload 'cg-mode "cg-mode" "Major mode for editing CG program code." t)
-
-;; Json
 (autoload 'json-mode "json-mode" "Major mode for editing CG json data." t)
-
-;; Lua
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-
-;; PHP
 (autoload 'php-mode "php-mode" "PHP editing mode." t)
-
-;; Protobufs
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
-
-;; Markdown Mode
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 
 (setq auto-mode-alist
@@ -132,6 +114,7 @@
         '("\\.php" . php-mode)
         '("\\.proto" . protobuf-mode)
 	'("\\.markdown$" . markdown-mode)
+	'("\\.md$" . markdown-mode)
 		)
        auto-mode-alist))
 
@@ -148,6 +131,7 @@
 	     (hs-minor-mode 1)
 	     (setq hs-isearch-open t)
 	     (c-set-style "c#")
+	     (setq indent-tabs-mode t)
 	     (setq tab-width 4)
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
@@ -180,6 +164,14 @@
 (require 'ess-site)
 ;;;;;;;;;
 
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/nav/")
+(require 'nav)
+(nav-disable-overeager-window-splitting)
+;; Optional: set up a quick key to toggle nav
+(global-set-key [f8] 'nav-toggle)
+;;;;;;;;;
+
 ;CTags setup
 (defun create-tags (dir-name-raw)
   "Create tags file."
@@ -198,7 +190,6 @@
    (format "find \"%s\" -iname \"*.cpp\" -or -iname \"*.h\" | etags -o \"%sTAGS\" -" dir-name dir-name))
   (visit-tags-table "~/vl/src/TAGS")
 )
-
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
@@ -224,6 +215,11 @@
   (goto-char (point-min))
   (replace-regexp-and-return "\n" "")
   )
+
+(defun insert-standard-date ()
+  "Inserts standard date time string." 
+  (interactive)
+  (insert (format-time-string "%Y-%m-%d %H:%M")))
 
 
 ; IDO buffer switching crap
