@@ -28,6 +28,8 @@
 (setq uniquify-after-kill-buffer-p t)
 (setq uniquify-ignore-buffers-re "^\\*")
 
+(require 'windmove)
+(windmove-default-keybindings 'meta)
 
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
@@ -91,7 +93,7 @@
 (autoload 'xsl-mode "xslide" "Major mode for XSL stylesheets." t)
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
 (autoload 'cg-mode "cg-mode" "Major mode for editing CG program code." t)
-(autoload 'json-mode "json-mode" "Major mode for editing CG json data." t)
+(autoload 'json-mode "json-mode" "Major mode for editing json data." t)
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
 (autoload 'php-mode "php-mode" "PHP editing mode." t)
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
@@ -110,6 +112,7 @@
         '("\\.glsl$" . cg-mode)
         '("\\.shader" . cg-mode)
         '("\\.lua" . lua-mode)
+        '("\\.particle" . lua-mode)
         '("\\.json" . json-mode)
         '("\\.php" . php-mode)
         '("\\.proto" . protobuf-mode)
