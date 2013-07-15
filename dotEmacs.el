@@ -1,5 +1,5 @@
 (set-variable 'inhibit-splash-screen "True")
-
+( tool-bar-mode -1 )
 (setq make-backup-files nil)
 
 (add-to-list 'load-path "~/ryscomacs/elisp" )
@@ -36,6 +36,14 @@
 (global-set-key "\C-c \r" 'mark-defun)
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
+
+(setq w32-enable-caps-lock nil)
+(global-set-key (kbd "<capslock> <capslock>") 'switch-to-buffer )
+
+(global-set-key (kbd "<capslock> <right>") 'split-window-right )
+(global-set-key (kbd "<capslock> <down>") 'split-window-below )
+(global-set-key (kbd "<capslock> <left>") 'delete-window )
+(global-set-key (kbd "<capslock> <up>") 'delete-other-windows )
 
 ;; OSX Specific key bindings/fixes
 
@@ -126,6 +134,7 @@
 	  '(lambda () (c-set-style "stroustrup")
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
+             ( local-set-key  (kbd "C-c o") 'ff-find-other-file )
 	     ) )
 
 (add-hook 'csharp-mode-hook
