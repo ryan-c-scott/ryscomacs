@@ -46,6 +46,12 @@
 (global-set-key (kbd "<capslock> <left>") 'delete-window )
 (global-set-key (kbd "<capslock> <up>") 'delete-other-windows )
 
+;; Windows specific setup for locales under cygwin
+  (when (eq system-type 'windows-nt)
+    (setenv "LANG" "C")
+    )
+;;
+
 ;; OSX Specific key bindings/fixes
 
 ;; RS: The below taken from http://defindit.com/readme_files/tom_emacs.txt
@@ -122,6 +128,9 @@
         '("\\.shader" . cg-mode)
         '("\\.lua" . lua-mode)
         '("\\.particle" . lua-mode)
+        '("\\.material" . lua-mode)
+        '("\\.scene" . lua-mode)
+        '("\\.deps" . lua-mode)
         '("\\.json" . json-mode)
         '("\\.php" . php-mode)
         '("\\.proto" . protobuf-mode)
