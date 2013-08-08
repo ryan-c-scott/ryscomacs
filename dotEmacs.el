@@ -194,6 +194,12 @@
 (global-set-key [f8] 'nav-toggle)
 ;;;;;;;;;
 
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/helm/")
+(require 'helm-config)
+(global-set-key (kbd "<capslock> SPC") 'helm-mini )
+;;;;;;;;;
+
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
   "update the colors for diff faces"
@@ -207,22 +213,15 @@
 ;;;;;;;;;
 
 ;CTags setup
-(defun create-tags (dir-name-raw)
-  "Create tags file."
-  (interactive "Directory: ")
-  (setq dir-name (expand-file-name dir-name-raw) )
-  (shell-command
-   (format "find \"%s\" -iname \"*.cxx\" -or -iname \"*.hxx\" | etags -o \"%sTAGS\" -" dir-name dir-name))
-  )
-
 (defun vltags()
   "Tag VL"
   (interactive)
-  ;(create-tags "~/vl/src/")
-  (setq dir-name (expand-file-name "~/vl/src/") )
+  (setq root-dir-name (expand-file-name "~/vl") )
   (shell-command
-   (format "find \"%s\" -iname \"*.cpp\" -or -iname \"*.h\" | etags -o \"%sTAGS\" -" dir-name dir-name))
-  (visit-tags-table "~/vl/src/TAGS")
+   (format "ctags -R -e --extra=qf -o \"%s/TAGS\" \"%s/src\"" root-dir-name root-dir-name))
+  (shell-command
+   (format "ctags -R -e -a --extra=qf -o \"%s/TAGS\" \"%s/Content/scripts\"" root-dir-name root-dir-name))
+  (visit-tags-table "~/vl/TAGS")
 )
 
 (defun replace-regexp-and-return (from to)
