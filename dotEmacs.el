@@ -198,6 +198,7 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/helm/")
 (require 'helm-config)
 (global-set-key (kbd "<capslock> SPC") 'helm-mini )
+(helm-mode 1)
 ;;;;;;;;;
 
 ;;;;;;;;; Customizing colors used in diff mode
