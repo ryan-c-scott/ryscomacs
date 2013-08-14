@@ -219,9 +219,7 @@
   (interactive)
   (setq root-dir-name (expand-file-name "~/vl") )
   (shell-command
-   (format "ctags -R -e --extra=qf -o \"%s/TAGS\" \"%s/src\"" root-dir-name root-dir-name))
-  (shell-command
-   (format "ctags -R -e -a --extra=qf -o \"%s/TAGS\" \"%s/Content/scripts\"" root-dir-name root-dir-name))
+   (format "ctags -R -e --extra=qf -o \"%s/TAGS\" \"%s/src\" \"%s/Content/scripts\"" root-dir-name root-dir-name root-dir-name))
   (visit-tags-table "~/vl/TAGS")
 )
 
