@@ -201,6 +201,10 @@
 (helm-mode 1)
 ;;;;;;;;;
 
+;;;;;;;;;
+(require 'p4)
+;;;;;;;;;
+
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
   "update the colors for diff faces"
