@@ -218,14 +218,17 @@
 ;;;;;;;;;
 
 ;CTags setup
+(defun tag-dir( dirpath subdirs )
+  "Run ctags against the specified directories"
+  (let ((default-directory dirpath))
+    (shell-command
+     (concat "ctags -R -e --extra=qf -o " (mapconcat 'expand-file-name subdirs " ")) )
+    (visit-tags-table (expand-file-name "TAGS")) ))
+
 (defun vltags()
   "Tag VL"
   (interactive)
-  (setq root-dir-name (expand-file-name "~/vl") )
-  (shell-command
-   (format "ctags -R -e --extra=qf -o \"%s/TAGS\" \"%s/src\" \"%s/Content/scripts\"" root-dir-name root-dir-name root-dir-name))
-  (visit-tags-table "~/vl/TAGS")
-)
+  (tag-dir "~/vl" '( "TAGS" "src" "Content/scripts" )) )
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
