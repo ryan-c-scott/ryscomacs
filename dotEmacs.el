@@ -22,6 +22,7 @@
 ( show-paren-mode t )
 ( setq indent-tabs-mode nil )
 ( setq truncate-partial-width-windows nil )
+( setq ring-bell-function 'ignore )
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
