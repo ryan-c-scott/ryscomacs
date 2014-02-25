@@ -11990,7 +11990,7 @@ its default 80x25 state -- dark grey on black."
   (interactive)
   (color-theme-install
    '(color-theme-charcoal-black
-     ((background-color . "Grey15")
+     ((background-color . "grey5")
       (background-mode . dark)
       (border-color . "Grey")
       (cursor-color . "Grey")
