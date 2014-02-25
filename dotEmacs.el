@@ -137,6 +137,7 @@
         '("\\.proto" . protobuf-mode)
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
+        '("\\.scala$" . scala-mode)
 		)
        auto-mode-alist))
 
@@ -200,6 +201,11 @@
 (require 'helm-config)
 (global-set-key (kbd "<capslock> SPC") 'helm-mini )
 (helm-mode 1)
+;;;;;;;;;
+
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/scala-mode2/")
+(require 'scala-mode2)
 ;;;;;;;;;
 
 ;;;;;;;;;
