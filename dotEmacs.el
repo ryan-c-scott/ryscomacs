@@ -220,7 +220,7 @@
   (set-face-attribute
    'diff-removed nil :background "grey13" :foreground "red3")
   (set-face-attribute
-   'diff-changed nil :background "grey15" :foreground "purple"))
+   'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
 ;;;;;;;;;
 
