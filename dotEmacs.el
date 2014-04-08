@@ -14,6 +14,9 @@
 ( global-set-key (quote [wheel-up]) 'scroll-down )
 ( global-set-key (quote [wheel-down]) 'scroll-up )
 
+; Font settings
+( set-face-attribute 'default t :font "Consolas-10.0" )
+
 ; Random setting
 ( transient-mark-mode t )
 ( global-font-lock-mode t )
