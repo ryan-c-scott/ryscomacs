@@ -26,6 +26,7 @@
 ( setq indent-tabs-mode nil )
 ( setq truncate-partial-width-windows nil )
 ( setq ring-bell-function 'ignore )
+( setq eshell-prefer-lisp-functions t )
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
@@ -213,6 +214,12 @@
 
 ;;;;;;;;;
 (require 'p4)
+;;;;;;;;;
+
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
 ;;;;;;;;;
 
 ;;;;;;;;; Customizing colors used in diff mode
