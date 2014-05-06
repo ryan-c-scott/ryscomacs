@@ -282,7 +282,7 @@
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files
 (setq 
-  ido-save-directory-list-file "~/.emacs.d/cache/ido.last"
+  ido-save-directory-list-file "~/.emacs.d/ido.last"
 
   ido-ignore-buffers ;; ignore these guys
   '("\\` " "^\*Mess" "^\*Back" ".*Completion" "^\*Ido" "^\*trace" "^\*\.meta"
