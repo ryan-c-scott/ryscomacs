@@ -277,6 +277,10 @@
   (interactive)
   (insert (format-time-string "%Y-%m-%d %H:%M")))
 
+(defun ryscomacs-compile()
+  "Byte compiles all of ~/ryscomacs/elisp."
+  (interactive)
+  (byte-recompile-directory "~/ryscomacs/elisp" 0))
 
 ; IDO buffer switching crap
 (require 'ido) 
