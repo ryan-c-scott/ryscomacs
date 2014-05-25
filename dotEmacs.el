@@ -188,11 +188,6 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/ess-13.05/lisp/" )
-(require 'ess-site)
-;;;;;;;;;
-
-;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/nav/")
 (require 'nav)
 (nav-disable-overeager-window-splitting)
@@ -205,6 +200,11 @@
 (require 'helm-config)
 (global-set-key (kbd "<capslock> SPC") 'helm-mini )
 (helm-mode 1)
+;;;;;;;;;
+
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
+(require 'dvc-autoloads)
 ;;;;;;;;;
 
 ;;;;;;;;;
@@ -226,9 +226,9 @@
 (defun custom-diff-colors ()
   "update the colors for diff faces"
   (set-face-attribute
-   'diff-added nil :background "grey18" :foreground "green")
+   'diff-added nil :background "grey18" :foreground "cyan3")
   (set-face-attribute
-   'diff-removed nil :background "grey13" :foreground "red3")
+   'diff-removed nil :background "grey13" :foreground "yellow3")
   (set-face-attribute
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
