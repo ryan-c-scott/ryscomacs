@@ -37,6 +37,10 @@
 (require 'windmove)
 (windmove-default-keybindings 'meta)
 
+; ispell
+(setq ispell-program-name "aspell")
+(require 'ispell)
+
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\C-c \r" 'mark-defun)
