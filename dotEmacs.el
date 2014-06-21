@@ -15,7 +15,9 @@
 ( global-set-key (quote [wheel-down]) 'scroll-up )
 
 ; Font settings
-( set-face-attribute 'default t :font "Consolas-10.0" )
+(cond
+ ((string-equal system-type "windows-nt")
+  (set-face-attribute 'default t :font "Consolas-10.0")))
 
 ; Random setting
 ( transient-mark-mode t )
