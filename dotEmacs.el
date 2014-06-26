@@ -1,18 +1,18 @@
 (set-variable 'inhibit-splash-screen "True")
-( tool-bar-mode -1 )
+(tool-bar-mode -1)
 (setq make-backup-files nil)
 
-(add-to-list 'load-path "~/ryscomacs/elisp" )
-(add-to-list 'load-path "~/.emacs.d/elisp" )
+(add-to-list 'load-path "~/ryscomacs/elisp")
+(add-to-list 'load-path "~/.emacs.d/elisp")
 
 (server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
 
 ; Wheel mouse setup
-( global-set-key (quote [mouse-4]) 'scroll-down )
-( global-set-key (quote [mouse-5]) 'scroll-up )
-( global-set-key (quote [wheel-up]) 'scroll-down )
-( global-set-key (quote [wheel-down]) 'scroll-up )
+(global-set-key (quote [mouse-4]) 'scroll-down)
+(global-set-key (quote [mouse-5]) 'scroll-up)
+(global-set-key (quote [wheel-up]) 'scroll-down)
+(global-set-key (quote [wheel-down]) 'scroll-up)
 
 ; Font settings
 (cond
@@ -20,15 +20,15 @@
   (set-face-attribute 'default t :font "Consolas-10.0")))
 
 ; Random setting
-( transient-mark-mode t )
-( global-font-lock-mode t )
-( line-number-mode t )
-( normal-erase-is-backspace-mode 1 )
-( show-paren-mode t )
-( setq indent-tabs-mode nil )
-( setq truncate-partial-width-windows nil )
-( setq ring-bell-function 'ignore )
-( setq eshell-prefer-lisp-functions t )
+(transient-mark-mode t)
+(global-font-lock-mode t)
+(line-number-mode t)
+(normal-erase-is-backspace-mode 1)
+(show-paren-mode t)
+(setq indent-tabs-mode nil)
+(setq truncate-partial-width-windows nil)
+(setq ring-bell-function 'ignore)
+(setq eshell-prefer-lisp-functions t)
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
@@ -64,8 +64,7 @@
 
 ;; Windows specific setup for locales under cygwin
   (when (eq system-type 'windows-nt)
-    (setenv "LANG" "C")
-    )
+    (setenv "LANG" "C"))
 ;;
 
 ;; OSX Specific key bindings/fixes
@@ -161,8 +160,7 @@
 	  '(lambda () (c-set-style "stroustrup")
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
-             ( local-set-key  (kbd "C-c o") 'ff-find-other-file )
-	     ) )
+             (local-set-key (kbd "C-c o") 'ff-find-other-file)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -174,25 +172,21 @@
 	     (setq tab-width 4)
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
-	     (local-set-key "\C-c<"  'hs-show-block)
-
-	     ) )
+	     (local-set-key "\C-c<"  'hs-show-block)))
 
 (add-hook 'javascript-mode-hook
 	  '(lambda ()
-	     (setq-default indent-tabs-mode nil)
-	     ) )
+	     (setq-default indent-tabs-mode nil)))
 
 (add-hook 'json-mode-hook
 	  '(lambda ()
 	     (setq-default indent-tabs-mode nil)
-             (setq js-indent-level 2)
-	     ) )
+             (setq js-indent-level 2)))
 
 (global-set-key "\C-h" 'backward-delete-char)
 
 ;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/" )
+(add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/")
 (require 'color-theme)
 (color-theme-initialize)
 (color-theme-charcoal-black)
@@ -246,17 +240,17 @@
 ;;;;;;;;;
 
 ;CTags setup
-(defun tag-dir( dirpath subdirs )
+(defun tag-dir(dirpath subdirs)
   "Run ctags against the specified directories"
   (let ((default-directory dirpath))
     (shell-command
-     (concat "ctags -R -e --extra=qf -o " (mapconcat 'expand-file-name subdirs " ")) )
-    (visit-tags-table (expand-file-name "TAGS")) ))
+     (concat "ctags -R -e --extra=qf -o " (mapconcat 'expand-file-name subdirs " ")))
+    (visit-tags-table (expand-file-name "TAGS"))))
 
 (defun vltags()
   "Tag VL"
   (interactive)
-  (tag-dir "~/vl" '( "TAGS" "src" "Content/scripts" )) )
+  (tag-dir "~/vl" '("TAGS" "src" "Content/scripts")))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
@@ -273,15 +267,13 @@
 
   (save-excursion
     (delete-trailing-whitespace)
-    (indent-region (point-min) (point-max) nil) )
-  )
+    (indent-region (point-min) (point-max) nil)))
 
 (defun json-unformat()
   "Format Json Data"
   (interactive)
   (goto-char (point-min))
-  (replace-regexp-and-return "\n" "")
-  )
+  (replace-regexp-and-return "\n" ""))
 
 (defun insert-standard-date ()
   "Inserts standard date time string." 
