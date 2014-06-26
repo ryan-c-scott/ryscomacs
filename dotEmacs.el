@@ -49,13 +49,18 @@
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
 
-(setq w32-enable-caps-lock nil)
-(global-set-key (kbd "<capslock> <capslock>") 'switch-to-buffer )
+; On everything but Windows, 
+(setq effective-capslock-key "<capslock>")
+(unless (string-equal system-type "windows-nt")
+  (setq effective-capslock-key "<f13>"))
 
-(global-set-key (kbd "<capslock> <right>") 'split-window-right )
-(global-set-key (kbd "<capslock> <down>") 'split-window-below )
-(global-set-key (kbd "<capslock> <left>") 'delete-window )
-(global-set-key (kbd "<capslock> <up>") 'delete-other-windows )
+(setq w32-enable-caps-lock nil)
+(global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'switch-to-buffer)
+
+(global-set-key (kbd (concat effective-capslock-key " <right>")) 'split-window-right)
+(global-set-key (kbd (concat effective-capslock-key " <down>")) 'split-window-below)
+(global-set-key (kbd (concat effective-capslock-key " <left>")) 'delete-window)
+(global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
 
 ;; Windows specific setup for locales under cygwin
   (when (eq system-type 'windows-nt)
@@ -204,7 +209,7 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/helm/")
 (require 'helm-config)
-(global-set-key (kbd "<capslock> SPC") 'helm-mini )
+(global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-mini)
 (helm-mode 1)
 ;;;;;;;;;
 
