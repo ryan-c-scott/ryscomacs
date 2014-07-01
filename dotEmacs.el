@@ -120,7 +120,6 @@
 
 
 ;; Modes
-(autoload 'xsl-mode "xslide" "Major mode for XSL stylesheets." t)
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
 (autoload 'cg-mode "cg-mode" "Major mode for editing CG program code." t)
 (autoload 'json-mode "json-mode" "Major mode for editing json data." t)
@@ -132,7 +131,6 @@
 (setq auto-mode-alist
       (append
        (list
-        '("\\.xsl" . xsl-mode)
         '("\\.xml$" . xml-mode)
         '("\\.rml$" . xml-mode)
         '("\\.css$" . css-mode)
@@ -151,7 +149,6 @@
         '("\\.proto" . protobuf-mode)
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
-        '("\\.scala$" . scala-mode)
 		)
        auto-mode-alist))
 
@@ -210,11 +207,6 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (require 'dvc-autoloads)
-;;;;;;;;;
-
-;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/scala-mode2/")
-(require 'scala-mode2)
 ;;;;;;;;;
 
 ;;;;;;;;;
