@@ -457,7 +457,7 @@ If DONT-SWITCH, don't switch to the diff buffer"
   ;; TODO: dvc-revision-to-string doesn't work for me.
   (interactive (list nil nil nil current-prefix-arg))
   (xhg-diff-1 (dvc-revision-to-string modified) path dont-switch
-              (dvc-revision-to-string base-rev)))
+              (dvc-revision-to-string base-rev "%s^%s")))
 
 (defun xhg-dvc-status ()
   "Run hg status."

@@ -119,7 +119,7 @@
 
 (defun xhg-name-construct (rev-id)
   (case (car rev-id)
-    (local (nth 1 rev-id))
+    (local (nth 2 rev-id))
     (t (error "Not implemented (rev-id=%s)" rev-id))))
 
 (provide 'xhg-revision)
