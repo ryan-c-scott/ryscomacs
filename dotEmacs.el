@@ -205,6 +205,11 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/helm-ag/")
+(require 'helm-ag)
+;;;;;;;;;
+
+;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (require 'dvc-autoloads)
 ;;;;;;;;;
