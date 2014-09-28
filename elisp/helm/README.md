@@ -18,34 +18,72 @@ and can be considered to be its successor.
 and provide a cleaner, leaner and more modular tool, that's not tied in
 the trap of backward compatibility. 
 
+## Requirements
+
+You need a recent Emacs to use latest helm, at least Emacs-24.3.
+
+[async](https://github.com/jwiegley/emacs-async) will be installed as dependency
+when installing from melpa but is facultative when installing from git (recommended though
+as it may fix installation of all packages from (m)elpa and will allow you to
+copy/rename asynchronously your files from helm and/or dired if needed).
+
 ## Getting Started
 
-### Quick install
+### Quick install from git
 
   1. Clone the `helm` repository to some directory:
   
     ```elisp
     $ git clone https://github.com/emacs-helm/helm.git /path/to/helm/directory
     ```
+
+  2. Clone the `async` repository to some directory (facultative)
+
+    ```elisp
+    $ git clone git@github.com:jwiegley/emacs-async.git /path/to/async/directory
+    ```
+  3. Run `make` from the `helm` directory.
   
-  2. Run make from this directory.
   3. Add to `.emacs.el` (or equivalent):
 
     ```elisp
+    ;; [Facultative] Only if you have installed async.
+    (add-to-list 'load-path "/path/to/async/directory")
+    
     (add-to-list 'load-path "/path/to/helm/directory")
     (require 'helm-config)
     ```
+    
+_NOTE:_ Installing helm like this (i.e from git+make) is the safest way.
 
-Alternatively, you can have a quick try to helm by launching from the helm directory:
+You can have a quick try to `helm` by launching from the helm directory:
 
 `./emacs-helm.sh`
 
-Note that this will not work on Windows systems.
+It is also recommended to use this when reporting bug.
+
+_NOTE:_ That this will not work on Windows systems.
 
 ### Install from Emacs packaging system
 
 Helm is now available on Melpa at `http://melpa.milkbox.net/`
 You will find there instructions to install.
+Then you should need only in your init file:
+
+```elisp
+(require 'helm-config)
+```
+
+_WARNING:_ Due to a bad concept of package.el which is in charge of fetching helm files
+and compiling them, users had errors most of the time when upgrading from melpa and `list-package`.
+To avoid this [Async](https://github.com/jwiegley/emacs-async) have been added as dependency to
+helm to force package.el compiling its files in a clean environment.
+People installing from git and using the make file will not suffer from this problem and don't need
+[Async](https://github.com/jwiegley/emacs-async) though it is recommended as it fix installation
+of all other packages you may install with package.el from (m)elpa.
+See [FAQ](https://github.com/emacs-helm/helm/wiki#faq) for more infos.
+
+_Note:_ After upgrading from the emacs packaging system you should restart emacs for the changes take effect.
 
 **Note to Linux Distributions Maintainers**
 
@@ -85,7 +123,20 @@ discover some of the commands provided by helm.
 
 ### Advanced usage
 
-Helm is capable of a lot.
+Helm is capable of a lot. Here is a demo of `helm-buffers-list`:
+
+![helm-buffers-list](doc/helm-buffers-list.gif)
+
+The demo starts when you see `Eval: START` in the minibuffer.
+
+- All the C buffers are selected using the regexp `*C`. In the demo, I also select Tcl buffers with `*Tcl` and then switched back to C buffers with `*C`.
+- I only want to have buffers that contains only the string "crash". To do that, I add a space, then add the pattern `@crash`.
+- After the initial search pattern, I hand over the current matching buffers to `helm-moccur` - `moccur` with Helm interface. In the above demo, I only switch to one file, that is `kexec.c`. However, you can select multiple buffers with `C-SPC` or select all buffers with `M-a`.
+- Candidates can be filtered gradually by adding more pattern, i.e. I added `memory` to filtered down to buffers that contain the string "memory" among the buffers that are containing "crash".
+
+As you can see, as you filtered out, the number of candidates decreases, as displayed in the modeline. At the end, there were 12 buffers remained as the result of filtering, down from the total 253 buffers.
+
+You can read [this guide](http://tuhdo.github.io/helm-intro.html) to quickly get started with Helm.
 
 You can find all the gory details on the [Helm Wiki](https://github.com/emacs-helm/helm/wiki).
 
@@ -104,7 +155,8 @@ development of Helm.
 ## Bugs & Improvements
 
 Bug reports and suggestions for improvements are always
-welcome. GitHub pull requests are even better! :-)
+welcome, be sure though they are related to helm, many bugs are coming from emacs itself
+or other packages. GitHub pull requests are even better! :-)
 
 NOTE: When trying if something is working or not, be sure to start helm from `Emacs -Q` or even better
 Start it from your helm directory with `./emacs-helm.sh`.

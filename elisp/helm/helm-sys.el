@@ -1,6 +1,6 @@
-;;; helm-sys.el --- System related functions for helm.
+;;; helm-sys.el --- System related functions for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 (require 'helm-utils)
 
@@ -26,11 +26,31 @@
   "System related helm library."
   :group 'helm)
 
+(defface helm-top-columns
+    '((t :inherit helm-header))
+  "Face for helm help string in minibuffer."
+  :group 'helm-sys)
+
+
+(defun helm-top-command-set-fn (var _value)
+  (set var
+       (cl-case system-type
+         (darwin "env COLUMNS=%s ps -axo pid,user,pri,nice,ucomm,tty,start,vsz,%%cpu,%%mem,etime,command")
+         (t      "env COLUMNS=%s top -b -n 1"))))
+
 (defcustom helm-top-command "env COLUMNS=%s top -b -n 1"
   "Top command used to display output of top.
+To use top command, a version supporting batch mode (-b option) is needed.
+On Mac OSX top command doesn't support this, so ps command
+is used by default instead.
+If you modify this the number and order of elements displayed
+should be the same as top command to have the sort commands
+working properly, that is 12 elements with the 2 first being
+PID and USER and the last 4 being %CPU, %MEM, TIME and COMMAND.
 A format string where %s will be replaced with `frame-width'."
   :group 'helm-sys
-  :type 'string)
+  :type 'string
+  :set  'helm-top-command-set-fn)
 
 
 ;;; Top (process)
@@ -52,6 +72,7 @@ A format string where %s will be replaced with `frame-width'."
     (header-name . (lambda (name) (concat name " (Press C-c C-u to refresh)"))) 
     (init . helm-top-init)
     (candidates-in-buffer)
+    (nomark)
     (display-to-real . helm-top-display-to-real)
     (persistent-action . helm-top-sh-persistent-action)
     (persistent-help . "SIGTERM")
@@ -61,20 +82,35 @@ A format string where %s will be replaced with `frame-width'."
     (filtered-candidate-transformer . helm-top-sort-transformer)
     (action-transformer . helm-top-action-transformer)))
 
-(defun helm-top-transformer (candidates source)
+(defun helm-top-transformer (candidates _source)
   "Transformer for `helm-top'.
 Return empty string for non--valid candidates."
-  (loop for disp in candidates collect
-        (if (string-match "^ *[0-9]+" disp) disp (cons disp ""))))
+  (cl-loop for disp in candidates collect
+        (cond ((string-match "^ *[0-9]+" disp) disp)
+              ((string-match "^ *PID" disp)
+               (cons (propertize disp 'face 'helm-top-columns) ""))
+              (t (cons disp "")))))
 
-(defun helm-top-action-transformer (actions candidate)
+(defun helm-top-action-transformer (actions _candidate)
   "Action transformer for `top'.
 Show actions only on line starting by a PID."
   (let ((disp (helm-get-selection nil t)))
     (cond ((string-match "^ *[0-9]+" disp)
            (list '("kill (SIGTERM)" . (lambda (pid) (helm-top-sh "TERM" pid)))
                  '("kill (SIGKILL)" . (lambda (pid) (helm-top-sh "KILL" pid)))
-                 '("Copy PID" . (lambda (pid) (kill-new pid)))))
+                 '("kill (SIGINT)" .  (lambda (pid) (helm-top-sh "INT" pid)))
+                 '("kill (Choose signal)"
+                   . (lambda (pid)
+                       (helm-top-sh
+                        (helm-comp-read (format "Kill [%s] with signal: " pid)
+                                        '("ALRM" "HUP" "INT" "KILL" "PIPE" "POLL"
+                                          "PROF" "TERM" "USR1" "USR2" "VTALRM"
+                                          "STKFLT" "PWR" "WINCH" "CHLD" "URG"
+                                          "TSTP" "TTIN" "TTOU" "STOP" "CONT"
+                                          "ABRT" "FPE" "ILL" "QUIT" "SEGV"
+                                          "TRAP" "SYS" "EMT" "BUS" "XCPU" "XFSZ")
+                                        :must-match t)
+                        pid)))))
           (t actions))))
 
 (defun helm-top-sh (sig pid)
@@ -104,16 +140,18 @@ Show actions only on line starting by a PID."
 (defun helm-top-set-mode-line (str)
   (if (string-match "Sort:\\[\\(.*\\)\\] " helm-top-mode-line)
       (setq helm-top-mode-line (replace-match str nil nil helm-top-mode-line 1))
-      (setq helm-top-mode-line (concat (format "Sort:[%s] " str) helm-top-mode-line))))
+    (setq helm-top-mode-line (concat (format "Sort:[%s] " str) helm-top-mode-line))))
 
 (defun helm-top-sort-transformer (candidates source)
   (helm-top-transformer
    (if helm-top-sort-fn
-       (loop for c in candidates
-             if (string-match "^ *[0-9]+" c) collect c into pid-cands
-             else collect c into header-cands
-             finally return (append (butlast header-cands)
-                                    (sort pid-cands helm-top-sort-fn)))
+       (cl-loop for c in candidates
+                if (string-match "^ *[0-9]+" c)
+                collect c into pid-cands
+                else collect c into header-cands
+                finally return (append
+                                header-cands
+                                (sort pid-cands helm-top-sort-fn)))
        candidates)
    source))
 
@@ -138,28 +176,24 @@ Show actions only on line starting by a PID."
          (user-2 (nth 1 split-2)))
     (string< user-1 user-2)))
 
-;;;###autoload
 (defun helm-top-run-sort-by-com ()
   (interactive)
   (helm-top-set-mode-line "COM")
   (setq helm-top-sort-fn 'helm-top-sort-by-com)
   (helm-force-update))
 
-;;;###autoload
 (defun helm-top-run-sort-by-cpu ()
   (interactive)
   (helm-top-set-mode-line "CPU")
   (setq helm-top-sort-fn nil)
   (helm-force-update))
 
-;;;###autoload
 (defun helm-top-run-sort-by-mem ()
   (interactive)
   (helm-top-set-mode-line "MEM")
   (setq helm-top-sort-fn 'helm-top-sort-by-mem)
   (helm-force-update))
 
-;;;###autoload
 (defun helm-top-run-sort-by-user ()
   (interactive)
   (helm-top-set-mode-line "USER")
@@ -202,7 +236,7 @@ Show actions only on line starting by a PID."
            (call-process "xrandr" nil (current-buffer) nil
                          "--screen" (helm-xrandr-screen) "-q")
            (goto-char 1)
-           (loop with modes = nil
+           (cl-loop with modes = nil
                  while (re-search-forward "   \\([0-9]+x[0-9]+\\)" nil t)
                  for mode = (match-string 1)
                  unless (member mode modes)
@@ -241,7 +275,8 @@ Show actions only on line starting by a PID."
     (unless helm-alive-p (delete-other-windows))
     (helm :sources 'helm-source-top
           :buffer "*helm top*" :full-frame t
-          :candidate-number-limit 9999)))
+          :candidate-number-limit 9999
+          :preselect "^\\s-*[0-9]+")))
 
 ;;;###autoload
 (defun helm-list-emacs-process ()
