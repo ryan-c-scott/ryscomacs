@@ -247,7 +247,7 @@
 (defun vltags()
   "Tag VL"
   (interactive)
-  (tag-dir "~/vl" '("TAGS" "src" "Content/scripts")))
+  (tag-dir "~/vl" '("TAGS" "src" "content/scripts")))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
