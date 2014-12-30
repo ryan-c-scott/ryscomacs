@@ -48,6 +48,7 @@
 (global-set-key "\C-c \r" 'mark-defun)
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
+(global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
 (setq effective-capslock-key "<capslock>")
@@ -142,6 +143,7 @@
         '("\\.lua" . lua-mode)
         '("\\.particle" . lua-mode)
         '("\\.material" . lua-mode)
+        '("\\.prefab" . lua-mode)
         '("\\.scene" . lua-mode)
         '("\\.deps" . lua-mode)
         '("\\.json" . json-mode)
