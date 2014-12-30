@@ -1,6 +1,6 @@
-;;; helm-elscreen.el -- Elscreen support -*- lexical-binding: t -*-
+;;; helm-elscreen.el -- Elscreen support
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(require 'cl-lib)
+(eval-when-compile (require 'cl))
 (require 'helm)
 
 (declare-function elscreen-find-screen-by-buffer "ext:elscreen.el" (buffer &optional create))
@@ -27,7 +27,7 @@
   "Open buffer in new screen, if marked buffers open all in elscreens."
   (helm-require-or-error 'elscreen 'helm-find-buffer-on-elscreen)
   (helm-aif (helm-marked-candidates)
-      (cl-dolist (i it)
+      (dolist (i it)
         (let ((target-screen (elscreen-find-screen-by-buffer
                               (get-buffer i) 'create)))
           (elscreen-goto target-screen)))
@@ -45,7 +45,7 @@
      . (lambda ()
          (if (cdr (elscreen-get-screen-to-name-alist))
              (sort
-              (cl-loop for sname in (elscreen-get-screen-to-name-alist)
+              (loop for sname in (elscreen-get-screen-to-name-alist)
                     append (list (format "[%d] %s" (car sname) (cdr sname))))
               #'(lambda (a b) (compare-strings a nil nil b nil nil))))))
     (action
@@ -54,7 +54,7 @@
                            (elscreen-goto (- (aref candidate 1) (aref "0" 0)))))
         ("Kill Screen(s)" .
                           (lambda (candidate)
-                            (cl-dolist (i (helm-marked-candidates))
+                            (dolist (i (helm-marked-candidates))
                               (elscreen-goto (- (aref i 1) (aref "0" 0)))
                               (elscreen-kill))))
         ("Only Screen" .

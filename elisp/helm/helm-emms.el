@@ -1,6 +1,6 @@
-;;; helm-emms.el --- Emms for Helm. -*- lexical-binding: t -*-
+;;; helm-emms.el --- Emms for Helm.
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(require 'cl-lib)
+(eval-when-compile (require 'cl))
 (require 'helm)
 
 (declare-function emms-streams "ext:emms-streams")
@@ -41,9 +41,9 @@
   :group 'helm-emms)
 
 
-(defvar emms-stream-list)
 (defun helm-emms-stream-edit-bookmark (elm)
   "Change the information of current emms-stream bookmark from helm."
+  (declare (special emms-stream-list))
   (let* ((cur-buf helm-current-buffer)
          (bookmark (assoc elm emms-stream-list))
          (name     (read-from-minibuffer "Description: "
@@ -64,10 +64,10 @@
         (emms-stream-quit)
         (helm-switch-to-buffer cur-buf)))))
 
-(defun helm-emms-stream-delete-bookmark (_candidate)
+(defun helm-emms-stream-delete-bookmark (candidate)
   "Delete emms-streams bookmarks from helm."
   (let* ((cands   (helm-marked-candidates))
-         (bmks    (cl-loop for bm in cands collect
+         (bmks    (loop for bm in cands collect
                         (car (assoc bm emms-stream-list))))
          (bmk-reg (mapconcat 'regexp-quote bmks "\\|^")))
     (when (y-or-n-p (format "Really delete radios\n -%s: ? "
@@ -75,7 +75,7 @@
       (save-window-excursion
         (emms-streams)
         (goto-char (point-min))
-        (cl-loop while (re-search-forward bmk-reg nil t)
+        (loop while (re-search-forward bmk-reg nil t)
               do (progn (forward-line 0)
                         (emms-stream-delete-bookmark))
               finally do (progn
@@ -87,11 +87,13 @@
     (init . (lambda ()
               (emms-stream-init)))
     (candidates . (lambda ()
+                    (declare (special emms-stream-list))
                     (mapcar 'car emms-stream-list)))
     (action . (("Play" . (lambda (elm)
+                           (declare (special emms-stream-list))
                            (let* ((stream (assoc elm emms-stream-list))
                                   (fn (intern (concat "emms-play-" (symbol-name (car (last stream))))))
-                                  (url (cl-second stream)))
+                                  (url (second stream)))
                              (funcall fn url))))
                ("Delete" . helm-emms-stream-delete-bookmark)
                ("Edit" . helm-emms-stream-edit-bookmark)))
@@ -116,13 +118,12 @@
     (filtered-candidate-transformer . helm-adaptive-sort)))
 
 (defvar helm-emms-current-playlist nil)
-(defun helm-emms-files-modifier (candidates _source)
-  (cl-loop for i in candidates
+(defun helm-emms-files-modifier (candidates source)
+  (loop for i in candidates
         if (member (cdr i) helm-emms-current-playlist)
         collect (cons (propertize (car i)
                                   'face 'helm-emms-playlist)
-                      (cdr i))
-        into lis
+                      (cdr i)) into lis
         else collect i into lis
         finally return (reverse lis)))
 
@@ -136,14 +137,14 @@
     (init . (lambda ()
               (setq helm-emms-current-playlist
                     (with-current-emms-playlist
-                      (cl-loop with cur-list = (emms-playlist-tracks-in-region
-                                                (point-min) (point-max))
+                      (loop with cur-list = (emms-playlist-tracks-in-region
+                                             (point-min) (point-max))
                             for i in cur-list
                             for name = (assoc-default 'name i)
                             when name
                             collect name)))))
     (candidates . (lambda ()
-                    (cl-loop for v being the hash-values in emms-cache-db
+                    (loop for v being the hash-values in emms-cache-db
                           for name      = (assoc-default 'name v)
                           for artist    = (or (assoc-default 'info-artist v) "unknown")
                           for genre     = (or (assoc-default 'info-genre v) "unknown")

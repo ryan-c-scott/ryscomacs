@@ -1,6 +1,6 @@
-;;; helm-bbdb.el --- Helm interface for bbdb -*- lexical-binding: t -*-
+;;; helm-bbdb.el --- Helm interface for bbdb
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(require 'cl-lib)
+(eval-when-compile (require 'cl))
 (require 'helm)
 (require 'helm-mode)
 
@@ -50,8 +50,9 @@ The format is \"Firstname Lastname\"."
 (defun helm-bbdb-read-phone ()
   "Return a list of vector address objects.
 See docstring of `bbdb-create-internal' for more info on address entries."
-  (cl-loop with loc-list = (cons "[Exit when no more]"
-                                 (bbdb-label-completion-list "phones"))
+  (loop with phone-list
+        with loc-list = (cons "[Exit when no more]"
+                              (bbdb-label-completion-list "phones"))
         with loc ; Defer count
         do (setq loc (helm-comp-read (format "Phone location[%s]: " count)
                                      loc-list
@@ -59,28 +60,29 @@ See docstring of `bbdb-create-internal' for more info on address entries."
                                      :default ""))
         while (not (string= loc "[Exit when no more]"))
         for count from 1
-        for phone-number = (helm-read-string (format "Phone number (%s): " loc))
+        for phone-number = (read-string (format "Phone number (%s): " loc))
         collect (vector loc phone-number) into phone-list
         do (setq loc-list (remove loc loc-list))
         finally return phone-list))
 
 ;; TODO move this to helm-utils when finish
-(defun helm-read-repeat-string (bbdb--prompt &optional count)
+(defun helm-read-repeat-string (prompt &optional count)
   "Prompt as many time PROMPT is not empty.
 If COUNT is non--nil add a number after each prompt."
-  (cl-loop with elm
+  (loop with elm with new-prompt = prompt
         while (not (string= elm ""))
         for n from 1
         do (when count
-             (setq bbdb--prompt (concat bbdb--prompt (int-to-string n) ": ")))
-        collect (setq elm (helm-read-string bbdb--prompt)) into lis
+             (setq new-prompt (concat prompt (int-to-string n) ": ")))
+        collect (setq elm (read-string new-prompt)) into lis
         finally return (remove "" lis)))
 
 (defun helm-bbdb-read-address ()
   "Return a list of vector address objects.
 See docstring of `bbdb-create-internal' for more info on address entries."
-  (cl-loop with loc-list = (cons "[Exit when no more]"
-                                 (bbdb-label-completion-list "addresses"))
+  (loop with address-list
+        with loc-list = (cons "[Exit when no more]"
+                              (bbdb-label-completion-list "addresses"))
         with loc ; Defer count
         do (setq loc (helm-comp-read
                       (format "Address description[%s]: "
@@ -92,10 +94,10 @@ See docstring of `bbdb-create-internal' for more info on address entries."
         for count from 1
         ;; Create vector
         for lines =  (helm-read-repeat-string "Line" t)
-        for city = (helm-read-string "City: ")
-        for state = (helm-read-string "State: ")
-        for zip = (helm-read-string "ZipCode: ")
-        for country = (helm-read-string "Country: ")
+        for city = (read-string "City: ")
+        for state = (read-string "State: ")
+        for zip = (read-string "ZipCode: ")
+        for country = (read-string "Country: ")
         collect (vector loc lines city state zip country) into address-list
         do (setq loc-list (remove loc loc-list))
         finally return address-list))
@@ -114,7 +116,7 @@ All other actions are removed."
               (helm-bbdb-read-address)
               (helm-bbdb-read-phone)
               (read-from-minibuffer "Note: ")))))
-    actions))
+      actions))
 
 (defun helm-bbdb-get-record (candidate)
   "Return record that match CANDIDATE."
@@ -130,30 +132,29 @@ All other actions are removed."
     (candidates . helm-bbdb-candidates)
     (action . (("Send a mail" . helm-bbdb-compose-mail)
                ("View person's data" . helm-bbdb-view-person-action)))
-    (filtered-candidate-transformer . (lambda (candidates _source)
+    (filtered-candidate-transformer . (lambda (candidates source)
                                         (setq helm-bbdb-name helm-pattern)
                                         (if (not candidates)
                                             (list "*Add to contacts*")
-                                          candidates)))
+                                            candidates)))
     (action-transformer . (lambda (actions candidate)
                             (helm-bbdb-create-contact actions candidate))))
   "Needs BBDB.
 
 http://bbdb.sourceforge.net/")
 
-(defvar bbdb-append-records)
 (defun helm-bbdb-view-person-action (candidate)
   "View BBDB data of single CANDIDATE or marked candidates."
   (helm-aif (helm-marked-candidates)
       (let ((bbdb-append-records (length it)))
-        (cl-dolist (i it)
+        (dolist (i it)
           (bbdb-redisplay-one-record (helm-bbdb-get-record i))))
     (bbdb-redisplay-one-record (helm-bbdb-get-record candidate))))
 
 (defun helm-bbdb-collect-mail-addresses ()
   "Return a list of all mail addresses of records in bbdb buffer."
   (with-current-buffer bbdb-buffer-name
-    (cl-loop for i in bbdb-records
+    (loop for i in bbdb-records
           if (bbdb-record-net (car i))
           collect (bbdb-dwim-net-address (car i)))))
 

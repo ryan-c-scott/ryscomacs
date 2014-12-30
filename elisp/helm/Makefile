@@ -22,44 +22,32 @@
 ## the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ## Floor, Boston, MA 02110-1301, USA.
 
-# Emacs invocation
-EMACS_COMMAND   := emacs
+# emacs invocation
+EMACS		:= emacs -Q -batch
 
-EMACS		:= $(EMACS_COMMAND) -Q -batch
-
-EVAL := $(EMACS) --eval
-
-PKGDIR := .
-
-# Additional emacs loadpath
+# additional emacs loadpath
 LOADPATH	:= -L .
 
-# Files to compile
+# files to compile
 EL			:= $(wildcard helm*.el)
 
-# Compiled files
+# compiled files
 ELC			:= $(EL:.el=.elc)
 
+.PHONY: clean batch-compile
 
-.PHONY: clean autoloads batch-compile
-
-all: clean autoloads batch-compile
+all: clean batch-compile
 
 $(ELC): %.elc: %.el
 	$(EMACS) $(LOADPATH) -f batch-byte-compile $<
 
-# Compile needed files
+# compile needed files
 compile: $(ELC)
 
-# Compile all files at once
+# compile all files at once
 batch-compile:
 	$(EMACS) $(LOADPATH) -f batch-byte-compile $(EL)
 
-# Remove all generated files
+# remove all generated files
 clean:
 	rm -f $(ELC)
-
-# Make autoloads file
-autoloads:
-	$(EVAL) "(let ((generated-autoload-file (expand-file-name \"helm-autoloads.el\" \"$(PKGDIR)\")) \
-(backup-inhibited t)) (update-directory-autoloads \"$(PKGDIR)\"))"

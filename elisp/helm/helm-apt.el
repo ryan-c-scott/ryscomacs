@@ -1,6 +1,6 @@
-;;; helm-apt.el --- Helm interface for Debian/Ubuntu packages (apt-*) -*- lexical-binding: t -*-
+;;; helm-apt.el --- Helm interface for Debian/Ubuntu packages (apt-*)
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(require 'cl-lib)
+(eval-when-compile (require 'cl))
 (require 'helm)
 (require 'helm-utils)
 (require 'helm-external)
@@ -31,14 +31,6 @@
 (defgroup helm-apt nil
   "Apt related Applications and libraries for Helm."
   :group 'helm)
-
-(defcustom helm-apt-cache-show-function 'helm-apt-cache-show-1
-  "Function of one argument used to show apt package.
-Default is `helm-apt-cache-show-1' but you can use `apt-utils-show-package-1'
-from `apt-utils.el' to have something more enhanced.
-If nil default `helm-apt-cache-show-1' will be used."
-  :type 'function
-  :group 'helm-apt)
 
 (defface helm-apt-installed
     '((t (:foreground "green")))
@@ -68,6 +60,7 @@ If nil default `helm-apt-cache-show-1' will be used."
     (candidates-in-buffer)
     (candidate-transformer . helm-apt-candidate-transformer)
     (display-to-real . helm-apt-display-to-real)
+    (requires-pattern . 2)
     (update . helm-apt-refresh)
     (keymap . ,helm-apt-map)
     (mode-line . helm-apt-mode-line)
@@ -99,7 +92,7 @@ If nil default `helm-apt-cache-show-1' will be used."
 
 (defun helm-apt-candidate-transformer (candidates)
   "Show installed CANDIDATES and the ones to deinstall in a different color."
-  (cl-loop for cand in candidates
+  (loop for cand in candidates
         for name = (helm-apt-display-to-real cand)
         for deinstall = (string=
                          (assoc-default name helm-apt-installed-packages)
@@ -118,29 +111,29 @@ If nil default `helm-apt-cache-show-1' will be used."
                          ((eq helm-apt-show-only 'all) cand))
         when show collect show))
 
+;;;###autoload
 (defun helm-apt-show-only-installed ()
   (interactive)
-  (when helm-alive-p
-    (setq helm-apt-show-only 'installed)
-    (helm-update)))
+  (setq helm-apt-show-only 'installed)
+  (helm-update))
 
+;;;###autoload
 (defun helm-apt-show-only-not-installed ()
   (interactive)
-  (when helm-alive-p
-    (setq helm-apt-show-only 'noinstalled)
-    (helm-update)))
+  (setq helm-apt-show-only 'noinstalled)
+  (helm-update))
 
+;;;###autoload
 (defun helm-apt-show-only-deinstalled ()
   (interactive)
-  (when helm-alive-p
-    (setq helm-apt-show-only 'deinstalled)
-    (helm-update)))
+  (setq helm-apt-show-only 'deinstalled)
+  (helm-update))
 
+;;;###autoload
 (defun helm-apt-show-all ()
   (interactive)
-  (when helm-alive-p
-    (setq helm-apt-show-only 'all)
-    (helm-update)))
+  (setq helm-apt-show-only 'all)
+  (helm-update))
 
 (defun helm-apt-init ()
   "Initialize list of debian packages."
@@ -153,17 +146,17 @@ If nil default `helm-apt-cache-show-1' will be used."
             (with-temp-buffer
               (call-process-shell-command "dpkg --get-selections"
                                           nil (current-buffer))
-              (cl-loop for i in (split-string (buffer-string) "\n" t)
+              (loop for i in (split-string (buffer-string) "\n" t)
                     for p = (split-string i)
                     collect (cons (car p) (cadr p)))))
       (helm-init-candidates-in-buffer
-          'global
-        (setq helm-apt-all-packages
-              (with-temp-buffer
-                (call-process-shell-command
-                 (format helm-apt-search-command query)
-                 nil (current-buffer))
-                (buffer-string))))
+       'global
+       (setq helm-apt-all-packages
+             (with-temp-buffer
+               (call-process-shell-command
+                (format helm-apt-search-command query)
+                nil (current-buffer))
+               (buffer-string))))
       (message "Loading package list done")
       (sit-for 0.5))))
 
@@ -180,59 +173,50 @@ package name - description."
 
 (defun helm-apt-cache-show (package)
   "Show information on apt package PACKAGE."
-  (if (and (functionp helm-apt-cache-show-function)
-           (not (eq helm-apt-cache-show-function
-                    'helm-apt-cache-show)))
-      ;; A function, call it.
-      (funcall helm-apt-cache-show-function package)
-    ;; nil or whatever use default.
-    (helm-apt-cache-show-1 package)))
+    (let* ((command (format helm-apt-show-command package))
+           (buf     (get-buffer-create "*helm apt show*")))
+      (helm-switch-to-buffer buf)
+      (unless (string= package helm-apt-show-current-package)
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (save-excursion
+            (call-process-shell-command
+             command nil (current-buffer) t))))
+      (helm-apt-show-mode)
+      (set (make-local-variable 'helm-apt-show-current-package)
+           package)))
 
-(defun helm-apt-cache-show-1 (package)
-  (let* ((command (format helm-apt-show-command package))
-         (buf     (get-buffer-create "*helm apt show*")))
-    (helm-switch-to-buffer buf)
-    (unless (string= package helm-apt-show-current-package)
-      (let ((inhibit-read-only t))
-        (erase-buffer)
-        (save-excursion
-          (call-process-shell-command
-           command nil (current-buffer) t))))
-    (helm-apt-show-mode)
-    (set (make-local-variable 'helm-apt-show-current-package)
-         package)))
-
-(defun helm-apt-install (_package)
+(defun helm-apt-install (package)
   "Run 'apt-get install' shell command on PACKAGE."
   (helm-apt-generic-action :action 'install))
 
-(defun helm-apt-reinstall (_package)
+(defun helm-apt-reinstall (package)
   "Run 'apt-get install --reinstall' shell command on PACKAGE."
   (helm-apt-generic-action :action 'reinstall))
 
-(defun helm-apt-uninstall (_package)
+(defun helm-apt-uninstall (package)
   "Run 'apt-get remove' shell command on PACKAGE."
   (helm-apt-generic-action :action 'uninstall))
 
-(defun helm-apt-purge (_package)
+(defun helm-apt-purge (package)
   "Run 'apt-get purge' shell command on PACKAGE."
   (helm-apt-generic-action :action 'purge))
 
-(cl-defun helm-apt-generic-action (&key action)
+(defun* helm-apt-generic-action (&key action)
   "Run 'apt-get ACTION'.
 Support install, remove and purge actions."
   (if (and helm-apt-term-buffer
            (buffer-live-p (get-buffer helm-apt-term-buffer)))
       (switch-to-buffer helm-apt-term-buffer)
-    (ansi-term (getenv "SHELL") "term apt")
-    (setq helm-apt-term-buffer (buffer-name)))
+      (ansi-term (getenv "SHELL") "term apt")
+      (setq helm-apt-term-buffer (buffer-name)))
   (term-line-mode)
-  (let ((command   (cl-case action
+  (let ((command   (case action
                      (install   "sudo apt-get install ")
                      (reinstall "sudo apt-get install --reinstall ")
                      (uninstall "sudo apt-get remove ")
                      (purge     "sudo apt-get purge ")
-                     (t          (error "Unknown action"))))
+                     (t          (error "Unknow action"))))
         (beg       (point))
         end
         (cand-list (mapconcat #'(lambda (x) (format "'%s'" x))
@@ -245,7 +229,7 @@ Support install, remove and purge actions."
           (setq helm-external-commands-list nil)
           (setq helm-apt-installed-packages nil)
           (term-char-mode) (term-send-input))
-      (delete-region beg end))))
+        (delete-region beg end))))
 
 ;;;###autoload
 (defun helm-apt (arg)

@@ -1,6 +1,6 @@
-;;; helm-help.el --- Help messages for Helm. -*- lexical-binding: t -*-
+;;; helm-help.el --- Help messages for Helm.
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,11 +23,29 @@
   :group 'helm)
 
 (defface helm-helper
-    '((t :inherit helm-header))
+  '((t :inherit helm-header))
   "Face for helm help string in minibuffer."
   :group 'helm-help)
 
 
+;;; Embeded documentation.
+;;
+;;
+;;;###autoload
+(defvar helm-mode-line-string "\
+\\<helm-map>\
+\\[helm-help]:Help \
+\\[helm-select-action]:Act \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
+  "Help string displayed in mode-line in `helm'.
+It can be a string or a list of two args, in this case,
+first arg is a string that will be used as name for candidates number,
+second arg any string to display in mode line.
+If nil, use default `mode-line-format'.")
+
+
 ;;; Global help message - Used by `helm-help'
 ;;
 ;;
@@ -40,10 +58,6 @@
 Narrow the list by typing some pattern,
 Multiple patterns are allowed by splitting by space.
 Select with natural Emacs operations, choose with RET.
-
-== Help ==
-C-h m : Run this generic help for helm.
-C-c ? : Run specific helm help for current source.
 
 == Basic Operations ==
 C-p, Up: Previous Line
@@ -59,12 +73,12 @@ M-PageDown, C-M-v : Next Page (other-window)
 Tab, C-i : Show action list
 Left : Previous Source
 Right, C-o : Next Source
-C-k : Delete pattern (with prefix arg delete from point to end)
-C-j or C-z: Persistent Action (Execute action with helm session kept)
+C-k : Delete pattern
+C-z : Persistent Action (Execute action with helm session kept)
 
-== Shortcuts For nth Action ==
-
-f1-12: Execute nth 1 to 12 Action(s).
+== Shortcuts For 2nd/3rd Action ==
+\\[helm-select-2nd-action-or-end-of-line] : Execute 2nd Action (if the minibuffer cursor is at end of line)
+\\[helm-select-3rd-action] : Execute 3rd Action
 
 == Visible Marks ==
 Visible marks store candidate. Some actions uses marked candidates.
@@ -74,15 +88,13 @@ Visible marks store candidate. Some actions uses marked candidates.
 \\[helm-next-visible-mark] : Next Mark
 
 == Miscellaneous Commands ==
-\\[helm-toggle-resplit-window] : Toggle vertical/horizontal split helm window.
-\\[helm-quit-and-find-file] : Drop into `find-file'.
-\\[helm-delete-current-selection] : Delete selected item (visually).
-\\[helm-kill-selection-and-quit] : Kill display value of candidate and quit (with prefix arg kill the real value).
-\\[helm-yank-selection] : Yank selection into pattern.
-\\[helm-follow-mode] : Toggle automatical execution of persistent action.
-\\[helm-follow-action-forward] : Run persistent action and goto next line.
-\\[helm-follow-action-backward] : Run persistent action and goto previous line.
-\\[helm-force-update] : Recalculate and redisplay candidates.
+\\[helm-toggle-resplit-window] : Toggle vertical/horizontal split helm window
+\\[helm-quit-and-find-file] : Drop into `find-file'
+\\[helm-delete-current-selection] : Delete Selected Item (visually)
+\\[helm-kill-selection-and-quit] : Set Item Into the kill-ring And Quit
+\\[helm-yank-selection] : Yank Selected Item Into Pattern
+\\[helm-follow-mode] : Toggle Automatical Execution Of Persistent Action
+\\[helm-force-update] : Recalculate And Redisplay Candidates
 
 == Global Commands ==
 \\<global-map>\\[helm-resume] revives last `helm' session.
@@ -113,14 +125,14 @@ text to be displayed in BUFNAME."
                  "[SPC,C-v,down:NextPage  b,M-v,up:PrevPage  C-s/r:Isearch Other:Exit]"
                  'face 'helm-helper))
         (scroll-error-top-bottom t))
-    (condition-case _err
-        (cl-loop for event = (read-key prompt) do
-              (cl-case event
+    (condition-case err
+        (loop for event = (read-key prompt) do
+              (case event
                 ((?\C-v ? down) (scroll-up-command helm-scroll-amount))
                 ((?\M-v ?b up)  (scroll-down-command helm-scroll-amount))
                 ((?\C-s)        (isearch-forward))
                 ((?\C-r)        (isearch-backward))
-                (t (cl-return))))
+                (t (return))))
       (beginning-of-buffer (message "Beginning of buffer"))
       (end-of-buffer       (message "End of Buffer")))))
 
@@ -147,74 +159,31 @@ text to be displayed in BUFNAME."
 
 Completion:
 
-- Major-mode:
-
 You can enter a partial name of major-mode (e.g lisp, sh) to narrow down buffers.
-To specify the major-mode, prefix it with \"*\" e.g \"*lisp\".
-If you want to match all buffers but the ones with a specific major-mode (negation),
-prefix the major-mode with \"!\" e.g \"*!lisp\".
-If you want to specify more than one major-mode, separate them with \",\",
-e.g \"*!lisp,!sh,!fun\" will list all buffers but the ones in lisp-mode, sh-mode and
-fundamental-mode.
-
 Enter then a space and a pattern to narrow down to buffers matching this pattern.
-
-- Search inside buffers:
-
 If you enter a space and a pattern prefixed by \"@\" helm will search for text matching
 this pattern INSIDE the buffer (i.e not in the name of buffer).
 NOTE that if you enter your pattern prefixed with \"@\" but escaped, helm will search a buffer
 matching \"@pattern\" but will not search inside.
 
-- Search by directory name:
-
-If you prefix the beginning of pattern with \"/\" the match will occur on directory name
-of buffer, it is interesting to narrow down to one directory for example, subsequent string
-entered after a space will match on buffer-name only.
-Note that negation is not supported for matching on buffer-file-name.
-You can't cumulate both major-mode matching AND directory matching, choose one or the other.
- 
-- Fuzzy matching:
-
-Note that if `helm-buffers-fuzzy-matching' is non--nil you will have
-fuzzy matching on buffer names (not on directory name matching and major-mode though).
-A pattern starting with \"^\" will disable fuzzy matching and will match by exact regexp.
-
-- Examples:
+e.g
 
 if I enter in pattern prompt:
-\"*lisp ^helm @moc\"
+\"lisp ^helm @moc\"
 helm will narrow down the list by selecting only buffers that are in lisp mode, start by helm
 and match \"moc\" in their contents.
 
 if I enter in pattern prompt:
-\"*lisp ^helm moc\"
+\"lisp ^helm moc\"
 Notice there is no \"@\" this time
 helm will look for lisp mode buffers starting by \"helm\" and have \"moc\" in their name.
 
-if I enter in pattern prompt:
-\"*!lisp !helm\"
-helm will narrow down to buffers that are not in \"lisp\" mode and that do not match \"helm\"
-
-if I enter in pattern prompt:
-/helm/ w3
-helm will narrow down to buffers that are in any \"helm\" subdirectory and matching w3.
-
-
-- Creating buffers
+Creating buffers
 
 When creating a new buffer use \\[universal-argument] to choose a mode for your buffer in a list.
 This list is customizable, see `helm-buffers-favorite-modes'.
 
-- Killing buffers
-
-You have a command to kill buffer(s) and quit emacs and a command to kill buffers one by one
-\(no marked\) without quitting helm.
-You can run this persistent kill buffer command either with the regular
-`helm-execute-persistent-action' called with a prefix arg (C-u C-j) or with its specific command
-`helm-buffer-run-kill-persistent' see binding below.
-
-- Meaning of colors and prefixes for buffers:
+Meaning of colors and prefixes for buffers:
 
 Remote buffers are prefixed with '@'.
 Red        => Buffer have its file modified on disk by an external process.
@@ -230,18 +199,15 @@ Italic     => A non--file buffer.
 \\[helm-buffer-switch-other-frame]\t\t->Switch other frame.
 \\[helm-buffer-run-query-replace-regexp]\t\t->Query replace regexp in marked buffers.
 \\[helm-buffer-run-query-replace]\t\t->Query replace in marked buffers.
+\\[helm-buffer-switch-to-elscreen]\t\t->Find buffer in Elscreen.
 \\[helm-buffer-run-ediff]\t\t->Ediff current buffer with candidate.  If two marked buffers ediff those buffers.
 \\[helm-buffer-run-ediff-merge]\t\t->Ediff merge current buffer with candidate.  If two marked buffers ediff merge those buffers.
 \\[helm-buffer-diff-persistent]\t\t->Toggle Diff buffer with saved file without quitting.
 \\[helm-buffer-revert-persistent]\t\t->Revert buffer without quitting.
 \\[helm-buffer-save-persistent]\t\t->Save buffer without quitting.
 \\[helm-buffer-run-kill-buffers]\t\t->Delete marked buffers and quit.
-\\[helm-buffer-run-kill-persistent]\t\t->Delete buffer without quitting helm.
 \\[helm-toggle-all-marks]\t\t->Toggle all marks.
 \\[helm-mark-all]\t\t->Mark all.
-\\[helm-toggle-buffers-details]\t\t->Toggle details.
-\\[helm-buffers-toggle-show-hidden-buffers]\t\t->Show hidden buffers.
-\\[helm-buffers-mark-similar-buffers]\t\t->Mark all buffers with same type (color) than current.
 \\[helm-buffer-help]\t\t->Display this help.
 \n== Helm Map ==
 \\{helm-map}")
@@ -264,33 +230,27 @@ Italic     => A non--file buffer.
 - Enter `/' at end of pattern to quickly reach root of your file system.
 
 - Enter `./' at end of pattern to quickly reach `default-directory' (initial start of session).
-  If you are in `default-directory' move cursor on top.
-
-- Enter `../' at end of pattern will reach upper directory, moving cursor on top.
-  NOTE: This different to using `C-l' in that `C-l' don't move cursor on top but stay on previous
-  subdir name.
 
 - You can complete with partial basename (start on third char entered)
 
     e.g \"fob\" or \"fbr\" will complete \"foobar\"
     but \"fb\" will wait for a third char for completing.
 
-- Use `C-u C-j' to watch an image.
+- Use `C-u C-z' to watch an image.
 
-- `C-j' on a filename will expand in helm-buffer to this filename.
-  Second hit on `C-j' will display buffer filename.
-  Third hit on `C-j' will kill buffer filename.
-  NOTE: `C-u C-j' will display buffer directly.
+- `C-z' on a filename will expand in helm-buffer to this filename.
+  Second hit on `C-z' will display buffer filename.
+  Third hit on `C-z' will kill buffer filename.
+  NOTE: `C-u C-z' will display buffer directly.
 
 - To browse images directories turn on `helm-follow-mode' and navigate with arrow keys.
-  You can also use `helm-follow-action-forward' and `helm-follow-action-backward'
-  (`C-<down' and `C-<left>').
 
-- You can turn off/on (toggle) autoupdate completion at any moment with `C-DEL'.
-  NOTE: On a terminal C-<backspace> may not work, use in this case C-c <backspace>.
+- When you want to delete backward characters to e.g creating a new file or directory,
+  autoupdate may keep updating to an existent directory
+  preventing you to do so, in this case just hit C-<backspace> and then <backspace>.
 
-- You can create a new directory and a new file at the same time, just write the path in prompt
-  and press `<RET>'.
+- You can create a new directory an a new file at the same time, just write the path in prompt
+  and press <RET>.
   e.g You can create \"~/new/newnew/newnewnew/my_newfile.txt\".
 
 - To create a new directory, add a \"/\" at end of new name and press <RET>.
@@ -311,7 +271,6 @@ Italic     => A non--file buffer.
 \\[helm-ff-run-zgrep]\t\t->Run zgrep (C-u Recursive).
 \\[helm-ff-run-etags]\t\t->Run Etags (C-u use thing-at-point `C-u C-u' reload cache)
 \\[helm-ff-run-rename-file]\t\t->Rename File (C-u Follow).
-\\[helm-ff-run-query-replace-on-marked]\t\t->Query replace on marked files.
 \\[helm-ff-run-copy-file]\t\t->Copy File (C-u Follow).
 \\[helm-ff-run-byte-compile-file]\t\t->Byte Compile File (C-u Load).
 \\[helm-ff-run-load-file]\t\t->Load File.
@@ -331,12 +290,12 @@ Italic     => A non--file buffer.
 \\[helm-ff-run-open-file-with-default-tool]\t\t->Open file externally with default tool.
 \\[helm-ff-rotate-left-persistent]\t\t->Rotate Image Left.
 \\[helm-ff-rotate-right-persistent]\t\t->Rotate Image Right.
-\\[helm-find-files-up-one-level]\t\t->Go down precedent directory.
+\\[helm-find-files-down-one-level]\t\t->Go down precedent directory.
 \\[helm-ff-run-switch-to-history]\t\t->Switch to last visited directories history.
 \\[helm-ff-file-name-history]\t\t->Switch to file name history.
 \\[helm-ff-properties-persistent]\t\t->Show file properties in a tooltip.
 \\[helm-mark-all]\t\t->Mark all visibles candidates.
-\\[helm-ff-run-toggle-auto-update]\t\t->Toggle auto expansion of directories.
+\\[helm-ff-run-toggle-auto-update]\t->Toggle auto expansion of directories.
 \\[helm-unmark-all]\t\t->Unmark all candidates, visibles and invisibles.
 \\[helm-ff-run-gnus-attach-files]\t\t->Gnus attach files to message buffer.
 \\[helm-ff-run-print-file]\t\t->Print file, (C-u to refresh printers list).
@@ -344,7 +303,6 @@ Italic     => A non--file buffer.
 \\[helm-narrow-window]\t\t->Narrow helm window.
 \\[helm-ff-run-toggle-basename]\t\t->Toggle basename/fullpath.
 \\[helm-ff-run-find-file-as-root]\t\t->Find file as root.
-\\[helm-ff-run-insert-org-link]\t\t->Insert org link.
 \\[helm-ff-help]\t\t->Display this help info.
 \n== Helm Map ==
 \\{helm-map}")
@@ -360,59 +318,11 @@ Italic     => A non--file buffer.
 ;;
 ;;
 (defvar helm-read-file-name-help-message
-  "== Helm read file name ==\
-\nTips:
-\n- Enter `~/' at end of pattern to quickly reach home directory.
-
-- Enter `/' at end of pattern to quickly reach root of your file system.
-
-- Enter `./' at end of pattern to quickly reach `default-directory' (initial start of session).
-  If you are in `default-directory' move cursor on top.
-
-- Enter `../' at end of pattern will reach upper directory, moving cursor on top.
-  NOTE: This different to using `C-l' in that `C-l' don't move cursor on top but stay on previous
-  subdir name.
-
-- You can complete with partial basename (start on third char entered)
-
-    e.g \"fob\" or \"fbr\" will complete \"foobar\"
-    but \"fb\" will wait for a third char for completing.
-
-Persistent actions:
-
-By default `helm-read-file-name' use the persistent actions of `helm-find-files'.
-
-- Use `C-u C-j' to watch an image.
-
-- `C-j' on a filename will expand in helm-buffer to this filename.
-  Second hit on `C-j' will display buffer filename.
-  Third hit on `C-j' will kill buffer filename.
-  NOTE: `C-u C-j' will display buffer directly.
-
-- To browse images directories turn on `helm-follow-mode' and navigate with arrow keys.
-
-- When you want to delete backward characters to e.g creating a new file or directory,
-  autoupdate may keep updating to an existent directory
-  preventing you to do so, in this case just hit C-<backspace> and then <backspace>.
-  This should not needed when copying/renaming files because autoupdate is disabled
-  by default in this case.
-  NOTE: On a terminal C-<backspace> may not work, use in this case C-c <backspace>.
-
-- You can create a new directory and a new file at the same time, just write the path in prompt
-  and press <RET>.
-  e.g You can create \"~/new/newnew/newnewnew/my_newfile.txt\".
-
-- To create a new directory, add a \"/\" at end of new name and press <RET>.
-
-- To create a new file just write the filename not ending with \"/\".
-
+  "== Helm read file name Map ==\
 \nSpecific commands for helm-read-file-name:
 \\<helm-read-file-map>
-\\[helm-find-files-up-one-level]\t\t->Go down precedent directory.
+\\[helm-find-files-down-one-level]\t\t->Go down precedent directory.
 \\[helm-ff-run-toggle-auto-update]\t->Toggle auto expansion of directories.
-\\[helm-ff-run-toggle-basename]\t\t->Toggle basename.
-\\[helm-ff-file-name-history]\t\t->File name history.
-\\[helm-cr-empty-string]\t->Maybe return empty string (unless `must-match').
 \\[helm-next-source]\t->Goto next source.
 \\[helm-previous-source]\t->Goto previous source.
 \\[helm-read-file-name-help]\t\t->Display this help info.
@@ -430,16 +340,6 @@ By default `helm-read-file-name' use the persistent actions of `helm-find-files'
 ;;
 (defvar helm-generic-file-help-message
   "== Helm Generic files Map ==\
-
-\nLocate tips:
-You can add after writing search pattern any of the locate command line options.
-e.g -b, -e, -n <number>...etc.
-See Man locate for more infos.
-
-Note:
-Some other sources (at the moment recentf and file in current directory sources)
-support the -b flag for compatibility with locate when they are used with it.
-
 \nSpecific commands for helm locate and others files sources:
 \\<helm-generic-files-map>
 \\[helm-ff-run-toggle-basename]\t\t->Toggle basename.
@@ -454,7 +354,10 @@ support the -b flag for compatibility with locate when they are used with it.
 \\[helm-yank-text-at-point]\t\t->Yank text at point.
 \\[helm-ff-run-open-file-externally]\t\t->Open file with external program (C-u to choose).
 \\[helm-ff-run-open-file-with-default-tool]\t\t->Open file externally with default tool.
-\\[helm-ff-run-insert-org-link]\t\t->Insert org link.
+\nLocate tips:
+You can add after writing search pattern any of the locate command line options.
+e.g -b, -e, -n <number>...etc.
+See Man locate for more infos.
 \n== Helm Map ==
 \\{helm-map}")
 
@@ -475,12 +378,6 @@ You can use wild card when selecting files (e.g *.el)
 You can grep in many differents directories by marking files or wild cards.
 You can save your results in a grep-mode buffer, see below.
 
-Grepping on remote file will work only with grep, not ack-grep, but it is
-anyway bad supported as tramp doesn't support multiple process running in a
-short delay (less than 5s actually), so I strongly advice hitting `C-!' (i.e
-suspend process) before entering anything in pattern, and hit again `C-!' when
-your regexp is ready to send to remote process.
-
 \nSpecific commands for Helm Grep:
 \\<helm-grep-map>
 \\[helm-goto-next-file]\t->Next File.
@@ -488,7 +385,7 @@ your regexp is ready to send to remote process.
 \\[helm-yank-text-at-point]\t\t->Yank Text at point in minibuffer.
 \\[helm-grep-run-other-window-action]\t\t->Jump other window.
 \\[helm-grep-run-other-frame-action]\t\t->Jump other frame.
-\\[helm-grep-run-persistent-action]\t\t->Run persistent action (Same as `C-j').
+\\[helm-grep-run-persistent-action]\t\t->Run persistent action (Same as `C-z').
 \\[helm-grep-run-default-action]\t\t->Run default action (Same as RET).
 \\[helm-grep-run-save-buffer]\t\t->Save to a `grep-mode' enabled buffer.
 \\[helm-grep-help]\t\t->Show this help.
@@ -574,7 +471,7 @@ your regexp is ready to send to remote process.
 \\<helm-bookmark-map>
 \\[helm-bookmark-run-jump-other-window]\t\t->Jump other window.
 \\[helm-bookmark-run-delete]\t\t->Delete bookmark.
-\\[helm-bookmark-run-edit]\t\t->Edit bookmark.
+\\[helm-bmkext-run-edit]\t\t->Edit bookmark (only for bmkext).
 \\[helm-bookmark-toggle-filename]\t\t->Toggle bookmark location visibility.
 \\[helm-bookmark-help]\t\t->Run this help.
 \n== Helm Map ==
@@ -604,7 +501,7 @@ But you can also pass an argument or more after 'candidate_file' like this:
 
 <command> %s [extra_args]\n
 
-'candidate_file' will be added at '%s' and your command will look at this:
+'candidate_file' will be inserted at '%s' and your command will look at this:
 
 <command> 'candidate_file' [extra_args]
 
@@ -612,15 +509,14 @@ But you can also pass an argument or more after 'candidate_file' like this:
 
 e.g <command> file1 file2 ...
 
-Call `helm-find-files-eshell-command-on-file' with one prefix-arg
+Call `helm-find-files-eshell-command-on-file' with one prefix-arg 
 Otherwise you can pass one prefix-arg from the command selection buffer.
-NOTE: This is not working on remote files.
 
 With two prefix-arg before starting or from the command selection buffer
 the output is printed to your `current-buffer'.
 
-Note that with no prefix-arg or a prefix-arg value of '(16) (C-u C-u)
-the command is called once for each file like this:
+With no prefix-arg or a prefix-arg value of '(16) (C-u C-u) the command
+is called once for each file like this:
 
 <command> file1 <command> file2 etc...
 
@@ -644,7 +540,7 @@ the command is called once for each file like this:
   "== Helm ido virtual buffers Map ==\
 \nSpecific commands for ido virtuals buffers:
 \\<helm-buffers-ido-virtual-map>
-\\[helm-ff-run-switch-other-window]\t\t->Switch other window.
+\\[helm-ff-run-switch-other-window]\t\t->Switch other window. 
 \\[helm-ff-run-switch-other-frame]\t\t->Switch other frame.
 \\[helm-ff-run-grep]\t\t->Grep file.
 \\[helm-ff-run-zgrep]\t\t->Zgrep file.
@@ -673,8 +569,8 @@ the command is called once for each file like this:
 \\[helm-goto-next-file]\t->Next Buffer.
 \\[helm-goto-precedent-file]\t\t->Precedent Buffer.
 \\[helm-yank-text-at-point]\t\t->Yank Text at point in minibuffer.
-\\[helm-moccur-run-goto-line-ow]\t\t->Goto line in other window.
-\\[helm-moccur-run-goto-line-of]\t\t->Goto line in new frame.
+\\[helm-m-occur-run-goto-line-ow]\t\t->Goto line in other window.
+\\[helm-m-occur-run-goto-line-of]\t\t->Goto line in new frame.
 \\[helm-moccur-help]\t\t->Show this help.
 \n== Helm Map ==
 \\{helm-map}")
@@ -729,113 +625,6 @@ the command is called once for each file like this:
   (let ((helm-help-message helm-apt-help-message))
     (helm-help)))
 
-;;; Helm elisp package
-;;
-;;
-(defvar helm-el-package-help-message
-  "== Helm elisp package Map ==\
-\nHelm elisp package tips:
-
-\nSpecific commands for Helm elisp package:
-\\<helm-el-package-map>
-\\[helm-el-package-show-all]\t->Show all packages.
-\\[helm-el-package-show-installed]\t->Show installed packages only.
-\\[helm-el-package-show-uninstalled]\t->Show not installed packages only.
-\\[helm-el-package-help]\t->Show this help.
-\n== Helm Map ==
-\\{helm-map}")
-
-;;;###autoload
-(defun helm-el-package-help ()
-  (interactive)
-  (let ((helm-help-message helm-el-package-help-message))
-    (helm-help)))
-
-;;; Helm M-x
-;;
-;;
-(defvar helm-M-x-help-message
-  "== Helm M-x ==\
-\nHelm M-x tips:
-
-You can get help on any command with persistent action (C-j).
-
-All the prefix args passed BEFORE running `helm-M-x' are ignored.
-When you want to pass prefix args, pass them AFTER starting `helm-M-x',
-you will have a prefix arg counter appearing in mode-line notifying you
-the amount of prefix args entered.
-
-\nSpecific commands for Helm M-x:
-\\<helm-M-x-map>
-\\[helm-M-x-help]\t\t->Show this help.
-\n== Helm Map ==
-\\{helm-map}")
-
-;;;###autoload
-(defun helm-M-x-help ()
-  (interactive)
-  (let ((helm-help-message helm-M-x-help-message))
-    (helm-help)))
-
-;;; helm-imenu
-;;
-;;
-(defvar helm-imenu-help-message
-  "== Helm imenu ==\
-\nHelm imenu tips:
-
-\nSpecific commands for Helm imenu:
-\\<helm-imenu-map>
-\\[helm-imenu-help]\t->Show this help.
-\n== Helm Map ==
-\\{helm-map}")
-
-;;;###autoload
-(defun helm-imenu-help ()
-  (interactive)
-  (let ((helm-help-message helm-imenu-help-message))
-    (helm-help)))
-
-;;; helm-colors
-;;
-;;
-(defvar helm-colors-help-message
-  "== Helm colors ==\
-\nSpecific commands for Helm colors:
-\\<helm-color-map>
-\\[helm-color-run-insert-name]\t\tInsert the entry'name.
-\\[helm-color-run-kill-name]\t\tKill the entry's name.
-\\[helm-color-run-insert-rgb]\t\tInsert entry in RGB format.
-\\[helm-color-run-kill-rgb]\t\tKill entry in RGB format.
-\\[helm-color-help]\t\tShow this help.
-\n== Helm Map ==
-\\{helm-map}")
-
-;;;###autoload
-(defun helm-color-help ()
-  (interactive)
-  (let ((helm-help-message helm-colors-help-message))
-    (helm-help)))
-
-;;; helm semantic
-;;
-;;
-(defvar helm-semantic-help-message
-  "== Helm semantic ==\
-\nHelm semantic tips:
-
-\nSpecific commands for Helm semantic:
-\\<helm-semantic-map>
-\\[helm-semantic-help]\t->Show this help.
-\n== Helm Map ==
-\\{helm-map}")
-
-;;;###autoload
-(defun helm-semantic-help ()
-  (interactive)
-  (let ((helm-help-message helm-semantic-help-message))
-    (helm-help)))
-
 
 ;;; Mode line strings
 ;;
@@ -847,18 +636,10 @@ the amount of prefix args entered.
 \\[helm-buffer-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
     "String displayed in mode-line in `helm-source-buffers-list'"))
-
-;;;###autoload
-(defvar helm-color-mode-line-string
-  '("Colors" "\
-\\<helm-color-map>\
-\\[helm-color-help]:Help/\
-\\[helm-color-run-insert-name]:Insert name/\
-\\[helm-color-run-insert-rgb]:Insert RGB/\
-with shift: Kill"))
 
 ;;;###autoload
 (defvar helm-buffers-ido-virtual-mode-line-string
@@ -867,8 +648,9 @@ with shift: Kill"))
 \\[helm-buffers-ido-virtual-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
     "String displayed in mode-line in `helm-source-buffers-list'"))
 
 ;;;###autoload
@@ -877,8 +659,9 @@ f1/f2/f-n:NthAct"
 \\[helm-ff-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
   "String displayed in mode-line in `helm-source-find-files'")
 
 ;;;###autoload
@@ -888,8 +671,9 @@ f1/f2/f-n:NthAct"
 \\[helm-cr-empty-string]:Empty \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
   "String displayed in mode-line in `helm-source-find-files'.")
 
 ;;;###autoload
@@ -898,8 +682,9 @@ f1/f2/f-n:NthAct"
 \\[helm-generic-file-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in Locate.")
 
@@ -909,8 +694,9 @@ f1/f2/f-n:NthAct \
 \\[helm-grep-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in `helm-do-grep'.")
 
@@ -920,8 +706,9 @@ f1/f2/f-n:NthAct \
 \\[helm-pdfgrep-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in `helm-do-pdfgrep'.")
 
@@ -931,8 +718,9 @@ f1/f2/f-n:NthAct \
 \\[helm-etags-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
   "String displayed in mode-line in `helm-etags-select'.")
 
 ;;;###autoload
@@ -941,8 +729,9 @@ f1/f2/f-n:NthAct"
 \\[helm-ucs-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct"
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct"
   "String displayed in mode-line in `helm-ucs'.")
 
 ;;;###autoload
@@ -952,8 +741,9 @@ f1/f2/f-n:NthAct"
 \\[helm-bookmark-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct")
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct")
   "String displayed in mode-line in `helm-source-buffers-list'")
 
 ;;;###autoload
@@ -964,8 +754,9 @@ f1/f2/f-n:NthAct")
 \\[helm-occur-run-query-replace-regexp]:Query replace regexp \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -974,8 +765,9 @@ f1/f2/f-n:NthAct \
 \\[helm-moccur-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -985,8 +777,9 @@ f1/f2/f-n:NthAct \
 \\<helm-map>\
 \\[helm-help]:Help \
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct")
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct")
 
 ;;;###autoload
 (defvar helm-top-mode-line "\
@@ -994,8 +787,9 @@ f1/f2/f-n:NthAct")
 \\[helm-top-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1004,48 +798,9 @@ f1/f2/f-n:NthAct \
 \\[helm-apt-help]:Help \
 \\<helm-map>\
 \\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
-\\[helm-toggle-suspend-update]:Tog.suspend")
-
-;;;###autoload
-(defvar helm-el-package-mode-line "\
-\\<helm-el-package-map>\
-\\[helm-el-package-help]:Help \
-\\<helm-map>\
-\\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
-\\[helm-toggle-suspend-update]:Tog.suspend")
-
-;;;###autoload
-(defvar helm-M-x-mode-line "\
-\\<helm-M-x-map>\
-\\[helm-M-x-help]:Help \
-\\<helm-map>\
-\\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
-\\[helm-toggle-suspend-update]:Tog.suspend")
-
-;;;###autoload
-(defvar helm-imenu-mode-line "\
-\\<helm-imenu-map>\
-\\[helm-imenu-help]:Help \
-\\<helm-map>\
-\\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
-\\[helm-toggle-suspend-update]:Tog.suspend")
-
-;;;###autoload
-(defvar helm-semantic-mode-line "\
-\\<helm-semantic-map>\
-\\[helm-semantic-help]:Help \
-\\<helm-map>\
-\\[helm-select-action]:Act \
-\\[helm-maybe-exit-minibuffer]/\
-f1/f2/f-n:NthAct \
+\\[helm-exit-minibuffer]/\
+\\[helm-select-2nd-action-or-end-of-line]/\
+\\[helm-select-3rd-action]:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 
@@ -1111,7 +866,7 @@ HELM-ATTRIBUTE should be a symbol."
 
 (helm-document-attribute 'candidates-process
     "Same as `candidates' attributes but for process function."
-  "  You should use this attribute when using a function involving
+  "You should use this attribute when using a function involving
   an async process instead of `candidates'.")
 
 (helm-document-attribute 'action "mandatory if type attribute is not provided"
@@ -1125,13 +880,11 @@ HELM-ATTRIBUTE should be a symbol."
   selected. The first action of the list is the default.")
 
 (helm-document-attribute 'coerce "optional"
-  "  It's a function called with one argument: the selected
-  candidate.
+  "  It's a function called with one argument: the selected candidate.
 
-  This function is intended for type convertion. In normal case,
-  the selected candidate (string) is passed to action
-  function. If coerce function is specified, it is called just
-  before action function.
+  This function is intended for type convertion.
+  In normal case, the selected candidate (string) is passed to action function.
+  If coerce function is specified, it is called just before action function.
 
   Example: converting string to symbol
     (coerce . intern)")
@@ -1154,6 +907,11 @@ HELM-ATTRIBUTE should be a symbol."
   helm does its job in the minibuffer and in the
   `helm-buffer' and the current directory can be different
   there.")
+
+(helm-document-attribute 'delayed-init "optional"
+  "  Function called with no parameters before candidate function is
+  called.  It is similar with `init' attribute, but its
+  evaluation is deferred. It is useful to combine with ")
 
 (helm-document-attribute 'match "optional"
   "  List of functions called with one parameter: a candidate. The
@@ -1260,11 +1018,10 @@ HELM-ATTRIBUTE should be a symbol."
   useful in case of sources with lots of candidates.")
 
 (helm-document-attribute 'persistent-action "optional"
-  "  Can be a either a Function called with one parameter (the
-  selected candidate) or a cons cell where first element is this
-  same function and second element a symbol (e.g never-split)
-  that inform `helm-execute-persistent-action'to not split his
-  window to execute this persistent action.")
+  "Can be a either a Function called with one parameter (the selected candidate)
+   or a cons cell where first element is this same function and second element
+   a symbol (e.g never-split) that inform `helm-execute-persistent-action'
+   to not split his window to execute this persistent action.")
 
 (helm-document-attribute 'candidates-in-buffer "optional"
   "  Shortcut attribute for making and narrowing candidates using
@@ -1288,15 +1045,15 @@ HELM-ATTRIBUTE should be a symbol."
 (helm-document-attribute 'search "optional"
   "  List of functions like `re-search-forward' or `search-forward'.
   Buffer search function used by `helm-candidates-in-buffer'.
-  By default, `helm-candidates-in-buffer' uses
-  `re-search-forward'. This attribute is meant to be used with
+  By default, `helm-candidates-in-buffer' uses `re-search-forward'.
+  This attribute is meant to be used with
   (candidates . helm-candidates-in-buffer) or
   (candidates-in-buffer) in short.")
 
 (helm-document-attribute 'search-from-end "optional"
   "  Make `helm-candidates-in-buffer' search from the end of buffer.
-  If this attribute is specified, `helm-candidates-in-buffer'
-  uses `re-search-backward' instead.")
+  If this attribute is specified, `helm-candidates-in-buffer' uses
+  `re-search-backward' instead.")
 
 (helm-document-attribute 'get-line "optional"
   "  A function like `buffer-substring-no-properties' or `buffer-substring'.
@@ -1340,8 +1097,8 @@ HELM-ATTRIBUTE should be a symbol."
   says.")
 
 (helm-document-attribute 'cleanup "optional"
-  "  Function called with no parameters when *helm* buffer is
-  closed. It is useful for killing unneeded candidates buffer.
+  "  Function called with no parameters when *helm* buffer is closed. It
+  is useful for killing unneeded candidates buffer.
 
   Note that the function is executed BEFORE performing action.")
 
@@ -1362,32 +1119,27 @@ HELM-ATTRIBUTE should be a symbol."
 
 (helm-document-attribute 'update "optional"
   (substitute-command-keys
-   "  Function called with no parameters at end of reinitialization when \
+   "  Function called with no parameters when \
 \\<helm-map>\\[helm-force-update] is pressed."))
 
 (helm-document-attribute 'mode-line "optional"
-  "  Source local `helm-mode-line-string' (included in
-  `mode-line-format'). It accepts also variable/function name.")
+  "  source local `helm-mode-line-string'. (included in `mode-line-format')
+  It accepts also variable/function name.")
 
 (helm-document-attribute 'header-line "optional"
-  "  Source local `header-line-format'.
+  "  source local `header-line-format'.
   It accepts also variable/function name. ")
 
 (helm-document-attribute
     'resume "optional"
-  "  Function called with no parameters at end of initialization
-  when `helm-resume' is started.
-  If this function try to do something against `helm-buffer', \(e.g updating,
-  searching etc...\) probably you should run it in a timer to ensure
-  `helm-buffer' is ready.")
+  "  Function called with no parameters when `helm-resume' is started.")
 
 (helm-document-attribute 'keymap "optional"
   "  Specific keymap for this source.
-  It is useful to have a keymap per source when using more than
-  one source.  Otherwise, a keymap can be set per command with
-  `helm' argument KEYMAP.  NOTE: when a source have `helm-map' as
-  keymap attr, the global value of `helm-map' will override the
-  actual local one.")
+  It is useful to have a keymap per source when using more than one source.
+  Otherwise, a keymap can be set per command with `helm' argument KEYMAP.
+  NOTE: when a source have `helm-map' as keymap attr,
+  the global value of `helm-map' will override the actual local one.")
 
 (helm-document-attribute 'help-message "optional"
   "  Help message for this source.
@@ -1395,78 +1147,53 @@ HELM-ATTRIBUTE should be a symbol."
 
 (helm-document-attribute 'match-part "optional"
   "  Allow matching candidate in the line with `candidates-in-buffer'.
-  In candidates-in-buffer sources, match is done with
-  `re-search-forward' which allow matching only a regexp on the
-  `helm-buffer'; when this search is done, match-part allow
-  matching only a specific part of the current line e.g with a
-  line like this:
+In candidates-in-buffer sources, match is done with `re-search-forward'
+which allow matching only a regexp on the `helm-buffer'; when this search is
+done, match-part allow matching only a specific part of the current line e.g
+with a line like this:
 
-  filename:candidate-containing-the-word-filename
+filename:candidate-containing-the-word-filename
 
-  What you want is to ignore \"filename\" part and match only
-  \"candidate-containing-the-word-filename\"
+What you want is to ignore \"filename\" part and match only
+\"candidate-containing-the-word-filename\" 
 
-  So give a function matching only the part of candidate after \":\"
+So give a function matching only the part of candidate after \":\"
 
-  If source contain match-part attribute, match is computed only
-  on part of candidate returned by the call of function provided
-  by this attribute. The function should have one arg, candidate,
-  and return only a specific part of candidate.
+If source contain match-part attribute, match is computed only
+on part of candidate returned by the call of function provided
+by this attribute.
+The function should have one arg, candidate, and return only
+a specific part of candidate.
 
-  NOTE: This have effect only on sources using
-  `candidates-in-buffer'.")
+NOTE: This have effect only on sources using `candidates-in-buffer'.")
 
 (helm-document-attribute 'match-strict "optional"
-  "  When specifying a match function within a source and
-  helm-match-plugin is enabled, the result of all matching
-  functions will be concatened, which in some cases is not what
-  is wanted. When using `match-strict' only this or these
-  functions will be used. You can specify those functions as a
-  list of functions or a single symbol function. For anonymous
-  function don't add the dot, e.g:
-
-  \(match-strict (lambda () (foo))).")
+  " When specifying a match function within a source and
+helm-match-plugin is enabled, the result of all matching functions will
+be concatened, which in some cases is not what is wanted.
+When using `match-strict' only this or these functions will be used.
+You can specify those functions as a list of functions or a single
+symbol function.
+For anonymous function don't add the dot, e.g:
+\(match-strict (lambda () (foo))).")
 
 (helm-document-attribute 'nohighlight "optional"
-  "  Disable highlight match in this source.")
+  " Disable highlight match in this source.")
 
-(helm-document-attribute 'no-matchplugin "optional"
-  "  Disable matchplugin for this source.")
+(helm-document-attribute 'no-delay-on-input "optional"
+  " Don't use `while-no-input' when computing candidates.")
 
 (helm-document-attribute 'history "optional"
-  "  Allow passing history variable to helm from source.
-  It should be a quoted symbol evaluated from source, i.e:
-  (history . ,'history-var)")
+  " Allow passing history variable to helm from source.
+It should be a quoted symbol evaluated from source.
+i.e (history . ,'history-var).")
 
 (helm-document-attribute 'follow "optional"
-  "  Enable `helm-follow-mode' for this source only.
-  You must give it a value of 1 or -1, though giving a -1 value
-  is surely not what you want, e.g: (follow . 1)
-
-  See `helm-follow-mode' for more infos")
-
-(helm-document-attribute 'follow-delay "optional"
-  "  `helm-follow-mode' will execute persistent-action after this delay.
-Otherwise value of `helm-follow-input-idle-delay' is used if non--nil,
-If none of these are found fallback to `helm-input-idle-delay'.")
-
-(helm-document-attribute 'allow-dups "optional"
-  "  Allow helm collecting duplicates candidates.")
-
-(helm-document-attribute 'filter-one-by-one "optional"
-  "  A transformer function that treat candidates one by one.
-  It is called with one arg the candidate.
-  It is faster than `filtered-candidate-transformer' or `candidates-transformer',
-  but should be used only in sources that recompute constantly their candidates,
-  e.g `helm-source-find-files'.
-  Filtering happen early and candidates are treated
-  one by one instead of re-looping on the whole list.
-  If used with `filtered-candidate-transformer' or `candidates-transformer'
-  these functions should treat the candidates transformed by the `filter-one-by-one'
-  function in consequence.")
-
-(helm-document-attribute 'nomark "optional"
-  "  Don't allow marking candidates when this attribute is present.")
+  " Enable `helm-follow-mode' for this source only.
+You must give it a value of 1 or -1, though giving a -1 value
+is surely not what you want.
+e.g (follow . 1)
+See `helm-follow-mode' for more infos")
 
 (provide 'helm-help)
 

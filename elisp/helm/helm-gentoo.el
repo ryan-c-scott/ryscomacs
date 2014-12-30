@@ -1,6 +1,6 @@
-;;; helm-gentoo.el --- Helm UI for gentoo portage. -*- lexical-binding: t -*-
+;;; helm-gentoo.el --- Helm UI for gentoo portage.
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(require 'cl-lib)
+(eval-when-compile (require 'cl))
 (require 'helm)
 
 (declare-function term-line-mode "term")
@@ -56,7 +56,7 @@
                ("Show history" . (lambda (elm)
                                    (if (member elm helm-cache-world)
                                        (helm-gentoo-eshell-action elm "genlop -qe")
-                                     (message "No infos on packages not yet installed"))))
+                                       (message "No infos on packages not yet installed"))))
                ("Copy in kill-ring" . kill-new)
                ("insert at point" . insert)
                ("Browse HomePage" . (lambda (elm)
@@ -65,7 +65,7 @@
                ("Show extra infos" . (lambda (elm)
                                        (if (member elm helm-cache-world)
                                            (helm-gentoo-eshell-action elm "genlop -qi")
-                                         (message "No infos on packages not yet installed"))))
+                                           (message "No infos on packages not yet installed"))))
                ("Show use flags" . (lambda (elm)
                                      (helm-gentoo-default-action elm "equery" "-C" "u")
                                      (font-lock-add-keywords nil '(("^\+.*" . font-lock-variable-name-face)))
@@ -85,17 +85,19 @@
                               (setq helm-cache-world (helm-gentoo-get-world))))))))
 
 
-(cl-defun helm-gentoo-install (_candidate &key action)
+(defun* helm-gentoo-install (candidate &key action)
   (setq helm-external-commands-list nil)
   (ansi-term (getenv "SHELL") "Gentoo emerge")
   (term-line-mode)
-  (let ((command (cl-case action
-                   (install "sudo emerge -av ")
-                   (uninstall "sudo emerge -avC ")
-                   (t (error "Unknown action"))))
-        (elms (mapconcat 'identity (helm-marked-candidates) " ")))
+  (let ((command (case action
+                   ('install "sudo emerge -av ")
+                   ('uninstall "sudo emerge -avC ")
+                   (t (error "Unknow action"))))
+        (elms (mapconcat 'identity (helm-marked-candidates) " "))
+        (beg (point)) end)
     (goto-char (point-max))
-    (insert (concat command elms)) 
+    (insert (concat command elms))
+    (setq end (point))
     (term-char-mode) (term-send-input)))
 
 (defun helm-gentoo-default-action (elm command &rest args)
@@ -107,7 +109,7 @@
         (let ((com-list (append args (list elm))))
           (apply #'call-process command nil t nil
                  com-list)))
-    (message "No infos on packages not yet installed")))
+      (message "No infos on packages not yet installed")))
 
 (defvar helm-source-use-flags
   '((name . "Use Flags")
@@ -150,9 +152,9 @@
 (defun helm-gentoo-init-list ()
   "Initialize buffer with all packages in Portage."
   (let* ((portage-buf (get-buffer-create "*helm-gentoo*"))
-         (buf (helm-candidate-buffer portage-buf)))
+         (buf (helm-candidate-buffer 'portage-buf)))
     (with-current-buffer buf
-      (cl-dolist (i helm-cache-gentoo)
+      (dolist (i helm-cache-gentoo)
         (insert (concat i "\n"))))))
 
 (defun helm-gentoo-setup-cache ()
@@ -174,14 +176,14 @@
             (pop-to-buffer "*scratch*")
             (eshell-command (format "%s %s" command elm)))
           (pop-to-buffer "*EShell Command Output*"))
-      (eshell-command (format "%s %s" command elm)))))
+        (eshell-command (format "%s %s" command elm)))))
 
 (defun helm-gentoo-get-use ()
   "Initialize buffer with all use flags."
   (let* ((use-buf (get-buffer-create "*helm-gentoo-use*"))
-         (buf (helm-candidate-buffer use-buf)))
+         (buf (helm-candidate-buffer 'use-buf)))
     (with-current-buffer buf
-      (cl-dolist (i helm-gentoo-use-flags)
+      (dolist (i helm-gentoo-use-flags)
         (insert (concat i "\n"))))))
 
 
@@ -195,14 +197,14 @@
 
 (defun helm-gentoo-get-url (elm)
   "Return a list of urls from eix output."
-  (cl-loop with url-list = (split-string
-                            (with-temp-buffer
-                              (call-process "eix" nil t nil
-                                            elm "--format" "<homepage>\n")
-                              (buffer-string)))
+  (loop with url-list = (split-string
+                         (with-temp-buffer
+                           (call-process "eix" nil t nil
+                                         elm "--format" "<homepage>\n")
+                           (buffer-string)))
+        with all
         for i in url-list
         when (and (string-match "^http://.*" i)
-                  all
                   (not (member i all)))
         collect i into all
         finally return all))
@@ -224,7 +226,7 @@
 
 (defun helm-highlight-world (eix)
   "Highlight all installed package."
-  (cl-loop for i in eix
+  (loop for i in eix
         if (member i helm-cache-world)
         collect (propertize i 'face 'helm-gentoo-match)
         else
@@ -232,7 +234,7 @@
 
 (defun helm-highlight-local-use (use-flags)
   (let ((local-uses (helm-gentoo-get-local-use)))
-    (cl-loop for i in use-flags
+    (loop for i in use-flags
           if (member i local-uses)
           collect (propertize i 'face 'helm-gentoo-match)
           else
