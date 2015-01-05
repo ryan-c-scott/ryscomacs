@@ -1,6 +1,6 @@
-;;; helm-misc.el --- Various functions for helm
+;;; helm-misc.el --- Various functions for helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 
 
@@ -28,6 +28,13 @@
   "The time zone of your home"
   :group 'helm-misc
   :type 'string)
+
+(defcustom helm-mini-default-sources '(helm-source-buffers-list
+                                       helm-source-recentf
+                                       helm-source-buffer-not-found)
+  "Default sources list used in `helm-mini'."
+  :group 'helm-misc
+  :type '(repeat (choice symbol)))
 
 (defface helm-time-zone-current
     '((t (:foreground "green")))
@@ -41,11 +48,11 @@
 
 
 ;;; Latex completion
+(defvar LaTeX-math-menu)
 (defun helm-latex-math-candidates ()
   "Collect candidates for latex math completion."
-  (declare (special LaTeX-math-menu))
-  (loop for i in (cddr LaTeX-math-menu)
-        for elm = (loop for s in i when (vectorp s)
+  (cl-loop for i in (cddr LaTeX-math-menu)
+        for elm = (cl-loop for s in i when (vectorp s)
                         collect (cons (aref s 0) (aref s 1)))
         append elm))
 
@@ -60,91 +67,16 @@
                 (call-interactively candidate)))))
 
 
-;;;; <Headline Extraction>
-(defvar helm-source-fixme
-  '((name . "TODO/FIXME/DRY comments")
-    (headline . "^.*\\<\\(TODO\\|FIXME\\|DRY\\)\\>.*$")
-    (adjust)
-    (recenter))
-  "Show TODO/FIXME/DRY comments in current file.")
-
-(defvar helm-source-rd-headline
-  '((name . "RD HeadLine")
-    (headline  "^= \\(.+\\)$" "^== \\(.+\\)$" "^=== \\(.+\\)$" "^==== \\(.+\\)$")
-    (condition . (memq major-mode '(rdgrep-mode rd-mode)))
-    (migemo)
-    (subexp . 1))
-  "Show RD headlines.
-
-RD is Ruby's POD.
-http://en.wikipedia.org/wiki/Ruby_Document_format")
-
-(defvar helm-source-oddmuse-headline
-  '((name . "Oddmuse HeadLine")
-    (headline  "^= \\(.+\\) =$" "^== \\(.+\\) ==$"
-     "^=== \\(.+\\) ===$" "^==== \\(.+\\) ====$")
-    (condition . (memq major-mode '(oddmuse-mode yaoddmuse-mode)))
-    (migemo)
-    (subexp . 1))
-  "Show Oddmuse headlines, such as EmacsWiki.")
-
-(defvar helm-source-emacs-source-defun
-  '((name . "Emacs Source DEFUN")
-    (headline . "DEFUN\\|DEFVAR")
-    (condition . (string-match "/emacs2[0-9].+/src/.+c$"
-                  (or buffer-file-name ""))))
-  "Show DEFUN/DEFVAR in Emacs C source file.")
-
-(defvar helm-source-emacs-lisp-expectations
-  '((name . "Emacs Lisp Expectations")
-    (headline . "(desc[ ]\\|(expectations")
-    (condition . (eq major-mode 'emacs-lisp-mode)))
-  "Show descriptions (desc) in Emacs Lisp Expectations.
-
-http://www.emacswiki.org/cgi-bin/wiki/download/el-expectations.el")
-
-(defvar helm-source-emacs-lisp-toplevels
-  '((name . "Emacs Lisp Toplevel / Level 4 Comment / Linkd Star")
-    (headline . "^(\\|(@\\*\\|^;;;;")
-    (get-line . buffer-substring)
-    (condition . (eq major-mode 'emacs-lisp-mode))
-    (adjust))
-  "Show top-level forms, level 4 comments and linkd stars (optional) in Emacs Lisp.
-linkd.el is optional because linkd stars are extracted by regexp.
-http://www.emacswiki.org/cgi-bin/wiki/download/linkd.el")
-
-
-;;; Eev anchors
-(defvar helm-source-eev-anchor
-  '((name . "Anchors")
-    (candidates
-     . (lambda ()
-         (ignore-errors
-           (with-helm-current-buffer
-             (loop initially (goto-char (point-min))
-                   while (re-search-forward
-                          (format ee-anchor-format "\\([^\.].+\\)") nil t)
-                   for anchor = (match-string-no-properties 1)
-                   collect (cons (format "%5d:%s"
-                                         (line-number-at-pos (match-beginning 0))
-                                         (format ee-anchor-format anchor))
-                                 anchor))))))
-    (persistent-action . (lambda (item)
-                           (ee-to item)
-                           (helm-match-line-color-current-line)))
-    (persistent-help . "Show this entry")
-    (action . (("Goto link" . ee-to)))))
-
 ;;; Jabber Contacts (jabber.el)
 (defun helm-jabber-online-contacts ()
   "List online Jabber contacts."
   (with-no-warnings
-    (let (jids)
-      (dolist (item (jabber-concat-rosters) jids)
-        (when (get item 'connected)
-          (push (if (get item 'name)
-                    (cons (get item 'name) item)
-                    (cons (symbol-name item) item)) jids))))))
+    (cl-loop for item in (jabber-concat-rosters)
+          when (get item 'connected)
+          collect
+          (if (get item 'name)
+              (cons (get item 'name) item)
+            (cons (symbol-name item) item)))))
 
 (defvar helm-source-jabber-contacts
   '((name . "Jabber Contacts")
@@ -158,8 +90,8 @@ http://www.emacswiki.org/cgi-bin/wiki/download/linkd.el")
 
 ;;; World time
 ;;
-(defun helm-time-zone-transformer (candidates sources)
-  (loop for i in candidates
+(defun helm-time-zone-transformer (candidates _source)
+  (cl-loop for i in candidates
         collect
         (cond ((string-match (format-time-string "%H:%M" (current-time)) i)
                (propertize i 'face 'helm-time-zone-current))
@@ -179,17 +111,52 @@ http://www.emacswiki.org/cgi-bin/wiki/download/linkd.el")
 
 ;;; LaCarte
 ;;
-(defvar helm-source-lacarte
-  '((name . "Lacarte")
-    (init . (lambda () (require 'lacarte)))
-    (candidates . (lambda ()
-                    (with-helm-current-buffer
-                      (delete '(nil) (lacarte-get-overall-menu-item-alist)))))
-    (candidate-number-limit . 9999)
-    (action . helm-call-interactively))
-  "Needs lacarte.el.
+;;
+(declare-function lacarte-get-overall-menu-item-alist "ext:lacarte.el" (&optional MAPS))
 
-http://www.emacswiki.org/cgi-bin/wiki/download/lacarte.el")
+(defun helm-lacarte-candidate-transformer (cands)
+  (mapcar (lambda (cand)
+            (let* ((item (car cand))
+                   (match (string-match "[^>] \\((.*)\\)$" item)))
+              (when match
+                (put-text-property (match-beginning 1) (match-end 1)
+                                   'face 'helm-M-x-key item))
+              cand))
+          cands))
+
+(defclass helm-lacarte (helm-source-sync helm-type-command)
+    ((init :initform (lambda () (require 'lacarte)))
+     (candidates :initform 'helm-lacarte-get-candidates)
+     (candidate-transformer :initform 'helm-lacarte-candidate-transformer)
+     (candidate-number-limit :initform 9999)))
+
+(defun helm-lacarte-get-candidates (&optional maps)
+  "Extract candidates for menubar using lacarte.el.
+See http://www.emacswiki.org/cgi-bin/wiki/download/lacarte.el.
+Optional argument MAPS is a list specifying which keymaps to use: it
+can contain the symbols `local', `global', and `minor', mean the
+current local map, current global map, and all current minor maps."
+  (with-helm-current-buffer
+    ;; FIXME: do we still need to remove possible '(nil) candidates.
+    (lacarte-get-overall-menu-item-alist maps)))
+
+;;;###autoload
+(defun helm-browse-menubar (arg)
+  "Helm interface to the menubar using lacarte.el.
+With no prefix arg call the local current major-mode menu,
+with one prefix arg call the global menu,
+with two prefix args call the menu for the possible minor-mode in effect."
+  (interactive "P")
+  (require 'lacarte)
+  (helm :sources (helm-make-source "Lacarte" 'helm-lacarte
+                   :candidates (lambda ()
+                                 (helm-lacarte-get-candidates
+                                  (cond ((equal arg '(4))
+                                         '(global))
+                                        ((equal arg '(16))
+                                         '(minor))
+                                        (t '(local))))))
+        :buffer "*helm lacarte*"))
 
 (defun helm-call-interactively (cmd-or-name)
   "Execute CMD-OR-NAME as Emacs command.
@@ -202,10 +169,10 @@ It is added to `extended-command-history'.
         (cmd (helm-symbolify cmd-or-name)))
     (if (stringp (symbol-function cmd))
         (execute-kbd-macro (symbol-function cmd))
-        (setq this-command cmd)
-        (call-interactively cmd))))
+      (setq this-command cmd)
+      (call-interactively cmd))))
 
-;; Minibuffer History
+;;; Minibuffer History
 ;;
 ;;
 (defvar helm-source-minibuffer-history
@@ -214,18 +181,34 @@ It is added to `extended-command-history'.
                      (format "%s (%s)" name minibuffer-history-variable)))
     (candidates
      . (lambda ()
-         (let ((history (loop for i in
+         (let ((history (cl-loop for i in
                               (symbol-value minibuffer-history-variable)
                               unless (string= "" i) collect i)))
            (if (consp (car history))
                (mapcar 'prin1-to-string history)
-               history))))
+             history))))
     (migemo)
     (multiline)
     (action . (lambda (candidate)
                 (delete-minibuffer-contents)
                 (insert candidate)))))
 
+;;; Shell history
+;;
+;;
+(defun helm-comint-input-ring-action (candidate)
+  "Default action for comint history."
+  (with-helm-current-buffer
+    (delete-region (comint-line-beginning-position) (point-max))
+    (insert candidate)))
+
+(defvar helm-source-comint-input-ring
+  '((name . "Comint history")
+    (candidates . (lambda ()
+                    (with-helm-current-buffer
+                      (ring-elements comint-input-ring))))
+    (action . helm-comint-input-ring-action))
+  "Source that provide helm completion against `comint-input-ring'.")
 
 
 ;;; Helm ratpoison UI
@@ -272,12 +255,14 @@ It is added to `extended-command-history'.
     (candidate-number-limit)))
 
 (defun helm-stumpwm-commands-init ()
-    (with-current-buffer (helm-candidate-buffer 'global)
-      (save-excursion
-        (call-process "stumpish" nil (current-buffer) nil "commands"))
-      (while (re-search-forward "\\([^ ]+\\) \n?" nil t)
-        (replace-match "\\1\n"))
-      (goto-char (point-max))))
+  (with-current-buffer (helm-candidate-buffer 'global)
+    (save-excursion
+      (call-process "stumpish" nil (current-buffer) nil "commands"))
+    (while (re-search-forward "[ ]*\\([^ ]+\\)[ ]*\n?" nil t)
+      (replace-match "\n\\1\n"))
+    (delete-blank-lines)
+    (sort-lines nil (point-min) (point-max))
+    (goto-char (point-max))))
 
 (defun helm-stumpwm-commands-execute (candidate)
   (call-process "stumpish" nil nil nil  candidate))
@@ -293,12 +278,6 @@ It is added to `extended-command-history'.
   "Preconfigured helm for latex math symbols completion."
   (interactive)
   (helm-other-buffer 'helm-source-latex-math "*helm latex*"))
-
-;;;###autoload
-(defun helm-eev-anchors ()
-  "Preconfigured `helm' for eev anchors."
-  (interactive)
-  (helm-other-buffer 'helm-source-eev-anchor "*Helm eev anchors*"))
 
 ;;;###autoload
 (defun helm-ratpoison-commands ()
@@ -319,10 +298,11 @@ It is added to `extended-command-history'.
   "Preconfigured `helm' lightweight version \(buffer -> recentf\)."
   (interactive)
   (require 'helm-files)
-  (helm-other-buffer '(helm-source-buffers-list
-                       helm-source-recentf
-                       helm-source-buffer-not-found)
-                     "*helm mini*"))
+  (unless helm-source-buffers-list
+    (setq helm-source-buffers-list
+          (helm-make-source "Buffers" 'helm-source-buffers)))
+  (let ((helm-ff-transformer-show-only-basename nil))
+    (helm-other-buffer helm-mini-default-sources "*helm mini*")))
 
 ;;;###autoload
 (defun helm-minibuffer-history ()
@@ -331,6 +311,17 @@ It is added to `extended-command-history'.
   (let ((enable-recursive-minibuffers t))
     (helm-other-buffer 'helm-source-minibuffer-history
                        "*helm minibuffer-history*")))
+
+;;;###autoload
+(defun helm-comint-input-ring ()
+  "Predefined `helm' that provide completion of `comint' history."
+  (interactive)
+  (when (derived-mode-p 'comint-mode)
+    (helm :sources 'helm-source-comint-input-ring
+          :input (buffer-substring-no-properties (comint-line-beginning-position)
+                                                 (point-at-eol))
+          :buffer "*helm comint history*")))
+
 
 (provide 'helm-misc)
 

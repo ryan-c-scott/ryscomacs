@@ -1,6 +1,6 @@
-;;; helm-firefox.el --- Firefox bookmarks
+;;; helm-firefox.el --- Firefox bookmarks -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 (require 'helm-utils)
-(require 'helm-adaptative)
+(require 'helm-adaptive)
 ;;
 ;; You will have to set firefox to import bookmarks in his html file bookmarks.html.
 ;; (only for firefox versions >=3)
@@ -78,14 +78,17 @@
                     (helm-browse-url
                      (helm-firefox-bookmarks-get-value candidate))))
                ("Copy Url"
-                . (lambda (elm)
-                    (kill-new (helm-w3m-bookmarks-get-value elm))))))))
+                . (lambda (candidate)
+                    (let ((url (helm-firefox-bookmarks-get-value
+                                candidate))) 
+                      (kill-new url)
+                      (message "`%s' copied to kill-ring" url))))))))
 
 (defun helm-firefox-bookmarks-get-value (elm)
   (assoc-default elm helm-firefox-bookmarks-alist))
 
-(defun helm-highlight-firefox-bookmarks (bookmarks source)
-  (loop for i in bookmarks
+(defun helm-highlight-firefox-bookmarks (bookmarks _source)
+  (cl-loop for i in bookmarks
         collect (propertize
                  i 'face '((:foreground "YellowGreen"))
                  'help-echo (helm-firefox-bookmarks-get-value i))))

@@ -1,6 +1,6 @@
-;;; helm-yaoddmuse.el --- Helm extension for yaoddmuse
+;;; helm-yaoddmuse.el --- Helm extension for yaoddmuse -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 
 (declare-function yaoddmuse-update-pagename "ext:yaoddmuse.el" (&optional unforced))
@@ -28,9 +28,9 @@
 (defvar helm-yaoddmuse-use-cache-file nil)
 (defvar helm-yaoddmuse-cache-file "~/.emacs.d/yaoddmuse-cache.el")
 (defvar helm-yaoddmuse-ew-cache nil)
+(defvar yaoddmuse-pages-hash)
 
 (defun helm-yaoddmuse-get-candidates ()
-  (declare (special yaoddmuse-pages-hash))
   (if helm-yaoddmuse-use-cache-file
       (ignore-errors
         (unless helm-yaoddmuse-ew-cache
@@ -38,8 +38,8 @@
           (setq helm-yaoddmuse-ew-cache
                 (gethash "EmacsWiki" yaoddmuse-pages-hash)))
         helm-yaoddmuse-ew-cache)
-      (yaoddmuse-update-pagename t)
-      (gethash "EmacsWiki" yaoddmuse-pages-hash)))
+    (yaoddmuse-update-pagename t)
+    (gethash "EmacsWiki" yaoddmuse-pages-hash)))
 
 (defvar helm-source-yaoddmuse-emacswiki-edit-or-view
   '((name . "Yaoddmuse Edit or View (EmacsWiki)")
@@ -71,7 +71,7 @@
                           (helm-yaoddmuse-cache-pages t)
                           (setq helm-yaoddmuse-ew-cache
                                 (gethash "EmacsWiki" yaoddmuse-pages-hash)))
-                        (yaoddmuse-update-pagename))))))
+                      (yaoddmuse-update-pagename))))))
     (action-transformer helm-yaoddmuse-action-transformer))
   "Needs yaoddmuse.el.
 
@@ -107,20 +107,19 @@ http://www.emacswiki.org/emacs/download/yaoddmuse.el")
       (append actions '(("Install Elisp"
                          . (lambda (elm)
                              (install-elisp-from-emacswiki elm)))))
-      actions))
+    actions))
 
 ;;;###autoload
 (defun helm-yaoddmuse-cache-pages (&optional load)
   "Fetch the list of files on emacswiki and create cache file.
 If load is non--nil load the file and feed `yaoddmuse-pages-hash'."
   (interactive)
-  (declare (special yaoddmuse-pages-hash))
   (yaoddmuse-update-pagename)
   (save-excursion
     (find-file helm-yaoddmuse-cache-file)
     (erase-buffer)
     (insert "(puthash \"EmacsWiki\" '(")
-    (loop for i in (gethash "EmacsWiki" yaoddmuse-pages-hash)
+    (cl-loop for i in (gethash "EmacsWiki" yaoddmuse-pages-hash)
           do
           (insert (concat "(\"" (car i) "\") ")))
     (insert ") yaoddmuse-pages-hash)\n")
@@ -136,7 +135,7 @@ If load is non--nil load the file and feed `yaoddmuse-pages-hash'."
         (library-list (yaoddmuse-get-library-list)))
     (with-current-buffer helm-buffer
       ;; Insert library name.
-      (dolist (library library-list)
+      (cl-dolist (library library-list)
         (insert (format "%s\n" library)))
       ;; Sort lines.
       (sort-lines nil (point-min) (point-max)))))

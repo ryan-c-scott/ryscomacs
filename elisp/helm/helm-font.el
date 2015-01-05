@@ -1,6 +1,6 @@
-;;; helm-font --- Font and ucs selection for Helm
+;;; helm-font --- Font and ucs selection for Helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 
 (defvar helm-ucs-map
@@ -66,7 +66,7 @@
 (defvar helm-ucs-max-len 0)
 (defun helm-calculate-ucs-max-len ()
   "Calculate the length of longest `ucs-names' candidate."
-  (loop with count = 0
+  (cl-loop with count = 0
         for (n . v) in (ucs-names)
         for len = (length n)
         if (> len count)
@@ -83,7 +83,7 @@ Only math* symbols are collected."
                         (get-buffer-create "*helm ucs*"))
     ;; `ucs-names' fn will not run again, data is cached in
     ;; var `ucs-names'.
-    (loop for (n . v) in (ucs-names)
+    (cl-loop for (n . v) in (ucs-names)
           for len = (length n)
           for diff = (+ (- helm-ucs-max-len len) 2)
           unless (string= "" n)
@@ -93,20 +93,20 @@ Only math* symbols are collected."
                               diff ? )))
                     (if (fboundp 'ucs-insert)
                         (ucs-insert v)
-                        ;; call `insert-char' with nil nil
-                        ;; to shutup byte compiler in 24.1.
-                        (insert-char v nil nil))
+                      ;; call `insert-char' with nil nil
+                      ;; to shutup byte compiler in 24.1.
+                      (insert-char v nil nil))
                     (insert "\n")))))
 
-(defun helm-ucs-forward-char (candidate)
+(defun helm-ucs-forward-char (_candidate)
   (with-helm-current-buffer
     (forward-char 1)))
 
-(defun helm-ucs-backward-char (candidate)
+(defun helm-ucs-backward-char (_candidate)
   (with-helm-current-buffer
     (forward-char -1)))
 
-(defun helm-ucs-delete-backward (candidate)
+(defun helm-ucs-delete-backward (_candidate)
   (with-helm-current-buffer
     (delete-char -1)))
 
@@ -119,23 +119,27 @@ Only math* symbols are collected."
 
 (defun helm-ucs-persistent-insert ()
   (interactive)
-  (helm-attrset 'action-insert 'helm-ucs-insert-char)
-  (helm-execute-persistent-action 'action-insert))
+  (with-helm-alive-p
+    (helm-attrset 'action-insert 'helm-ucs-insert-char)
+    (helm-execute-persistent-action 'action-insert)))
 
 (defun helm-ucs-persistent-forward ()
   (interactive)
-  (helm-attrset 'action-forward 'helm-ucs-forward-char)
-  (helm-execute-persistent-action 'action-forward))
+  (with-helm-alive-p
+    (helm-attrset 'action-forward 'helm-ucs-forward-char)
+    (helm-execute-persistent-action 'action-forward)))
 
 (defun helm-ucs-persistent-backward ()
   (interactive)
-  (helm-attrset 'action-back 'helm-ucs-backward-char)
-  (helm-execute-persistent-action 'action-back))
+  (with-helm-alive-p
+    (helm-attrset 'action-back 'helm-ucs-backward-char)
+    (helm-execute-persistent-action 'action-back)))
 
 (defun helm-ucs-persistent-delete ()
   (interactive)
-  (helm-attrset 'action-delete 'helm-ucs-delete-backward)
-  (helm-execute-persistent-action 'action-delete))
+  (with-helm-alive-p
+    (helm-attrset 'action-delete 'helm-ucs-delete-backward)
+    (helm-execute-persistent-action 'action-delete)))
 
 (defvar helm-source-ucs
   '((name . "Ucs names")
