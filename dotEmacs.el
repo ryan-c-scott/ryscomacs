@@ -245,6 +245,7 @@
   (let ((default-directory dirpath))
     (shell-command
      (concat "ctags -R -e --append=no --exclude='\.svn' --extra=qf -o " (mapconcat 'expand-file-name subdirs " ")))
+    (kill-buffer "TAGS")
     (visit-tags-table (expand-file-name "TAGS"))))
 
 (defun vltags()
