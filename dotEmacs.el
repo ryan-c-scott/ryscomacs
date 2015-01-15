@@ -151,6 +151,7 @@
         '("\\.proto" . protobuf-mode)
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
+        '("\\.erl$" . erlang-mode)
 		)
        auto-mode-alist))
 
@@ -225,6 +226,13 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
 (require 'expand-region)
 (global-set-key (kbd "C-=") 'er/expand-region)
+;;;;;;;;;
+
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/erlang")
+;(setq erlang-root-dir "C:/Program Files/erl<Ver>")
+;(setq exec-path (cons "C:/Program Files/erl<Ver>/bin" exec-path))
+(require 'erlang-start)
 ;;;;;;;;;
 
 ;;;;;;;;; Customizing colors used in diff mode
