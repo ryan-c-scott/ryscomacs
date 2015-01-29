@@ -323,3 +323,8 @@
 
 ;;;;;;;;;;;;;
 (load "localprojects" :missing-ok t)
+
+(defun edit-local-projects()
+  "Open ~/.emacs.d/elisp/localprojects.el"
+  (interactive)
+  (find-file "~/.emacs.d/elisp/localprojects.el"))
