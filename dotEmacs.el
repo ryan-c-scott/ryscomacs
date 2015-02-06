@@ -1,5 +1,6 @@
 (set-variable 'inhibit-splash-screen "True")
-(tool-bar-mode -1)
+(if window-system
+    (tool-bar-mode -1))
 (setq make-backup-files nil)
 
 (add-to-list 'load-path "~/ryscomacs/elisp")
@@ -7,6 +8,8 @@
 
 (server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
+
+(load "localconfig" :missing-ok t)
 
 ; Wheel mouse setup
 (global-set-key (quote [mouse-4]) 'scroll-down)
@@ -219,7 +222,8 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
-(require 'p4)
+(if (and (boundp 'enableP4) enableP4)
+    (require 'p4))
 ;;;;;;;;;
 
 ;;;;;;;;;
@@ -328,3 +332,8 @@
   "Open ~/.emacs.d/elisp/localprojects.el"
   (interactive)
   (find-file "~/.emacs.d/elisp/localprojects.el"))
+
+(defun edit-local-config()
+  "Open ~/.emacs.d/elisp/localconfig.el"
+  (interactive)
+  (find-file "~/.emacs.d/elisp/localconfig.el"))
