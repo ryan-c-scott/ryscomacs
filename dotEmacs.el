@@ -54,7 +54,7 @@
 (global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
-(if (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
+(if (and (string-equal system-type "windows-nt") (or (not (boundp 'rysco-capslock-mapped)) (not rysco-capslock-mapped)))
     (progn
       (setq effective-capslock-key "<capslock>")
       (setq w32-enable-caps-lock nil))
@@ -266,6 +266,11 @@
   "Tag VL"
   (interactive)
   (tag-dir "~/vl" '("TAGS" "src" "content/scripts")))
+
+(defun vltags-ex()
+  "Tag VL: experimental"
+  (interactive)
+  (tag-dir "~/src/vl-experimental" '("TAGS" "src" "content/scripts")))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
