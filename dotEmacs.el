@@ -54,11 +54,12 @@
 (global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
-(setq effective-capslock-key "<capslock>")
-(unless (string-equal system-type "windows-nt")
+(if (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped-f13))
+    (progn
+      (setq effective-capslock-key "<capslock>")
+      (setq w32-enable-caps-lock nil))
   (setq effective-capslock-key "<f13>"))
 
-(setq w32-enable-caps-lock nil)
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'switch-to-buffer)
 
 (global-set-key (kbd (concat effective-capslock-key " <right>")) 'split-window-right)
