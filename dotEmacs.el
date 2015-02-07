@@ -54,11 +54,11 @@
 (global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
-(if (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped-f13))
+(if (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
     (progn
       (setq effective-capslock-key "<capslock>")
       (setq w32-enable-caps-lock nil))
-  (setq effective-capslock-key "<f13>"))
+  (setq effective-capslock-key "<f12>"))
 
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'switch-to-buffer)
 
