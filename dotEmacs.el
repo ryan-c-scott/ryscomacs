@@ -136,6 +136,7 @@
 (setq auto-mode-alist
       (append
        (list
+	'("\\.h$" . c++-mode)
         '("\\.xml$" . xml-mode)
         '("\\.rml$" . xml-mode)
         '("\\.css$" . css-mode)
