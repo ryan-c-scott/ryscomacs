@@ -66,6 +66,7 @@
 (global-set-key (kbd (concat effective-capslock-key " <down>")) 'split-window-below)
 (global-set-key (kbd (concat effective-capslock-key " <left>")) 'delete-window)
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
+(global-set-key (kbd (concat effective-capslock-key " <RET>")) 'vertical-windows-with-related)
 
 ;; Windows specific setup for locales under cygwin
   (when (eq system-type 'windows-nt)
@@ -315,6 +316,12 @@
   "Byte compiles all of ~/ryscomacs/elisp."
   (interactive)
   (byte-recompile-directory "~/ryscomacs/elisp" 0))
+
+(defun vertical-windows-with-related()
+  (interactive)
+  (delete-other-windows)
+  (split-window-right)
+  (ff-find-related-file t t))
 
 ; IDO buffer switching crap
 (require 'ido) 
