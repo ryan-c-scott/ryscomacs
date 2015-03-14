@@ -26,6 +26,7 @@ There are several custom configuration options, bindings, etc.
 Ryscomacs is designed to utilize the CAPSLOCK key for doing window splitting.
 
 Manipulation:
+
 * <CAPSLOCK><CAPSLOCK> :  Switch buffer
 * <CAPSLOCK><DOWN> :  Split window horizontally
 * <CAPSLOCK><RIGHT> :  Split window vertically
