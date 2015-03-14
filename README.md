@@ -17,10 +17,12 @@ C languages are set to use the stroustrup style for code formatting
 There are several custom configuration options, bindings, etc.
 
 * <CAPSLOCK><SPC> :  Helm mini
+* <CAPSLOCK>s :  Helm occur
 * C-x c i :  Semantic mode.  This shows language specific information for the buffer.
 * F8 :  Brings up a file browser interface
 * helm-colors :  Brings up a helm interface for color selection.
 * C-= :  Expands the current selection/point by semantic units (e.g. clause, function, class, etc.)
+* C-c o :  In C modes, opens the related file in a verical pane (using vertical-windows-with-related)
 
 ## Window Manipulation
 Ryscomacs is designed to utilize the CAPSLOCK key for doing window splitting.

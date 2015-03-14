@@ -66,7 +66,9 @@
 (global-set-key (kbd (concat effective-capslock-key " <down>")) 'split-window-below)
 (global-set-key (kbd (concat effective-capslock-key " <left>")) 'delete-window)
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
-(global-set-key (kbd (concat effective-capslock-key " <RET>")) 'vertical-windows-with-related)
+
+(global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
+(global-set-key (kbd (concat effective-capslock-key " s")) 'helm-occur)
 
 ;; Windows specific setup for locales under cygwin
   (when (eq system-type 'windows-nt)
@@ -166,7 +168,7 @@
 	  '(lambda () (c-set-style "stroustrup")
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
-             (local-set-key (kbd "C-c o") 'ff-find-other-file)))
+             (local-set-key (kbd "C-c o") 'vertical-windows-with-related)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -347,7 +349,6 @@
 
 ;; when using ido, the confirmation is rather annoying...
 (setq confirm-nonexistent-file-or-buffer nil)
-
 
 ;;;;;;;;;;;;;
 (load "localprojects" :missing-ok t)
