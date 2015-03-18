@@ -12,37 +12,35 @@ Buffers that aren't visiting files are hidden from the normal buffer switching l
 C languages are set to use the stroustrup style for code formatting
 .h files are always loaded in c++-mode
 
+## Capslock Overriding
+Ryscomacs is designed to utilize the CAPSLOCK key for doing window splitting and other frequently used commands.
+
+On Windows machines, Emacs provides a configuration option for disabling the OS's default handling of CAPSLOCK.  However, on any other OS it must be mapped to F12 at the OS level and the variable 'rysco-capslock-mapped' set in your localconfig.
+
+If you ssh into other machines and use Emacs remotely, you'll want to map F12 as you would on other systems.
+
+Mapping at the OS level is generally easiest by way of utilities that are readily available.  For windows, two registry files for setting and unsetting that binding can be found under 'win32'.
 
 # Commands of note
 There are several custom configuration options, bindings, etc.
 
-* <CAPSLOCK><SPC> :  Helm mini
+* <CAPSLOCK><CAPSLOCK> :  Switch buffer (helm-mini)
+* <CAPSLOCK><SPC> :  Semantic mode.  This shows language specific information for the buffer.
 * <CAPSLOCK>s :  Helm occur
-* C-x c i :  Semantic mode.  This shows language specific information for the buffer.
+* <CAPSLOCK><RET> :  Helm resume session
 * F8 :  Brings up a file browser interface
 * helm-colors :  Brings up a helm interface for color selection.
 * C-= :  Expands the current selection/point by semantic units (e.g. clause, function, class, etc.)
 * C-c o :  In C modes, opens the related file in a verical pane (using vertical-windows-with-related)
 
 ## Window Manipulation
-Ryscomacs is designed to utilize the CAPSLOCK key for doing window splitting.
 
-Manipulation:
-
-* <CAPSLOCK><CAPSLOCK> :  Switch buffer
 * <CAPSLOCK><DOWN> :  Split window horizontally
 * <CAPSLOCK><RIGHT> :  Split window vertically
 * <CAPSLOCK><UP> :  Close other windows
 * <CAPSLOCK><LEFT> :  Close this window
 
 Movement between windows can be done with the META key in conjunction with the arrows.
-
-### Capslock Overriding
-On Windows machines, Emacs provides a configuration option for disabling the OS's default handling of CAPSLOCK.  However, on any other OS it must be mapped to F12 at the OS level and the variable 'rysco-capslock-mapped' set in your localconfig.
-
-If you ssh into other machines and use Emacs remotely, you'll want to map F12 as you would on other systems.
-
-Mapping at the OS level is generally easiest by way of utilities that are readily available.  For windows, two registry files for setting and unsetting that binding can be found under 'win32'.
 
 ## Version Control
 Between DVC and VC most, if not all, of your source control needs can be met.

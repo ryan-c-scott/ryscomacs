@@ -60,15 +60,15 @@
       (setq w32-enable-caps-lock nil))
   (setq effective-capslock-key "<f12>"))
 
-(global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'switch-to-buffer)
+(global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
+(global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-semantic-or-imenu)
+(global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
+(global-set-key (kbd (concat effective-capslock-key " s")) 'helm-occur)
 
 (global-set-key (kbd (concat effective-capslock-key " <right>")) 'split-window-right)
 (global-set-key (kbd (concat effective-capslock-key " <down>")) 'split-window-below)
 (global-set-key (kbd (concat effective-capslock-key " <left>")) 'delete-window)
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
-
-(global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
-(global-set-key (kbd (concat effective-capslock-key " s")) 'helm-occur)
 
 ;; Windows specific setup for locales under cygwin
   (when (eq system-type 'windows-nt)
@@ -211,8 +211,8 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/helm/")
 (require 'helm-config)
-(global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-mini)
 (global-set-key (kbd "M-x") 'helm-M-x)
+(setq helm-split-window-default-side 'other)
 (helm-mode 1)
 ;;;;;;;;;
 
