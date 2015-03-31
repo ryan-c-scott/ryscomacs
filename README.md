@@ -63,6 +63,7 @@ Under VC (e.g. when using SVN), vc-root-diff will give you a unified diff of the
 * vertical-windows-with-related:  Splits the window vertically and loads the related file (e.g. the header for a C file) in the other window
 * edit-local-projects :  Opens/creates the localprojects.el file
 * edit-local-config :  Opens/creates the localconfig.el file
+* killall :  Kills all buffers that don't start with '*' and maximizes the scratch buffer
 
 # Included Sources
 * cg-mode
