@@ -325,6 +325,16 @@
   (split-window-right)
   (ff-find-related-file t t))
 
+(defun killall()
+  "Kill all non-system buffers"
+  (interactive)
+  (mapc (lambda (buffer)
+	  (when (not (string-equal "*" (substring (buffer-name buffer) 0 1)))
+	    (kill-buffer buffer)))
+	(buffer-list))
+  (switch-to-buffer "*scratch*")
+  (delete-other-windows))
+	    
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files
