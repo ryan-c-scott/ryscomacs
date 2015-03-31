@@ -271,25 +271,15 @@
 	(kill-buffer "TAGS"))
     (visit-tags-table (expand-file-name "TAGS"))))
 
-(defun tag-dir-manual( dir )
+(defun tag-dir-manual (dir)
   "Tag dir."
   (interactive (list (ido-read-directory-name "Diretory: ")) )
   (tag-dir dir '("TAGS" ".")))
 
-(defun vl( dir )
+(defun vl (dir)
   "Tag dir as a working copy of VL."
-  (interactive (list (ido-read-directory-name "VL Diretory: ")) )
+  (interactive (list (ido-read-directory-name "VL diretory: ")) )
   (tag-dir dir '("TAGS" "src" "content/scripts")))
-
-(defun vltags()
-  "Tag VL"
-  (interactive)
-  (vl "~/vl"))
-
-(defun vltags-ex()
-  "Tag VL: experimental"
-  (interactive)
-  (vl "~/src/vl-experimental"))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
