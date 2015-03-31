@@ -209,6 +209,11 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
+(require 'async-bytecomp)
+;;;;;;;;;
+
+;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/helm/")
 (require 'helm-config)
 (global-set-key (kbd "M-x") 'helm-M-x)
@@ -317,7 +322,7 @@
 (defun ryscomacs-compile()
   "Byte compiles all of ~/ryscomacs/elisp."
   (interactive)
-  (byte-recompile-directory "~/ryscomacs/elisp" 0))
+  (async-byte-recompile-directory "~/ryscomacs/elisp" 0))
 
 (defun vertical-windows-with-related()
   (interactive)
@@ -338,12 +343,15 @@
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files
+(defun ido-ignore-buffer-filter (name)
+  "Ignores all internal buffers with some exceptions"
+  (and (string-match-p "^\*" name)
+       (not (member name '("*scratch*" "*Messages*")))))
+
 (setq 
   ido-save-directory-list-file "~/.emacs.d/ido.last"
 
-  ido-ignore-buffers ;; ignore these guys
-  '("\\` " "^\*Mess" "^\*Back" ".*Completion" "^\*Ido" "^\*trace" "^\*\.meta"
-     "^\*compilation" "^\*TAGS" "^session\.*" "^\*")
+  ido-ignore-buffers '(ido-ignore-buffer-filter)
   ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~src")
   ido-case-fold  t                 ; be case-insensitive
 
