@@ -1,6 +1,6 @@
 ;;; helm-elisp.el --- Elisp symbols completion for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -118,7 +118,8 @@ fuzzy completion is not available in `completion-at-point'."
 (defun helm-show-completion ()
   (with-helm-current-buffer
     (overlay-put helm-show-completion-overlay
-                 'display (helm-get-selection))))
+                 'display (substring-no-properties
+                           (helm-get-selection)))))
 
 (defun helm-show-completion-init-overlay (beg end)
   (when (and helm-turn-on-show-completion beg end)
@@ -400,18 +401,30 @@ Filename completion happen if string start after or between a double quote."
 (defun helm-apropos-init (test default)
   "Init candidates buffer for `helm-apropos' sources."
   (require 'helm-help)
+  (helm-init-candidates-in-buffer 'global
+    (let ((default-symbol (and (stringp default)
+                               (intern-soft default)))
+          (symbols (all-completions "" obarray test)))
+      (if (and default-symbol (funcall test default-symbol))
+          (cons default-symbol symbols)
+        symbols))))
+
+(defun helm-apropos-init-faces (default)
+  "Init candidates buffer for faces for `helm-apropos'."
+  (require 'helm-help)
   (with-current-buffer (helm-candidate-buffer 'global)
     (goto-char (point-min))
     (let ((default-symbol (and (stringp default)
-                               (intern-soft default))))
-      (when (and default-symbol (funcall test default-symbol))
+                               (intern-soft default)))
+          (faces (face-list)))
+      (when (and default-symbol (facep default-symbol))
         (insert (concat default "\n")))
-      (cl-loop with all = (all-completions "" obarray test)
-            for sym in all
-            for s = (intern sym)
-            unless (or (and default (string= sym default))
-                       (keywordp s))
-            do (insert (concat sym "\n"))))))
+      (insert
+       (mapconcat #'prin1-to-string
+                  (if default
+                      (cl-remove-if (lambda (sym) (string= sym default)) faces)
+                    faces)
+                  "\n")))))
 
 (defun helm-apropos-default-sort-fn (candidates _source)
   (if (string= helm-pattern "")
@@ -421,7 +434,8 @@ Filename completion happen if string start after or between a double quote."
 (defun helm-def-source--emacs-variables (&optional default)
   (helm-build-in-buffer-source "Variables"
     :init `(lambda ()
-             (helm-apropos-init 'boundp ,default))
+             (helm-apropos-init
+              (lambda (x) (and (boundp x) (not (keywordp x)))) ,default))
     :fuzzy-match helm-apropos-fuzzy-match
     :filtered-candidate-transformer (and (null helm-apropos-fuzzy-match)
                                          'helm-apropos-default-sort-fn)
@@ -433,8 +447,7 @@ Filename completion happen if string start after or between a double quote."
 
 (defun helm-def-source--emacs-faces (&optional default)
   (helm-build-in-buffer-source "Faces"
-    :init `(lambda ()
-             (helm-apropos-init 'facep ,default))
+    :init (lambda () (helm-apropos-init-faces default))
     :fuzzy-match helm-apropos-fuzzy-match
     :filtered-candidate-transformer
     (append (and (null helm-apropos-fuzzy-match)
@@ -718,7 +731,7 @@ Filename completion happen if string start after or between a double quote."
        ("Eval" . (lambda (candidate)
                    (and (boundp 'helm-sexp--last-sexp)
                         (setq helm-sexp--last-sexp candidate))
-                   (helm-run-after-quit 'helm-sexp-eval candidate)))
+                   (run-with-timer 0.1 nil #'helm-sexp-eval candidate)))
        ("Edit and eval" .
         (lambda (cand)
           (minibuffer-with-setup-hook

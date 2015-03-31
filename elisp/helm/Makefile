@@ -23,7 +23,7 @@
 ## Floor, Boston, MA 02110-1301, USA.
 
 # Emacs invocation
-EMACS_COMMAND   := /cygdrive/c/emacs-24.3/bin/emacs
+EMACS_COMMAND   := /cygdrive/c/emacs-24.4/bin/emacs
 
 EMACS		:= $(EMACS_COMMAND) -Q -batch
 
@@ -35,7 +35,7 @@ PKGDIR := .
 LOADPATH	:= -L .
 
 # Files to compile
-EL			:= $(wildcard helm*.el)
+EL			:= $(sort $(wildcard helm*.el))
 
 # Compiled files
 ELC			:= $(EL:.el=.elc)

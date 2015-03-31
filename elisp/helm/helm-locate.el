@@ -1,6 +1,6 @@
 ;;; helm-locate.el --- helm interface for locate. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -229,26 +229,29 @@ See also `helm-locate'."
          (case-sensitive-flag (if locate-is-es "-i" ""))
          (ignore-case-flag (if (or locate-is-es
                                    (not real-locate)) "" "-i"))
-         process-connection-type
-         (args (split-string helm-pattern " ")))
+         (args (split-string helm-pattern " "))
+         (cmd (format helm-locate-command
+                      (cl-case helm-locate-case-fold-search
+                        (smart (let ((case-fold-search nil))
+                                 (if (string-match "[[:upper:]]" helm-pattern)
+                                     case-sensitive-flag
+                                     ignore-case-flag)))
+                        (t (if helm-locate-case-fold-search
+                               ignore-case-flag
+                               case-sensitive-flag)))
+                      (concat
+                       ;; The pattern itself.
+                       (shell-quote-argument (car args)) " "
+                       ;; Possible locate args added
+                       ;; after pattern, don't quote them.
+                       (mapconcat 'identity (cdr args) " ")))))
+    (helm-log "Starting helm-locate process")
+    (helm-log "Command line used was:\n\n%s"
+              (concat ">>> " (propertize cmd 'face 'font-lock-comment-face) "\n\n"))
     (prog1
         (start-process-shell-command
          "locate-process" helm-buffer
-         (format helm-locate-command
-                 (cl-case helm-locate-case-fold-search
-                   (smart (let ((case-fold-search nil))
-                            (if (string-match "[[:upper:]]" helm-pattern)
-                                case-sensitive-flag
-                              ignore-case-flag)))
-                   (t (if helm-locate-case-fold-search
-                          ignore-case-flag
-                        case-sensitive-flag)))
-                 (concat
-                  ;; The pattern itself.
-                  (shell-quote-argument (car args)) " "
-                  ;; Possible locate args added
-                  ;; after pattern, don't quote them.
-                  (mapconcat 'identity (cdr args) " "))))
+         cmd)
       (set-process-sentinel
        (get-buffer-process helm-buffer)
        #'(lambda (_process event)
@@ -258,7 +261,7 @@ See also `helm-locate'."
                        '(" " mode-line-buffer-identification " "
                          (:eval (format "L%s" (helm-candidate-number-at-point))) " "
                          (:eval (propertize
-                                 (format "[Locate Process Finish- (%s results)]"
+                                 (format "[Locate process finished - (%s results)]"
                                          (max (1- (count-lines
                                                    (point-min) (point-max)))
                                               0))
@@ -277,6 +280,10 @@ See also `helm-locate'."
    (candidate-number-limit :initform 9999)
    (mode-line :initform helm-generic-file-mode-line-string)))
 
+(defvar helm-source-locate
+  (helm-make-source "Locate" 'helm-locate-source
+    :pattern-transformer 'helm-locate-pattern-transformer))
+
 (defun helm-locate-pattern-transformer (pattern)
   (if helm-locate-fuzzy-match
       (cond ((string-match
@@ -286,10 +293,6 @@ See also `helm-locate'."
                       (match-string 1 pattern)) " -b"))
             (t (helm--mapconcat-pattern pattern)))
       pattern))
-
-(defvar helm-source-locate
-  (helm-make-source "Locate" 'helm-locate-source
-    :pattern-transformer 'helm-locate-pattern-transformer))
 
 ;;;###autoload
 (defun helm-locate-read-file-name (prompt)

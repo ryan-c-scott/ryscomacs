@@ -1,6 +1,6 @@
 ;;; helm-imenu.el --- Helm interface for Imenu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -109,11 +109,11 @@
       (if (eq helm-cached-imenu-tick tick)
           helm-cached-imenu-candidates
         (setq imenu--index-alist nil)
-        (setq helm-cached-imenu-tick tick
-              helm-cached-imenu-candidates
-              (let ((index (imenu--make-index-alist))) 
-                (helm-imenu--candidates-1
-                 (delete (assoc "*Rescan*" index) index))))))))
+        (prog1 (setq helm-cached-imenu-candidates
+                     (let ((index (imenu--make-index-alist))) 
+                       (helm-imenu--candidates-1
+                        (delete (assoc "*Rescan*" index) index))))
+          (setq helm-cached-imenu-tick tick))))))
 
 (defun helm-imenu--candidates-1 (alist)
   (cl-loop for elm in alist

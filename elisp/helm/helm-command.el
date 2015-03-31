@@ -1,6 +1,6 @@
 ;;; helm-command.el --- Helm execute-exended-command. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2014 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -154,7 +154,9 @@ the prefix args if needed, are passed AFTER starting `helm-M-x'.
 You can get help on each command by persistent action."
   (interactive)
   (let* ((history (cl-loop for i in extended-command-history
-                        when (commandp (intern i)) collect i))
+                        when (commandp (intern i))
+                        do (set-text-properties 0 (length i) nil i)
+                        and collect i))
          command sym-com in-help help-cand
          (orig-fuzzy-sort-fn helm-fuzzy-sort-fn)
          (helm-fuzzy-sort-fn (lambda (candidates source)
