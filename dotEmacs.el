@@ -335,7 +335,7 @@
 (ido-mode 'both) ;; for buffers and files
 (defun ido-ignore-buffer-filter (name)
   "Ignores all internal buffers with some exceptions"
-  (and (string-match-p "^\*" name)
+  (and (string-match-p "^*" name)
        (not (member name '("*scratch*" "*Messages*")))))
 
 (setq 
