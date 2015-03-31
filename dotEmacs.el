@@ -210,7 +210,7 @@
 
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
-(require 'async-bytecomp)
+(require 'async)
 ;;;;;;;;;
 
 ;;;;;;;;;
@@ -322,7 +322,7 @@
 (defun ryscomacs-compile()
   "Byte compiles all of ~/ryscomacs/elisp."
   (interactive)
-  (async-byte-recompile-directory "~/ryscomacs/elisp" 0))
+  (byte-recompile-directory "~/ryscomacs/elisp" 0))
 
 (defun vertical-windows-with-related()
   (interactive)
