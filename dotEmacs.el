@@ -249,6 +249,10 @@
 (require 'erlang-start)
 ;;;;;;;;;
 
+;;;;;;;;;
+(require 'multi)
+;;;;;;;;;
+
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
   "update the colors for diff faces"
@@ -286,24 +290,6 @@
     (while (re-search-forward from nil t)
       (replace-match to))))
 
-(defun json-format()
-  "Format Json Data"
-  (interactive)
-  (goto-char (point-min))
-  (replace-regexp-and-return "{" "{\n")
-  (replace-regexp-and-return "}" "\n}\n")
-  (replace-regexp-and-return "," ",\n")
-
-  (save-excursion
-    (delete-trailing-whitespace)
-    (indent-region (point-min) (point-max) nil)))
-
-(defun json-unformat()
-  "Format Json Data"
-  (interactive)
-  (goto-char (point-min))
-  (replace-regexp-and-return "\n" ""))
-
 (defun insert-standard-date ()
   "Inserts standard date time string." 
   (interactive)
@@ -324,7 +310,7 @@
   "Kill all non-system buffers"
   (interactive)
   (mapc (lambda (buffer)
-	  (when (not (string-equal "*" (substring (buffer-name buffer) 0 1)))
+	  (when (not (string-match "^*" (buffer-name buffer)))
 	    (kill-buffer buffer)))
 	(buffer-list))
   (switch-to-buffer "*scratch*")
@@ -336,7 +322,7 @@
 (defun ido-ignore-buffer-filter (name)
   "Ignores all internal buffers with some exceptions"
   (and (string-match-p "^*" name)
-       (not (member name '("*scratch*" "*Messages*")))))
+       (not (member name '("*scratch*" "*Messages*" "*ielm*")))))
 
 (setq 
   ido-save-directory-list-file "~/.emacs.d/ido.last"

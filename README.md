@@ -57,8 +57,6 @@ Files that have not been added yet must be marked and added with 'a' prior to co
 Under VC (e.g. when using SVN), vc-root-diff will give you a unified diff of the project. vc-diff works only from the current directory down.
 
 ## Custom Commands
-* json-format
-* json-unformat
 * insert-standard-date :  Inserts the current date
 * vertical-windows-with-related:  Splits the window vertically and loads the related file (e.g. the header for a C file) in the other window
 * edit-local-projects :  Opens/creates the localprojects.el file
@@ -82,3 +80,4 @@ Under VC (e.g. when using SVN), vc-root-diff will give you a unified diff of the
 * p4
 * php-mode
 * protobuf-mode
+* multi
