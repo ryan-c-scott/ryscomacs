@@ -322,7 +322,7 @@
 (defun ido-ignore-buffer-filter (name)
   "Ignores all internal buffers with some exceptions"
   (and (string-match-p "^*" name)
-       (not (member name '("*scratch*" "*Messages*" "*ielm*")))))
+       (not (member name '("*scratch*" "*Messages*" "*ielm*" "*gud-gdb*" "*gud*")))))
 
 (setq 
   ido-save-directory-list-file "~/.emacs.d/ido.last"
