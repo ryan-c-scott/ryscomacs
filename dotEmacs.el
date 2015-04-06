@@ -168,7 +168,7 @@
 	  '(lambda () (c-set-style "stroustrup")
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
-             (local-set-key (kbd "C-c o") 'vertical-windows-with-related)))
+             (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -305,6 +305,10 @@
   (delete-other-windows)
   (split-window-right)
   (ff-find-related-file t t))
+
+(defun ff-find-related-file-ignore-include()
+  (interactive)
+  (ff-find-related-file nil t))
 
 (defun killall()
   "Kill all non-system buffers"
