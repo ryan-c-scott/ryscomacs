@@ -46,6 +46,15 @@
 (setq ispell-program-name "aspell")
 (require 'ispell)
 
+; tramp
+(require 'tramp)
+;; (set-default 'tramp-auto-save-directory "C:\\Users\\rscott\\AppData\\Local\\Temp")
+(if (string-equal system-type "windows-nt")
+    (set-default 'tramp-default-method "plink"))
+
+;
+(require 'wc-mode)
+
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\C-c \r" 'mark-defun)
