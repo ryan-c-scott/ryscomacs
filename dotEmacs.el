@@ -52,8 +52,15 @@
 (if (string-equal system-type "windows-nt")
     (set-default 'tramp-default-method "plink"))
 
-;
+;;
 (require 'wc-mode)
+;;
+
+;; Powerline
+(add-to-list 'load-path "~/ryscomacs/elisp/powerline")
+(require 'powerline)
+(powerline-default-theme)
+;;
 
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
