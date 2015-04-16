@@ -405,7 +405,7 @@ static char * %s[] = {
                                           [header-line down-mouse-3]
                                           (powerline-mouse 'minor 'menu mm))
                                         map)))
-             (split-string (format-mode-line minor-mode-alist))
+             (if powerline-hide-minor-modes '() (split-string (format-mode-line minor-mode-alist)))
              (propertize " " 'face face)))
 
 ;;;###autoload (autoload 'powerline-narrow "powerline")
@@ -467,6 +467,8 @@ static char * %s[] = {
 (defvar pl/default-mode-line mode-line-format)
 
 (defvar pl/minibuffer-selected-window-list '())
+
+(defvar powerline-hide-minor-modes nil)
 
 (defun pl/minibuffer-selected-window ()
   "Return the selected window when entereing the minibuffer."
