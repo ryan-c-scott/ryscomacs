@@ -1,3 +1,11 @@
+(defface powerline-rysco-active3 '((t (:foreground "black")))
+  "Powerline face 3."
+  :group 'powerline)
+
+(defface powerline-rysco-inactive3 '((t (:foreground "gold")))
+  "Powerline face 3."
+  :group 'powerline)
+
 (defun powerline-rysco-theme ()
   "Setup the default mode-line."
   (interactive)
@@ -8,6 +16,8 @@
                           (mode-line (if active 'mode-line 'mode-line-inactive))
                           (face1 (if active 'powerline-active1 'powerline-inactive1))
                           (face2 (if active 'powerline-active2 'powerline-inactive2))
+			  ;;(face3 (if active 'powerline-rysco-active3 'powerline-rysco-inactive3))
+			  (face3 nil)
                           (separator-left (intern (format "powerline-%s-%s"
 							  (powerline-current-separator)
                                                           (car powerline-default-separator-dir))))
@@ -19,7 +29,7 @@
                                        (powerline-buffer-size nil 'l))
                                      (when powerline-display-mule-info
                                        (powerline-raw mode-line-mule-info nil 'l))
-                                     (powerline-buffer-id nil 'l)
+				     (powerline-buffer-id face3 'l)
                                      (when (and (boundp 'which-func-mode) which-func-mode)
                                        (powerline-raw which-func-format nil 'l))
                                      (powerline-raw " ")
@@ -28,7 +38,6 @@
                                        (powerline-raw erc-modified-channels-object face1 'l))
                                      (powerline-major-mode face1 'l)
                                      (powerline-process face1)
-                                     ;;(powerline-minor-modes face1 'l)
                                      (powerline-narrow face1 'l)
                                      (powerline-raw " " face1)
                                      (funcall separator-left face1 face2)
