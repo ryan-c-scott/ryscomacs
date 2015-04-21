@@ -200,9 +200,10 @@
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)))
 
-(add-hook 'javascript-mode-hook
+(add-hook 'js-mode-hook
 	  '(lambda ()
-	     (setq-default indent-tabs-mode nil)))
+	     (setq-default indent-tabs-mode nil)
+             (local-set-key (kbd "M-.") 'find-tag)))
 
 (add-hook 'json-mode-hook
 	  '(lambda ()
