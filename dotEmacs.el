@@ -285,11 +285,11 @@
 ;;;;;;;;;
 
 ;CTags setup
-(defun tag-dir(dirpath subdirs)
+(defun tag-dir(dirpath subdirs &optional flags)
   "Run ctags against the specified directories"
   (let ((default-directory dirpath))
     (shell-command
-     (concat "ctags -R -e --append=no --exclude='\.svn' --extra=qf -o " (mapconcat 'expand-file-name subdirs " ")))
+     (concat (format "ctags -R -e --append=no --exclude='\.svn' --extra=qf %s -o " flags) (mapconcat 'expand-file-name subdirs " ")))
     (if (get-buffer "TAGS")
 	(kill-buffer "TAGS"))
     (visit-tags-table (expand-file-name "TAGS"))))
@@ -302,7 +302,7 @@
 (defun vl (dir)
   "Tag dir as a working copy of VL."
   (interactive (list (ido-read-directory-name "VL diretory: ")) )
-  (tag-dir dir '("TAGS" "src" "content/scripts")))
+  (tag-dir dir '("TAGS" "src" "content/scripts") "--exclude='protobufs'"))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
