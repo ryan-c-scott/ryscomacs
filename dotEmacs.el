@@ -64,6 +64,11 @@
 (powerline-rysco-theme)
 ;;
 
+;; SQL
+(if (string-equal system-type "windows-nt")
+    (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
+;;
+
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\C-c \r" 'mark-defun)
@@ -202,13 +207,18 @@
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
-	     (setq-default indent-tabs-mode nil)
+	     (setq indent-tabs-mode nil)
+             (setq tab-width 4)
              (local-set-key (kbd "M-.") 'find-tag)))
 
 (add-hook 'json-mode-hook
 	  '(lambda ()
 	     (setq-default indent-tabs-mode nil)
              (setq js-indent-level 2)))
+
+(add-hook 'sql-interactive-mode-hook
+          (lambda ()
+            (toggle-truncate-lines t)))
 
 (global-set-key "\C-h" 'backward-delete-char)
 
