@@ -158,6 +158,7 @@
 (autoload 'php-mode "php-mode" "PHP editing mode." t)
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
+(autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 
 (setq auto-mode-alist
       (append
@@ -183,6 +184,7 @@
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
         '("\\.erl$" . erlang-mode)
+	'("\\.screenplay" . screenwriter-mode)
 		)
        auto-mode-alist))
 
