@@ -159,6 +159,7 @@
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
+(autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
 
 (setq auto-mode-alist
       (append
@@ -221,6 +222,10 @@
 (add-hook 'sql-interactive-mode-hook
           (lambda ()
             (toggle-truncate-lines t)))
+
+(add-hook 'screenwriter-mode-hook
+	  '(lambda ()
+             (helm-screenwriter-init)))
 
 (global-set-key "\C-h" 'backward-delete-char)
 
