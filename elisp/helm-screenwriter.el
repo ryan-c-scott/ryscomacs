@@ -23,8 +23,10 @@
 ;; http://www.nongnu.org/screenwriter
 ;; http://savannah.nongnu.org/cvs/?group=screenwriter
 
-;; TODO:  Add a default action that just uses the search pattern as a result
+;; TODO:
 ;; .Replace the raw text used in the regexes to instead use the margin values from screenwriter-mode
+;; .Similarly, create a set of uniform regexes to use for identifying different types
+;; .Font-locking
 
 ;; USAGE:
 ;; Copy helm-screenwriter.el into a location that's in your load-path.
@@ -128,10 +130,42 @@
   (interactive)
   (helm :sources helm-scrn-slug-source))
 
+(defun helm-screenwriter-guess-margins ()
+  (interactive)
+  ;; Do regex matches to determine which margin function to call from screenwriter
+  (let ((line (thing-at-point 'line t)) case-fold-search)
+    
+    (cond
+     ((string-match "^[[:upper:]][[:upper:]\|\s\.]+$" line)
+      (message "Found: Slugline")
+      (scrn-margins)
+      (back-to-indentation))
+
+     ((string-match "^[^[:space:]]+" line)
+      (message "Found: action")
+      (scrn-margins)
+      (back-to-indentation))
+
+     ((string-match "^				                   \s*" line)
+      (message "Found: Transition")
+      (scrn-trans-margins)
+      (back-to-indentation))
+     
+     ((string-match "^		    [^[:space:]]" line)
+      (message "Found: Actor")
+      (scrn-dialog-margins)
+      (setq left-margin 20)
+      (back-to-indentation))
+
+     ((string-match "^	  [^[:space:]]" line)
+      (message "Found: Dialogue")
+      (scrn-dialog-margins)
+      (back-to-indentation)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun helm-screenwriter-init ()
   (auto-fill-mode)
+  (local-set-key (kbd "M-i") 'helm-screenwriter-guess-margins)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
   (local-set-key (kbd "M-t") 'helm-screenwriter-transition))
