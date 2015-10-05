@@ -131,6 +131,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun helm-screenwriter-init ()
+  (auto-fill-mode)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
   (local-set-key (kbd "M-t") 'helm-screenwriter-transition))
