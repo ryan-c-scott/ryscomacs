@@ -225,7 +225,9 @@
 
 (add-hook 'screenwriter-mode-hook
 	  '(lambda ()
-             (helm-screenwriter-init)))
+             (helm-screenwriter-init)
+	     (require 'fill-column-indicator)
+	     (fci-mode)))
 
 (global-set-key "\C-h" 'backward-delete-char)
 
