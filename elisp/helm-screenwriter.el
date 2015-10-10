@@ -25,8 +25,6 @@
 
 ;; TODO:
 ;; .Replace the raw text used in the regexes to instead use the margin values from screenwriter-mode
-;; .Similarly, create a set of uniform regexes to use for identifying different types
-;; .Font-locking
 
 ;; USAGE:
 ;; Copy helm-screenwriter.el into a location that's in your load-path.
@@ -46,6 +44,13 @@
 ;;; Code:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar helm-screenwriter-regex-slugline "^\\([[:upper:]][[:upper:]\|\s\.-]+\\)$")
+(defvar helm-screenwriter-regex-action "^[^[:space:]]+")
+(defvar helm-screenwriter-regex-transition "^				\s*\\(.*\\)")
+(defvar helm-screenwriter-regex-actor "^		    \\([^[:space:]].*\\)")
+(defvar helm-screenwriter-regex-dialogue "^	  [^[:space:]]")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun helm-screenwriter-get-characters ()
   (let (res)
     (with-current-buffer helm-screenwriter-buffer
@@ -53,7 +58,7 @@
 	(goto-char (point-min))
 					; TODO: ignore notes
 					;.Split multiple characters separated by '/'
-	(while (re-search-forward "^		    \\(.*\\)$" nil t)
+	(while (re-search-forward helm-screenwriter-regex-actor nil t)
 	  (let ((character (match-string 1)))
 	    (add-to-list 'res character))))
       res)))
@@ -63,7 +68,7 @@
     (with-current-buffer helm-screenwriter-buffer
       (save-excursion
 	(goto-char (point-min))
-	(while (re-search-forward "^				                   \s*\\(.*\\)$" nil t)
+	(while (re-search-forward helm-screenwriter-regex-transition nil t)
 	  (let ((transition (match-string 1)))
 	    (add-to-list 'res transition))))
       res)))
@@ -73,7 +78,7 @@
     (with-current-buffer helm-screenwriter-buffer
       (save-excursion
 	(goto-char (point-min))
-	(while (re-search-forward "^[[:upper:]][[:upper:]\|\s\.]+$" nil t)
+	(while (re-search-forward helm-screenwriter-regex-slugline nil t)
 	  (let ((slug (match-string 0)))
 	    (add-to-list 'res slug))))
       res)))
@@ -136,35 +141,45 @@
   (let ((line (thing-at-point 'line t)) case-fold-search)
     
     (cond
-     ((string-match "^[[:upper:]][[:upper:]\|\s\.]+$" line)
+     ((string-match helm-screenwriter-regex-slugline line)
       (message "Found: Slugline")
       (scrn-margins)
       (back-to-indentation))
 
-     ((string-match "^[^[:space:]]+" line)
+     ((string-match helm-screenwriter-regex-action line)
       (message "Found: action")
       (scrn-margins)
       (back-to-indentation))
 
-     ((string-match "^				                   \s*" line)
+     ((string-match helm-screenwriter-regex-transition line)
       (message "Found: Transition")
       (scrn-trans-margins)
       (back-to-indentation))
      
-     ((string-match "^		    [^[:space:]]" line)
+     ((string-match helm-screenwriter-regex-actor line)
       (message "Found: Actor")
       (scrn-dialog-margins)
       (setq left-margin 20)
       (back-to-indentation))
 
-     ((string-match "^	  [^[:space:]]" line)
+     ((string-match helm-screenwriter-regex-dialogue line)
       (message "Found: Dialogue")
       (scrn-dialog-margins)
       (back-to-indentation)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq helm-screenwriter-highlights
+      `((,helm-screenwriter-regex-actor . font-lock-function-name-face)
+	(,helm-screenwriter-regex-slugline . font-lock-keyword-face)
+	(,helm-screenwriter-regex-transition . font-lock-constant-face)))
+
+
 (defun helm-screenwriter-init ()
   (auto-fill-mode)
+
+  (setq font-lock-defaults '(helm-screenwriter-highlights))
+  (font-lock-mode)
+  
   (local-set-key (kbd "M-i") 'helm-screenwriter-guess-margins)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
