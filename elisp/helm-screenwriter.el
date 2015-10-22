@@ -47,7 +47,7 @@
 (defvar helm-screenwriter-regex-slugline "^\\([[:upper:]][[:upper:]\s\.'\"/-]+\\)$")
 (defvar helm-screenwriter-regex-action "^[^[:space:]]+")
 (defvar helm-screenwriter-regex-transition "^				\s*\\(.*\\)")
-(defvar helm-screenwriter-regex-actor "^		    \\([^[:space:]].*\\)")
+(defvar helm-screenwriter-regex-actor "^		    \\([^[:space:]].*?\\)\\($\\|(\\)")
 (defvar helm-screenwriter-regex-dialogue "^	  [^[:space:]]")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
