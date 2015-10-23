@@ -267,6 +267,7 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (require 'dvc-autoloads)
+(setq dvc-tips-enabled nil)
 ;;;;;;;;;
 
 ;;;;;;;;;
