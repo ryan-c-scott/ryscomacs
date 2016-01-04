@@ -146,7 +146,6 @@
 
 (define-key user-minor-mode-map [delete] 'delete-char)
 (define-key user-minor-mode-map [kp-delete] 'delete-char)
-(define-key user-minor-mode-map [backspace] 'backward-delete-char)
 ;;;;;;;;;;;
 
 
@@ -290,6 +289,13 @@
 
 ;;;;;;;;;
 (require 'multi)
+;;;;;;;;;
+
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/kodi/")
+(autoload 'helm-kodi-shows "helm-kodi" "" t)
+(autoload 'helm-kodi-movies "helm-kodi" "" t)
+(autoload 'kodi-connect "kodi" "" t)
 ;;;;;;;;;
 
 ;;;;;;;;; Customizing colors used in diff mode
