@@ -1,12 +1,10 @@
 (require 'json)
+(require 'kodi)
 
-(defvar kodi-host)
+(defvar helm-kodi-default-sorting '("sort" . (("order" . "ascending") ("method" . "label") ("ignorearticle" . t))))
 
-(defvar get-shows-query "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetTVShows\", \"params\": { \"properties\": [], \"sort\": { \"order\": \"ascending\", \"method\": \"label\", \"ignorearticle\": true } }, \"id\": \"libTvShows\"}")
+(defvar helm-kodi-show-properties '("properties" . ("season" "episode" "title" "playcount" "plot")))
 
-(defvar get-episodes-query "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetEpisodes\", \"params\": { \"tvshowid\": %d, \"properties\": [\"season\", \"episode\", \"title\"%s], \"sort\": { \"order\": \"ascending\", \"method\": \"label\", \"ignorearticle\": true } }, \"id\": \"libTvShows\"}")
-
-(defvar get-movies-query "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", \"params\": { \"properties\" : [], \"sort\": { \"order\": \"ascending\", \"method\": \"label\", \"ignorearticle\": true } }, \"id\": \"libMovies\"}")
 
 (defun helm-kodi-input-filter (proc content)
   "Process filter that continually attempts to process the collected response as json.
@@ -24,13 +22,13 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
                        (cdr (assoc 'tvshows (cdar results))))))
     (helm :sources '((name . "KODI: Shows")
                      (candidates . shows)
-                     (action . (("Episodes" . (lambda (candidate) (helm-kodi-episodes candidate)))
-                                ("Plots" . (lambda (candidate) (helm-kodi-episodes candidate t)))))))))
+                     (action . (lambda (candidate) (helm-kodi-episodes candidate)))))))
 
 (defun helm-kodi-handle-episodes (results)
   "Internal input filter callback function that processes episode listing results and engages helm with that as a resource."
   (let ((episodes (mapcar (lambda (elt)`( ,(concat
-                                            (format "s%de%d. %s:  "
+                                            (format "%s s%de%d. %s:  "
+						    (if (> (cdr (assoc 'playcount elt)) 0) "*" " ")
                                                     (cdr (assoc 'season elt))
                                                     (cdr (assoc 'episode elt))
                                                     (cdr (assoc 'title elt)))
@@ -58,9 +56,9 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
       
       (setq helm-kodi-results-callback 'helm-kodi-handle-shows)
       (set-process-filter stream 'helm-kodi-input-filter)
-      (process-send-string stream get-shows-query)))
+      (process-send-string stream (kodi-create-packet "VideoLibrary.GetTVShows" `(,helm-kodi-default-sorting) '(("id" . "libTvShows"))))))
 
-(defun helm-kodi-episodes (show-id &optional plots)
+(defun helm-kodi-episodes (show-id)
   "Queries Kodi for a list of show episodes"
     (let ((stream (open-network-stream "kodi-connection" "*kodi-connection*" kodi-host 9090)))
       (with-current-buffer (get-buffer "*kodi-connection*") (erase-buffer))
@@ -68,7 +66,7 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
       
       (setq helm-kodi-results-callback 'helm-kodi-handle-episodes)
       (set-process-filter stream 'helm-kodi-input-filter)
-      (process-send-string stream (format get-episodes-query show-id (if plots ",\"plot\"" "")))))
+      (process-send-string stream (kodi-create-packet "VideoLibrary.GetEpisodes" `(("tvshowid" . ,show-id) ,helm-kodi-show-properties ,helm-kodi-default-sorting) '(("id" . "libTvShows"))))))
 
 (defun helm-kodi-movies ()
   (interactive)
@@ -79,11 +77,11 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
       
       (setq helm-kodi-results-callback 'helm-kodi-handle-movies)
       (set-process-filter stream 'helm-kodi-input-filter)
-      (process-send-string stream get-movies-query)))
+      (process-send-string stream (kodi-create-packet "VideoLibrary.GetMovies" `(,helm-kodi-default-sorting) '(("id" . "libTvShows"))))))
 
 (defun helm-kodi-play-file (id)
   "Calls Player.Open RPC.  'id' should be contents of the RPC's 'item' parameter.  e.g. \"movied\":3   or   \"episodeid\":300"
   (let ((stream (open-network-stream "kodi-connection" "*kodi-connection*" kodi-host 9090)))
     (set-process-filter stream nil)
-    (process-send-string stream (format "{\"jsonrpc\": \"2.0\", \"method\": \"Player.Open\", \"params\": { \"item\":{%s}}}" id))
+    (process-send-string stream (kodi-create-packet "Player.Open" `(("item" . (("item" . ,id))))))
     (delete-process stream)))

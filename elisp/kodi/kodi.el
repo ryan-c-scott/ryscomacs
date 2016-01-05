@@ -1,6 +1,12 @@
 ;;; kodi-mode.el --- major mode for interacting with a Kodi instance
 
+;;; TODO:  Experiment with triggering helm sources as a response handler for show/episode listings
+;;; .This has the side effect of requiring that kodi be connected to before hand, but in practice this hasn't seem like much of a problem
+
+
 (require 'multi)
+
+(defvar kodi-host)
 
 (defvar kodi-mode-connection nil)
 
@@ -29,10 +35,11 @@
 
 (defvar kodi-mode-connection-input "")
 
-(defun kodi-create-packet (method &optional params)
+(defun kodi-create-packet (method &optional params other)
   ""
   (let ((packet `(("jsonrpc" . "2.0")("method" . ,method))))
     (when params (setq packet (append packet `(("params" . ,params)))))
+    (when other (setq packet (append packet other)))
     (json-encode packet)))
 
 (defun kodi-input-filter (proc content)
@@ -122,6 +129,11 @@
   (interactive)
   ""
   (kodi-nav "Select"))
+
+(defun kodi-nav-home ()
+  (interactive)
+  ""
+  (kodi-nav "Home"))
 
 (defun kodi-seek (cmd)
   (interactive)
