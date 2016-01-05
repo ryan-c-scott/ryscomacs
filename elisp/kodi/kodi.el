@@ -5,6 +5,7 @@
 
 
 (require 'multi)
+(require 'json)
 
 (defvar kodi-host)
 
@@ -24,14 +25,15 @@
     (define-key map (kbd "SPC") 'kodi-play-pause)
     (define-key map (kbd "C-SPC") 'kodi-stop)
     (define-key map (kbd "C-s") 'helm-kodi-shows)
-    (define-key map (kbd "C-m") 'helm-kodi-movies)
+    (define-key map (kbd "C-f") 'helm-kodi-movies)
     map)
   "Keymap for Kodi major mode.")
 
 (define-derived-mode kodi-mode nil "Kodi"
   "Major mode for interacting with Kodi
 \\{kodi-mode-map}
-")
+"
+  (kodi-draw-title "Connected"))
 
 (defvar kodi-mode-connection-input "")
 
@@ -63,6 +65,7 @@
   (message "OnPause received"))
 
 (defmulti-method-fallback kodi-response-handler (&rest data)
+  (kodi-draw-title "Connected")
   (message "Unhandled data: %s" data))
 
 (defun kodi-connect ()
@@ -71,7 +74,9 @@
   (kodi-disconnect)
   (let ((stream (open-network-stream "kodi-client" "*kodi-client*" kodi-host 9090)))
     (setq kodi-mode-connection stream)
+    (setq kodi-mode-connection-input "")
     (with-current-buffer "*kodi-client*" (erase-buffer))
+    (kodi-draw-setup)
     (set-process-filter stream 'kodi-input-filter))
   (switch-to-buffer "*kodi-client*")
   (kodi-mode))
@@ -164,5 +169,19 @@
   (interactive)
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.SetSubtitle" '(("playerid" . 1)("subtitle" . "off")))))
+
+;;; Interface
+(defun kodi-draw-setup ()
+  (with-current-buffer "*kodi-client*" "\n\n\n\n\n\n"))
+
+(defun kodi-draw-title (&optional status)
+  (interactive)
+  ""
+  (with-current-buffer "*kodi-client*"
+    (goto-char (point-min))
+					;(forward-line (1- 1))
+    ;(kill-line)
+    (insert "KODI:  It's what's on your TV a lot...  ")
+    (when status (insert status))))
 
 (provide 'kodi)

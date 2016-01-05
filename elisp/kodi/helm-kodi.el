@@ -36,7 +36,7 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
                           (cdr (assoc 'episodes (cdar results))))))
     (helm :sources '((name . "KODI: Episodes")
                      (candidates . episodes)
-                     (action . (lambda (candidate) (helm-kodi-play-file (format "\"episodeid\":%d" candidate))))))))
+                     (action . (lambda (candidate) (helm-kodi-play-file `(("episodeid" . ,candidate)))))))))
 
 (defun helm-kodi-handle-movies (results)
   ""
@@ -44,7 +44,7 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
                        (cdr (assoc 'movies (cdar results))))))
     (helm :sources '((name . "KODI: Movies")
                      (candidates . movies)
-                     (action . (lambda (candidate) (helm-kodi-play-file (format "\"movieid\":%d" candidate))))))))
+                     (action . (lambda (candidate) (helm-kodi-play-file `(("movieid" . ,candidate)))))))))
 
 
 (defun helm-kodi-shows ()
@@ -83,5 +83,6 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
   "Calls Player.Open RPC.  'id' should be contents of the RPC's 'item' parameter.  e.g. \"movied\":3   or   \"episodeid\":300"
   (let ((stream (open-network-stream "kodi-connection" "*kodi-connection*" kodi-host 9090)))
     (set-process-filter stream nil)
-    (process-send-string stream (kodi-create-packet "Player.Open" `(("item" . (("item" . ,id))))))
+    (process-send-string stream (kodi-create-packet "Player.Open" `(("item" . ,id))))
     (delete-process stream)))
+
