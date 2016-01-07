@@ -37,6 +37,13 @@
 
 (defvar kodi-mode-connection-input "")
 
+(defun kodi-get (keys alist)
+"Helper function for retrieving values from nested alists"
+(if (not keys)
+    alist
+  (progn
+    (kodi-get (cdr keys) (cdr (assoc (car keys) alist))))))
+
 (defun kodi-create-packet (method &optional params other)
   ""
   (let ((packet `(("jsonrpc" . "2.0")("method" . ,method))))
@@ -49,8 +56,6 @@
     (setq kodi-mode-connection-input (concat kodi-mode-connection-input content))
     (let* ((result (json-read-from-string kodi-mode-connection-input))
 	   (method (cdr (assoc 'method result))))
-
-      (message method)
       (setq kodi-mode-connection-input "")
       (kodi-response-handler method result))))
 
@@ -59,14 +64,47 @@
   x)
 
 (defmulti-method kodi-response-handler "Player.OnPlay" (_ data)
-  (message "OnPlay received"))
+  (message "OnPlay received")
+
+  (let* ((item (kodi-get '(params data item) data))
+	 (type (kodi-get '(type) item))
+	 (id (kodi-get '(id) item)))
+
+    ;; TODO:  switch on type to get the correct details
+    ;; TESTING:  Triggering a media information retrieval for this item
+    (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot"))) '(("id" . "libTvShows"))))))
 
 (defmulti-method kodi-response-handler "Player.OnPause" (_ data)
   (message "OnPause received"))
 
+(defmulti-method kodi-response-handler "Player.OnStop" (_ data)
+  (message "OnStop received")
+  (kodi-draw-currently-playing))
+
+(defmulti-method kodi-response-handler "GUI.OnScreensaverActivated" (_ data)
+  (message "Kodi screensaver on."))
+
+(defmulti-method kodi-response-handler "GUI.OnScreensaverDeactivated" (_ data)
+  (message "Kodi screensaver off."))
+
+(defmulti-method kodi-response-handler nil (_ data)
+  (let ((result (kodi-get '(result) data)))
+    (cond ((kodi-get '(episodedetails) result) (kodi-data-handler 'episodedetails result))
+	  (t (message "Unhandled response data: %s" (json-encode data))))))
+
 (defmulti-method-fallback kodi-response-handler (&rest data)
-  (kodi-draw-title "Connected")
-  (message "Unhandled data: %s" data))
+  (message "Unhandled method response: %s" (json-encode data)))
+
+(defmulti kodi-data-handler (x &rest _)
+  ""
+  x)
+
+(defmulti-method kodi-data-handler 'episodedetails (_ data)
+  (message "Handling episode details")
+  (let* ((details (kodi-get '(episodedetails) data))
+	 (label (kodi-get '(label) details))
+	 (plot (kodi-get '(plot) details)))
+    (kodi-draw-currently-playing (format " %s" label) plot)))
 
 (defun kodi-connect ()
   (interactive)
@@ -172,16 +210,31 @@
 
 ;;; Interface
 (defun kodi-draw-setup ()
-  (with-current-buffer "*kodi-client*" "\n\n\n\n\n\n"))
-
-(defun kodi-draw-title (&optional status)
   (interactive)
+  ""
+  (with-current-buffer "*kodi-client*" (insert "KODI: .
+Playing: .
+Position: .
+Plot: .")))
+
+(defun kodi-draw (label value)
   ""
   (with-current-buffer "*kodi-client*"
     (goto-char (point-min))
-					;(forward-line (1- 1))
-    ;(kill-line)
-    (insert "KODI:  It's what's on your TV a lot...  ")
-    (when status (insert status))))
+    (search-forward label)
+    (kill-line)
+    (insert " " value)))
+
+(defun kodi-draw-title (&optional status)
+  ""
+  (let ((title " It's what's on your TV a lot... "))
+    (when status (setq title (concat title status)))
+    (kodi-draw "KODI:" title)))
+
+(defun kodi-draw-currently-playing (&optional item plot)
+  ""
+  (kodi-draw "Playing:" (if item item " ."))
+  (kodi-draw "Plot:" (if plot plot " .")))
+
 
 (provide 'kodi)
