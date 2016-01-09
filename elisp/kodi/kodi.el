@@ -1,18 +1,16 @@
 ;;; kodi-mode.el --- major mode for interacting with a Kodi instance
 
-;;; TODO:  Experiment with triggering helm sources as a response handler for show/episode listings
-;;; .This has the side effect of requiring that kodi be connected to before hand, but in practice this hasn't seem like much of a problem
-
-
 (require 'multi)
 (require 'json)
 
+;;; Settings
+(defvar kodi-default-sorting '("sort" . (("order" . "ascending") ("method" . "label") ("ignorearticle" . t))))
+(defvar kodi-show-properties '("properties" . ("season" "episode" "title" "playcount" "plot")))
+
 (defvar kodi-host)
-
 (defvar kodi-mode-connection nil)
-
-(defvar kodi-mode-hook nil
-  "")
+(defvar kodi-mode-connection-input "")
+(defvar kodi-mode-hook nil "")
 
 (defvar kodi-mode-map
   (let ((map (make-sparse-keymap)))
@@ -24,18 +22,20 @@
     (define-key map (kbd "RET") 'kodi-nav-select)
     (define-key map (kbd "SPC") 'kodi-play-pause)
     (define-key map (kbd "C-SPC") 'kodi-stop)
-    (define-key map (kbd "C-s") 'helm-kodi-shows)
-    (define-key map (kbd "C-f") 'helm-kodi-movies)
+    (define-key map (kbd "C-s") 'kodi-shows)
+    (define-key map (kbd "C-f") 'kodi-movies)
     map)
   "Keymap for Kodi major mode.")
 
+
+;;; Mode and helpers
 (define-derived-mode kodi-mode nil "Kodi"
   "Major mode for interacting with Kodi
 \\{kodi-mode-map}
 "
+  (auto-fill-mode)
+  (set-fill-column 80)
   (kodi-draw-title "Connected"))
-
-(defvar kodi-mode-connection-input "")
 
 (defun kodi-get (keys alist)
 "Helper function for retrieving values from nested alists"
@@ -59,6 +59,8 @@
       (setq kodi-mode-connection-input "")
       (kodi-response-handler method result))))
 
+
+;;; Response handlers
 (defmulti kodi-response-handler (x &rest _)
   ""
   x)
@@ -70,16 +72,25 @@
 	 (type (kodi-get '(type) item))
 	 (id (kodi-get '(id) item)))
 
-    ;; TODO:  switch on type to get the correct details
-    ;; TESTING:  Triggering a media information retrieval for this item
-    (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot"))) '(("id" . "libTvShows"))))))
+    (cond ((equal type "episode")
+	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot"))) '(("id" . "libTvShows")))))
+	  ((equal type "movie")
+	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot"))) '(("id" . "libMovies"))))))))
 
 (defmulti-method kodi-response-handler "Player.OnPause" (_ data)
   (message "OnPause received"))
 
 (defmulti-method kodi-response-handler "Player.OnStop" (_ data)
   (message "OnStop received")
-  (kodi-draw-currently-playing))
+  (kodi-draw-currently-playing)
+  (kodi-draw-position))
+
+(defmulti-method kodi-response-handler "Player.OnSeek" (_ data)
+  (let* ((time (kodi-get '(params data player time) data))
+	 (hours (kodi-get '(hours) time))
+	 (minutes (kodi-get '(minutes) time))
+	 (seconds (kodi-get '(seconds) time)))
+    (kodi-draw-position (format "%d:%d:%d" hours minutes seconds))))
 
 (defmulti-method kodi-response-handler "GUI.OnScreensaverActivated" (_ data)
   (message "Kodi screensaver on."))
@@ -90,22 +101,58 @@
 (defmulti-method kodi-response-handler nil (_ data)
   (let ((result (kodi-get '(result) data)))
     (cond ((kodi-get '(episodedetails) result) (kodi-data-handler 'episodedetails result))
+	  ((kodi-get '(moviedetails) result) (kodi-data-handler 'moviedetails result))
+	  ((kodi-get '(movies) result) (kodi-data-handler 'movies result))
+	  ((kodi-get '(tvshows) result) (kodi-data-handler 'tvshows result))
+	  ((kodi-get '(episodes) result) (kodi-data-handler 'episodes result))
 	  (t (message "Unhandled response data: %s" (json-encode data))))))
 
 (defmulti-method-fallback kodi-response-handler (&rest data)
   (message "Unhandled method response: %s" (json-encode data)))
 
+
+;;; Data handlers
 (defmulti kodi-data-handler (x &rest _)
   ""
   x)
 
 (defmulti-method kodi-data-handler 'episodedetails (_ data)
-  (message "Handling episode details")
   (let* ((details (kodi-get '(episodedetails) data))
 	 (label (kodi-get '(label) details))
 	 (plot (kodi-get '(plot) details)))
     (kodi-draw-currently-playing (format " %s" label) plot)))
 
+(defmulti-method kodi-data-handler 'moviedetails (_ data)
+  (let* ((details (kodi-get '(moviedetails) data))
+	 (label (kodi-get '(label) details))
+	 (plot (kodi-get '(plot) details)))
+    (kodi-draw-currently-playing (format " %s" label) plot)))
+
+(defmulti-method kodi-data-handler 'movies (_ data)
+  (let ((movies (mapcar (lambda (elt) `( ,(kodi-get '(label) elt) . ,(kodi-get '(movieid) elt))) (kodi-get '(movies) data))))
+    (helm :sources '((name . "KODI: Movies")
+                     (candidates . movies)
+                     (action . (lambda (candidate) (kodi-play-item `(("movieid" . ,candidate)))))))))
+
+(defmulti-method kodi-data-handler 'tvshows (_ data)
+  (let ((shows (mapcar (lambda (elt) `( ,(kodi-get '(label) elt) . ,(kodi-get '(tvshowid) elt))) (kodi-get '(tvshows) data))))
+    (helm :sources '((name . "KODI: Shows")
+                     (candidates . shows)
+                     (action . (lambda (candidate) (kodi-episodes candidate)))))))
+
+(defmulti-method kodi-data-handler 'episodes (_ data)
+  (let ((episodes (mapcar (lambda (elt) `( ,(format "%s s%de%d. %s:  %s"
+						    (if (> (kodi-get '(playcount) elt) 0) "*" " ")
+                                                    (kodi-get '(season) elt)
+                                                    (kodi-get '(episode) elt)
+						    (kodi-get '(title) elt)
+						    (kodi-get '(plot) elt)) . ,(kodi-get '(episodeid) elt))) (kodi-get '(episodes) data))))
+    (helm :sources '((name . "KODI: Episodes")
+                     (candidates . episodes)
+                     (action . (lambda (candidate) (kodi-play-item `(("episodeid" . ,candidate)))))))))
+
+
+;;; High-level commands
 (defun kodi-connect ()
   (interactive)
   ""
@@ -124,6 +171,26 @@
   ""
   (when kodi-mode-connection (delete-process kodi-mode-connection) (setq kodi-mode-connection nil)))
 
+(defun kodi-movies ()
+  (interactive)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovies" `(,kodi-default-sorting) '(("id" . "libTvShows")))))
+
+(defun kodi-shows ()
+  (interactive)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetTVShows" `(,kodi-default-sorting) '(("id" . "libTvShows")))))
+
+(defun kodi-episodes (show-id)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodes" `(("tvshowid" . ,show-id) ,kodi-show-properties ,kodi-default-sorting) '(("id" . "libTvShows")))))
+
+(defun kodi-play-item (item)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "Player.Open" `(("item" . ,item)))))
+
+
+;;; Basic commands
 (defun kodi-play-pause ()
   (interactive)
   ""
@@ -134,6 +201,8 @@
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.Stop" '(("playerid" . 1)))))
 
+
+;;; Basic navigation
 (defun kodi-nav (cmd)
   (interactive)
   ""
@@ -208,22 +277,30 @@
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.SetSubtitle" '(("playerid" . 1)("subtitle" . "off")))))
 
+
 ;;; Interface
 (defun kodi-draw-setup ()
   (interactive)
   ""
   (with-current-buffer "*kodi-client*" (insert "KODI: .
+
 Playing: .
 Position: .
+
 Plot: .")))
 
-(defun kodi-draw (label value)
+(defun kodi-draw (label value &optional kill-to-end)
   ""
   (with-current-buffer "*kodi-client*"
     (goto-char (point-min))
     (search-forward label)
-    (kill-line)
-    (insert " " value)))
+
+    (if kill-to-end (delete-region (point) (point-max))
+      (kill-line))
+    
+    (let ((current (point)))
+      (insert "\t" value)
+      (fill-region current (point)))))
 
 (defun kodi-draw-title (&optional status)
   ""
@@ -233,8 +310,11 @@ Plot: .")))
 
 (defun kodi-draw-currently-playing (&optional item plot)
   ""
-  (kodi-draw "Playing:" (if item item " ."))
-  (kodi-draw "Plot:" (if plot plot " .")))
+  (kodi-draw "Playing:" (if item item "."))
+  (kodi-draw "Plot:" (if plot (format "\n\t%s" plot) ".") t))
 
+(defun kodi-draw-position (&optional time)
+  ""
+  (kodi-draw "Position:" (if time time ".")))
 
 (provide 'kodi)
