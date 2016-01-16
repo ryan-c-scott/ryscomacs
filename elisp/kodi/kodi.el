@@ -90,13 +90,19 @@
 	 (hours (kodi-get '(hours) time))
 	 (minutes (kodi-get '(minutes) time))
 	 (seconds (kodi-get '(seconds) time)))
-    (kodi-draw-position (format "%d:%d:%d" hours minutes seconds))))
+    (kodi-draw-position (format-time-string "%H:%M:%S" (encode-time seconds minutes hours 0 0 0)))))
 
 (defmulti-method kodi-response-handler "GUI.OnScreensaverActivated" (_ data)
-  (message "Kodi screensaver on."))
+  (kodi-draw-title "Asleep"))
 
 (defmulti-method kodi-response-handler "GUI.OnScreensaverDeactivated" (_ data)
-  (message "Kodi screensaver off."))
+  (kodi-draw-title "Connected"))
+
+(defmulti-method kodi-response-handler "VideoLibrary.OnScanStarted" (_ data)
+  (kodi-draw-title "Scanning..."))
+
+(defmulti-method kodi-response-handler "VideoLibrary.OnScanFinished" (_ data)
+  (kodi-draw-title "Connected"))
 
 (defmulti-method kodi-response-handler nil (_ data)
   (let ((result (kodi-get '(result) data)))
@@ -170,6 +176,11 @@
   (interactive)
   ""
   (when kodi-mode-connection (delete-process kodi-mode-connection) (setq kodi-mode-connection nil)))
+
+(defun kodi-update-video-library ()
+  (interactive)
+  "Updates the video library"
+  (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.Scan")))
 
 (defun kodi-movies ()
   (interactive)
@@ -304,8 +315,8 @@ Plot: .")))
 
 (defun kodi-draw-title (&optional status)
   ""
-  (let ((title " It's what's on your TV a lot... "))
-    (when status (setq title (concat title status)))
+  (let ((title "\tIt's what's on your TV a lot. "))
+    (when status (setq title (concat title (format "\t\t(%s: %s)" kodi-host status))))
     (kodi-draw "KODI:" title)))
 
 (defun kodi-draw-currently-playing (&optional item plot)
