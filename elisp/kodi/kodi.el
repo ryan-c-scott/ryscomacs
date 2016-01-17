@@ -19,6 +19,8 @@
     (define-key map (kbd "<up>") 'kodi-nav-up)
     (define-key map (kbd "<down>") 'kodi-nav-down)
     (define-key map (kbd "<backspace>") 'kodi-nav-back)
+    (define-key map (kbd "C-<up>") 'kodi-audio-stream-next)
+    (define-key map (kbd "C-<down>") 'kodi-audio-stream-previous)
     (define-key map (kbd "RET") 'kodi-nav-select)
     (define-key map (kbd "SPC") 'kodi-play-pause)
     (define-key map (kbd "C-SPC") 'kodi-stop)
@@ -38,11 +40,10 @@
   (kodi-draw-title "Connected"))
 
 (defun kodi-get (keys alist)
-"Helper function for retrieving values from nested alists"
-(if (not keys)
-    alist
-  (progn
-    (kodi-get (cdr keys) (cdr (assoc (car keys) alist))))))
+  "Helper function for retrieving values from nested alists"
+  (while keys
+      (setq alist (cdr (assoc (pop keys) alist))))
+    alist)
 
 (defun kodi-create-packet (method &optional params other)
   ""
@@ -73,7 +74,7 @@
 	 (id (kodi-get '(id) item)))
 
     (cond ((equal type "episode")
-	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot"))) '(("id" . "libTvShows")))))
+	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot" "streamdetails"))) '(("id" . "libTvShows")))))
 	  ((equal type "movie")
 	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot"))) '(("id" . "libMovies"))))))))
 
@@ -125,8 +126,16 @@
 (defmulti-method kodi-data-handler 'episodedetails (_ data)
   (let* ((details (kodi-get '(episodedetails) data))
 	 (label (kodi-get '(label) details))
-	 (plot (kodi-get '(plot) details)))
-    (kodi-draw-currently-playing (format " %s" label) plot)))
+	 (plot (kodi-get '(plot) details))
+	 (audio (kodi-get '(streamdetails audio) details))
+	 (audio-list (mapcar (lambda (elt)
+			       (format "%s-%s-%s"
+				       (kodi-get '(language) elt)
+				       (kodi-get '(codec) elt)
+				       (kodi-get '(channels) elt)))
+			     audio)))
+    
+    (kodi-draw-currently-playing (format " %s" label) plot audio-list)))
 
 (defmulti-method kodi-data-handler 'moviedetails (_ data)
   (let* ((details (kodi-get '(moviedetails) data))
@@ -283,11 +292,26 @@
   ""
   (kodi-seek "bigbackward"))
 
+;;; Player option interaction
 (defun kodi-disable-subtitles ()
   (interactive)
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.SetSubtitle" '(("playerid" . 1)("subtitle" . "off")))))
 
+(defun kodi-audio-stream (id)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "Player.SetAudioStream" `(("playerid" . 1)("stream" . ,id)))))
+
+(defun kodi-audio-stream-next ()
+  (interactive)
+  ""
+  (kodi-audio-stream "next"))
+
+(defun kodi-audio-stream-previous ()
+  (interactive)
+  ""
+  (kodi-audio-stream "previous"))
+  
 
 ;;; Interface
 (defun kodi-draw-setup ()
@@ -297,6 +321,7 @@
 
 Playing: .
 Position: .
+Streams: .
 
 Plot: .")))
 
@@ -319,10 +344,15 @@ Plot: .")))
     (when status (setq title (concat title (format "\t\t(%s: %s)" kodi-host status))))
     (kodi-draw "KODI:" title)))
 
-(defun kodi-draw-currently-playing (&optional item plot)
+(defun kodi-draw-currently-playing (&optional item plot audio-list)
   ""
   (kodi-draw "Playing:" (if item item "."))
-  (kodi-draw "Plot:" (if plot (format "\n\t%s" plot) ".") t))
+  (kodi-draw "Plot:" (if plot (format "\n\t%s" plot) ".") t)
+  (kodi-draw "Streams:" (if audio-list (mapconcat 'identity audio-list ", ") ".")))
+
+(defun kodi-draw-position (&optional time)
+  ""
+  (kodi-draw "Position:" (if time time ".")))
 
 (defun kodi-draw-position (&optional time)
   ""
