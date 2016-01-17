@@ -355,7 +355,7 @@ Plot: .")))
   ""
   (kodi-draw "Playing:" (if item item "."))
   (kodi-draw "Plot:" (if plot (format "\n\t%s" plot) ".") t)
-  (kodi-draw "Streams:" (if audio-list (mapconcat 'identity audio-list ", ") ".")))
+  (kodi-draw "Streams:" (if audio-list (mapconcat 'identity audio-list " | ") ".")))
 
 (defun kodi-draw-position (&optional time)
   ""
