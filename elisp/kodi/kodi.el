@@ -76,7 +76,7 @@
     (cond ((equal type "episode")
 	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetEpisodeDetails" `(("episodeid" . ,id) ("properties" . ("plot" "streamdetails"))) '(("id" . "libTvShows")))))
 	  ((equal type "movie")
-	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot"))) '(("id" . "libMovies"))))))))
+	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot" "streamdetails"))) '(("id" . "libMovies"))))))))
 
 (defmulti-method kodi-response-handler "Player.OnPause" (_ data)
   (message "OnPause received"))
@@ -140,8 +140,16 @@
 (defmulti-method kodi-data-handler 'moviedetails (_ data)
   (let* ((details (kodi-get '(moviedetails) data))
 	 (label (kodi-get '(label) details))
-	 (plot (kodi-get '(plot) details)))
-    (kodi-draw-currently-playing (format " %s" label) plot)))
+	 (plot (kodi-get '(plot) details))
+	 (audio (kodi-get '(streamdetails audio) details))
+	 (audio-list (mapcar (lambda (elt)
+			       (format "%s-%s-%s"
+				       (kodi-get '(language) elt)
+				       (kodi-get '(codec) elt)
+				       (kodi-get '(channels) elt)))
+			     audio)))
+
+    (kodi-draw-currently-playing (format " %s" label) plot audio-list)))
 
 (defmulti-method kodi-data-handler 'movies (_ data)
   (let ((movies (mapcar (lambda (elt) `( ,(kodi-get '(label) elt) . ,(kodi-get '(movieid) elt))) (kodi-get '(movies) data))))
