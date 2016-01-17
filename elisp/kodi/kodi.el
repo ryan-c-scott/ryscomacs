@@ -60,6 +60,8 @@
       (setq kodi-mode-connection-input "")
       (kodi-response-handler method result))))
 
+(defun kodi-process-sentinel (proc state)
+  (message "KODI-SENTINEL: %s" state))
 
 ;;; Response handlers
 (defmulti kodi-response-handler (x &rest _)
@@ -67,8 +69,6 @@
   x)
 
 (defmulti-method kodi-response-handler "Player.OnPlay" (_ data)
-  (message "OnPlay received")
-
   (let* ((item (kodi-get '(params data item) data))
 	 (type (kodi-get '(type) item))
 	 (id (kodi-get '(id) item)))
@@ -78,11 +78,9 @@
 	  ((equal type "movie")
 	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot" "streamdetails"))) '(("id" . "libMovies"))))))))
 
-(defmulti-method kodi-response-handler "Player.OnPause" (_ data)
-  (message "OnPause received"))
+(defmulti-method kodi-response-handler "Player.OnPause" (_ data))
 
 (defmulti-method kodi-response-handler "Player.OnStop" (_ data)
-  (message "OnStop received")
   (kodi-draw-currently-playing)
   (kodi-draw-position))
 
@@ -185,7 +183,8 @@
     (setq kodi-mode-connection-input "")
     (with-current-buffer "*kodi-client*" (erase-buffer))
     (kodi-draw-setup)
-    (set-process-filter stream 'kodi-input-filter))
+    (set-process-filter stream 'kodi-input-filter)
+    (set-process-sentinel stream 'kodi-process-sentinel))
   (switch-to-buffer "*kodi-client*")
   (kodi-mode))
 
