@@ -37,6 +37,12 @@
 "
   (auto-fill-mode)
   (set-fill-column 80)
+
+  (setq font-lock-defaults
+	`(((,(format "^%s:" (regexp-opt '("KODI" "Playing" "Position" "Streams" "Plot") 'words)) . font-lock-function-name-face)
+	   ("^KODI:.*(\\(.*\\))$" . (1 font-lock-keyword-face)))))
+
+  (font-lock-mode)
   (kodi-draw-title "Connected"))
 
 (defun kodi-get (keys alist)
