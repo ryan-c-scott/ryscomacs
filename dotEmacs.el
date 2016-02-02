@@ -11,7 +11,7 @@
 
 ;; Vars
 (defvar rysco-fancy-modeline nil)
-(defvar rysco-fancy-modeline 'ocodo-minimal-light-smt)
+(defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-capslock-mapped nil)
 (defvar enableP4 nil)
 (defvar effective-capslock-key "<f12>")
