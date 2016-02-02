@@ -64,7 +64,7 @@
 (require 'wc-mode)
 ;;
 
-(if rysco-fancy-modeline
+(if (and rysco-fancy-modeline (image-type-available-p 'svg))
     (progn
       ;; Fancy SVG based mode lines
       (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
@@ -73,10 +73,19 @@
       (set-face-attribute 'mode-line nil :box nil)
       (set-face-attribute 'mode-line-inactive nil :box nil)
 
+      (set-face-attribute 'mode-line nil :font "Consolas-10.0")
+
       (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
       (require 'ocodo-svg-modelines)
       (ocodo-svg-modelines-init)
-      (smt/set-theme rysco-fancy-modeline-theme))
+      (smt/set-theme rysco-fancy-modeline-theme)
+
+      ;; HACK:  The unicode characters that ocodo uses for modified buffer status are maybe not so universal
+      (smt/defwidget buffer-dirty
+	:text (lambda (widget)
+		(when (buffer-file-name)
+		  (if (and (buffer-modified-p) (or buffer-file-name buffer-offer-save))
+		      " ▣ " " √ ")))))
   
   ;; Powerline
   (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
@@ -102,6 +111,7 @@
   (setq effective-capslock-key "<capslock>")
   (setq w32-enable-caps-lock nil))
 
+(global-set-key (kbd (concat effective-capslock-key " .")) 'find-tag)
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
 (global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-semantic-or-imenu)
 (global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
