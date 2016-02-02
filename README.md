@@ -81,3 +81,4 @@ Under VC (e.g. when using SVN), vc-root-diff will give you a unified diff of the
 * php-mode
 * protobuf-mode
 * multi
+* powerline

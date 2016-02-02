@@ -28,6 +28,7 @@
 (line-number-mode t)
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
+(menu-bar-mode -1)
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
@@ -60,7 +61,7 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
 (require 'powerline)
 (require 'powerline-rysco-themes)
-(setq powerline-default-separator 'bar)
+(setq powerline-default-separator 'slant)
 (powerline-rysco-theme)
 ;;
 
@@ -87,6 +88,7 @@
 (global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-semantic-or-imenu)
 (global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
 (global-set-key (kbd (concat effective-capslock-key " s")) 'helm-occur)
+(global-set-key (kbd (concat effective-capslock-key " y")) 'helm-show-kill-ring)
 
 (global-set-key (kbd (concat effective-capslock-key " <right>")) 'split-window-right)
 (global-set-key (kbd (concat effective-capslock-key " <down>")) 'split-window-below)
@@ -201,7 +203,7 @@
 	     (hs-minor-mode 1)
 	     (setq hs-isearch-open t)
 	     (c-set-style "c#")
-	     (setq indent-tabs-mode t)
+	     (setq indent-tabs-mode nil)
 	     (setq tab-width 4)
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)

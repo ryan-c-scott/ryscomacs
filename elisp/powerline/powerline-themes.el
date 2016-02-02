@@ -19,14 +19,17 @@
 
 (defcustom powerline-display-buffer-size t
   "When non-nil, display the buffer size."
+  :group 'powerline
   :type 'boolean)
 
 (defcustom powerline-display-mule-info t
   "When non-nil, display the mule info."
+  :group 'powerline
   :type 'boolean)
 
 (defcustom powerline-display-hud t
   "When non-nil, display the hud."
+  :group 'powerline
   :type 'boolean)
 
 ;;;###autoload
@@ -56,7 +59,7 @@
                                        (powerline-raw which-func-format nil 'l))
                                      (powerline-raw " ")
                                      (funcall separator-left mode-line face1)
-                                     (when (boundp 'erc-modified-channels-object)
+                                     (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
                                        (powerline-raw erc-modified-channels-object face1 'l))
                                      (powerline-major-mode face1 'l)
                                      (powerline-process face1)
@@ -117,7 +120,7 @@
 				     (powerline-hud face2 face1)))
 			  (center (list (powerline-raw " " face1)
 					(funcall separator-left face1 face2)
-					(when (boundp 'erc-modified-channels-object)
+					(when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
 					  (powerline-raw erc-modified-channels-object face2 'l))
 					(powerline-major-mode face2 'l)
 					(powerline-process face2)
@@ -164,7 +167,7 @@
 				     (powerline-hud face2 face1)))
 			  (center (append (list (powerline-raw " " face1)
 						(funcall separator-left face1 face2)
-						(when (boundp 'erc-modified-channels-object)
+						(when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
 						  (powerline-raw erc-modified-channels-object face2 'l))
 						(powerline-major-mode face2 'l)
 						(powerline-process face2)
@@ -216,7 +219,7 @@
 				     ;; (powerline-raw (concat "[" (mode-line-eol-desc) "]") mode-line)
 				     (when (and (boundp 'which-func-mode) which-func-mode)
 				       (powerline-raw which-func-format nil 'l))
-				     (when (boundp 'erc-modified-channels-object)
+				     (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
 				       (powerline-raw erc-modified-channels-object face1 'l))
 				     (powerline-raw "[" mode-line 'l)
 				     (powerline-minor-modes mode-line)
