@@ -9,6 +9,12 @@
 (server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
 
+;; Vars
+(defvar rysco-fancy-modeline nil)
+(defvar rysco-capslock-mapped nil)
+(defvar enableP4 t)
+
+;
 (load "localconfig" :missing-ok t)
 
 ; Wheel mouse setup
@@ -57,13 +63,31 @@
 (require 'wc-mode)
 ;;
 
-;; Powerline
-(add-to-list 'load-path "~/ryscomacs/elisp/powerline")
-(require 'powerline)
-(require 'powerline-rysco-themes)
-(setq powerline-default-separator 'slant)
-(powerline-rysco-theme)
-;;
+(if (bound-and-true-p rysco-fancy-modeline)
+    (progn
+      ;; Fancy SVG based mode lines
+      (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
+      (require 'svg-mode-line-themes)
+      (smt/enable)
+      (set-face-attribute 'mode-line nil :box nil)
+      (set-face-attribute 'mode-line-inactive nil :box nil)
+
+      (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
+      (require 'ocodo-svg-modelines)
+      (ocodo-svg-modelines-init)
+      (smt/set-theme 'ocodo-minimal-dark-smt)
+      ;;
+      )
+  
+  ;; Powerline
+  (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
+  (require 'powerline)
+  (require 'powerline-rysco-themes)
+  (setq powerline-default-separator 'slant)
+  (powerline-rysco-theme)
+  ;;
+  )
+
 
 ;; SQL
 (if (string-equal system-type "windows-nt")
@@ -78,7 +102,7 @@
 (global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
-(if (and (string-equal system-type "windows-nt") (or (not (boundp 'rysco-capslock-mapped)) (not rysco-capslock-mapped)))
+(if (and (string-equal system-type "windows-nt") (not (bound-and-true-p rysco-capslock-mapped)))
     (progn
       (setq effective-capslock-key "<capslock>")
       (setq w32-enable-caps-lock nil))
@@ -272,7 +296,7 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
-(if (and (boundp 'enableP4) enableP4)
+(if (bound-and-true-p enableP4)
     (require 'p4))
 ;;;;;;;;;
 
@@ -280,13 +304,6 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
 (require 'expand-region)
 (global-set-key (kbd "C-=") 'er/expand-region)
-;;;;;;;;;
-
-;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/erlang")
-;(setq erlang-root-dir "C:/Program Files/erl<Ver>")
-;(setq exec-path (cons "C:/Program Files/erl<Ver>/bin" exec-path))
-(require 'erlang-start)
 ;;;;;;;;;
 
 ;;;;;;;;;
