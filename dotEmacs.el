@@ -28,6 +28,7 @@
 (line-number-mode t)
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
+(menu-bar-mode -1)
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
