@@ -60,7 +60,7 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
 (require 'powerline)
 (require 'powerline-rysco-themes)
-(setq powerline-default-separator 'bar)
+(setq powerline-default-separator 'slant)
 (powerline-rysco-theme)
 ;;
 
