@@ -11,8 +11,10 @@
 
 ;; Vars
 (defvar rysco-fancy-modeline nil)
+(defvar rysco-fancy-modeline 'ocodo-minimal-light-smt)
 (defvar rysco-capslock-mapped nil)
-(defvar enableP4 t)
+(defvar enableP4 nil)
+(defvar effective-capslock-key "<f12>")
 
 ;
 (load "localconfig" :missing-ok t)
@@ -24,9 +26,8 @@
 (global-set-key (quote [wheel-down]) 'scroll-up)
 
 ; Font settings
-(cond
- ((string-equal system-type "windows-nt")
-  (set-face-attribute 'default t :font "Consolas-10.0")))
+(when (string-equal system-type "windows-nt")
+  (set-face-attribute 'default t :font "Consolas-10.0"))
 
 ; Random setting
 (transient-mark-mode t)
@@ -63,7 +64,7 @@
 (require 'wc-mode)
 ;;
 
-(if (bound-and-true-p rysco-fancy-modeline)
+(if rysco-fancy-modeline
     (progn
       ;; Fancy SVG based mode lines
       (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
@@ -75,23 +76,18 @@
       (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
       (require 'ocodo-svg-modelines)
       (ocodo-svg-modelines-init)
-      (smt/set-theme 'ocodo-minimal-dark-smt)
-      ;;
-      )
+      (smt/set-theme rysco-fancy-modeline-theme))
   
   ;; Powerline
   (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
   (require 'powerline)
   (require 'powerline-rysco-themes)
   (setq powerline-default-separator 'slant)
-  (powerline-rysco-theme)
-  ;;
-  )
-
+  (powerline-rysco-theme))
 
 ;; SQL
-(if (string-equal system-type "windows-nt")
-    (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
+(when (string-equal system-type "windows-nt")
+  (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 ;;
 
 ; Bind various keys
@@ -102,11 +98,9 @@
 (global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
 
 ; On everything but Windows, 
-(if (and (string-equal system-type "windows-nt") (not (bound-and-true-p rysco-capslock-mapped)))
-    (progn
-      (setq effective-capslock-key "<capslock>")
-      (setq w32-enable-caps-lock nil))
-  (setq effective-capslock-key "<f12>"))
+(when (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
+  (setq effective-capslock-key "<capslock>")
+  (setq w32-enable-caps-lock nil))
 
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
 (global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-semantic-or-imenu)
@@ -191,13 +185,11 @@
        (list
 	'("\\.h$" . c++-mode)
         '("\\.xml$" . xml-mode)
-        '("\\.rml$" . xml-mode)
         '("\\.css$" . css-mode)
-        '("\\.rcss$" . css-mode)
         '("\\.cs" . csharp-mode)
         '("\\.cg" . cg-mode)
         '("\\.glsl$" . cg-mode)
-        '("\\.shader" . cg-mode)
+        '("\\.shader" . lua-mode)
         '("\\.lua" . lua-mode)
         '("\\.particle" . lua-mode)
         '("\\.material" . lua-mode)
@@ -209,7 +201,6 @@
         '("\\.proto" . protobuf-mode)
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
-        '("\\.erl$" . erlang-mode)
 	'("\\.screenplay" . screenwriter-mode)
 		)
        auto-mode-alist))
@@ -296,7 +287,7 @@
 ;;;;;;;;;
 
 ;;;;;;;;;
-(if (bound-and-true-p enableP4)
+(if enableP4
     (require 'p4))
 ;;;;;;;;;
 
