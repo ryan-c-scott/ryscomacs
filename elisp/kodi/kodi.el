@@ -51,6 +51,12 @@
       (setq alist (cdr (assoc (pop keys) alist))))
     alist)
 
+(defun kodi-process-time (time)
+  (let* ((hours (kodi-get '(hours) time))
+	 (minutes (kodi-get '(minutes) time))
+	 (seconds (kodi-get '(seconds) time)))
+    (format-time-string "%H:%M:%S" (encode-time seconds minutes hours 0 0 0))))
+
 (defun kodi-create-packet (method &optional params other)
   ""
   (let ((packet `(("jsonrpc" . "2.0")("method" . ,method))))
@@ -91,11 +97,7 @@
   (kodi-draw-position))
 
 (defmulti-method kodi-response-handler "Player.OnSeek" (_ data)
-  (let* ((time (kodi-get '(params data player time) data))
-	 (hours (kodi-get '(hours) time))
-	 (minutes (kodi-get '(minutes) time))
-	 (seconds (kodi-get '(seconds) time)))
-    (kodi-draw-position (format-time-string "%H:%M:%S" (encode-time seconds minutes hours 0 0 0)))))
+  (kodi-draw-position (kodi-process-time (kodi-get '(params data player time) data))))
 
 (defmulti-method kodi-response-handler "GUI.OnScreensaverActivated" (_ data)
   (kodi-draw-title "Asleep"))
@@ -116,6 +118,7 @@
 	  ((kodi-get '(movies) result) (kodi-data-handler 'movies result))
 	  ((kodi-get '(tvshows) result) (kodi-data-handler 'tvshows result))
 	  ((kodi-get '(episodes) result) (kodi-data-handler 'episodes result))
+	  ((kodi-get '(time) result) (kodi-data-handler 'time result))
 	  (t (message "Unhandled response data: %s" (json-encode data))))))
 
 (defmulti-method-fallback kodi-response-handler (&rest data)
@@ -141,7 +144,7 @@
 				       (kodi-get '(codec) elt)
 				       (kodi-get '(channels) elt)))
 			     audio)))
-    
+
     (kodi-draw-currently-playing (format "%s" label) plot audio-list)))
 
 (defmulti-method kodi-data-handler 'moviedetails (_ data)
@@ -180,6 +183,11 @@
     (helm :sources '((name . "KODI: Episodes")
                      (candidates . episodes)
                      (action . (lambda (candidate) (kodi-play-item `(("episodeid" . ,candidate)))))))))
+
+(defmulti-method kodi-data-handler 'time (_ data)
+  (kodi-draw-position
+   (kodi-process-time (kodi-get '(time) data))
+   (kodi-process-time (kodi-get '(totaltime) data))))
 
 
 ;;; High-level commands
@@ -225,6 +233,10 @@
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.Open" `(("item" . ,item)))))
 
+(defun kodi-update-time ()
+  (interactive)
+  ""
+  (process-send-string kodi-mode-connection (kodi-create-packet "Player.GetProperties" '(("playerid" . 1)("properties" . ("time" "totaltime" "percentage"))) '(("id" . 1)))))
 
 ;;; Basic commands
 (defun kodi-play-pause ()
@@ -366,12 +378,10 @@ Plot: .")))
   (kodi-draw "Plot:" (if plot (format "\n\t%s" plot) ".") t)
   (kodi-draw "Streams:" (if audio-list (mapconcat 'identity audio-list " | ") ".")))
 
-(defun kodi-draw-position (&optional time)
+(defun kodi-draw-position (&optional time totaltime)
   ""
-  (kodi-draw "Position:" (if time time ".")))
-
-(defun kodi-draw-position (&optional time)
-  ""
-  (kodi-draw "Position:" (if time time ".")))
+  (let* ((current (if time time "."))
+	 (totalString (if totaltime (format " / %s" totaltime) "")))
+  (kodi-draw "Position:" (concat current totalString))))
 
 (provide 'kodi)
