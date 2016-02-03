@@ -1,5 +1,6 @@
 (set-variable 'inhibit-splash-screen "True")
 (if window-system
+    (scroll-bar-mode -1)
     (tool-bar-mode -1))
 (setq make-backup-files nil)
 
@@ -36,7 +37,6 @@
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
-(scroll-bar-mode -1)
 
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
