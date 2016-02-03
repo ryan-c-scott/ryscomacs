@@ -36,6 +36,8 @@
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
+(scroll-bar-mode -1)
+
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
@@ -223,7 +225,8 @@
 	  '(lambda () (c-set-style "stroustrup")
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
-             (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)))
+             (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
+	     (local-set-key "\C-c\C-c" 'comment-or-uncomment-region)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -235,7 +238,8 @@
 	     (setq tab-width 4)
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
-	     (local-set-key "\C-c<"  'hs-show-block)))
+	     (local-set-key "\C-c<"  'hs-show-block)
+	     (local-set-key "\C-c\C-c" 'comment-or-uncomment-region)))
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
