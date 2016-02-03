@@ -75,8 +75,6 @@
       (set-face-attribute 'mode-line nil :box nil)
       (set-face-attribute 'mode-line-inactive nil :box nil)
 
-      (set-face-attribute 'mode-line nil :font "Consolas-10.0")
-
       (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
       (require 'ocodo-svg-modelines)
       (ocodo-svg-modelines-init)
