@@ -11,6 +11,7 @@
 (defvar kodi-mode-connection nil)
 (defvar kodi-mode-connection-input "")
 (defvar kodi-mode-hook nil "")
+(defvar kodi-mode-update-timer nil)
 
 (defvar kodi-mode-map
   (let ((map (make-sparse-keymap)))
@@ -73,7 +74,11 @@
       (kodi-response-handler method result))))
 
 (defun kodi-process-sentinel (proc state)
-  (message "KODI-SENTINEL: %s" state))
+  (message "KODI-SENTINEL: %s" state)
+  (when (string-equal state "deleted")
+    (when kodi-mode-update-timer
+      (cancel-timer kodi-mode-update-timer)
+      (setq kodi-mode-update-timer nil))))
 
 ;;; Response handlers
 (defmulti kodi-response-handler (x &rest _)
@@ -198,6 +203,7 @@
   (let ((stream (open-network-stream "kodi-client" "*kodi-client*" kodi-host 9090)))
     (setq kodi-mode-connection stream)
     (setq kodi-mode-connection-input "")
+    (setq kodi-mode-update-timer (run-with-timer 1 1 (lambda ()(kodi-update-time))))
     (with-current-buffer "*kodi-client*" (erase-buffer))
     (kodi-draw-setup)
     (set-process-filter stream 'kodi-input-filter)
@@ -234,7 +240,6 @@
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.Open" `(("item" . ,item)))))
 
 (defun kodi-update-time ()
-  (interactive)
   ""
   (process-send-string kodi-mode-connection (kodi-create-packet "Player.GetProperties" '(("playerid" . 1)("properties" . ("time" "totaltime" "percentage"))) '(("id" . 1)))))
 
