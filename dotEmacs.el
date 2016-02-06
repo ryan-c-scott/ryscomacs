@@ -30,7 +30,11 @@
 (require 'projectile)
 (require 'helm-projectile)
 (projectile-global-mode)
+(setq projectile-completion-system 'helm)
 (setq projectile-indexing-method 'alien)
+(setq projectile-switch-project-action 'helm-projectile)
+(setq projectile-tags-command "ctags -Re --exclude='\.svn' --extra=q -f \"%s\" %s")
+(helm-projectile-on)
 ;(setq projectile-enable-caching t)
 
 ;; Local config
