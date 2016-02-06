@@ -1,5 +1,5 @@
 (set-variable 'inhibit-splash-screen "True")
-(if window-system
+(when window-system
     (scroll-bar-mode -1)
     (tool-bar-mode -1))
 (setq make-backup-files nil)
@@ -17,7 +17,23 @@
 (defvar enableP4 nil)
 (defvar effective-capslock-key "<f12>")
 
-;
+;; Helm
+(add-to-list 'load-path "~/ryscomacs/elisp/helm/")
+(require 'helm-config)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(setq helm-split-window-default-side 'other)
+(helm-mode 1)
+;;;;;;;;;
+
+;; Projectile
+(add-to-list 'load-path "~/ryscomacs/elisp/dash")
+(require 'projectile)
+(require 'helm-projectile)
+(projectile-global-mode)
+(setq projectile-indexing-method 'alien)
+;(setq projectile-enable-caching t)
+
+;; Local config
 (load "localconfig" :missing-ok t)
 
 ; Wheel mouse setup
@@ -280,14 +296,6 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
 (require 'async)
-;;;;;;;;;
-
-;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/helm/")
-(require 'helm-config)
-(global-set-key (kbd "M-x") 'helm-M-x)
-(setq helm-split-window-default-side 'other)
-(helm-mode 1)
 ;;;;;;;;;
 
 ;;;;;;;;;
