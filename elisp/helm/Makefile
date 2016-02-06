@@ -23,7 +23,7 @@
 ## Floor, Boston, MA 02110-1301, USA.
 
 # Emacs invocation
-EMACS_COMMAND   := /cygdrive/c/emacs-24.4/bin/emacs
+EMACS_COMMAND   := /cygdrive/c/emacs/bin/emacs.exe
 
 EMACS		:= $(EMACS_COMMAND) -Q -batch
 
