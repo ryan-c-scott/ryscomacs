@@ -114,6 +114,10 @@
 (defmulti-method kodi-response-handler "Player.OnSeek" (_ data)
   (kodi-draw-position (kodi-process-time (kodi-get '(params data player time) data))))
 
+(defmulti-method kodi-response-handler "Playlist.OnClear" (_ data))
+(defmulti-method kodi-response-handler "Playlist.OnAdd" (_ data))
+(defmulti-method kodi-response-handler "VideoLibrary.OnUpdate" (_ data))
+
 (defmulti-method kodi-response-handler "GUI.OnScreensaverActivated" (_ data)
   (kodi-draw-title "Asleep"))
 
@@ -374,7 +378,9 @@ Plot: .")))
     (search-forward label)
 
     (if kill-to-end (delete-region (point) (point-max))
-      (kill-line))
+      (delete-region
+       (point)
+       (progn (end-of-line 1) (point))))
     
     (let ((current (point)))
       (insert "\t" value)
