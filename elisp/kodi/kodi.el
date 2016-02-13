@@ -73,12 +73,19 @@
       (setq kodi-mode-connection-input "")
       (kodi-response-handler method result))))
 
+(defun kodi-spawn-update-timer ()
+  (kodi-kill-update-timer)
+  (setq kodi-mode-update-timer (run-with-timer 1 1 (lambda ()(kodi-update-time)))))
+
+(defun kodi-kill-update-timer ()
+  (when kodi-mode-update-timer
+    (cancel-timer kodi-mode-update-timer)
+    (setq kodi-mode-update-timer nil)))
+
 (defun kodi-process-sentinel (proc state)
   (message "KODI-SENTINEL: %s" state)
   (when (string-equal state "deleted")
-    (when kodi-mode-update-timer
-      (cancel-timer kodi-mode-update-timer)
-      (setq kodi-mode-update-timer nil))))
+      (kodi-kill-update-timer)))
 
 ;;; Response handlers
 (defmulti kodi-response-handler (x &rest _)
@@ -86,6 +93,7 @@
   x)
 
 (defmulti-method kodi-response-handler "Player.OnPlay" (_ data)
+  (kodi-spawn-update-timer)
   (let* ((item (kodi-get '(params data item) data))
 	 (type (kodi-get '(type) item))
 	 (id (kodi-get '(id) item)))
@@ -95,9 +103,11 @@
 	  ((equal type "movie")
 	   (process-send-string kodi-mode-connection (kodi-create-packet "VideoLibrary.GetMovieDetails" `(("movieid" . ,id) ("properties" . ("plot" "streamdetails"))) '(("id" . "libMovies"))))))))
 
-(defmulti-method kodi-response-handler "Player.OnPause" (_ data))
+(defmulti-method kodi-response-handler "Player.OnPause" (_ data)
+  (kodi-kill-update-timer))
 
 (defmulti-method kodi-response-handler "Player.OnStop" (_ data)
+  (kodi-kill-update-timer)
   (kodi-draw-currently-playing)
   (kodi-draw-position))
 
@@ -203,7 +213,6 @@
   (let ((stream (open-network-stream "kodi-client" "*kodi-client*" kodi-host 9090)))
     (setq kodi-mode-connection stream)
     (setq kodi-mode-connection-input "")
-    (setq kodi-mode-update-timer (run-with-timer 1 1 (lambda ()(kodi-update-time))))
     (with-current-buffer "*kodi-client*" (erase-buffer))
     (kodi-draw-setup)
     (set-process-filter stream 'kodi-input-filter)
