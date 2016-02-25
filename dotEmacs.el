@@ -392,22 +392,25 @@
   (interactive)
   (ff-find-related-file nil t))
 
+(defun kill-all-matching (criteria)
+  "Kills all buffers that the criteria function returns non-nil on"
+  (mapc (lambda (buffer)
+	  (when (funcall criteria buffer)
+	    (kill-buffer buffer)))
+	(buffer-list)))
+
 (defun killall()
   "Kill all non-system buffers"
   (interactive)
-  (mapc (lambda (buffer)
-	  (when (not (string-match "^*" (buffer-name buffer)))
-	    (kill-buffer buffer)))
-	(buffer-list))
+  (kill-all-matching (lambda (buffer)
+		       (not (string-match "^*" (buffer-name buffer)))))
   (switch-to-buffer "*scratch*")
   (delete-other-windows))
 
 (defun kill-dired-buffers ()
   (interactive)
-  (mapc (lambda (buffer) 
-	  (when (eq 'dired-mode (buffer-local-value 'major-mode buffer)) 
-	    (kill-buffer buffer))) 
-	(buffer-list)))
+  (kill-all-matching (lambda (buffer)
+		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
 
 ; IDO buffer switching crap
 (require 'ido) 
