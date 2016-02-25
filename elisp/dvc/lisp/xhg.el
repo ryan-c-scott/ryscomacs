@@ -443,7 +443,13 @@ If DONT-SWITCH, don't switch to the diff buffer"
                       :finished
                       (dvc-capturing-lambda (output error status arguments)
                         (dvc-show-changes-buffer output 'xhg-parse-diff
-                                                 (capture buffer))))))
+                                                 (capture buffer))
+			(with-current-buffer (capture buffer)
+			  (save-excursion
+			    (goto-char (point-min))
+			    (let ((inhibit-read-only t))
+			      (while (search-forward "" nil t)
+				(replace-match "")))))))))
 
 ;;;###autoload
 (defun xhg-dvc-diff (&optional base-rev path dont-switch)
