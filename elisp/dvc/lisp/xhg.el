@@ -550,6 +550,11 @@ If DONT-SWITCH, don't switch to the diff buffer"
                      :error 'xhg-push-finish-function
                      :finished 'xhg-push-finish-function))
 
+(defun xhg-dvc-push-default ()
+  "Calls hg push interactively"
+  (interactive)
+  (call-interactively 'xhg-push))
+
 ;;;###autoload
 (defun xhg-clone (src &optional dest rev noupdate pull)
   "Run hg clone."
