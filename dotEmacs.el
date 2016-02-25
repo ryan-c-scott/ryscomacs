@@ -399,6 +399,20 @@
 	    (kill-buffer buffer)))
 	(buffer-list)))
 
+(defun kill-all-matching-prefix (buffer-prefixes)
+  (interactive)
+  (kill-all-matching (lambda (buffer)
+                       (let ((names buffer-prefixes)
+                             (bufname (buffer-name buffer))
+                             (found))
+                         (while names
+                           (if (string-match (car names) bufname)
+                               (progn
+                                 (setq found t)
+                                 (setq names nil))
+                             (setq names (cdr names))))
+                         found))))
+
 (defun killall()
   "Kill all non-system buffers"
   (interactive)
@@ -411,6 +425,10 @@
   (interactive)
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
+
+(defun kill-all-dvc-buffers ()
+  (interactive)
+  (kill-all-matching-prefix '("*dvc-" "*xhg-")))
 
 ; IDO buffer switching crap
 (require 'ido) 
