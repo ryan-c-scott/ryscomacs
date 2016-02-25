@@ -443,7 +443,13 @@ If DONT-SWITCH, don't switch to the diff buffer"
                       :finished
                       (dvc-capturing-lambda (output error status arguments)
                         (dvc-show-changes-buffer output 'xhg-parse-diff
-                                                 (capture buffer))))))
+                                                 (capture buffer))
+			(with-current-buffer (capture buffer)
+			  (save-excursion
+			    (goto-char (point-min))
+			    (let ((inhibit-read-only t))
+			      (while (search-forward "" nil t)
+				(replace-match "")))))))))
 
 ;;;###autoload
 (defun xhg-dvc-diff (&optional base-rev path dont-switch)
@@ -543,6 +549,11 @@ If DONT-SWITCH, don't switch to the diff buffer"
   (dvc-run-dvc-async 'xhg (list "push" src)
                      :error 'xhg-push-finish-function
                      :finished 'xhg-push-finish-function))
+
+(defun xhg-dvc-push-default ()
+  "Calls hg push interactively"
+  (interactive)
+  (call-interactively 'xhg-push))
 
 ;;;###autoload
 (defun xhg-clone (src &optional dest rev noupdate pull)

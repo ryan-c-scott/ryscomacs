@@ -392,16 +392,44 @@
   (interactive)
   (ff-find-related-file nil t))
 
+(defun kill-all-matching (criteria)
+  "Kills all buffers that the criteria function returns non-nil on"
+  (mapc (lambda (buffer)
+	  (when (funcall criteria buffer)
+	    (kill-buffer buffer)))
+	(buffer-list)))
+
+(defun kill-all-matching-prefix (buffer-prefixes)
+  (interactive)
+  (kill-all-matching (lambda (buffer)
+                       (let ((names buffer-prefixes)
+                             (bufname (buffer-name buffer))
+                             (found))
+                         (while names
+                           (if (string-match (car names) bufname)
+                               (progn
+                                 (setq found t)
+                                 (setq names nil))
+                             (setq names (cdr names))))
+                         found))))
+
 (defun killall()
   "Kill all non-system buffers"
   (interactive)
-  (mapc (lambda (buffer)
-	  (when (not (string-match "^*" (buffer-name buffer)))
-	    (kill-buffer buffer)))
-	(buffer-list))
+  (kill-all-matching (lambda (buffer)
+		       (not (string-match "^*" (buffer-name buffer)))))
   (switch-to-buffer "*scratch*")
   (delete-other-windows))
-	    
+
+(defun kill-dired-buffers ()
+  (interactive)
+  (kill-all-matching (lambda (buffer)
+		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
+
+(defun kill-all-dvc-buffers ()
+  (interactive)
+  (kill-all-matching-prefix '("*dvc-" "*xhg-")))
+
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files

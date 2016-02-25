@@ -621,10 +621,11 @@ database, branch or workspace."
   "Push changes to a remote location."
   (interactive)
   (let ((bookmarked-locations (dvc-bookmarks-current-push-locations)))
-    (when bookmarked-locations
+    (if bookmarked-locations
       (dolist (location bookmarked-locations)
         (message "pushing to: %s" location)
-        (dvc-call "dvc-push" location)))))
+        (dvc-call "dvc-push" location))
+	(dvc-call "dvc-push-default"))))
 
 ;;;###autoload
 (define-dvc-unified-command dvc-merge (&optional other)
