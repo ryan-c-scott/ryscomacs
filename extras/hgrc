@@ -1,0 +1,9 @@
+[ui]
+# Name data to appear in commits
+username = Ryan C. Scott <ryan@5pmCasual.com>
+ssh = "c:\Program Files (x86)\PuTTY\plink.exe" -ssh -2 -batch -C
+
+
+[extensions]
+shelve = 
+graphlog=
