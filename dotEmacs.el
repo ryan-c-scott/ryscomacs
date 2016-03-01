@@ -426,10 +426,6 @@
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
 
-(defun kill-all-dvc-buffers ()
-  (interactive)
-  (kill-all-matching-prefix '("*dvc-" "*xhg-")))
-
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files

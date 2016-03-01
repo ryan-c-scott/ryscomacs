@@ -1,0 +1,30 @@
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=1000
+unsetopt beep
+bindkey -e
+# End of lines configured by zsh-newuser-install
+zstyle :compinstall filename '/Users/ryan/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+setopt prompt_subst
+
+function prompt_char {
+    git branch >/dev/null 2>/dev/null && echo ' (±) ' && return
+    hg root >/dev/null 2>/dev/null && echo ' (☿) ' && return
+    echo ''
+}
+
+PROMPT='[%T %n]$(prompt_char)%~$ '
+
+alias dir='ls --color=auto'
+
+#
+compdef -d svn
+
+#
+EDITOR=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
