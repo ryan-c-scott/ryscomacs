@@ -285,8 +285,9 @@
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/")
 (require 'color-theme)
+(require 'color-theme-rysco)
 (color-theme-initialize)
-(color-theme-charcoal-black)
+(color-theme-rysco)
 ;;;;;;;;;
 
 ;;;;;;;;;
