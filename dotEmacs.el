@@ -427,6 +427,12 @@
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
 
+(defun kill-p4-buffers ()
+  "Kill all *P4 buffers"
+  (interactive)
+  (kill-all-matching (lambda (buffer)
+		       (string-match "^*P4 " (buffer-name buffer)))))
+
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files
