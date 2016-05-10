@@ -62,6 +62,7 @@
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
 (setq eshell-prefer-lisp-functions t)
+(setq dired-recursive-deletes 'always)
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
