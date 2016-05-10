@@ -124,7 +124,7 @@
 (global-set-key "\C-c \r" 'mark-defun)
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
-(global-set-key "\C-c\C-c" 'comment-or-uncomment-region)
+(global-set-key "\C-c\C-c" 'comment-dwim)
 
 ; On everything but Windows, 
 (when (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
@@ -244,7 +244,7 @@
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
-	     (local-set-key "\C-c\C-c" 'comment-or-uncomment-region)))
+	     (local-set-key "\C-c\C-c" 'comment-dwim)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -257,7 +257,7 @@
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
-	     (local-set-key "\C-c\C-c" 'comment-or-uncomment-region)))
+	     (local-set-key "\C-c\C-c" 'comment-dwim)))
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
