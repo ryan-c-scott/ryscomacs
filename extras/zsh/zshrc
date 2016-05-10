@@ -21,7 +21,11 @@ function prompt_char {
 
 PROMPT='[%T %n]$(prompt_char)%~$ '
 
-alias dir='ls -G'
+if [ "`uname`" = "Darwin" ]; then
+    alias dir='ls -G'
+else
+    alias dir='ls --color=auto'
+fi
 
 #
 compdef -d svn
