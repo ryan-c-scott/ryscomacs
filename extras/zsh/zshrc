@@ -21,7 +21,7 @@ function prompt_char {
 
 PROMPT='[%T %n]$(prompt_char)%~$ '
 
-alias dir='ls --color=auto'
+alias dir='ls -G'
 
 #
 compdef -d svn
