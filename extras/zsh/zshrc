@@ -31,5 +31,5 @@ EDITOR=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
 
 
 #
-source ~/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ~/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/ryscomacs/extras/zsh/zsh-syntax-highlighting.zsh
+source ~/ryscomacs/extras/zsh/zsh-autosuggestions.zsh
