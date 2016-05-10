@@ -28,3 +28,8 @@ compdef -d svn
 
 #
 EDITOR=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
+
+
+#
+source ~/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/zsh-autosuggestions/zsh-autosuggestions.zsh
