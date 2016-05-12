@@ -3,7 +3,6 @@
 username = Ryan C. Scott <ryan@5pmCasual.com>
 ssh = "c:\Program Files (x86)\PuTTY\plink.exe" -ssh -2 -batch -C
 
-
 [extensions]
 shelve = 
 graphlog =
@@ -11,8 +10,13 @@ color =
 
 [merge-tools]
 
+[alias]
+cdiff = diff --color=always
+cstat = stat --color=always
+cglog = glog --color=always
+clog = log --color=always
+
 [color]
-mode = ansi
 status.modified = cyan bold
 status.added = green bold
 status.removed = yellow bold
