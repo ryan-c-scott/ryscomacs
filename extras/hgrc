@@ -6,4 +6,26 @@ ssh = "c:\Program Files (x86)\PuTTY\plink.exe" -ssh -2 -batch -C
 
 [extensions]
 shelve = 
-graphlog=
+graphlog =
+color =
+
+[merge-tools]
+
+[color]
+mode = ansi
+status.modified = cyan bold
+status.added = green bold
+status.removed = yellow bold
+status.deleted = red bold
+status.unknown = magenta bold
+status.ignored = black bold
+
+diff.diffline = bold
+diff.extended = magenta bold
+diff.file_a = green bold
+diff.file_b = green bold
+diff.hunk = magenta
+diff.deleted = yellow
+diff.inserted = cyan
+diff.changed = white
+diff.trailingwhitespace = bold white_background
