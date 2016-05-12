@@ -14,6 +14,9 @@ compinit
 # Remove '/' from the list of characters in words so kill commands behave more like bash et al
 export WORDCHARS=${WORDCHARS//\//}
 
+bindkey ';5D' emacs-backward-word
+bindkey ';5C' emacs-forward-word
+
 setopt prompt_subst
 
 source ~/ryscomacs/extras/zsh/zsh-colors.sh
