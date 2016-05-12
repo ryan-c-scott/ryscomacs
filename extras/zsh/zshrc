@@ -11,6 +11,9 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
+# Remove '/' from the list of characters in words so kill commands behave more like bash et al
+export WORDCHARS=${WORDCHARS//\//}
+
 setopt prompt_subst
 
 source ~/ryscomacs/extras/zsh/zsh-colors.sh
