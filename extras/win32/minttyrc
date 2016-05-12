@@ -6,3 +6,4 @@ Columns=100
 Rows=40
 Term=xterm-256color
 BackspaceSendsBS=yes
+BackgroundColour=13,13,13
