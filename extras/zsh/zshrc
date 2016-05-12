@@ -15,8 +15,6 @@ setopt prompt_subst
 
 source ~/ryscomacs/extras/zsh/zsh-colors.sh
 
-defaultBG="%K{237}%k"
-
 function SystemBlock
 {
     echo "%K{023}%F{252}[%T %F{000}%n%F{252}]"
@@ -29,7 +27,7 @@ function VCBlock
     
     git branch >/dev/null 2>/dev/null && echo "$vcStart ± $vcEnd" && return
     hg root >/dev/null 2>/dev/null && echo "$vcStart ☿ $vcEnd" && return
-    echo "$defaultBG "
+    echo "%K{237} "
 }
 
 function PathBlock
