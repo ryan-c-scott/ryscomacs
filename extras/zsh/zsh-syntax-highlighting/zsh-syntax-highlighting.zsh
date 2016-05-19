@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2015 zsh-syntax-highlighting contributors
+# Copyright (c) 2010-2016 zsh-syntax-highlighting contributors
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted
@@ -121,7 +121,7 @@ _zsh_highlight()
     (( $+YANK_ACTIVE )) && (( YANK_ACTIVE )) && _zsh_highlight_apply_zle_highlight paste standout "$YANK_START" "$YANK_END"
 
     # isearch
-    (( $+ISEARCH_ACTIVE )) && (( ISEARCH_ACTIVE )) && _zsh_highlight_apply_zle_highlight isearch underline "$ISEARCH_START" "$ISEARCH_END"
+    (( $+ISEARCHMATCH_ACTIVE )) && (( ISEARCHMATCH_ACTIVE )) && _zsh_highlight_apply_zle_highlight isearch underline "$ISEARCHMATCH_START" "$ISEARCHMATCH_END"
 
     # suffix
     (( $+SUFFIX_ACTIVE )) && (( SUFFIX_ACTIVE )) && _zsh_highlight_apply_zle_highlight suffix bold "$SUFFIX_START" "$SUFFIX_END"
@@ -196,9 +196,10 @@ _zsh_highlight_cursor_moved()
   [[ -n $CURSOR ]] && [[ -n ${_ZSH_HIGHLIGHT_PRIOR_CURSOR-} ]] && (($_ZSH_HIGHLIGHT_PRIOR_CURSOR != $CURSOR))
 }
 
-# Add a highlight defined by ZSH_HIGHLIGHT_STYLES
+# Add a highlight defined by ZSH_HIGHLIGHT_STYLES.
 #
-# Should be used by all highlighters aside from 'pattern' (cf. ZSH_HIGHLIGHT_PATTERN)
+# Should be used by all highlighters aside from 'pattern' (cf. ZSH_HIGHLIGHT_PATTERN).
+# Overwritten in tests/test-highlighting.zsh when testing.
 _zsh_highlight_add_highlight()
 {
   local -i start end
@@ -321,7 +322,6 @@ _zsh_highlight_preexec_hook()
 {
   typeset -g _ZSH_HIGHLIGHT_PRIOR_BUFFER=
   typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=
-  _zsh_highlight_command_type_cache=()
 }
 autoload -U add-zsh-hook
 add-zsh-hook preexec _zsh_highlight_preexec_hook 2>/dev/null || {
@@ -333,6 +333,3 @@ zmodload zsh/parameter 2>/dev/null || true
 
 # Initialize the array of active highlighters if needed.
 [[ $#ZSH_HIGHLIGHT_HIGHLIGHTERS -eq 0 ]] && ZSH_HIGHLIGHT_HIGHLIGHTERS=(main) || true
-
-# Initialize command type cache
-typeset -A _zsh_highlight_command_type_cache

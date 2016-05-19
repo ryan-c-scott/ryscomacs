@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------
-# Copyright (c) 2010-2015 zsh-syntax-highlighting contributors
+# Copyright (c) 2010-2016 zsh-syntax-highlighting contributors
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted
@@ -68,7 +68,7 @@ _zsh_highlight_main_highlighter_predicate()
 # Helper to deal with tokens crossing line boundaries.
 _zsh_highlight_main_add_region_highlight() {
   integer start=$1 end=$2
-  local style=$3
+  shift 2
 
   # The calculation was relative to $PREBUFFER$BUFFER, but region_highlight is
   # relative to $BUFFER.
@@ -77,7 +77,7 @@ _zsh_highlight_main_add_region_highlight() {
 
   (( end < 0 )) && return # having end<0 would be a bug
   (( start < 0 )) && start=0 # having start<0 is normal with e.g. multiline strings
-  _zsh_highlight_add_highlight $start $end $style
+  _zsh_highlight_add_highlight $start $end "$@"
 }
 
 # Get the type of a command.
@@ -89,13 +89,10 @@ _zsh_highlight_main_add_region_highlight() {
 #
 # The result will be stored in REPLY.
 _zsh_highlight_main__type() {
-  REPLY=$_zsh_highlight_command_type_cache[(e)$1]
-  if [[ -n "$REPLY" ]]; then
-    return
-  fi
   if (( $#options_to_set )); then
     setopt localoptions $options_to_set;
   fi
+  unset REPLY
   if zmodload -e zsh/parameter; then
     if (( $+aliases[(e)$1] )); then
       REPLY=alias
@@ -107,15 +104,25 @@ _zsh_highlight_main__type() {
       REPLY=function
     elif (( $+builtins[(e)$1] )); then
       REPLY=builtin
-    elif builtin type -w $1 >/dev/null 2>&1; then
+    elif (( $+commands[(e)$1] )); then
       REPLY=command
-    else
+    elif ! builtin type -w -- $1 >/dev/null 2>&1; then
       REPLY=none
     fi
-  else
+  fi
+  if ! (( $+REPLY )); then
     REPLY="${$(LC_ALL=C builtin type -w -- $1 2>/dev/null)#*: }"
   fi
-  _zsh_highlight_command_type_cache[(e)$1]=$REPLY
+}
+
+# Check whether the first argument is a redirection operator token.
+# Report result via the exit code.
+_zsh_highlight_main__is_redirection() {
+  # A redirection operator token:
+  # - starts with an optional single-digit number;
+  # - then, has a '<' or '>' character;
+  # - is not a process substitution [<(...) or >(...)].
+  [[ $1 == (<0-9>|)(\<|\>)* ]] && [[ $1 != (\<|\>)$'\x28'* ]]
 }
 
 # Resolve alias.
@@ -237,6 +244,8 @@ _zsh_highlight_main_highlighter()
   #
   local this_word=':start:' next_word
   integer in_redirection
+  # Processing buffer
+  local proc_buf="$buf"
   for arg in ${interactive_comments-${(z)buf}} \
              ${interactive_comments+${(zZ+c+)buf}}; do
     if (( in_redirection )); then
@@ -272,13 +281,34 @@ _zsh_highlight_main_highlighter()
       # indistinguishable from 'echo foo echo bar' (one command with three
       # words for arguments).
       local needle=$'[;\n]'
-      integer offset=${${buf[start_pos+1,len]}[(i)$needle]}
-      (( start_pos += offset - 1 ))
+      integer offset=$(( ${proc_buf[(i)$needle]} - 1 ))
+      (( start_pos += offset ))
       (( end_pos = start_pos + $#arg ))
     else
-      ((start_pos+=(len-start_pos)-${#${${buf[start_pos+1,len]}##([[:space:]]|\\[[:space:]])#}}))
+      integer offset=$(((len-start_pos)-${#${proc_buf##([[:space:]]|\\[[:space:]])#}}))
+      ((start_pos+=offset))
       ((end_pos=$start_pos+${#arg}))
     fi
+
+    # Above `if` computes new start_pos and end_pos.
+    # Here we compute new proc_buf. We advance it
+    # (chop off characters from the beginning)
+    # beyond what end_pos points to, by skipping
+    # as many characters as end_pos was advanced.
+    #
+    # end_pos was advanced by $offset (via start_pos)
+    # and by $#arg. Note the `start_pos=$end_pos`
+    # below.
+    #
+    # As for the [,len]. We could use [,len-start_pos+offset]
+    # here, but to make it easier on eyes, we use len and
+    # rely on the fact that Zsh simply handles that. The
+    # length of proc_buf is len-start_pos+offset because
+    # we're chopping it to match current start_pos, so its
+    # length matches the previous value of start_pos.
+    #
+    # Why [,-1] is slower than [,length] isn't clear.
+    proc_buf="${proc_buf[offset + $#arg + 1,len]}"
 
     if [[ -n ${interactive_comments+'set'} && $arg[1] == $histchars[3] ]]; then
       if [[ $this_word == *(':regular:'|':start:')* ]]; then
@@ -369,7 +399,7 @@ _zsh_highlight_main_highlighter()
         function)       style=function;;
         command)        style=command;;
         hashed)         style=hashed-command;;
-        *)              if _zsh_highlight_main_highlighter_check_assign; then
+        none)           if _zsh_highlight_main_highlighter_check_assign; then
                           style=assign
                           if [[ $arg[-1] == '(' ]]; then
                             in_array_assignment=true
@@ -390,7 +420,7 @@ _zsh_highlight_main_highlighter()
                           else
                             style=unknown-token
                           fi
-                        elif [[ $arg == (<0-9>|)(\<|\>)* ]]; then
+                        elif _zsh_highlight_main__is_redirection $arg; then
                           # A '<' or '>', possibly followed by a digit
                           style=redirection
                           (( in_redirection=2 ))
@@ -422,6 +452,9 @@ _zsh_highlight_main_highlighter()
                             style=unknown-token
                           fi
                         fi
+                        ;;
+        *)              _zsh_highlight_main_add_region_highlight commandtypefromthefuture-$res
+                        already_added=1
                         ;;
       esac
      fi
@@ -460,7 +493,7 @@ _zsh_highlight_main_highlighter()
                    else
                      style=unknown-token
                    fi
-                 elif [[ $arg == (<0-9>|)(\<|\>)* ]]; then
+                 elif _zsh_highlight_main__is_redirection $arg; then
                    style=redirection
                    (( in_redirection=2 ))
                  else
