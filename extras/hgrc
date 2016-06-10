@@ -4,11 +4,13 @@ username = Ryan C. Scott <ryan@5pmCasual.com>
 ssh = "c:\Program Files (x86)\PuTTY\plink.exe" -ssh -2 -batch -C
 
 [extensions]
+record =
 shelve = 
 graphlog =
 color =
 
 [merge-tools]
+#emacsclient.args = -q --eval "(require 'ediff)" --eval "(setq ediff-window-setup-function 'ediff-setup-windows-plain)" --eval "(add-hook 'ediff-quit-hook 'save-buffers-kill-emacs)" --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
 
 [alias]
 cdiff = diff --color=always
