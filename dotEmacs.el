@@ -354,7 +354,7 @@
   "Run ctags against the specified directories"
   (let ((default-directory dirpath))
     (shell-command
-     (concat (format "ctags -R -e --append=no --exclude='\.svn' --extra=qf %s -o " flags) (mapconcat 'expand-file-name subdirs " ")))
+     (concat (format "ctags -R -e --append=no --exclude='\.svn' --extra=qf %s -o " (or flags "")) (mapconcat 'expand-file-name subdirs " ")))
     (if (get-buffer "TAGS")
 	(kill-buffer "TAGS"))
     (visit-tags-table (expand-file-name "TAGS"))))
