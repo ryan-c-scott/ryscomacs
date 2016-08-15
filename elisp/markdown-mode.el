@@ -1307,9 +1307,7 @@ region is active, it is used as the header text."
     (dotimes (count n hdr)
       (setq hdr (concat "#" hdr)))      ; Build a hash mark header string
     (setq hdrl (concat hdr " "))
-    (setq hdrr (concat " " hdr))
-    (markdown-wrap-or-insert hdrl hdrr))
-  (backward-char (+ 1 n)))
+    (markdown-wrap-or-insert hdrl "")))
 
 (defun markdown-insert-title ()
   "Insert a setext-style (underline) first level header.
