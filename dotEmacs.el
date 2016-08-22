@@ -281,6 +281,25 @@
 	     (require 'fill-column-indicator)
 	     (fci-mode)))
 
+; Org mode
+(setq org-log-done 'time)
+(setq org-enforce-todo-dependencies t)
+
+(defun org-unset-move-keys ()
+  ""
+  (interactive)
+  (local-unset-key (kbd "<S-left>"))
+  (local-unset-key (kbd "<S-down>"))
+  (local-unset-key (kbd "<S-right>"))
+  (local-unset-key (kbd "<S-up>"))
+  (local-unset-key (kbd "<M-left>"))
+  (local-unset-key (kbd "<M-down>"))
+  (local-unset-key (kbd "<M-right>"))
+  (local-unset-key (kbd "<M-up>")))
+
+(add-hook 'org-mode-hook 'org-unset-move-keys)
+(add-hook 'org-agenda-mode-hook 'org-unset-move-keys)
+
 (global-set-key "\C-h" 'backward-delete-char)
 
 ;;;;;;;;;
