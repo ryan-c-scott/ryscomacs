@@ -453,6 +453,25 @@
   (kill-all-matching (lambda (buffer)
 		       (string-match "^*P4 " (buffer-name buffer)))))
 
+; Helper function for inserting a table of contents in a markdown file
+(defun markdown-toc ()
+  (interactive)
+  (let (res depth title)
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^#\\(#*\\) \\(.*\\)$" nil t)
+	(add-to-list 'res `(,(match-string 1) ,(match-string 2)))))
+
+    (dolist (elt (reverse res))
+      (setq depth (replace-in-string (car elt) "#" "\t"))
+      (setq title (cadr elt))
+
+      (insert (format "%s1. [%s]" depth title))
+      (setq title (replace-regexp-in-string "\s+" "-" title))
+      (setq title (replace-in-string title ":" ""))
+      (insert (format "(#%s)\n" (downcase title))))))
+  
+
 ; IDO buffer switching crap
 (require 'ido) 
 (ido-mode 'both) ;; for buffers and files
