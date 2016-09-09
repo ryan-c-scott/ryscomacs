@@ -349,6 +349,8 @@
 (require 'multi)
 ;;;;;;;;;
 
+(require 's)
+
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/kodi/")
 (autoload 'helm-kodi-shows "helm-kodi" "" t)
