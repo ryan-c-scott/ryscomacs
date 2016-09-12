@@ -281,6 +281,7 @@
 	     (require 'fill-column-indicator)
 	     (fci-mode)))
 
+
 ; Org mode
 (setq org-log-done 'time)
 (setq org-enforce-todo-dependencies t)
@@ -332,6 +333,14 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (require 'dvc-autoloads)
 (setq dvc-tips-enabled nil)
+
+(require 'dvc-helpers)
+
+(eval-after-load "dvc-diff"
+  '((lambda ()
+     (define-key dvc-diff-mode-map "m" 'dvc-diff-mark-file-dwim)
+     (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim))))
+
 ;;;;;;;;;
 
 ;;;;;;;;;
