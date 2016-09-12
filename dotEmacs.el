@@ -339,7 +339,9 @@
 (eval-after-load "dvc-diff"
   '((lambda ()
      (define-key dvc-diff-mode-map "m" 'dvc-diff-mark-file-dwim)
-     (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim))))
+     (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim)
+     (define-key dvc-diff-mode-map "s" 'dvc-diff-mark-files-subdirectory)
+     (define-key dvc-diff-mode-map "f" 'dvc-diff-unmark-files-subdirectory))))
 
 ;;;;;;;;;
 
