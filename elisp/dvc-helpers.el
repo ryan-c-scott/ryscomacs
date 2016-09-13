@@ -32,6 +32,7 @@
       (setq path (substring-no-properties (thing-at-point 'line t) 4 (current-column)))
 
       (goto-char (point-min))
+      (forward-line 1)
       (forward-paragraph)
       (setq end (point))
       
