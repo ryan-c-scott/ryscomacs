@@ -481,7 +481,7 @@
 
       (insert (format "%s1. [%s]" depth title))
       (setq title (replace-regexp-in-string "\s+" "-" title))
-      (setq title (replace-in-string title ":" ""))
+      (setq title (replace-regexp-in-string "[:*]" "" title))
       (insert (format "(#%s)\n" (downcase title))))))
   
 
