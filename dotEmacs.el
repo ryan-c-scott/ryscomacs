@@ -210,6 +210,7 @@
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 (autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
+(autoload 'csv-mode "csv-mode" "Major mode for dealing with CSV data." t)
 
 (setq auto-mode-alist
       (append
@@ -236,6 +237,7 @@
 	'("\\.markdown$" . markdown-mode)
 	'("\\.md$" . markdown-mode)
 	'("\\.screenplay$" . screenwriter-mode)
+	'("\\.csv$" . csv-mode)
 		)
        auto-mode-alist))
 
