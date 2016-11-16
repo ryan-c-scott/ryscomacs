@@ -67,3 +67,19 @@ if [ -z $NO_AUTOSUGGESTIONS ]; then
     source ~/ryscomacs/extras/zsh/zsh-autosuggestions.zsh
 fi
 
+#
+if [[ "$OSTYPE" == cygwin ]]; then
+    if type ssh-pageant > /dev/null; then
+        if [[ -f ~/.agent.env ]]; then
+            . ~/.agent.env -s > /dev/null
+	    
+            if ! kill -0 $SSH_PAGEANT_PID > /dev/null 2>&1; then
+                ssh-pageant -s > ~/.agent.env
+                . ~/.agent.env > /dev/null 2>&1
+            fi
+        else
+            ssh-pageant -s > ~/.agent.env
+            . ~/.agent.env > /dev/null 2>&1
+        fi
+    fi
+fi
