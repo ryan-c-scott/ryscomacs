@@ -1,4 +1,6 @@
 (set-variable 'inhibit-splash-screen "True")
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
 (when window-system
     (scroll-bar-mode -1)
     (tool-bar-mode -1))
@@ -17,13 +19,14 @@
 (defvar enableP4 nil)
 (defvar effective-capslock-key "<f12>")
 
+(setq custom-theme-directory "~/ryscomacs/themes/")
+
 ;; Helm
 (add-to-list 'load-path "~/ryscomacs/elisp/helm/")
 (require 'helm-config)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (setq helm-split-window-default-side 'other)
 (helm-mode 1)
-;;;;;;;;;
 
 ;; Projectile
 (add-to-list 'load-path "~/ryscomacs/elisp/dash")
@@ -40,20 +43,17 @@
 ;; Local config
 (load "localconfig" :missing-ok t)
 
-; Wheel mouse setup
-(global-set-key (quote [mouse-4]) 'scroll-down)
-(global-set-key (quote [mouse-5]) 'scroll-up)
-(global-set-key (quote [wheel-up]) 'scroll-down)
-(global-set-key (quote [wheel-down]) 'scroll-up)
-
 ; Font settings
-(when (string-equal system-type "windows-nt")
-  (set-face-attribute 'default t :font "Consolas-10.0"))
+; TODO:  Add features for handling font settings in user config
+;; (when (string-equal system-type "windows-nt")
+;;   (set-face-attribute 'default t :font "Consolas-10.0"))
+
+(add-to-list 'default-frame-alist '(font . "Source Code Pro-15.0"))
+(set-face-attribute 'default t :font "Source Code Pro-15.0")
 
 ; Random setting
 (transient-mark-mode t)
 (global-font-lock-mode t)
-(line-number-mode t)
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
@@ -83,10 +83,6 @@
 (if (string-equal system-type "windows-nt")
     (set-default 'tramp-default-method "plink"))
 
-;;
-(require 'wc-mode)
-;;
-
 (if (and rysco-fancy-modeline (image-type-available-p 'svg))
     (progn
       ;; Fancy SVG based mode lines
@@ -107,18 +103,17 @@
 		(when (buffer-file-name)
 		  (if (and (buffer-modified-p) (or buffer-file-name buffer-offer-save))
 		      " ▣ " " √ ")))))
-  
+
   ;; Powerline
   (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
   (require 'powerline)
   (require 'powerline-rysco-themes)
-  (setq powerline-default-separator 'slant)
+  (setq powerline-default-separator 'utf-8)
   (powerline-rysco-theme))
 
 ;; SQL
 (when (string-equal system-type "windows-nt")
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
-;;
 
 ; Bind various keys
 (global-set-key "\eg" 'goto-line)
@@ -145,60 +140,14 @@
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
 
 ;; Windows specific setup for locales under cygwin
-  (when (eq system-type 'windows-nt)
-    (setenv "LANG" "C"))
-;;
+(when (eq system-type 'windows-nt)
+  (setenv "LANG" "C"))
 
 ;; OSX Specific key bindings/fixes
-
-;; RS: The below taken from http://defindit.com/readme_files/tom_emacs.txt
-;; http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs
-;; I think this allows my preferred mode map to continue working when
-;; other minor modes are active. See my user-minor-mode-map define-key
-;; bindings below.
 (setq mac-option-key-is-meta nil)
 (setq mac-command-key-is-meta t)
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier nil)
-
-(defvar user-minor-mode-map (make-sparse-keymap) "user-minor-mode keymap.")
-
-(define-minor-mode user-minor-mode
-  "A minor mode so that my key settings override annoying major modes."
-  t
-  " user-keys"
-  'user-minor-mode-map)
-
-
-;; Turn user-minor-mode on/off 1/0 in the mini-buffer.
-;; Oct 5 2009 Was 1 which was clearly a mistake. 
-
-(defun user-minibuffer-setup-hook ()
-  (user-minor-mode 0))
-
-(add-hook 'minibuffer-setup-hook 'user-minibuffer-setup-hook)
-
-(user-minor-mode 1)(define-key global-map [home] 'beginning-of-line)
-(define-key global-map [end] 'end-of-line)
-(define-key global-map [C-home] 'beginning-of-buffer)
-(define-key global-map [C-end] 'end-of-buffer)
-
-(define-key global-map [delete] 'delete-char)
-(define-key global-map [kp-delete] 'delete-char)
-(define-key global-map [backspace] 'delete-backward-char)
-
-(define-key isearch-mode-map [backspace] 'isearch-delete-char) 
-
-; now need to fix the mini buffer because of the above
-(define-key minibuffer-local-map [delete] 'delete-char)
-(define-key minibuffer-local-map [kp-delete] 'delete-char)
-(define-key minibuffer-local-map [backspace] 'backward-delete-char)
-(define-key minibuffer-local-map "\C-h" 'backward-delete-char)
-
-(define-key user-minor-mode-map [delete] 'delete-char)
-(define-key user-minor-mode-map [kp-delete] 'delete-char)
-;;;;;;;;;;;
-
 
 ;; Modes
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
@@ -207,10 +156,14 @@
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
 (autoload 'php-mode "php-mode" "PHP editing mode." t)
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
-(autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 (autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
 (autoload 'csv-mode "csv-mode" "Major mode for dealing with CSV data." t)
+
+(autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
+(autoload 'gfm-mode "markdown-mode"
+  "Major mode for editing GitHub Flavored Markdown files" t)
+
 
 (setq auto-mode-alist
       (append
@@ -234,8 +187,8 @@
         '("\\.json$" . json-mode)
         '("\\.php$" . php-mode)
         '("\\.proto$" . protobuf-mode)
-	'("\\.markdown$" . markdown-mode)
-	'("\\.md$" . markdown-mode)
+	'("\\.markdown$" . gfm-mode)
+	'("\\.md$" . gfm-mode)
 	'("\\.screenplay$" . screenwriter-mode)
 	'("\\.csv$" . csv-mode)
 		)
@@ -306,30 +259,8 @@
 (global-set-key "\C-h" 'backward-delete-char)
 
 ;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/color-theme-6.6.0/")
-(require 'color-theme)
-(require 'color-theme-rysco)
-(color-theme-initialize)
-(color-theme-rysco)
-;;;;;;;;;
-
-;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/nav/")
-(require 'nav)
-(nav-disable-overeager-window-splitting)
-;; Optional: set up a quick key to toggle nav
-(global-set-key [f8] 'nav-toggle)
-;;;;;;;;;
-
-;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
 (require 'async)
-;;;;;;;;;
-
-;;;;;;;;;
-(add-to-list 'load-path "~/ryscomacs/elisp/helm-ag/")
-(require 'helm-ag)
-;;;;;;;;;
 
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
@@ -346,22 +277,16 @@
      (define-key dvc-diff-mode-map "f" 'dvc-diff-unmark-files-subdirectory))))
 
 ;;;;;;;;;
-
-;;;;;;;;;
 (if enableP4
     (require 'p4))
-;;;;;;;;;
 
 ;;;;;;;;;
 (add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
 (require 'expand-region)
 (global-set-key (kbd "C-=") 'er/expand-region)
-;;;;;;;;;
 
 ;;;;;;;;;
 (require 'multi)
-;;;;;;;;;
-
 (require 's)
 
 ;;;;;;;;;
@@ -369,7 +294,6 @@
 (autoload 'helm-kodi-shows "helm-kodi" "" t)
 (autoload 'helm-kodi-movies "helm-kodi" "" t)
 (autoload 'kodi-connect "kodi" "" t)
-;;;;;;;;;
 
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
@@ -381,27 +305,6 @@
   (set-face-attribute
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
-;;;;;;;;;
-
-;CTags setup
-(defun tag-dir(dirpath subdirs &optional flags)
-  "Run ctags against the specified directories"
-  (let ((default-directory dirpath))
-    (shell-command
-     (concat (format "ctags -R -e --append=no --exclude='\.svn' --extra=qf %s -o " (or flags "")) (mapconcat 'expand-file-name subdirs " ")))
-    (if (get-buffer "TAGS")
-	(kill-buffer "TAGS"))
-    (visit-tags-table (expand-file-name "TAGS"))))
-
-(defun tag-dir-manual (dir)
-  "Tag dir."
-  (interactive (list (ido-read-directory-name "Diretory: ")) )
-  (tag-dir dir '("TAGS" ".")))
-
-(defun vl (dir)
-  "Tag dir as a working copy of VL."
-  (interactive (list (ido-read-directory-name "VL diretory: ")) )
-  (tag-dir dir '("TAGS" "src" "content/scripts") "--exclude='protobufs'"))
 
 (defun replace-regexp-and-return (from to)
   (save-excursion
@@ -469,6 +372,20 @@
 		       (string-match "^*P4 " (buffer-name buffer)))))
 
 ; Helper function for inserting a table of contents in a markdown file
+(defun markdown-unset-move-keys ()
+  ""
+  (interactive)
+    (local-unset-key (kbd "M-<up>"))
+    (local-unset-key (kbd "M-<down>"))
+    (local-unset-key (kbd "M-<left>"))
+    (local-unset-key (kbd "M-<right>")))
+
+(add-hook 'markdown-mode-hook 'markdown-unset-move-keys)
+(add-hook 'gfm-mode-hook 'markdown-unset-move-keys)
+
+(setq markdown-asymmetric-header t)
+(setq markdown-header-scaling t)
+
 (defun markdown-toc ()
   (interactive)
   (let (res depth title)
@@ -489,19 +406,12 @@
 
 ; IDO buffer switching crap
 (require 'ido) 
-(ido-mode 'both) ;; for buffers and files
-(defun ido-ignore-buffer-filter (name)
-  "Ignores all internal buffers with some exceptions"
-  (and (string-match-p "^*" name)
-       (not (member name '("*scratch*" "*Messages*" "*ielm*" "*gud-gdb*" "*gud*")))))
+(ido-mode 'files)
 
 (setq 
-  ido-save-directory-list-file "~/.emacs.d/ido.last"
-
-  ido-ignore-buffers '(ido-ignore-buffer-filter)
+  ido-save-directory-list-file nil ;"~/.emacs.d/ido.last"
   ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~src")
   ido-case-fold  t                 ; be case-insensitive
-
   ido-enable-last-directory-history t ; remember last used dirs
   ido-max-work-directory-list 30   ; should be enough
   ido-max-work-file-list      50   ; remember many
@@ -516,14 +426,28 @@
 (setq confirm-nonexistent-file-or-buffer nil)
 
 ;;;;;;;;;;;;;
-(load "localprojects" :missing-ok t)
-
-(defun edit-local-projects()
-  "Open ~/.emacs.d/elisp/localprojects.el"
-  (interactive)
-  (find-file "~/.emacs.d/elisp/localprojects.el"))
-
 (defun edit-local-config()
   "Open ~/.emacs.d/elisp/localconfig.el"
   (interactive)
   (find-file "~/.emacs.d/elisp/localconfig.el"))
+
+;;;;;;;;;;;;
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("b571f92c9bfaf4a28cb64ae4b4cdbda95241cd62cf07d942be44dc8f46c491f4" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;;;;;;;;;;;;
+(load-theme 'molokai)
+;;;;;;;;;;;;
