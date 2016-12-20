@@ -385,6 +385,7 @@
 (setq markdown-header-scaling t)
 (add-hook 'markdown-mode-hook
           (lambda ()
+            (markdown-update-header-faces markdown-header-scaling)
             (visual-line-mode t)
             ;(writegood-mode t)
             (flyspell-mode t)))
