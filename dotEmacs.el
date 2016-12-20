@@ -18,7 +18,8 @@
 (defvar rysco-capslock-mapped nil)
 (defvar enableP4 nil)
 (defvar effective-capslock-key "<f12>")
-(defvar rysco-font "Source Code Pro-15.0")
+(defvar rysco-font "Source Code Pro")
+(defvar rysco-font-size "15.0")
 
 (setq custom-theme-directory "~/ryscomacs/themes/")
 
@@ -45,8 +46,9 @@
 (load "localconfig" :missing-ok t)
 
 ; Font settings
-(add-to-list 'default-frame-alist `(font . ,rysco-font))
-(set-face-attribute 'default t :font rysco-font)
+(let ((font (concat rysco-font "-" rysco-font-size)))
+  (add-to-list 'default-frame-alist `(font . ,font))
+  (set-face-attribute 'default t :font font))
 
 ; Random setting
 (transient-mark-mode t)
@@ -74,12 +76,6 @@
 ; ispell
 (setq ispell-program-name "aspell")
 (require 'ispell)
-
-; tramp
-(require 'tramp)
-;; (set-default 'tramp-auto-save-directory "C:\\Users\\rscott\\AppData\\Local\\Temp")
-(if (string-equal system-type "windows-nt")
-    (set-default 'tramp-default-method "plink"))
 
 (if (and rysco-fancy-modeline (image-type-available-p 'svg))
     (progn
@@ -445,7 +441,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("b571f92c9bfaf4a28cb64ae4b4cdbda95241cd62cf07d942be44dc8f46c491f4" default))))
+    ("b936b76d83fa0559eb1445fd4424ca2f6f25de1fe95d3a3825454b7b958646fb" "b571f92c9bfaf4a28cb64ae4b4cdbda95241cd62cf07d942be44dc8f46c491f4" default))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -455,4 +451,3 @@
 
 ;;;;;;;;;;;;
 (load-theme 'molokai)
-;;;;;;;;;;;;
