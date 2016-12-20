@@ -2,7 +2,7 @@
   "Powerline face 3."
   :group 'powerline)
 
-(defface powerline-rysco-inactive3 '((t (:foreground "gold")))
+(defface powerline-rysco-inactive3 '((t (:foreground "black")))
   "Powerline face 3."
   :group 'powerline)
 
@@ -16,7 +16,7 @@
                           (mode-line (if active 'mode-line 'mode-line-inactive))
                           (face1 (if active 'powerline-active1 'powerline-inactive1))
                           (face2 (if active 'powerline-active2 'powerline-inactive2))
-			  ;;(face3 (if active 'powerline-rysco-active3 'powerline-rysco-inactive3))
+			  ;(face3 (if active 'powerline-rysco-active3 'powerline-rysco-inactive3))
 			  (face3 nil)
                           (separator-left (intern (format "powerline-%s-%s"
 							  (powerline-current-separator)
