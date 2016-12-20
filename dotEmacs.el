@@ -18,6 +18,7 @@
 (defvar rysco-capslock-mapped nil)
 (defvar enableP4 nil)
 (defvar effective-capslock-key "<f12>")
+(defvar rysco-font "Source Code Pro-15.0")
 
 (setq custom-theme-directory "~/ryscomacs/themes/")
 
@@ -44,12 +45,8 @@
 (load "localconfig" :missing-ok t)
 
 ; Font settings
-; TODO:  Add features for handling font settings in user config
-;; (when (string-equal system-type "windows-nt")
-;;   (set-face-attribute 'default t :font "Consolas-10.0"))
-
-(add-to-list 'default-frame-alist '(font . "Source Code Pro-15.0"))
-(set-face-attribute 'default t :font "Source Code Pro-15.0")
+(add-to-list 'default-frame-alist `(font . ,rysco-font))
+(set-face-attribute 'default t :font rysco-font)
 
 ; Random setting
 (transient-mark-mode t)
