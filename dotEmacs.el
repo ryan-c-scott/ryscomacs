@@ -54,7 +54,8 @@
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
-
+(toggle-indicate-empty-lines)
+(defalias 'yes-or-no-p 'y-or-n-p)
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
@@ -156,7 +157,7 @@
 (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 (autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
 (autoload 'csv-mode "csv-mode" "Major mode for dealing with CSV data." t)
-
+(autoload 'writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose." t)
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 (autoload 'gfm-mode "markdown-mode"
   "Major mode for editing GitHub Flavored Markdown files" t)
@@ -382,6 +383,12 @@
 
 (setq markdown-asymmetric-header t)
 (setq markdown-header-scaling t)
+(add-hook 'markdown-mode-hook
+          (lambda ()
+            (visual-line-mode t)
+            ;(writegood-mode t)
+            (flyspell-mode t)))
+(setq markdown-command "pandoc --smart -r markdown_github -w html")
 
 (defun markdown-toc ()
   (interactive)
