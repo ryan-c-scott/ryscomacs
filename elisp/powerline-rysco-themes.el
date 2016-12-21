@@ -6,6 +6,15 @@
   "Powerline face 3."
   :group 'powerline)
 
+; NOTE:  eval-defun will handle re-evaluating a defface immediately
+;(defface powerline-rysco-backing '((t (:foreground "black" :background "firebrick4"))) "" :group 'powerline)
+;(defface powerline-rysco-backing '((t (:foreground "black" :background "IndianRed4"))) "" :group 'powerline)
+;(defface powerline-rysco-backing '((t (:foreground "black" :background "dark slate grey"))) "" :group 'powerline) ;Matches zsh config
+;(defface powerline-rysco-backing '((t (:foreground "black" :background "goldenrod"))) "" :group 'powerline)
+(defface powerline-rysco-backing '((t (:foreground "black" :background "dark slate grey")))
+  "Powerline face 3."
+  :group 'powerline)
+
 (defun powerline-rysco-theme ()
   "Setup the default mode-line."
   (interactive)
@@ -15,7 +24,8 @@
                    (let* ((active (powerline-selected-window-active))
                           (mode-line (if active 'mode-line 'mode-line-inactive))
                           (face1 (if active 'powerline-active1 'powerline-inactive1))
-                          (face2 (if active 'powerline-active2 'powerline-inactive2))
+			  ;(face2 (if active 'powerline-active2 'powerline-inactive2))
+			  (face2 'powerline-rysco-backing)
 			  ;(face3 (if active 'powerline-rysco-active3 'powerline-rysco-inactive3))
 			  (face3 nil)
                           (separator-left (intern (format "powerline-%s-%s"
