@@ -28,7 +28,6 @@ There are several custom configuration options, bindings, etc.
 * <CAPSLOCK><SPC> :  Semantic mode.  This shows language specific information for the buffer.
 * <CAPSLOCK>s :  Helm occur
 * <CAPSLOCK><RET> :  Helm resume session
-* F8 :  Brings up a file browser interface
 * helm-colors :  Brings up a helm interface for color selection.
 * C-= :  Expands the current selection/point by semantic units (e.g. clause, function, class, etc.)
 * C-c o :  In C modes, opens the related file in a verical pane (using vertical-windows-with-related)
@@ -59,24 +58,19 @@ Under VC (e.g. when using SVN), vc-root-diff will give you a unified diff of the
 ## Custom Commands
 * insert-standard-date :  Inserts the current date
 * vertical-windows-with-related:  Splits the window vertically and loads the related file (e.g. the header for a C file) in the other window
-* edit-local-projects :  Opens/creates the localprojects.el file
 * edit-local-config :  Opens/creates the localconfig.el file
 * killall :  Kills all buffers that don't start with '*' and maximizes the scratch buffer
 
 # Included Sources
 * cg-mode
-* color-theme [README](elisp/color-theme-6.6.0/README)
 * csharp-mode
 * dvc
-* erlang-mode
 * expand-region [README](elisp/expand-region/README.md)
 * glsl-mode
-* helm-ag
 * helm
 * json-mode
 * lua-mode
 * markdown-mode
-* nav [README](elisp/nav/README.md)
 * p4
 * php-mode
 * protobuf-mode
