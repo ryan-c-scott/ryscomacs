@@ -1,3 +1,5 @@
+(setq ns-use-srgb-colorspace nil)
+
 (set-variable 'inhibit-splash-screen "True")
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
@@ -102,7 +104,7 @@
   (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
   (require 'powerline)
   (require 'powerline-rysco-themes)
-  (setq powerline-default-separator 'utf-8)
+  (setq powerline-default-separator 'slant)
   (powerline-rysco-theme))
 
 ;; SQL
