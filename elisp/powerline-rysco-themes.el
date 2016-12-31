@@ -11,11 +11,11 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-backing-modified '((t (:foreground "black" :background "firebrick4" :weight normal)))
+(defface powerline-rysco-backing-modified '((t (:foreground "black" :background "goldenrod" :weight normal)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "IndianRed4" :weight normal)))
+(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "firebrick4" :weight normal)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
