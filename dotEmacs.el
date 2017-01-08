@@ -135,6 +135,17 @@
 (global-set-key (kbd (concat effective-capslock-key " <left>")) 'delete-window)
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
 
+;; Testing:  Experimental home-row bindings for rysco features
+(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "n")) 'windmove-right)
+(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "t")) 'windmove-down)
+(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "h")) 'windmove-left)
+(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "c")) 'windmove-up)
+
+(global-set-key (kbd (concat effective-capslock-key " n")) 'split-window-right)
+(global-set-key (kbd (concat effective-capslock-key " t")) 'split-window-below)
+(global-set-key (kbd (concat effective-capslock-key " h")) 'delete-window)
+(global-set-key (kbd (concat effective-capslock-key " c")) 'delete-other-windows)
+
 ;; Windows specific setup for locales under cygwin
 (when (eq system-type 'windows-nt)
   (setenv "LANG" "C"))
