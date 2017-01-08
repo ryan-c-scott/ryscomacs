@@ -146,6 +146,9 @@
 (global-set-key (kbd (concat effective-capslock-key " h")) 'delete-window)
 (global-set-key (kbd (concat effective-capslock-key " c")) 'delete-other-windows)
 
+(global-set-key (kbd "M-n") 'forward-paragraph)
+(global-set-key (kbd "M-p") 'backward-paragraph)
+
 ;; Windows specific setup for locales under cygwin
 (when (eq system-type 'windows-nt)
   (setenv "LANG" "C"))
