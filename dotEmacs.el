@@ -19,7 +19,7 @@
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-capslock-mapped nil)
 (defvar enableP4 nil)
-(defvar effective-capslock-key "<f12>")
+(defvar effective-capslock-key "<escape>")
 (defvar rysco-font "Source Code Pro")
 (defvar rysco-font-size "15.0")
 
@@ -117,11 +117,6 @@
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
 (global-set-key "\C-c\C-c" 'comment-dwim)
-
-; On everything but Windows, 
-(when (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
-  (setq effective-capslock-key "<escape>")
-  (setq w32-enable-caps-lock nil))
 
 (global-set-key (kbd (concat effective-capslock-key " .")) 'find-tag)
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
