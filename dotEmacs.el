@@ -414,7 +414,7 @@
 	(add-to-list 'res `(,(match-string 1) ,(match-string 2)))))
 
     (dolist (elt (reverse res))
-      (setq depth (replace-in-string (car elt) "#" "\t"))
+      (setq depth (replace-regexp-in-string (regexp-quote "#") (car elt) "\t" nil 'literal))
       (setq title (cadr elt))
 
       (insert (format "%s1. [%s]" depth title))
