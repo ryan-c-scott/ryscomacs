@@ -422,7 +422,10 @@
       (setq title (replace-regexp-in-string "\s+" "-" title))
       (setq title (replace-regexp-in-string "[:*]" "" title))
       (insert (format "(#%s)\n" (downcase title))))))
-  
+
+(defun markdown-insert-youtube (id &optional label)
+  (interactive "sID: \nsLabel: ")
+  (insert (format "[![%s](http://img.youtube.com/vi/%s/0.jpg)](http://www.youtube.com/watch?v=%s)" label id id)))
 
 ; IDO buffer switching crap
 (require 'ido) 
