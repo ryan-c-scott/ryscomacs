@@ -120,7 +120,7 @@
 
 ; On everything but Windows, 
 (when (and (string-equal system-type "windows-nt") (not rysco-capslock-mapped))
-  (setq effective-capslock-key "<capslock>")
+  (setq effective-capslock-key "<escape>")
   (setq w32-enable-caps-lock nil))
 
 (global-set-key (kbd (concat effective-capslock-key " .")) 'find-tag)
@@ -136,10 +136,10 @@
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
 
 ;; Testing:  Experimental home-row bindings for rysco features
-(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "n")) 'windmove-right)
-(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "t")) 'windmove-down)
-(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "h")) 'windmove-left)
-(global-set-key (kbd (concat "M-" effective-capslock-key " M-" "c")) 'windmove-up)
+(global-set-key (kbd (concat effective-capslock-key " M-" "n")) 'windmove-right)
+(global-set-key (kbd (concat effective-capslock-key " M-" "t")) 'windmove-down)
+(global-set-key (kbd (concat effective-capslock-key " M-" "h")) 'windmove-left)
+(global-set-key (kbd (concat effective-capslock-key " M-" "c")) 'windmove-up)
 
 (global-set-key (kbd (concat effective-capslock-key " n")) 'split-window-right)
 (global-set-key (kbd (concat effective-capslock-key " t")) 'split-window-below)
@@ -148,6 +148,10 @@
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
+
+;; Helpers for things that have a lot of muscle memory
+(global-set-key (kbd "<escape>d") 'kill-word)
+(global-set-key (kbd "<escape>DEL") 'backward-kill-word)
 
 ;; Windows specific setup for locales under cygwin
 (when (eq system-type 'windows-nt)
