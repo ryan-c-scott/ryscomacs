@@ -75,6 +75,38 @@
 (require 'windmove)
 (windmove-default-keybindings 'meta)
 
+(defun rysco-split-dwim (dir &optional switch)
+  ""
+  (let* ((can-horizontal (not (or (windmove-find-other-window 'left) (windmove-find-other-window 'right))))
+         (window-below (windmove-find-other-window 'down))
+         (can-vertical (not (or (windmove-find-other-window 'up) (and window-below (not (window-minibuffer-p window-below)))))))
+
+    (cond ((and (or (eq dir 'left) (eq dir 'right)) can-horizontal) (split-window-right))
+          ((and (or (eq dir 'up) (eq dir 'down)) can-vertical) (split-window-below)))
+
+         (windmove-do-window-select dir)))
+
+(defun rysco-split-up-dwim ()
+    ""
+  (interactive)
+  (rysco-split-dwim 'up t))
+
+(defun rysco-split-down-dwim ()
+    ""
+  (interactive)
+  (rysco-split-dwim 'down t))
+
+(defun rysco-split-right-dwim ()
+    ""
+  (interactive)
+  (rysco-split-dwim 'right t))
+
+(defun rysco-split-left-dwim ()
+    ""
+  (interactive)
+  (rysco-split-dwim 'left t))
+
+  
 ; ispell
 (setq ispell-program-name "aspell")
 (require 'ispell)
@@ -131,15 +163,13 @@
 (global-set-key (kbd (concat effective-capslock-key " <up>")) 'delete-other-windows)
 
 ;; Testing:  Experimental home-row bindings for rysco features
-(global-set-key (kbd (concat effective-capslock-key " M-" "n")) 'windmove-right)
-(global-set-key (kbd (concat effective-capslock-key " M-" "t")) 'windmove-down)
-(global-set-key (kbd (concat effective-capslock-key " M-" "h")) 'windmove-left)
-(global-set-key (kbd (concat effective-capslock-key " M-" "c")) 'windmove-up)
+(global-set-key (kbd (concat effective-capslock-key " g")) 'delete-window)
+(global-set-key (kbd (concat effective-capslock-key " r")) 'delete-other-windows)
 
-(global-set-key (kbd (concat effective-capslock-key " n")) 'split-window-right)
-(global-set-key (kbd (concat effective-capslock-key " t")) 'split-window-below)
-(global-set-key (kbd (concat effective-capslock-key " h")) 'delete-window)
-(global-set-key (kbd (concat effective-capslock-key " c")) 'delete-other-windows)
+(global-set-key (kbd (concat effective-capslock-key " n")) 'rysco-split-right-dwim)
+(global-set-key (kbd (concat effective-capslock-key " t")) 'rysco-split-down-dwim)
+(global-set-key (kbd (concat effective-capslock-key " h")) 'rysco-split-left-dwim)
+(global-set-key (kbd (concat effective-capslock-key " c")) 'rysco-split-up-dwim)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
