@@ -202,7 +202,7 @@
 (autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
 (autoload 'gfm-mode "markdown-mode"
   "Major mode for editing GitHub Flavored Markdown files" t)
-
+(autoload 'graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files" t)
 
 (setq auto-mode-alist
       (append
@@ -230,6 +230,7 @@
 	'("\\.md$" . gfm-mode)
 	'("\\.screenplay$" . screenwriter-mode)
 	'("\\.csv$" . csv-mode)
+        '("\\.dot$" . graphviz-dot-mode)
 		)
        auto-mode-alist))
 
@@ -333,6 +334,11 @@
 (autoload 'helm-kodi-shows "helm-kodi" "" t)
 (autoload 'helm-kodi-movies "helm-kodi" "" t)
 (autoload 'kodi-connect "kodi" "" t)
+
+;;;;;;;;;
+(setq graphviz-dot-auto-indent-on-braces nil)
+(setq graphviz-dot-auto-indent-on-semi nil)
+(setq graphviz-dot-view-command "dot")
 
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
