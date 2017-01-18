@@ -276,6 +276,9 @@
 	     (require 'fill-column-indicator)
 	     (fci-mode)))
 
+(add-hook 'graphviz-dot-mode-hook
+	  '(lambda ()
+	     (local-set-key "\C-c\C-c" 'comment-dwim)))
 
 ; Org mode
 (setq org-log-done 'time)
@@ -338,7 +341,7 @@
 ;;;;;;;;;
 (setq graphviz-dot-auto-indent-on-braces nil)
 (setq graphviz-dot-auto-indent-on-semi nil)
-(setq graphviz-dot-view-command "dot")
+(setq graphviz-dot-auto-indent-on-newline nil)
 
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()

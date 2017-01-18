@@ -830,21 +830,13 @@ loaded in GNU Emacs, and `image-formats-alist' for XEmacs."
 is executed. If `graphviz-dot-save-before-view' is set, the current
 buffer is saved before the command is executed."
   (interactive)
-  (let ((cmd (if graphviz-dot-view-edit-command
-                 (if (fboundp 'read-shell-command)
-                     (read-shell-command "View command: "
-                                         (format graphviz-dot-view-command
-                                                 (shell-quote-argument (buffer-file-name))))
-                   ;; read-shell-command not available in GNU Emacs 21
-                   (read-from-minibuffer "View command: "
-                                         (format graphviz-dot-view-command
-                                                 (shell-quote-argument (buffer-file-name)))))
-               (format graphviz-dot-view-command
-                       (shell-quote-argument (buffer-file-name))))))
-    (if graphviz-dot-save-before-view
-        (save-buffer))
-    (start-process-shell-command (downcase mode-name) nil cmd)
-    (message (format "Executing `%s'..." cmd))))
+  (let* ((infile (shell-quote-argument (buffer-file-name)))
+	 (outfile (concat (file-name-sans-extension infile) ".png")))
+
+    (when graphviz-dot-save-before-view (save-buffer))
+    
+    (call-process graphviz-dot-dot-program nil nil nil "-Tpng" infile "-o" outfile)
+    (graphviz-dot-preview)))
 
 ;;;;
 ;;;; Completion
