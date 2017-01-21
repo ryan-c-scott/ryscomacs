@@ -343,6 +343,10 @@
 (setq graphviz-dot-auto-indent-on-semi nil)
 (setq graphviz-dot-auto-indent-on-newline nil)
 
+;;;;;;;;;
+(add-to-list 'load-path "~/ryscomacs/elisp/go-mode/")
+(require 'go-mode-autoloads)
+
 ;;;;;;;;; Customizing colors used in diff mode
 (defun custom-diff-colors ()
   "update the colors for diff faces"
