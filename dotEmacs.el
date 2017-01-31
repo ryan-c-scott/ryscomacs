@@ -433,7 +433,9 @@
     (local-unset-key (kbd "M-<left>"))
     (local-unset-key (kbd "M-<right>"))
     (local-unset-key (kbd "M-p"))
-    (local-unset-key (kbd "M-n")))
+    (local-unset-key (kbd "M-n"))
+    (local-set-key (kbd "M-p") 'markdown-beginning-of-block)
+    (local-set-key (kbd "M-n") 'markdown-end-of-block))
 
 (add-hook 'markdown-mode-hook 'markdown-unset-move-keys)
 (add-hook 'gfm-mode-hook 'markdown-unset-move-keys)
