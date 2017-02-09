@@ -21,9 +21,20 @@ setopt prompt_subst
 
 source ~/ryscomacs/extras/zsh/zsh-colors.sh
 
+if [[ -f ~/.zsh-options ]]; then
+    source ~/.zsh-options
+fi
+
 function SystemBlock
 {
-    echo "%K{023}%F{252}[%T %F{000}%n%F{252}]"
+    echo -n "%K{023}%F{252}[%T %F{000}%n"
+
+    if [ $SHOW_HOST ]; then
+	echo -n "%F{252}@%m"
+    fi
+
+    echo -n "%F{252}]"
+    echo
 }
 
 function VCBlock
