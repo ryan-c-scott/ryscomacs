@@ -97,7 +97,7 @@ if [[ "$OSTYPE" == cygwin ]]; then
         fi
     fi
 
-elif [[ "$OSTYPE" == linux-gnu ]]; then
+elif [[ "$OSTYPE" == linux-gnu ]] && [ $USE_SSH_AGENT ]; then
     if [ -f "${SSH_ENV}" ]; then
 	. "${SSH_ENV}" > /dev/null
 
