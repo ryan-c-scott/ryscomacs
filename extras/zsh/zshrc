@@ -55,8 +55,11 @@ fi
 compdef -d svn
 
 #
-EDITOR=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
-
+if [ "`uname`" = "Darwin" ]; then
+    EDITOR=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
+else
+    EDITOR=emacsclient
+fi
 
 #
 if [ -z $NO_HIGHLIGHT ]; then
@@ -67,7 +70,18 @@ if [ -z $NO_AUTOSUGGESTIONS ]; then
     source ~/ryscomacs/extras/zsh/zsh-autosuggestions.zsh
 fi
 
-#
+# SSH Setup
+SSH_ENV="$HOME/.ssh/environment"
+
+function start_ssh_agent {
+    echo "Initialising new SSH agent..."
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    echo succeeded
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+    #/usr/bin/ssh-add;
+}
+
 if [[ "$OSTYPE" == cygwin ]]; then
     if type ssh-pageant > /dev/null; then
         if [[ -f ~/.agent.env ]]; then
@@ -81,5 +95,16 @@ if [[ "$OSTYPE" == cygwin ]]; then
             ssh-pageant -s > ~/.agent.env
             . ~/.agent.env > /dev/null 2>&1
         fi
+    fi
+
+elif [[ "$OSTYPE" == linux-gnu ]]; then
+    if [ -f "${SSH_ENV}" ]; then
+	. "${SSH_ENV}" > /dev/null
+
+	ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+            start_ssh_agent;
+	}
+    else
+	start_ssh_agent;
     fi
 fi
