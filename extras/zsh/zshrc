@@ -47,6 +47,7 @@ PROMPT='$(SystemBlock)$(VCBlock)$(PathBlock)$promptCap%f%k '
 
 if [ "`uname`" = "Darwin" ]; then
     alias dir='ls -G'
+    alias redtoggle='pkill -USR1 redshift'
 else
     alias dir='ls --color=auto'
 fi
