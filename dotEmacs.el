@@ -106,7 +106,15 @@
   (interactive)
   (rysco-split-dwim 'left t))
 
-  
+
+(defun rysco-comment-dwim ()
+  ""
+  (interactive)
+  (if mark-active
+      (comment-dwim nil)
+    (comment-line 1)
+    (forward-line -1)))
+
 ; ispell
 (setq ispell-program-name "aspell")
 (require 'ispell)
@@ -148,7 +156,7 @@
 (global-set-key "\C-c \r" 'mark-defun)
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
-(global-set-key "\C-c\C-c" 'comment-dwim)
+(global-set-key "\C-c\C-c" 'rysco-comment-dwim)
 
 (global-set-key (kbd (concat effective-capslock-key " .")) 'find-tag)
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
@@ -240,7 +248,7 @@
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
-	     (local-set-key "\C-c\C-c" 'comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -253,7 +261,7 @@
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
-	     (local-set-key "\C-c\C-c" 'comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
@@ -278,7 +286,7 @@
 
 (add-hook 'graphviz-dot-mode-hook
 	  '(lambda ()
-	     (local-set-key "\C-c\C-c" 'comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 ; Org mode
 (setq org-log-done 'time)
