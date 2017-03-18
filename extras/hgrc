@@ -18,6 +18,9 @@ cstat = stat --color=always
 cglog = glog --color=always
 clog = log --color=always
 
+force-merge-other = merge --tool internal:other
+force-merge-mine = merge --tool internal:local
+
 [color]
 status.modified = cyan bold
 status.added = green bold
