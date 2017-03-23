@@ -55,5 +55,21 @@
   (interactive)
   (dvc-diff-mark-files-subdirectory t))
 
+;;;;;;;; Fixes for missing functionality
+(defun xhg-dvc-file-diff (&optional path baseref localref noswitch)
+  (interactive)
+  (dvc-run-dvc-sync 'xhg `("diff" ,path)
+		    :finished
+		    (dvc-capturing-lambda (output error status arguments)
+		      (progn
+			(let* ((diff-buffer (get-buffer-create "*xhg-file-diff*"))
+			       (inhibit-read-only t))
+			  (with-current-buffer diff-buffer
+			    (erase-buffer)
+			    (insert-buffer-substring output)
+			    (diff-mode)
+			    (read-only-mode)
+			    (dvc-switch-to-buffer diff-buffer)))))))
+
 ;;;;;
 (provide 'dvc-helpers)
