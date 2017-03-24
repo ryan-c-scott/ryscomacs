@@ -307,6 +307,22 @@
 (add-hook 'org-mode-hook 'org-unset-move-keys)
 (add-hook 'org-agenda-mode-hook 'org-unset-move-keys)
 
+(defun org-archive-all-done-item ()
+  "Archive all item that have with prefix DONE."
+  (interactive)
+  (save-excursion
+    (show-all)
+    (goto-char (point-min))
+    (if (search-forward-regexp "^[\\*]+ DONE" nil t)
+        (progn
+          (goto-char (point-min))
+          (while (search-forward-regexp "^[\\*]+ DONE" nil t)
+            (org-advertized-archive-subtree))
+          (org-display-all-todo-item)
+          (message "Archive finished"))
+      (org-display-all-todo-item)
+      (message "No need to archive"))))
+
 (global-set-key "\C-h" 'backward-delete-char)
 
 ;;;;;;;;;
