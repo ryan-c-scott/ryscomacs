@@ -115,7 +115,13 @@
     (comment-line 1)
     (forward-line -1)))
 
-; ispell
+(defun rysco-clear-undo ()
+  ""
+  (interactive)
+  (buffer-disable-undo)
+  (buffer-enable-undo))
+
+;; ispell
 (setq ispell-program-name "aspell")
 (require 'ispell)
 
