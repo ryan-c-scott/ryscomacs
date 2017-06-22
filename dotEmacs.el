@@ -269,6 +269,10 @@
 	     (local-set-key "\C-c<"  'hs-show-block)
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
+(add-hook 'python-mode-hook
+	  '(lambda ()
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+
 (add-hook 'js-mode-hook
 	  '(lambda ()
 	     (setq indent-tabs-mode nil)
