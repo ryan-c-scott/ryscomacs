@@ -222,6 +222,7 @@
       (append
        (list
 	'("\\.h$" . c++-mode)
+	'("\\.ino$" . c++-mode)
         '("\\.xml$" . xml-mode)
         '("\\.css$" . css-mode)
         '("\\.cs$" . csharp-mode)
