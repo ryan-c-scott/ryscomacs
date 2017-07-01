@@ -1,16 +1,21 @@
 [ui]
 # Name data to appear in commits
 username = Ryan C. Scott <ryan@5pmCasual.com>
-ssh = "c:\Program Files (x86)\PuTTY\plink.exe" -ssh -2 -batch -C
+ssh = ssh -2 -C
+merge = emacs
 
 [extensions]
 record =
 shelve = 
 graphlog =
 color =
+purge =
 
 [merge-tools]
-#emacsclient.args = -q --eval "(require 'ediff)" --eval "(setq ediff-window-setup-function 'ediff-setup-windows-plain)" --eval "(add-hook 'ediff-quit-hook 'save-buffers-kill-emacs)" --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
+#emacs.args = -q --eval "(require 'ediff)" --eval "(setq ediff-window-setup-function 'ediff-setup-windows-plain)" --eval "(add-hook 'ediff-quit-hook 'save-buffers-kill-emacs)" --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
+emacs.args = -q --load ~/ryscomacs/ediff-setup.el --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
+vimdiff.args = -f -d $output -M $local $base $other -c "wincmd J" -c "set modifiable" -c "set write"
+vimdiff.premerge = keep
 
 [alias]
 cdiff = diff --color=always
