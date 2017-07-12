@@ -92,6 +92,7 @@
 	'("\\.screenplay$" . screenwriter-mode)
 	'("\\.csv$" . csv-mode)
         '("\\.dot$" . graphviz-dot-mode)
+        '("\\.gv$" . graphviz-dot-mode)
 		)
        auto-mode-alist))
 
