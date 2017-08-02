@@ -21,6 +21,9 @@ setopt prompt_subst
 
 source ~/ryscomacs/extras/zsh/zsh-colors.sh
 
+# Replace dark blue because it's obnoxious on black
+printf %b '\e]4;4;#64'
+
 if [[ -f ~/.zsh-options ]]; then
     source ~/.zsh-options
 fi
