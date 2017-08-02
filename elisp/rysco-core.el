@@ -92,6 +92,7 @@
 	'("\\.screenplay$" . screenwriter-mode)
 	'("\\.csv$" . csv-mode)
         '("\\.dot$" . graphviz-dot-mode)
+        '("\\.gv$" . graphviz-dot-mode)
 		)
        auto-mode-alist))
 
@@ -192,6 +193,10 @@
 					; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+
+(add-hook 'python-mode-hook
+	  '(lambda ()
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'js-mode-hook
