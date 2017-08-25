@@ -11,6 +11,10 @@ graphlog =
 color =
 purge =
 strip =
+pager =
+
+[pager]
+pager = LESS='FRX' less
 
 [merge-tools]
 emacs.args = -q --load ~/ryscomacs/ediff-setup.el --eval "(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\")"
