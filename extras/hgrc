@@ -24,7 +24,7 @@ cglog = glog --color=always
 clog = log --color=always
 
 slog = log --style=$HOME/ryscomacs/extras/mercurial/map-cmdline.slog
-sglog = log --style=$HOME/ryscomacs/extras/mercurial/map-cmdline.sglog
+sglog = glog --style=$HOME/ryscomacs/extras/mercurial/map-cmdline.sglog
 
 force-merge-other = merge --tool internal:other
 force-merge-mine = merge --tool internal:local
