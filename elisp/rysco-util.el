@@ -170,7 +170,12 @@
 	  (insert
 	   (with-temp-buffer
 	     (insert-file-contents include)
-	     (buffer-string))))))
+
+	     (if (equal "el" (file-name-extension include))
+		 (eval (car
+			(read-from-string
+			 (concat "(with-output-to-string " (buffer-string) ")"))) t)
+	     (buffer-string)))))))
     (save-buffer)
     (kill-buffer)))
 
