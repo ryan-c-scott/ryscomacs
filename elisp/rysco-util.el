@@ -156,7 +156,9 @@
   "Generates ssh config file from snippets in directories specified in 'rysco-ssh-configs"
   (interactive)
   (let* ((out (find-file "~/.ssh/config"))
-	 (directories (append '("~/.ssh/config.d/") rysco-ssh-config-directories)))
+	 (directories
+	  (remove-if-not 'file-exists-p
+			 (append '("~/.ssh/config.d/") rysco-ssh-config-directories))))
     (backup-buffer)
     (erase-buffer)
 
