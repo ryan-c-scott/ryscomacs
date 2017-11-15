@@ -84,6 +84,27 @@
       res)))
 
 
+(defun helm-screenwriter-move-next (type-regex)
+  (re-search-forward type-regex)
+  (forward-line)
+  (forward-word)
+  (backward-word))
+
+(defun helm-screenwriter-move-previous (type-regex)
+  (re-search-backward type-regex)
+  (re-search-backward type-regex)
+  (forward-line)
+  (forward-word)
+  (backward-word))
+
+(defun helm-screenwriter-move-next-dialogue ()
+  (interactive)
+  (helm-screenwriter-move-next helm-screenwriter-regex-actor))
+
+(defun helm-screenwriter-move-previous-dialogue ()
+  (interactive)
+  (helm-screenwriter-move-previous helm-screenwriter-regex-actor))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq helm-scrn-character-source
       `(((name . "Screenwriter Characters")
@@ -123,6 +144,39 @@
 	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun helm-screenwriter-display-official ()
+  (interactive)
+  (buffer-face-set '(:family "Courier new" :height 120)))
+
+(defun helm-screenwriter-display-normal ()
+  (interactive)
+  (buffer-face-set))
+
+(defun helm-screenwriter-calculate-page (pos)
+  (1+ (/ (count-lines (point-min) pos) 52)))
+
+(defun helm-screenwriter-what-page ()
+  (interactive)
+  (message "Page %s / %s" (helm-screenwriter-calculate-page (point))
+	   (helm-screenwriter-calculate-page (point-max))))
+
+(defun helm-screenwriter-goto-page (page)
+  (interactive "nGoto page: ")
+  (goto-char (point-min))
+  (forward-line (* (1- page) 52))
+  (helm-screenwriter-what-page))
+
+(defun helm-screenwriter-move-page (dir)
+  (helm-screenwriter-goto-page (+ dir (helm-screenwriter-calculate-page (point)))))
+
+(defun helm-screenwriter-move-next-page ()
+  (interactive)
+  (helm-screenwriter-move-page 1))
+  
+(defun helm-screenwriter-move-previous-page ()
+  (interactive)
+  (helm-screenwriter-move-page -1))
+  
 (defun helm-screenwriter-dialog-block ()
   (interactive)
   (helm :sources helm-scrn-character-source))
@@ -138,34 +192,35 @@
 (defun helm-screenwriter-guess-margins ()
   (interactive)
   ;; Do regex matches to determine which margin function to call from screenwriter
-  (let ((line (thing-at-point 'line t)) case-fold-search)
-    
-    (cond
-     ((string-match helm-screenwriter-regex-slugline line)
-      (message "Found: Slugline")
-      (scrn-margins)
-      (back-to-indentation))
+  (save-mark-and-excursion
+    (let ((line (thing-at-point 'line t)) case-fold-search)
+      
+      (cond
+       ((string-match helm-screenwriter-regex-slugline line)
+	(message "Found: Slugline")
+	(scrn-margins)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-action line)
-      (message "Found: action")
-      (scrn-margins)
-      (back-to-indentation))
+       ((string-match helm-screenwriter-regex-action line)
+	(message "Found: action")
+	(scrn-margins)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-transition line)
-      (message "Found: Transition")
-      (scrn-trans-margins)
-      (back-to-indentation))
-     
-     ((string-match helm-screenwriter-regex-actor line)
-      (message "Found: Actor")
-      (scrn-dialog-margins)
-      (setq left-margin 20)
-      (back-to-indentation))
+       ((string-match helm-screenwriter-regex-transition line)
+	(message "Found: Transition")
+	(scrn-trans-margins)
+	(back-to-indentation))
+       
+       ((string-match helm-screenwriter-regex-actor line)
+	(message "Found: Actor")
+	(scrn-dialog-margins)
+	(setq left-margin 20)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-dialogue line)
-      (message "Found: Dialogue")
-      (scrn-dialog-margins)
-      (back-to-indentation)))))
+       ((string-match helm-screenwriter-regex-dialogue line)
+	(message "Found: Dialogue")
+	(scrn-dialog-margins)
+	(back-to-indentation))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq helm-screenwriter-highlights
@@ -183,6 +238,14 @@
   (local-set-key (kbd "M-i") 'helm-screenwriter-guess-margins)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
-  (local-set-key (kbd "M-t") 'helm-screenwriter-transition))
+  (local-set-key (kbd "M-t") 'helm-screenwriter-transition)
+  (local-set-key (kbd "C-x l") 'helm-screenwriter-what-page)
+  (local-set-key (kbd "M-g") 'helm-screenwriter-goto-page)
 
+  (local-set-key (kbd "C-M-n") 'helm-screenwriter-move-next-page)
+  (local-set-key (kbd "C-M-p") 'helm-screenwriter-move-previous-page)
+  (local-set-key (kbd "C-M-f") 'helm-screenwriter-move-next-dialogue)
+  (local-set-key (kbd "C-M-b") 'helm-screenwriter-move-previous-dialogue)
+
+  (helm-screenwriter-what-page))
   

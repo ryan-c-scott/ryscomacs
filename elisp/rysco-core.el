@@ -185,9 +185,9 @@
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
-					; for hide/show support
-	     (hs-minor-mode 1)
-	     (setq hs-isearch-open t)
+	     ;;    			; for hide/show support
+	     ;; (hs-minor-mode 1)
+	     ;; (setq hs-isearch-open t)
 	     (c-set-style "c#")
 	     (setq indent-tabs-mode nil)
 	     (setq tab-width 4)
