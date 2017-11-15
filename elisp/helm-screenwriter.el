@@ -84,6 +84,27 @@
       res)))
 
 
+(defun helm-screenwriter-move-next (type-regex)
+  (re-search-forward type-regex)
+  (forward-line)
+  (forward-word)
+  (backward-word))
+
+(defun helm-screenwriter-move-previous (type-regex)
+  (re-search-backward type-regex)
+  (re-search-backward type-regex)
+  (forward-line)
+  (forward-word)
+  (backward-word))
+
+(defun helm-screenwriter-move-next-dialogue ()
+  (interactive)
+  (helm-screenwriter-move-next helm-screenwriter-regex-actor))
+
+(defun helm-screenwriter-move-previous-dialogue ()
+  (interactive)
+  (helm-screenwriter-move-previous helm-screenwriter-regex-actor))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq helm-scrn-character-source
       `(((name . "Screenwriter Characters")
@@ -146,34 +167,35 @@
 (defun helm-screenwriter-guess-margins ()
   (interactive)
   ;; Do regex matches to determine which margin function to call from screenwriter
-  (let ((line (thing-at-point 'line t)) case-fold-search)
-    
-    (cond
-     ((string-match helm-screenwriter-regex-slugline line)
-      (message "Found: Slugline")
-      (scrn-margins)
-      (back-to-indentation))
+  (save-mark-and-excursion
+    (let ((line (thing-at-point 'line t)) case-fold-search)
+      
+      (cond
+       ((string-match helm-screenwriter-regex-slugline line)
+	(message "Found: Slugline")
+	(scrn-margins)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-action line)
-      (message "Found: action")
-      (scrn-margins)
-      (back-to-indentation))
+       ((string-match helm-screenwriter-regex-action line)
+	(message "Found: action")
+	(scrn-margins)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-transition line)
-      (message "Found: Transition")
-      (scrn-trans-margins)
-      (back-to-indentation))
-     
-     ((string-match helm-screenwriter-regex-actor line)
-      (message "Found: Actor")
-      (scrn-dialog-margins)
-      (setq left-margin 20)
-      (back-to-indentation))
+       ((string-match helm-screenwriter-regex-transition line)
+	(message "Found: Transition")
+	(scrn-trans-margins)
+	(back-to-indentation))
+       
+       ((string-match helm-screenwriter-regex-actor line)
+	(message "Found: Actor")
+	(scrn-dialog-margins)
+	(setq left-margin 20)
+	(back-to-indentation))
 
-     ((string-match helm-screenwriter-regex-dialogue line)
-      (message "Found: Dialogue")
-      (scrn-dialog-margins)
-      (back-to-indentation)))))
+       ((string-match helm-screenwriter-regex-dialogue line)
+	(message "Found: Dialogue")
+	(scrn-dialog-margins)
+	(back-to-indentation))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq helm-screenwriter-highlights
