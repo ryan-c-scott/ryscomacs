@@ -152,6 +152,31 @@
   (interactive)
   (buffer-face-set))
 
+(defun helm-screenwriter-calculate-page (pos)
+  (1+ (/ (count-lines (point-min) pos) 52)))
+
+(defun helm-screenwriter-what-page ()
+  (interactive)
+  (message "Page %s / %s" (helm-screenwriter-calculate-page (point))
+	   (helm-screenwriter-calculate-page (point-max))))
+
+(defun helm-screenwriter-goto-page (page)
+  (interactive "nGoto page: ")
+  (goto-char (point-min))
+  (forward-line (* (1- page) 52))
+  (helm-screenwriter-what-page))
+
+(defun helm-screenwriter-move-page (dir)
+  (helm-screenwriter-goto-page (+ dir (helm-screenwriter-calculate-page (point)))))
+
+(defun helm-screenwriter-move-next-page ()
+  (interactive)
+  (helm-screenwriter-move-page 1))
+  
+(defun helm-screenwriter-move-previous-page ()
+  (interactive)
+  (helm-screenwriter-move-page -1))
+  
 (defun helm-screenwriter-dialog-block ()
   (interactive)
   (helm :sources helm-scrn-character-source))
@@ -213,6 +238,14 @@
   (local-set-key (kbd "M-i") 'helm-screenwriter-guess-margins)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
-  (local-set-key (kbd "M-t") 'helm-screenwriter-transition))
+  (local-set-key (kbd "M-t") 'helm-screenwriter-transition)
+  (local-set-key (kbd "C-x l") 'helm-screenwriter-what-page)
+  (local-set-key (kbd "M-g") 'helm-screenwriter-goto-page)
 
+  (local-set-key (kbd "C-M-n") 'helm-screenwriter-move-next-page)
+  (local-set-key (kbd "C-M-p") 'helm-screenwriter-move-previous-page)
+  (local-set-key (kbd "C-M-f") 'helm-screenwriter-move-next-dialogue)
+  (local-set-key (kbd "C-M-b") 'helm-screenwriter-move-previous-dialogue)
+
+  (helm-screenwriter-what-page))
   
