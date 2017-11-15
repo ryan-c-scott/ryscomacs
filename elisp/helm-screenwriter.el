@@ -123,6 +123,14 @@
 	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun helm-screenwriter-display-official ()
+  (interactive)
+  (buffer-face-set '(:family "Courier new" :height 120)))
+
+(defun helm-screenwriter-display-normal ()
+  (interactive)
+  (buffer-face-set))
+
 (defun helm-screenwriter-dialog-block ()
   (interactive)
   (helm :sources helm-scrn-character-source))
