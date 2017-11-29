@@ -153,7 +153,7 @@
   (find-file "~/.emacs.d/elisp/localconfig.el"))
 
 (defun rysco-generate-ssh-config ()
-  "Generates ssh config file from snippets in directories specified in 'rysco-ssh-configs"
+  "Generates ssh config file from snippets in directories specified in 'rysco-ssh-config-directories"
   (interactive)
   (let* ((out (find-file "~/.ssh/config"))
 	 (directories

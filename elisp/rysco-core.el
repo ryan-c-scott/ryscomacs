@@ -3,7 +3,7 @@
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-capslock-mapped nil)
-(defvar rysco-ssh-configs nil)
+(defvar rysco-ssh-config-directories nil)
 ;; (defvar enableP4 nil)
 (defvar effective-capslock-key "<escape>")
 (defvar rysco-font "Source Code Pro")
