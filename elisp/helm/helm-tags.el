@@ -1,6 +1,6 @@
 ;;; helm-tags.el --- Helm for Etags. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,12 +43,10 @@ Don't search tag file deeply if outside this value."
   "Allow choosing the tag part of CANDIDATE in `helm-source-etags-select'.
 A tag looks like this:
     filename: \(defun foo
-You can choose matching against only end part of tag (i.e \"foo\"),
-against only the tag part (i.e \"(defun foo\"),
-or against the whole candidate (i.e \"(filename: (defun foo\")."
+You can choose matching against the tag part (i.e \"(defun foo\"),
+or against the whole candidate (i.e \"(filename:5:(defun foo\")."
   :type '(choice
           (const :tag "Match only tag" tag)
-          (const :tag "Match last part of tag" endtag)
           (const :tag "Match all file+tag" all))
   :group 'helm-tags)
 
@@ -98,7 +96,6 @@ one match."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "M-<down>") 'helm-goto-next-file)
     (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
-    (define-key map (kbd "C-w")      'helm-yank-text-at-point)
     (define-key map (kbd "C-c o")    'helm-etags-run-switch-other-window)
     (define-key map (kbd "C-c C-o")  'helm-etags-run-switch-other-frame)
     map)
@@ -206,8 +203,9 @@ If no entry in cache, create one."
                 ;; If an entry exists modify it.
                 (setcdr it (helm-etags-mtime f))
               ;; No entry create a new one.
-              (add-to-list 'helm-etags-mtime-alist
-                           (cons f (helm-etags-mtime f))))))))))
+              (cl-pushnew (cons f (helm-etags-mtime f))
+                          helm-etags-mtime-alist
+                          :test 'equal))))))))
 
 (defvar helm-source-etags-select nil
   "Helm source for Etags.")
@@ -220,11 +218,9 @@ If no entry in cache, create one."
     :match-part (lambda (candidate)
                   ;; Match only the tag part of CANDIDATE
                   ;; and not the filename.
-                  (cl-ecase helm-etags-match-part-only
-                      (endtag (cadr (split-string
-                                     (cl-caddr (helm-grep-split-line candidate)))))
-                      (tag    (cl-caddr (helm-grep-split-line candidate)))
-                      (all    candidate)))
+                  (cl-case helm-etags-match-part-only
+                      (tag (cl-caddr (helm-grep-split-line candidate)))
+                      (t   candidate)))
     :fuzzy-match helm-etags-fuzzy-match
     :help-message 'helm-etags-help-message
     :keymap helm-etags-map
@@ -238,6 +234,7 @@ If no entry in cache, create one."
                                               (helm-etags-action-goto
                                                'find-file-other-frame
                                                c))))
+    :group 'helm-tags
     :persistent-help "Go to line"
     :persistent-action (lambda (candidate)
                          (helm-etags-action-goto 'find-file candidate)
@@ -254,16 +251,25 @@ If no entry in cache, create one."
 
 (defvar find-tag-marker-ring)
 
+(defsubst helm-etags--file-from-tag (fname)
+  (cl-loop for ext in
+           (cons "" (remove "" tags-compression-info-list))
+           for file = (concat fname ext)
+           when (file-exists-p file)
+           return file))
+
 (defun helm-etags-action-goto (switcher candidate)
   "Helm default action to jump to an etags entry in other window."
   (require 'etags)
+  (deactivate-mark t)
   (helm-log-run-hook 'helm-goto-line-before-hook)
   (let* ((split (helm-grep-split-line candidate))
          (fname (cl-loop for tagf being the hash-keys of helm-etags-cache
-                      for f = (expand-file-name
-                               (car split) (file-name-directory tagf))
-                      when (file-exists-p f)
-                      return f))
+                         for f = (expand-file-name
+                                  (car split) (file-name-directory tagf))
+                         ;; Try to find an existing file, possibly compressed.
+                         when (helm-etags--file-from-tag f)
+                         return it))
          (elm   (cl-caddr split))
          (linum (string-to-number (cadr split))))
     (if (null fname)
@@ -305,13 +311,7 @@ This function aggregates three sources of tag files:
         (str (if (region-active-p)
                  (buffer-substring-no-properties
                   (region-beginning) (region-end))
-                 ;; Use a raw syntax-table to determine tap.
-                 ;; This may be wrong when calling etags
-                 ;; with hff from a buffer that use
-                 ;; a different syntax, but most of the time it
-                 ;; should be better.
-                 (with-syntax-table (standard-syntax-table)
-                   (thing-at-point 'symbol)))))
+               (thing-at-point 'symbol))))
     (if (cl-notany 'file-exists-p tag-files)
         (message "Error: No tag file found.\
 Create with etags shell command, or visit with `find-tag' or `visit-tags-table'.")
@@ -337,7 +337,7 @@ Create with etags shell command, or visit with `find-tag' or `visit-tags-table'.
 (provide 'helm-tags)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

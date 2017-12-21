@@ -1,6 +1,6 @@
 ;;; helm-config.el --- Applications library for `helm.el' -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -94,7 +94,6 @@
     (define-key map (kbd "C-,")       'helm-calcul-expression)
     (define-key map (kbd "M-x")       'helm-M-x)
     (define-key map (kbd "M-s o")     'helm-occur)
-    (define-key map (kbd "M-g s")     'helm-do-grep)
     (define-key map (kbd "M-g a")     'helm-do-grep-ag)
     (define-key map (kbd "c")         'helm-colors)
     (define-key map (kbd "F")         'helm-select-xfont)
@@ -109,7 +108,7 @@
     (define-key map (kbd "C-x r i")   'helm-register)
     (define-key map (kbd "C-c C-x")   'helm-run-external-command)
     (define-key map (kbd "b")         'helm-resume)
-    (define-key map (kbd "M-g i")       'helm-gid)
+    (define-key map (kbd "M-g i")     'helm-gid)
     (define-key map (kbd "@")         'helm-list-elisp-packages)
     map))
 
@@ -145,12 +144,14 @@
      ("(\\<\\(with-helm-buffer\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-show-completion\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-default-directory\\)\\>" 1 font-lock-keyword-face)
-     ("(\\<\\(with-helm-display-same-window\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-restore-variables\\)\\>" 1 font-lock-keyword-face)
-     ("(\\<\\(define-helm-type-attribute\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(helm-multi-key-defun\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(helm-while-no-input\\)\\>" 1 font-lock-keyword-face)
-     ("(\\<\\(helm-aif\\)\\>" 1 font-lock-keyword-face))))
+     ("(\\<\\(helm-aif\\)\\>" 1 font-lock-keyword-face)
+     ("(\\<\\(helm-awhile\\)\\>" 1 font-lock-keyword-face)
+     ("(\\<\\(helm-acond\\)\\>" 1 font-lock-keyword-face)
+     ("(\\<\\(helm-aand\\)\\>" 1 font-lock-keyword-face)
+     ("(\\<\\(helm-with-gensyms\\)\\>" 1 font-lock-keyword-face))))
 
 
 ;;; Load the autoload file
@@ -162,7 +163,7 @@
 (provide 'helm-config)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

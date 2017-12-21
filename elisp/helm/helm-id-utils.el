@@ -1,6 +1,6 @@
 ;;; helm-id-utils.el --- Helm interface for id-utils. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2015 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -39,15 +39,23 @@ MacPorts to install id-utils, it should be `gid32'."
   :type 'string)
 
 (defun helm-gid-candidates-process ()
-  (let ((proc (start-process
-               "gid" nil helm-gid-program
-               "-r" helm-pattern)))
-    (set (make-local-variable 'helm-grep-last-cmd-line)
-         (format "%s -r %s" helm-gid-program helm-pattern))
+  (let* ((patterns (helm-mm-split-pattern helm-pattern))
+         (default-com (format "%s -r %s" helm-gid-program
+                              (shell-quote-argument (car patterns))))
+         (cmd (helm-aif (cdr patterns)
+                  (concat default-com
+                          (cl-loop for p in it
+                                   concat (format " | grep --color=always %s"
+                                                  (shell-quote-argument p))))
+                default-com))
+         (proc (start-process-shell-command
+                "gid" helm-buffer cmd)))
+    (set (make-local-variable 'helm-grep-last-cmd-line) cmd)
     (prog1 proc
       (set-process-sentinel
        proc (lambda (_process event)
               (when (string= event "finished\n")
+                (helm-maybe-show-help-echo)
                 (with-helm-window
                   (setq mode-line-format
                         '(" " mode-line-buffer-identification " "
@@ -83,9 +91,6 @@ MacPorts to install id-utils, it should be `gid32'."
    (action :initform (helm-make-actions
                       "Find File" 'helm-grep-action
                       "Find file other frame" 'helm-grep-other-frame
-                      (lambda () (and (locate-library "elscreen")
-                                      "Find file in Elscreen"))
-                      'helm-grep-jump-elscreen
                       "Save results in grep buffer" 'helm-grep-save-results
                       "Find file other window" 'helm-grep-other-window))
    (persistent-action :initform 'helm-grep-persistent-action)
@@ -118,7 +123,7 @@ See <https://www.gnu.org/software/idutils/>."
 (provide 'helm-id-utils)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
