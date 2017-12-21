@@ -181,6 +181,7 @@
 
 (add-hook 'c-mode-common-hook
 	  '(lambda () (c-set-style "stroustrup")
+             (semantic-mode t)
 	     (setq tab-width 4)
 	     (setq indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
