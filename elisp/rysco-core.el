@@ -65,6 +65,9 @@
 (autoload 'helm-kodi-movies "helm-kodi" "" t)
 (autoload 'kodi-connect "kodi" "" t)
 
+(autoload 'shift-number-up "shift-number" nil t)
+(autoload 'shift-number-down "shift-number" nil t)
+
 (setq auto-mode-alist
       (append
        (list
