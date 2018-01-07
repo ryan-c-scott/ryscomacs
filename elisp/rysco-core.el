@@ -43,6 +43,7 @@
 (require 'uniquify)
 (require 'windmove)
 (require 'ispell)
+(require 'dired+)
 
 (require 'run-assoc)
 (setq associated-program-alist
