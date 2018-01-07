@@ -44,6 +44,12 @@
 (require 'windmove)
 (require 'ispell)
 
+(require 'run-assoc)
+(setq associated-program-alist
+      '(((lambda (file)
+           (when (eq system-type 'windows-nt)
+             (w32-shell-execute "open" (convert-standard-filename file)))) "\\.*$")))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
