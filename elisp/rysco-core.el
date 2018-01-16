@@ -186,6 +186,9 @@
 
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
 
+;; Do not use tabs
+(setq-default indent-tabs-mode nil)
+
 (add-hook 'c-mode-common-hook
 	  '(lambda () (c-set-style "stroustrup")
              (semantic-mode t)
