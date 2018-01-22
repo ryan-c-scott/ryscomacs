@@ -273,8 +273,11 @@
           (lambda ()
             (markdown-update-header-faces markdown-header-scaling)
             (visual-line-mode t)
-            ;(writegood-mode t)
-            (flyspell-mode t)))
+            ;;(writegood-mode t)
+            
+            (when (not (eq system-type 'windows-nt))
+              (flyspell-mode t))
+            (require 'hugo)))
 
 (defun custom-diff-colors ()
   "update the colors for diff faces"
