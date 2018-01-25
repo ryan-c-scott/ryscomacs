@@ -75,6 +75,8 @@
 (autoload 'shift-number-up "shift-number" nil t)
 (autoload 'shift-number-down "shift-number" nil t)
 
+(autoload 'org-table-matrix-mode "org-table-matrix" "" t)
+
 (setq auto-mode-alist
       (append
        (list
@@ -199,13 +201,15 @@
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
-	     ;;    			; for hide/show support
+	     ;; for hide/show support
 	     ;; (hs-minor-mode 1)
 	     ;; (setq hs-isearch-open t)
 	     (c-set-style "c#")
 	     (setq indent-tabs-mode nil)
 	     (setq tab-width 4)
-					; with point inside the block, use these keys to hide/show
+             
+             ;; with point inside the block, use these keys to hide/show
+             (local-set-key "}" 'c-electric-brace) ; No idea why this isn't the default, but here we are...
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
