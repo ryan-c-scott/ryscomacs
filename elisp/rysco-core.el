@@ -208,8 +208,11 @@
 	     (setq indent-tabs-mode nil)
 	     (setq tab-width 4)
              
+             ;; No idea why this isn't the default, but here we are...
+             (local-set-key "{" 'c-electric-brace)
+             (local-set-key "}" 'c-electric-brace)
+
              ;; with point inside the block, use these keys to hide/show
-             (local-set-key "}" 'c-electric-brace) ; No idea why this isn't the default, but here we are...
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
