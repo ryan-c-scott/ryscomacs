@@ -158,6 +158,7 @@
 
 (transient-mark-mode t)
 (global-font-lock-mode t)
+(jit-lock-mode t)
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
