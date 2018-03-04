@@ -364,7 +364,7 @@
 (global-set-key (kbd "<C-tab>") 'complete-tag)
 (global-set-key "\C-c\C-c" 'rysco-comment-dwim)
 
-(global-set-key (kbd (concat effective-capslock-key " .")) 'find-tag)
+(global-set-key (kbd (concat effective-capslock-key " f")) 'find-tag)
 (global-set-key (kbd (concat effective-capslock-key " " effective-capslock-key)) 'helm-mini)
 (global-set-key (kbd (concat effective-capslock-key " SPC")) 'helm-semantic-or-imenu)
 (global-set-key (kbd (concat effective-capslock-key " <RET>")) 'helm-resume)
@@ -384,6 +384,10 @@
 (global-set-key (kbd (concat effective-capslock-key " t")) 'rysco-split-down-dwim)
 (global-set-key (kbd (concat effective-capslock-key " h")) 'rysco-split-left-dwim)
 (global-set-key (kbd (concat effective-capslock-key " c")) 'rysco-split-up-dwim)
+
+(global-set-key (kbd (concat effective-capslock-key " /")) 'new-frame)
+(global-set-key (kbd (concat effective-capslock-key " \\")) 'delete-frame)
+(global-set-key (kbd (concat effective-capslock-key " l")) 'other-frame)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
