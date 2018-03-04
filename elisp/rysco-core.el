@@ -386,8 +386,8 @@
 (global-set-key (kbd (concat rysco-lead-key " c")) 'rysco-split-up-dwim)
 
 (global-set-key (kbd (concat rysco-lead-key " /")) 'new-frame)
-(global-set-key (kbd (concat rysco-lead-key " \\")) 'delete-frame)
-(global-set-key (kbd (concat rysco-lead-key " l")) 'other-frame)
+(global-set-key (kbd (concat rysco-lead-key " =")) 'delete-frame)
+(global-set-key (kbd (concat rysco-lead-key " \\")) 'other-frame)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
