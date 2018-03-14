@@ -173,7 +173,6 @@
 (setq uniquify-separator "|")
 (setq uniquify-after-kill-buffer-p t)
 (setq uniquify-ignore-buffers-re "^\\*")
-(windmove-default-keybindings 'meta)
 (setq ispell-program-name "aspell")
 
 ;; Local config
@@ -253,11 +252,7 @@
   (local-unset-key (kbd "<S-left>"))
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
-  (local-unset-key (kbd "<S-up>"))
-  (local-unset-key (kbd "<M-left>"))
-  (local-unset-key (kbd "<M-down>"))
-  (local-unset-key (kbd "<M-right>"))
-  (local-unset-key (kbd "<M-up>")))
+  (local-unset-key (kbd "<S-up>")))
 
 (add-hook 'org-mode-hook 'org-unset-move-keys)
 (add-hook 'org-agenda-mode-hook 'org-unset-move-keys)
