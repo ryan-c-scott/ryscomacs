@@ -115,7 +115,7 @@
  '(mumamo-background-chunk-submode ((t (:background "#1B1D1E"))))
  '(outline-1 ((t (:foreground "#66D9EF" :height 1.6))))
  '(outline-2 ((t (:foreground "#F92672" :height 1.4))))
- '(outline-3 ((t (:foreground "#A6E22E" :height 1.2))))
+ '(outline-3 ((t (:foreground "#54ff9f" :height 1.2))))
  '(outline-4 ((t (:foreground "#AE81FF"))))
  '(outline-5 ((t (:foreground "#E6DB74"))))
  '(outline-6 ((t (:foreground "#66D9EF"))))
