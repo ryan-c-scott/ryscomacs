@@ -123,6 +123,7 @@
  '(outline-6 ((t (:foreground "#AE81FF"))))
  '(outline-7 ((t (:foreground "#66D9EF"))))
  '(outline-8 ((t (:foreground "#A6E22E"))))
+ '(org-todo ((t (:foreground "#Ff82ab"))))
  '(rainbow-delimiters-depth-1-face ((t (:inherit outline-1))))
  '(rainbow-delimiters-depth-2-face ((t (:inherit outline-2))))
  '(rainbow-delimiters-depth-3-face ((t (:inherit outline-3))))
