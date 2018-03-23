@@ -380,7 +380,7 @@
 (global-set-key (kbd (concat rysco-lead-key " h")) 'rysco-split-left-dwim)
 (global-set-key (kbd (concat rysco-lead-key " c")) 'rysco-split-up-dwim)
 
-(global-set-key (kbd (concat rysco-lead-key " /")) 'new-frame)
+(global-set-key (kbd (concat rysco-lead-key " /")) 'make-frame)
 (global-set-key (kbd (concat rysco-lead-key " =")) 'delete-frame)
 (global-set-key (kbd (concat rysco-lead-key " \\")) 'other-frame)
 
