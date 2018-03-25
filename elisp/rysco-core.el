@@ -22,6 +22,7 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
 (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
 (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
+(add-to-list 'load-path "~/ryscomacs/elisp/dired-hacks/")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -43,13 +44,21 @@
 (require 'uniquify)
 (require 'windmove)
 (require 'ispell)
-(require 'dired+)
 
 (require 'run-assoc)
 (setq associated-program-alist
       '(((lambda (file)
            (when (eq system-type 'windows-nt)
              (w32-shell-execute "open" (convert-standard-filename file)))) "\\.*$")))
+
+(require 'dired+)
+(require 'dired-subtree)
+(require 'dired-collapse)
+(require 'dired-filter)
+(add-hook 'dired-mode-hook (lambda ()
+                             (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
+                             (dired-collapse-mode)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
