@@ -246,16 +246,17 @@
 	  '(lambda ()
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
-(defun org-unset-move-keys ()
+(defun rysco-org-hook ()
   ""
   (interactive)
   (local-unset-key (kbd "<S-left>"))
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
-  (local-unset-key (kbd "<S-up>")))
+  (local-unset-key (kbd "<S-up>"))
+  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings))
 
-(add-hook 'org-mode-hook 'org-unset-move-keys)
-(add-hook 'org-agenda-mode-hook 'org-unset-move-keys)
+(add-hook 'org-mode-hook 'rysco-org-hook)
+(add-hook 'org-agenda-mode-hook 'rysco-org-hook)
 
 (defun markdown-unset-move-keys ()
   ""
