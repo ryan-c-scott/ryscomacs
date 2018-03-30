@@ -267,6 +267,10 @@
 (add-hook 'org-mode-hook 'rysco-org-hook)
 (add-hook 'org-agenda-mode-hook 'rysco-org-hook)
 
+(font-lock-add-keywords 'org-mode
+                        '(("^ +\\([-*]\\) "
+                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
 (defun markdown-unset-move-keys ()
   ""
   (interactive)
