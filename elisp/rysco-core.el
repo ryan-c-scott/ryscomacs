@@ -59,6 +59,22 @@
                              (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
                              (dired-collapse-mode)))
 
+(setq dired-filter-group-saved-groups
+      `(("default"
+         ("PDF"
+          (extension . "pdf"))
+         ("LaTeX"
+          (extension "tex" "bib"))
+         ("Org"
+          (extension . "org"))
+         ("Image"
+          (extension "jpg" "png" "dds" "bmp"))
+         ("Media"
+          (extension "mp3" "mp4" "avi" "ogg" "ogv" "mkv" "mpg" "flv"))
+         ("Markdown"
+          (extension . "md"))
+         ("Archives"
+          (extension "zip" "rar" "gz" "bz2" "tar")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
