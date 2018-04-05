@@ -274,6 +274,7 @@
 (defun rysco-org-hook ()
   ""
   (interactive)
+  (visual-line-mode t)
   (local-unset-key (kbd "<S-left>"))
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
