@@ -74,7 +74,7 @@
          ("Markdown"
           (extension . "md"))
          ("Archives"
-          (extension "zip" "rar" "gz" "bz2" "tar"))
+          (extension "zip" "rar" "gz" "bz2" "tar" "dmg"))
          ("Source"
           (extension "py" "c" "cpp" "h" "hpp" "lua" "go" "el" "glsl"))
          ("Exe"
