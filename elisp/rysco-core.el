@@ -68,13 +68,17 @@
          ("Org"
           (extension . "org"))
          ("Image"
-          (extension "jpg" "png" "dds" "bmp"))
+          (extension "jpg" "JPG" "png" "dds" "bmp"))
          ("Media"
-          (extension "mp3" "mp4" "avi" "ogg" "ogv" "mkv" "mpg" "flv"))
+          (extension "mp3" "mp4" "avi" "ogg" "ogv" "mkv" "mpg" "flv" "mov"))
          ("Markdown"
           (extension . "md"))
          ("Archives"
-          (extension "zip" "rar" "gz" "bz2" "tar")))))
+          (extension "zip" "rar" "gz" "bz2" "tar"))
+         ("Source"
+          (extension "py" "c" "cpp" "h" "hpp" "lua" "go" "el" "glsl"))
+         ("Exe"
+          (extension "exe" "sh" "bat")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
