@@ -983,7 +983,7 @@ to work properly with code that includes attributes."
                                (save-match-data
                                  (ignore-errors
                                    (condition-case nil
-                                       (c-font-lock-declarators limit t nil)
+                                       (c-font-lock-declarators limit t nil nil)
                                      (wrong-number-of-arguments
                                       (c-font-lock-declarators limit t nil nil)))))
                                (goto-char (match-end 0))
