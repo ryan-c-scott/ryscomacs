@@ -279,7 +279,6 @@
   ""
   (interactive)
   (visual-line-mode t)
-  (setq org-tags-column 30)
   (local-unset-key (kbd "<S-left>"))
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
