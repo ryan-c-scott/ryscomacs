@@ -298,7 +298,7 @@
 ;;          - Fix indentation for generic type-initializers.
 ;;          - Fix fontification of using and namespace-statements with
 ;;            underscores in them.
-;;          - Derive csharp-mode-map from prog-mode-map.
+;;          - Fixes for indentation for many kinds of type-initializers.
 ;;
 ;;; Code:
 
@@ -364,6 +364,10 @@
 ;;              ops)
 ;;      :test 'equal)))
 
+
+(defgroup csharp nil
+  "Major mode for editing C# code."
+  :group 'prog-mode)
 
 
 ;; Custom variables
@@ -977,7 +981,11 @@ to work properly with code that includes attributes."
                                                       'c-decl-id-start)
                                  (c-forward-syntactic-ws))
                                (save-match-data
-                                 (c-font-lock-declarators limit t nil))
+                                 (ignore-errors
+                                   (condition-case nil
+                                       (c-font-lock-declarators limit t nil)
+                                     (wrong-number-of-arguments
+                                      (c-font-lock-declarators limit t nil nil)))))
                                (goto-char (match-end 0))
                                )
                              )))
@@ -1054,7 +1062,7 @@ to work properly with code that includes attributes."
                                          (save-excursion
                                            (c-beginning-of-statement-1)
                                            (looking-at
-                                            "#\\(pragma\\|endregion\\|region\\|if\\|else\\|endif\\)"))
+                                            "#\\s *\\(pragma\\|endregion\\|region\\|if\\|else\\|endif\\)"))
                                          )))
 
                         (if is-attr
@@ -1155,9 +1163,11 @@ Currently handled:
                   (setq done t)))))))))
 
     (goto-char beg)
-    (while (re-search-forward "^\\s-*#\\(region\\|pragma\\) " end t)
-      (when (looking-at "\\w")
-        (put-text-property (point) (1+ (point))
+    (while (re-search-forward "^\\s *#\\s *\\(region\\|pragma\\)\\s " end t)
+      (when (looking-at "\\s *\\S ")
+        ;; mark the whitespace separating the directive from the comment
+        ;; text as comment starter to allow correct word movement
+        (put-text-property (1- (point)) (point)
                            'syntax-table (string-to-syntax "< b"))))))
 
 ;; C# does generics.  Setting this to t tells the parser to put
@@ -1401,7 +1411,7 @@ This regexp is assumed to not match any non-operator identifier."
           ;; Use the eval form for `font-lock-keywords' to be able to use
           ;; the `c-preprocessor-face-name' variable that maps to a
           ;; suitable face depending on the (X)Emacs version.
-          '(eval . (list "^\\s *\\(#pragma\\|undef\\|define\\)\\>\\(.*\\)"
+          '(eval . (list "^\\s *#\\s *\\(pragma\\|undef\\|define\\)\\>\\(.*\\)"
                          (list 1 c-preprocessor-face-name)
                          '(2 font-lock-string-face)))
           ;; There are some other things in `c-cpp-matchers' besides the
@@ -1449,7 +1459,6 @@ This regexp is assumed to not match any non-operator identifier."
     ("finally" "finally" c-electric-continued-statement 0)))
 
 (defvar csharp-mode-map (let ((map (c-make-inherited-keymap)))
-                          (set-keymap-parent map prog-mode-map)
                           ;; Add bindings which are only useful for C#
                           map)
   "Keymap used in ‘csharp-mode’ buffers.")
@@ -2278,7 +2287,7 @@ your `csharp-mode-hook' function:
                  ;; contains only an open-curly.  In this case, insert a
                  ;; summary element pair.
                  (preceding-line-is-empty
-                  (setq text-to-insert  "/ <summary>\n///   \n/// </summary>"
+                  (setq text-to-insert  "/ <summary>\n ///   \n /// </summary>"
                         flavor 1) )
 
                  ;; The preceding word closed a summary element.  In this case,
@@ -2286,13 +2295,13 @@ your `csharp-mode-hook' function:
                  ;; insert a remarks element.
                  ((and (string-equal word-back "summary") (eq char0 ?/)  (eq char1 ?<))
                   (if (not (and (string-equal word-fore "remarks") (eq char-0 ?<)))
-                      (setq text-to-insert "/ <remarks>\n///   <para>\n///     \n///   </para>\n/// </remarks>"
+                      (setq text-to-insert "/ <remarks>\n ///   <para>\n ///     \n ///   </para>\n /// </remarks>"
                             flavor 2)))
 
                  ;; The preceding word closed the remarks section.  In this case,
                  ;; insert an example element.
                  ((and (string-equal word-back "remarks")  (eq char0 ?/)  (eq char1 ?<))
-                  (setq text-to-insert "/ <example>\n///   \n/// </example>"
+                  (setq text-to-insert "/ <example>\n ///   \n /// </example>"
                         flavor 3))
 
                  ;; The preceding word closed the example section.  In this
@@ -2334,7 +2343,7 @@ your `csharp-mode-hook' function:
                     (if (string-equal word-back "remarks")
                         (setq spacer (concat spacer "   ")))
 
-                    (setq text-to-insert (format "/%s<para>\n///%s  \n///%s</para>"
+                    (setq text-to-insert (format "/%s<para>\n ///%s  \n ///%s</para>"
                                                  spacer spacer spacer)
                           flavor 6)))
 
@@ -2571,11 +2580,18 @@ are the string substitutions (see `format')."
 
         res))))
 
+(advice-add 'c-inside-bracelist-p
+            :around 'csharp-inside-bracelist-or-c-inside-bracelist-p)
 
+(defun csharp-inside-bracelist-or-c-inside-bracelist-p (command &rest args)
+  "Run `csharp-inside-bracelist-p' if in `csharp-mode'.
 
+Otherwise run `c-inside-bracelist-p'."
+  (if (eq major-mode 'csharp-mode)
+      (csharp-inside-bracelist-p (nth 0 args) (nth 1 args))
+    (apply command args)))
 
-
-(defun c-inside-bracelist-p (containing-sexp paren-state)
+(defun csharp-inside-bracelist-p (containing-sexp paren-state)
   ;; return the buffer position of the beginning of the brace list
   ;; statement if we're inside a brace list, otherwise return nil.
   ;; CONTAINING-SEXP is the buffer pos of the innermost containing
@@ -2611,13 +2627,19 @@ are the string substitutions (see `format')."
                               (c-safe (c-forward-sexp -1))
                               (looking-at csharp-enum-decl-re))
 
-                            ;; no need to forward when looking here, because enum
-                            ;; check already did it!
+                            ;; type-initializers are not properly detected and
+                            ;; indented unless we help out. (no need to forward
+                            ;; when looking here, because enum-check already did
+                            ;; it!)
                             (looking-at csharp-type-initializer-statement-re))))
 
                   (setq bracepos (c-down-list-forward (point)))
-                  (not (c-crosses-statement-barrier-p (point)
-                                                      (- bracepos 2))))
+                  (or
+                   (not (c-crosses-statement-barrier-p (point)
+                                                       (- bracepos 2)))
+                   ;; this little hack (combined with the regexp-check above)
+                   ;; fixes indentation for all type-initializers.
+                   (c-major-mode-is 'csharp-mode)))
              (point)))))
 
    ;; this will pick up array/aggregate init lists, even if they are nested.
@@ -2914,7 +2936,7 @@ The mode provides fontification and indent for C# syntax, as well
 as some other handy features.
 
 At mode startup, there are two interesting hooks that run:
-`c-mode-common-hook' is run with no args, then `csharp-mode-hook' is run after
+`prog-mode-hook' is run with no args, then `csharp-mode-hook' is run after
 that, also with no args.
 
 To run your own logic after csharp-mode starts, do this:
@@ -2961,20 +2983,21 @@ Key bindings:
   ;; customized values for our language.
   (c-init-language-vars csharp-mode)
 
-  ;; Set style to c# style unless a file local variable or default
-  ;; style is found, in which case it should be set after
-  ;; calling `c-common-init' below.
-  (unless (or c-file-style
-              (stringp c-default-style)
-              (assq 'csharp-mode c-default-style))
-    (c-set-style "C#"))
-
-  ;; `c-common-init' initializes most of the components of a CC Mode
-  ;; buffer, including setup of the mode menu, font-lock, etc.
-  ;; There's also a lower level routine `c-basic-common-init' that
-  ;; only makes the necessary initialization to get the syntactic
-  ;; analysis and similar things working.
-  (c-common-init 'csharp-mode)
+  ;; Use our predefined "C#" style unless a file local or default
+  ;; style is found. This is done by rebinding `c-default-style'
+  ;; during the `c-common-init' call. 'c-common-init' will initialize
+  ;; the buffer's style using the value of `c-default-style'.
+  (let ((c-default-style (if (or c-file-style
+                                 (stringp c-default-style)
+                                 (assq 'csharp-mode c-default-style))
+                             c-default-style
+                           "C#")))
+    ;; `c-common-init' initializes most of the components of a CC Mode
+    ;; buffer, including setup of the mode menu, font-lock, etc.
+    ;; There's also a lower level routine `c-basic-common-init' that
+    ;; only makes the necessary initialization to get the syntactic
+    ;; analysis and similar things working.
+    (c-common-init 'csharp-mode))
 
   (define-key csharp-mode-map (kbd "/") 'csharp-maybe-insert-codedoc)
 
