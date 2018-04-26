@@ -95,7 +95,8 @@
   (interactive)
   (kill-all-matching (lambda (buffer)
 		       (not (string-match "^*" (buffer-name buffer)))))
-  (dvc-kill-all-buffers)
+  (when (fboundp 'dvc-kill-all-buffers)
+    (dvc-kill-all-buffers))
   (switch-to-buffer "*scratch*")
   (delete-other-windows))
 
