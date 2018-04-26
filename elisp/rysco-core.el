@@ -17,22 +17,42 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/go-mode/")
 (add-to-list 'load-path "~/ryscomacs/elisp/kodi/")
 (add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
-(add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
+;; (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
 (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
 (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
 (add-to-list 'load-path "~/ryscomacs/elisp/powerline")
 (add-to-list 'load-path "~/ryscomacs/elisp/dired-hacks/")
+(add-to-list 'load-path "~/ryscomacs/elisp/magit/magit/lisp")
+(add-to-list 'load-path "~/ryscomacs/elisp/magit/magit-popup")
+(add-to-list 'load-path "~/ryscomacs/elisp/magit/with-editor")
+(add-to-list 'load-path "~/ryscomacs/elisp/magit/ghub")
+(add-to-list 'load-path "~/ryscomacs/elisp/monky")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (require 'rysco-util)
 (require 'async)
-(require 'dvc-autoloads)
-(require 'dvc-helpers)
+;; (require 'dvc-autoloads)
+;; (require 'dvc-helpers)
 
-;; (if enableP4
-;;     (require 'p4))
+(autoload 'magit-status "magit" nil t)
+
+(require 'monky)
+;(setq monky-process-type 'cmdserver)
+
+(add-hook 'monky-mode-hook
+          (lambda ()
+            (set-face-attribute
+             'monky-section-title nil :foreground "#F92672" :height 1.2 :underline t)
+            (set-face-attribute
+             'monky-diff-add nil :background "grey18" :foreground "cyan3")
+            (set-face-attribute
+             'monky-diff-del nil :background "grey13" :foreground "yellow3")
+            (set-face-attribute
+             'monky-diff-title nil :background "darkgreen" :box t :foreground "white")
+            (set-face-attribute
+             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")))
 
 (require 'expand-region)
 (require 'multi)
@@ -174,7 +194,7 @@
 (setq markdown-asymmetric-header t)
 (setq markdown-header-scaling t)
 (setq markdown-command "pandoc --smart -r markdown_github -w html")
-(setq dvc-tips-enabled nil)
+;; (setq dvc-tips-enabled nil)
 (setq graphviz-dot-auto-indent-on-braces nil)
 (setq graphviz-dot-auto-indent-on-semi nil)
 (setq graphviz-dot-auto-indent-on-newline nil)
@@ -327,12 +347,12 @@
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
 
-(eval-after-load "dvc-diff"
-  '((lambda ()
-     (define-key dvc-diff-mode-map "m" 'dvc-diff-mark-file-dwim)
-     (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim)
-     (define-key dvc-diff-mode-map "s" 'dvc-diff-mark-files-subdirectory)
-     (define-key dvc-diff-mode-map "f" 'dvc-diff-unmark-files-subdirectory))))
+;; (eval-after-load "dvc-diff"
+;;   '((lambda ()
+;;      (define-key dvc-diff-mode-map "m" 'dvc-diff-mark-file-dwim)
+;;      (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim)
+;;      (define-key dvc-diff-mode-map "s" 'dvc-diff-mark-files-subdirectory)
+;;      (define-key dvc-diff-mode-map "f" 'dvc-diff-unmark-files-subdirectory))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
