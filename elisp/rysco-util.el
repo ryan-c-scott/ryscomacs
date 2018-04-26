@@ -200,5 +200,16 @@
             (goto-char (point-min))
             (replace-regexp key value)))))
 
+(defun rysco-repo-status ()
+  "Run either `monky-status' or `magit-status' for hg or git repositories respectively"
+  (interactive)
+  (cond
+   ((vc-find-root "." ".hg")
+    (monky-status))
+   ((vc-find-root "." ".git")
+    (magit-status))
+   (t
+    (message "Not a git or hg repository"))))
+   
 ;;
 (provide 'rysco-util)
