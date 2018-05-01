@@ -27,6 +27,7 @@
 (require 'cl)
 (require 'cl-lib)
 (require 'bindat)
+(require 'json)
 
 (defgroup monky nil
   "Controlling Hg from Emacs."
