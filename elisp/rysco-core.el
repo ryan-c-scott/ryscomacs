@@ -54,9 +54,11 @@
             (set-face-attribute
              'monky-diff-hunk-header nil :background "grey18" :foreground "purple")
             (set-face-attribute
+             'monky-log-sha1 nil :background nil :foreground "yellow")
+            (set-face-attribute
              'monky-log-author nil :background nil :foreground "grey55" :slant 'italic)
             (set-face-attribute
-             'monky-log-head-label-local nil :background nil :foreground "sky blue")
+             'monky-log-head-label-local nil :background nil :foreground "sky blue" :slant 'italic)
             (set-face-attribute
              'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)))
 
