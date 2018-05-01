@@ -354,6 +354,7 @@ refreshes buffers."
   "Variable to store parsed hello message.")
 
 (monky-def-permanent-buffer-local monky-root-dir)
+(monky-def-permanent-buffer-local monky-diff-set)
 
 (defun monky-cmdserver-sentinel (proc change)
   (unless (memq (process-status proc) '(run stop))
@@ -1844,7 +1845,7 @@ before the last command."
 
 (defun monky-insert-diff (file &optional status cmd)
   (let ((p (point)))
-    (monky-hg-insert (list (or cmd "diff") file))
+    (insert (cdr (assoc (substitute-in-file-name file) monky-diff-set)))
     (if (not (eq (char-before) ?\n))
         (insert "\n"))
     (save-restriction
@@ -1883,6 +1884,14 @@ before the last command."
          (monky-with-section file 'diff
            (monky-insert-diff file status)))))))
 
+(defun monky-get-all-diffs ()
+  "Retrieves all tracked file diffs as an alist via `hg diff'"
+  (interactive)
+  (let ((raw (monky-hg-output (list "diff"))))
+    (cl-loop for diff in (s-split "^diff -" raw t) collect
+             (cons
+              (cl-caddr (s-match "^[a-z] \\([0-9a-z]+\\) \\(.*?\\)$" diff))
+              (concat "diff -" diff)))))
 
 (defun monky-insert-changes ()
   (let ((monky-hide-diffs t))
@@ -1993,6 +2002,8 @@ before the last command."
             (monky-insert-resolved-files))
         (monky-insert-untracked-files)
         (monky-insert-missing-files)
+
+        (setq monky-diff-set (monky-get-all-diffs))
         (monky-insert-changes)
         (monky-insert-staged-changes)))))
 
