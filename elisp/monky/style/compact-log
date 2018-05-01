@@ -1,0 +1,5 @@
+changeset = '\{"rev":"{rev}","branches":[{branches}],"tags":[{tags}],"bookmarks":[{bookmarks}],"date":"{date|age}","author":"{author|person}","msg":"{desc|firstline|strip|escape}"},'
+
+branch = '"{branch|escape}",'
+bookmark = '"{bookmark|escape}",'
+tag = '"{tag|escape}",'

@@ -211,11 +211,6 @@ Many Monky faces inherit from this one by default."
   "Face for tag labels shown in log buffer."
   :group 'monky-faces)
 
-(defface monky-queue-patch
-  '((t :weight bold :inherit (monky-header highlight)))
-  "Face for patch name"
-  :group 'monky-faces)
-
 (defface monky-log-head-label-bookmarks
   '((((class color) (background light))
      :box t
@@ -243,42 +238,6 @@ Many Monky faces inherit from this one by default."
 (defface monky-log-date
   '((t :weight bold :inherit monky-header))
   "Face for date in log."
-  :group 'monky-faces)
-
-(defface monky-queue-active
-  '((((class color) (background light))
-     :box t
-     :background "light green"
-     :foreground "dark olive green")
-    (((class color) (background dark))
-     :box t
-     :background "light green"
-     :foreground "dark olive green"))
-  "Face for active patch queue"
-  :group 'monky-faces)
-
-(defface monky-queue-positive-guard
-  '((((class color) (background light))
-     :box t
-     :background "light green"
-     :foreground "dark olive green")
-    (((class color) (background dark))
-     :box t
-     :background "light green"
-     :foreground "dark olive green"))
-  "Face for queue postive guards"
-  :group 'monky-faces)
-
-(defface monky-queue-negative-guard
-  '((((class color) (background light))
-     :box t
-     :background "IndianRed1"
-     :foreground "IndianRed4")
-    (((class color) (background dark))
-     :box t
-     :background "IndianRed1"
-     :foreground "IndianRed4"))
-  "Face for queue negative guards"
   :group 'monky-faces)
 
 (defvar monky-mode-hook nil
@@ -1693,6 +1652,9 @@ before the last command."
 (defvar monky-hg-style-log-graph
   (monky-get-style-path "log-graph"))
 
+(defvar monky-hg-style-compact-log
+  (monky-get-style-path "compact-log"))
+
 (defvar monky-hg-style-files
   (monky-get-style-path "files"))
 
@@ -1974,6 +1936,40 @@ before the last command."
     (monky-hg-section 'merged "Merged Files:" #'monky-wash-merged-files
                       "resolve" "--list")))
 
+;;; Commits
+(defun monky-wash-recent-commits ()
+  (let ((data
+         (json-read-from-string
+          (concat "[" (substring (buffer-string) 0 -1) "]"))))
+    (delete-region (point-min) (point-max))
+
+    (cl-loop for entry across data do
+             (let ((rev (cdr (assoc 'rev entry)))
+                   (msg (cdr (assoc 'msg entry)))
+                   (date (cdr (assoc 'date entry)))
+                   (author (cdr (assoc 'author entry)))
+                   (branches (cdr (assoc 'branches entry)))
+                   (tags (cdr (assoc 'tags entry))))
+
+               (monky-with-section rev 'commit
+                 (insert (propertize rev 'face 'monky-log-sha1) " ")
+
+                 (cl-loop for branch across branches do
+                          (insert (propertize branch 'face 'monky-log-head-label-local) " "))
+                 
+                 (cl-loop for tag across tags do
+                          (insert (propertize tag 'face 'monky-log-head-label-tags) " "))
+
+                 (insert (propertize (monky-decode-xml-entities msg) 'face 'monky-log-message) " ")
+                 (insert (propertize (format "(%s by %s)\n" date author)
+                                     'face 'monky-log-author))
+                 (monky-set-section-info rev))))))
+
+(defun monky-insert-recent-commits ()
+  (monky-hg-section 'recent "Recent commits:" #'monky-wash-recent-commits
+                    "log" "-l" "10" "--style" monky-hg-style-compact-log))
+
+
 ;;; UnModified Files
 
 (defun monky-wash-unmodified-files ()
@@ -1996,6 +1992,8 @@ before the last command."
   (monky-create-buffer-sections
     (monky-with-section 'status nil
       (monky-insert-parents)
+      (monky-insert-recent-commits)
+      
       (if (monky-merge-p)
           (progn
             (monky-insert-merged-files)
