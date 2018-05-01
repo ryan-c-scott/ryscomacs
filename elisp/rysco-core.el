@@ -52,7 +52,11 @@
             (set-face-attribute
              'monky-diff-title nil :background "darkgreen" :box t :foreground "white")
             (set-face-attribute
-             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")))
+             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")
+            (set-face-attribute
+             'monky-log-author nil :background nil :foreground "grey55")
+            (set-face-attribute
+             'monky-log-head-label-local nil :background nil :foreground "sky blue")))
 
 (require 'expand-region)
 (require 'multi)
