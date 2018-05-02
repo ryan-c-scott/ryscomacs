@@ -62,7 +62,7 @@
             (set-face-attribute
              'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)
             (set-face-attribute
-             'monky-log-head-label-phase nil :foreground "Darkolivegreen4" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
+             'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
 
 (require 'expand-region)
 (require 'multi)
