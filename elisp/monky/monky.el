@@ -1946,6 +1946,7 @@ before the last command."
 
     (cl-loop for entry across data do
              (let ((rev (cdr (assoc 'rev entry)))
+                   (phase (cdr (assoc 'phase entry)))
                    (msg (cdr (assoc 'msg entry)))
                    (date (cdr (assoc 'date entry)))
                    (author (cdr (assoc 'author entry)))
@@ -1962,8 +1963,13 @@ before the last command."
                           (insert (propertize tag 'face 'monky-log-head-label-tags) " "))
 
                  (insert (propertize (monky-decode-xml-entities msg) 'face 'monky-log-message) " ")
-                 (insert (propertize (format "(%s by %s)\n" date author)
+                 (insert (propertize (format "(%s by %s) " date author)
                                      'face 'monky-log-author))
+
+                 (when (not (equal phase "public"))
+                   (insert (propertize phase 'face 'monky-log-head-label-phase) " "))
+
+                 (insert "\n")
                  (monky-set-section-info rev))))))
 
 (defun monky-insert-recent-commits ()
