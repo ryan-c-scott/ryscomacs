@@ -192,6 +192,7 @@
 (setq projectile-tags-command "ctags -Re --exclude='\.svn' --extra=q -f \"%s\" %s")
 (helm-projectile-on)
 ;(setq projectile-enable-caching t)
+(setq helm-grep-ag-command "rg --color=always --smart-case --no-heading --line-number %s %s %s")
 
 (when (string-equal system-type "windows-nt")
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
