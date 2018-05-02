@@ -1993,7 +1993,6 @@ before the last command."
   (monky-create-buffer-sections
     (monky-with-section 'status nil
       (monky-insert-parents)
-      (monky-insert-recent-commits)
       
       (if (monky-merge-p)
           (progn
@@ -2004,7 +2003,8 @@ before the last command."
 
         (setq monky-diff-set (monky-get-all-diffs))
         (monky-insert-changes)
-        (monky-insert-staged-changes)))))
+        (monky-insert-staged-changes))
+      (monky-insert-recent-commits))))
 
 (define-minor-mode monky-status-mode
   "Minor mode for hg status.
