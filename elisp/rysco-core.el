@@ -84,8 +84,7 @@
 (require 'dired-filter)
 (add-hook 'dired-mode-hook (lambda ()
                              (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
-                             (local-set-key (kbd "<tab>") 'dired-subtree-toggle)
-                             (dired-collapse-mode)))
+                             (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
 
 (setq dired-filter-group-saved-groups
       `(("default"
