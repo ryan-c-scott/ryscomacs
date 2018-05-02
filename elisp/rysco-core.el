@@ -17,7 +17,6 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/go-mode/")
 (add-to-list 'load-path "~/ryscomacs/elisp/kodi/")
 (add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
-;; (add-to-list 'load-path "~/ryscomacs/elisp/dvc/lisp")
 (add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
 (add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
 (add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
@@ -33,8 +32,6 @@
 ;; requires
 (require 'rysco-util)
 (require 'async)
-;; (require 'dvc-autoloads)
-;; (require 'dvc-helpers)
 
 (autoload 'magit-status "magit" nil t)
 
@@ -206,7 +203,6 @@
 (setq markdown-asymmetric-header t)
 (setq markdown-header-scaling t)
 (setq markdown-command "pandoc --smart -r markdown_github -w html")
-;; (setq dvc-tips-enabled nil)
 (setq graphviz-dot-auto-indent-on-braces nil)
 (setq graphviz-dot-auto-indent-on-semi nil)
 (setq graphviz-dot-auto-indent-on-newline nil)
@@ -265,6 +261,7 @@
 	     ;; for hide/show support
 	     ;; (hs-minor-mode 1)
 	     ;; (setq hs-isearch-open t)
+             (semantic-mode t)
 	     (c-set-style "c#")
 	     (setq indent-tabs-mode nil)
 	     (setq tab-width 4)
@@ -358,13 +355,6 @@
   (set-face-attribute
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
-
-;; (eval-after-load "dvc-diff"
-;;   '((lambda ()
-;;      (define-key dvc-diff-mode-map "m" 'dvc-diff-mark-file-dwim)
-;;      (define-key dvc-diff-mode-map "u" 'dvc-diff-unmark-file-dwim)
-;;      (define-key dvc-diff-mode-map "s" 'dvc-diff-mark-files-subdirectory)
-;;      (define-key dvc-diff-mode-map "f" 'dvc-diff-unmark-files-subdirectory))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
