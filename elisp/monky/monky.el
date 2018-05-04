@@ -315,6 +315,7 @@ refreshes buffers."
 
 (monky-def-permanent-buffer-local monky-root-dir)
 (monky-def-permanent-buffer-local monky-diff-set)
+(monky-def-permanent-buffer-local monky-output-cache)
 
 (defun monky-cmdserver-sentinel (proc change)
   (unless (memq (process-status proc) '(run stop))
@@ -584,7 +585,7 @@ FUNC should leave point at the end of the modified region"
     (define-key map (kbd "TAB") 'monky-toggle-section)
     (define-key map (kbd "SPC") 'monky-show-item-or-scroll-up)
     (define-key map (kbd "DEL") 'monky-show-item-or-scroll-down)
-    (define-key map (kbd "g") 'monky-refresh)
+    (define-key map (kbd "g") 'monky-refresh-full)
     (define-key map (kbd "$") 'monky-display-process)
     (define-key map (kbd ":") 'monky-hg-command)
     (define-key map (kbd "l l") 'monky-log-current-branch)
@@ -779,7 +780,10 @@ CMD is an external command that will be run with ARGS as arguments"
                       (if buffer-title
                           (insert (propertize buffer-title 'face 'monky-section-title) "\n"))
                       (setq body-beg (point))
-                      (apply 'monky-process-file cmd nil t nil args)
+                      (--if-let (monky-hg-get-cached-output (cons cmd args))
+                          (insert it)
+                        (apply 'monky-process-file cmd nil t nil args)
+                        (monky-hg-cache-output (cons cmd args) (buffer-substring body-beg (point))))
                       (if (not (eq (char-before) ?\n))
                           (insert "\n"))
                       (if washer
@@ -1129,6 +1133,7 @@ IF FLAG-OR-FUNC is a Boolean value, the section will be hidden if its true, show
 (defun monky-hg-command (command)
   "Perform arbitrary Hg COMMAND."
   (interactive "sRun hg like this: ")
+  (monky-hg-clear-cache)
   (let ((args (monky-parse-args command))
         (monky-process-popup-time 0))
     (monky-with-refresh
@@ -1228,8 +1233,10 @@ With a prefix argument, visit in other window."
   (interactive)
   (monky-section-action (item info "stage")
     ((untracked file)
+     (monky-hg-clear-cache)
      (monky-run-hg "add" info))
     ((untracked)
+     (monky-hg-clear-cache)
      (monky-run-hg "add"))
     ((missing file)
      (monky-run-hg "remove" "--after" info))
@@ -1279,10 +1286,12 @@ With a prefix argument, visit in other window."
 (defun monky-pull ()
   "Run hg pull."
   (interactive)
+  (monky-hg-clear-cache)
   (let ((remote (if current-prefix-arg
                     (monky-read-remote "Pull from : ")
                   monky-incoming-repository)))
-    (monky-run-hg-async "pull" remote)))
+    (monky-run-hg-async "pull" remote))
+  (monky-hg-clear-cache))
 
 (defun monky-remotes ()
   (mapcar #'car (monky-hg-config-section "paths")))
@@ -1305,23 +1314,28 @@ With a prefix argument, visit in other window."
                      (monky-read-remote
                       (format "Push branch %s to : " branch))
                    monky-outgoing-repository)))
-    (monky-run-hg-async "push" "--branch" branch remote)))
+    (monky-run-hg-async "push" "--branch" branch remote))
+  (monky-hg-clear-cache))
 
 (defun monky-checkout (node)
   (interactive (list (monky-read-revision "Update to : ")))
+  (monky-hg-clear-cache)
   (monky-run-hg "update" node))
 
 (defun monky-reset-tip ()
   (interactive)
   (when (yes-or-no-p "Discard all uncommitted changes? ")
-      (monky-run-hg "update" "--clean")))
+    (monky-hg-clear-cache)
+    (monky-run-hg "update" "--clean")))
 
 (defun monky-addremove-all ()
   (interactive)
+  (monky-hg-clear-cache)
   (monky-run-hg "addremove"))
 
 (defun monky-rollback ()
   (interactive)
+  (monky-hg-clear-cache)
   (monky-run-hg "rollback"))
 
 ;;; Merging
@@ -1349,11 +1363,13 @@ With a prefix argument, visit in other window."
 (defun monky-backout (revision)
   "Runs hg backout."
   (interactive (list (monky-read-revision "Backout : ")))
+  (monky-hg-clear-cache)
   (monky-pop-to-log-edit 'backout revision))
 
 (defun monky-backout-item ()
   "Backout the revision represented by current item."
   (interactive)
+  (monky-hg-clear-cache)
   (monky-section-action (item info "backout")
     ((log commits commit)
      (monky-backout info))))
@@ -1389,10 +1405,13 @@ With a prefix argument, visit in other window."
        (delete-file info)
        (monky-refresh-buffer)))
     ((changes diff)
+     (monky-hg-clear-cache)
      (monky-revert-file (monky-diff-item-file item)))
     ((staged diff)
+     (monky-hg-clear-cache)
      (monky-revert-file (monky-diff-item-file item)))
     ((missing file)
+     (monky-hg-clear-cache)
      (monky-revert-file info))))
 
 (defun monky-quit-window (&optional kill-buffer)
@@ -1442,13 +1461,21 @@ buffer instead."
     (setq monky-refresh-needing-buffers
           (adjoin buffer monky-refresh-needing-buffers))))
 
-(defun monky-refresh ()
+(defun monky-refresh (&optional no-cache)
   "Refresh current buffer to match repository state.
 Also revert every unmodified buffer visiting files
 in the corresponding directory."
   (interactive)
+
+  (when no-cache
+    (monky-hg-clear-cache))
+  
   (monky-with-refresh
     (monky-need-refresh)))
+
+(defun monky-refresh-full ()
+  (interactive)
+  (monky-refresh t))
 
 (defun monky-refresh-buffer (&optional buffer)
   (with-current-buffer (or buffer (current-buffer))
@@ -1557,18 +1584,38 @@ before the last command."
 (defun monky-hg-insert (args)
   (insert (monky-hg-output args)))
 
+(defun monky-hg-get-cached-output (args)
+  (when (and args monky-output-cache)
+    (gethash (apply 'concat args) monky-output-cache)))
+
+(defun monky-hg-cache-output (args output)
+  (unless monky-output-cache
+    (setq monky-output-cache (make-hash-table :test 'equal)))
+  
+  (if args
+      (puthash (apply 'concat args) output monky-output-cache)
+    output))
+
+(defun monky-hg-clear-cache ()
+  (unless monky-output-cache
+    (setq monky-output-cache (make-hash-table :test 'equal)))
+  (clrhash monky-output-cache))
+
 (defun monky-hg-output (args)
-  (monky-with-temp-file stderr
-    (save-current-buffer
-      (with-temp-buffer
-        (unless (eq 0 (apply #'monky-process-file
-                             monky-hg-executable
-                             nil (list t stderr) nil
-                             (append monky-hg-standard-options args)))
-          (error (with-temp-buffer
-                   (insert-file-contents stderr)
-                   (buffer-string))))
-        (buffer-string)))))
+  (--if-let (monky-hg-get-cached-output args)
+      it
+    ;;
+    (monky-with-temp-file stderr
+      (save-current-buffer
+        (with-temp-buffer
+          (unless (eq 0 (apply #'monky-process-file
+                               monky-hg-executable
+                               nil (list t stderr) nil
+                               (append monky-hg-standard-options args)))
+            (error (with-temp-buffer
+                     (insert-file-contents stderr)
+                     (buffer-string))))
+          (monky-hg-cache-output args (buffer-string)))))))
 
 (defun monky-hg-string (&rest args)
   (monky-trim-line (monky-hg-output args)))
@@ -2508,6 +2555,7 @@ With a non numeric prefix ARG, show all entries"
   (interactive)
   (if (not (or monky-staged-files (monky-merge-p)))
       (error "Nothing staged")
+    (monky-hg-clear-cache)
     (monky-pop-to-log-edit 'commit)))
 
 (defun monky-commit-amend ()
@@ -2515,6 +2563,7 @@ With a non numeric prefix ARG, show all entries"
 Brings up a buffer to allow editing of commit message."
   (interactive)
   ;; get last commit message
+  (monky-hg-clear-cache)
   (with-current-buffer (get-buffer-create monky-log-edit-buffer-name)
     (monky-hg-insert
      (list "log"
