@@ -423,13 +423,14 @@
 (global-set-key (kbd (concat rysco-lead-key " <RET>")) 'helm-resume)
 (global-set-key (kbd (concat rysco-lead-key " s")) 'helm-occur)
 (global-set-key (kbd (concat rysco-lead-key " y")) 'helm-show-kill-ring)
+(global-set-key (kbd (concat rysco-lead-key " v")) 'rysco-revert-buffer)
 
 (global-set-key (kbd (concat rysco-lead-key " <right>")) 'split-window-right)
 (global-set-key (kbd (concat rysco-lead-key " <down>")) 'split-window-below)
 (global-set-key (kbd (concat rysco-lead-key " <left>")) 'delete-window)
 (global-set-key (kbd (concat rysco-lead-key " <up>")) 'delete-other-windows)
 
-;; Testing:  Experimental home-row bindings for rysco features
+;; Home-row bindings for rysco features (dvorak)
 (global-set-key (kbd (concat rysco-lead-key " g")) 'delete-window)
 (global-set-key (kbd (concat rysco-lead-key " r")) 'delete-other-windows)
 

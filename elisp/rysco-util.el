@@ -105,11 +105,11 @@
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
 
-;; (defun kill-p4-buffers ()
-;;   "Kill all *P4 buffers"
-;;   (interactive)
-;;   (kill-all-matching (lambda (buffer)
-;; 		       (string-match "^*P4 " (buffer-name buffer)))))
+(defun rysco-revert-buffer ()
+    "Revert buffer, prompting if it has been modified."
+    (interactive)
+    (when (or (not (buffer-modified-p)) (yes-or-no-p "Revert Buffer?"))
+      (revert-buffer :ignore-auto :noconfirm)))
 
 (defun markdown-toc ()
   (interactive)
