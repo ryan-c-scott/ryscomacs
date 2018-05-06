@@ -1861,7 +1861,7 @@ to the beginning of the prior namespace."
                         ;; we MUST require modifiers, or else we cannot reliably
                         ;; identify declarations, without also dragging in lots of
                         ;; if statements and what not.
-                        access-modifier-list "+"
+                        access-modifier-list "*"
                         return-type space
                         "\\("
                         type
