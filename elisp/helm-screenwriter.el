@@ -43,12 +43,15 @@
 
 ;;; Code:
 
+(require 'screenwriter)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar helm-screenwriter-regex-slugline "^\\([[:upper:]][[:upper:]\s\.'\"/-]+\\)$")
 (defvar helm-screenwriter-regex-action "^[^[:space:]]+")
 (defvar helm-screenwriter-regex-transition "^				\s*\\(.*\\)")
 (defvar helm-screenwriter-regex-actor "^		    \\([^[:space:]].*?\\)\\($\\|(\\)")
 (defvar helm-screenwriter-regex-dialogue "^	  [^[:space:]]")
+(defvar helm-screenwriter-buffer)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun helm-screenwriter-get-characters ()
@@ -106,7 +109,7 @@
   (helm-screenwriter-move-previous helm-screenwriter-regex-actor))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq helm-scrn-character-source
+(defconst helm-scrn-character-source
       `(((name . "Screenwriter Characters")
 	(init . (lambda ()
 		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
@@ -118,7 +121,7 @@
 	 (dummy)
 	 (action . (("Create" . (lambda (candidate) (screenwriter-dialog-block (upcase candidate)))))))))
 
-(setq helm-scrn-transition-source
+(defconst helm-scrn-transition-source
       `(((name . "Screenwriter transitions")
 	(init . (lambda ()
 		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
@@ -130,7 +133,7 @@
 	 (dummy)
 	 (action . (("Create" . (lambda (candidate) (screenwriter-transition (upcase candidate)))))))))
 
-(setq helm-scrn-slug-source
+(defconst helm-scrn-slug-source
       `(((name . "Screenwriter slugs")
 	(init . (lambda ()
 		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
