@@ -36,10 +36,12 @@
 (autoload 'magit-status "magit" nil t)
 
 (require 'monky)
-;(setq monky-process-type 'cmdserver)
+;; (setq monky-process-type 'cmdserver)
 
 (add-hook 'monky-mode-hook
           (lambda ()
+            (visual-line-mode)
+            
             (set-face-attribute
              'monky-section-title nil :foreground "#F92672" :height 1.2 :underline t)
             (set-face-attribute
