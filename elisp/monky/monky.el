@@ -2168,6 +2168,8 @@ PROPERTIES is the arguments for the function `propertize'."
   (setq str (replace-regexp-in-string "&lt;" "<" str))
   (setq str (replace-regexp-in-string "&gt;" ">" str))
   (setq str (replace-regexp-in-string "&amp;" "&" str))
+  (setq str (replace-regexp-in-string "&quot;" "\"" str))
+  (setq str (replace-regexp-in-string "&apos;" "'" str))
   str)
 
 (defun monky-xml-items-to-list (xml-like tag)
