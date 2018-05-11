@@ -44,6 +44,20 @@
   (buffer-disable-undo)
   (buffer-enable-undo))
 
+(defun rysco-set-buffer-local-font (&optional font-family)
+  "Sets font in current buffer"
+  (interactive)
+  (let ((font-family (or font-family
+                         (helm :sources `(,(helm-build-sync-source "Font Families"
+                                             :candidates (font-family-list)))))))
+    (buffer-face-set `(:family ,font-family))))
+
+(defun rysco-toggle-writing-face ()
+  (interactive)
+  (if (and (boundp 'buffer-face-mode) buffer-face-mode)
+      (buffer-face-mode -1)
+    (rysco-set-buffer-local-font rysco-writing-font)))
+
 (defun replace-regexp-and-return (from to)
   (save-excursion
     (while (re-search-forward from nil t)

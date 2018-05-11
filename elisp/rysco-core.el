@@ -4,10 +4,10 @@
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-capslock-mapped nil)
 (defvar rysco-ssh-config-directories nil)
-;; (defvar enableP4 nil)
 (defvar rysco-lead-key "<escape>")
 (defvar rysco-font "Source Code Pro")
 (defvar rysco-font-size "15.0")
+(defvar rysco-writing-font "Georgia")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
