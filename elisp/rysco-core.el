@@ -199,6 +199,7 @@
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 
 (setq custom-theme-directory "~/ryscomacs/themes/")
+(setq org-export-allow-bind-keywords t)
 (setq org-log-done 'time)
 (setq org-enforce-todo-dependencies t)
 (setq markdown-asymmetric-header t)
