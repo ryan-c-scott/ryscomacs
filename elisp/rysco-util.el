@@ -162,10 +162,10 @@
       (org-display-all-todo-item)
       (message "No need to archive"))))
 
-(defun rysco-org-export-writing-outline ()
+(defun rysco-org-export-writing-outline (&optional arg)
   "Exports the current org file to a master export (in org format) by traversing any headings tagged `:outline:' and outputing `\#+INCLUDE:' for every linked file found.  This is for ease of moving around sections and interspersing those references with notes as needed.
 Normally the outline would also be tagged `:noexport:' so that it will be excluded from the output."
-  (interactive)
+  (interactive "P")
   (let (content)
     (setq content (buffer-string))
     
@@ -182,7 +182,9 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
                               (--if-let (org-element-property :search-option el)
                                   (concat "::" (org-link-unescape it))
                                 "")))))))
-      (org-org-export-to-org))))
+      (if arg
+          (org-org-export-as-org)
+      (org-org-export-to-org)))))
 
 (defun edit-local-config()
   "Open ~/.emacs.d/elisp/localconfig.el"
