@@ -150,7 +150,7 @@
   "Archive all item that have with prefix DONE."
   (interactive)
   (save-excursion
-    (show-all)
+    (outline-show-all)
     (goto-char (point-min))
     (if (search-forward-regexp "^[\\*]+ DONE" nil t)
         (progn
@@ -182,9 +182,11 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
                               (--if-let (org-element-property :search-option el)
                                   (concat "::" (org-link-unescape it))
                                 "")))))))
-      (if arg
-          (org-org-export-as-org)
-      (org-org-export-to-org)))))
+
+      (org-mode)
+      (org-export-expand-include-keyword)
+
+      (write-file (org-export-output-file-name ".org")))))
 
 (defun edit-local-config()
   "Open ~/.emacs.d/elisp/localconfig.el"
