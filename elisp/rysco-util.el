@@ -186,7 +186,17 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
       (org-mode)
       (org-export-expand-include-keyword)
 
-      (write-file (org-export-output-file-name ".org")))))
+      (if (not arg)
+          (write-file (org-export-output-file-name ".org"))
+        (let ((content (buffer-string))
+              (buffer (get-buffer-create "*Writing Outline Master Export*")))
+          (with-current-buffer buffer
+            (erase-buffer)
+            (insert content)
+            (org-mode)
+            (read-only-mode)
+            (goto-char (point-min)))
+          (switch-to-buffer-other-window buffer))))))
 
 (defun edit-local-config()
   "Open ~/.emacs.d/elisp/localconfig.el"
