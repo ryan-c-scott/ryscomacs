@@ -166,6 +166,7 @@
   "Exports the current org file to a master export (in org format) by traversing any headings tagged `:outline:' and outputing `\#+INCLUDE:' for every linked file found.  This is for ease of moving around sections and interspersing those references with notes as needed.
 Normally the outline would also be tagged `:noexport:' so that it will be excluded from the output."
   (interactive "P")
+  (require 'ox)
   (let (content)
     (setq content (buffer-string))
     
