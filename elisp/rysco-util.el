@@ -122,8 +122,10 @@
 (defun rysco-revert-buffer ()
     "Revert buffer, prompting if it has been modified."
     (interactive)
-    (when (or (not (buffer-modified-p)) (yes-or-no-p "Revert Buffer?"))
-      (revert-buffer :ignore-auto :noconfirm)))
+    (--when-let (buffer-file-name)
+      (let ((current-pos (point)))
+        (when (find-alternate-file it)
+          (goto-char current-pos)))))
 
 (defun markdown-toc ()
   (interactive)
