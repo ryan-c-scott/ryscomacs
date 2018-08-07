@@ -417,6 +417,7 @@
 (global-set-key "\C-c \t" 'indent-region)
 (global-set-key (kbd "<C-tab>") 'complete-tag)
 (global-set-key "\C-c\C-c" 'rysco-comment-dwim)
+(global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-cj" 'pop-to-mark-command)
 (global-set-key (kbd (concat "<f1> " rysco-lead-key)) 'helm-apropos)
 
