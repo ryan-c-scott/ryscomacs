@@ -27,6 +27,7 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/magit/with-editor")
 (add-to-list 'load-path "~/ryscomacs/elisp/magit/ghub")
 (add-to-list 'load-path "~/ryscomacs/elisp/monky")
+(add-to-list 'load-path "~/ryscomacs/elisp/multiple-cursors.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -73,6 +74,7 @@
 (require 'uniquify)
 (require 'windmove)
 (require 'ispell)
+(require 'multiple-cursors)
 
 (require 'run-assoc)
 (setq associated-program-alist
