@@ -287,6 +287,7 @@
 	  '(lambda ()
 	     (setq indent-tabs-mode nil)
              (setq tab-width 4)
+             (setq js-indent-level 2)
              (local-set-key (kbd "M-.") 'find-tag)))
 
 (add-hook 'json-mode-hook
