@@ -107,7 +107,7 @@
          ("Archives"
           (extension "zip" "rar" "gz" "bz2" "tar" "dmg"))
          ("Source"
-          (extension "py" "c" "cpp" "h" "hpp" "lua" "go" "el" "glsl"))
+          (extension "py" "c" "cpp" "h" "hpp" "lua" "go" "el" "glsl" "rs"))
          ("Exe"
           (extension "exe" "sh" "bat")))))
 
@@ -118,6 +118,7 @@
 (autoload 'json-mode "json-mode" "Major mode for editing json data." t)
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
 (autoload 'php-mode "php-mode" "PHP editing mode." t)
+(autoload 'rust-mode "rust-mode" "RustLang editing mode." t)
 (autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
 (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 (autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
@@ -166,6 +167,7 @@
 	'("\\.csv$" . csv-mode)
         '("\\.dot$" . graphviz-dot-mode)
         '("\\.gv$" . graphviz-dot-mode)
+        '("\\.rs$" . rust-mode)
 		)
        auto-mode-alist))
 
