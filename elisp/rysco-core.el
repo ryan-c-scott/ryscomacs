@@ -243,6 +243,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
+(cl-defmacro rysco-bind-keys (lead &rest bindings)
+  `(progn
+     ,@(cl-loop for (key bind) on bindings by 'cddr collect
+                `(global-set-key
+                  (kbd (concat ,lead " " ,key))
+                  ,bind))))
 
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
@@ -426,34 +432,41 @@
 (global-set-key "\C-cj" 'pop-to-mark-command)
 (global-set-key (kbd (concat "<f1> " rysco-lead-key)) 'helm-apropos)
 
-(global-set-key (kbd (concat rysco-lead-key " f")) 'find-tag)
-(global-set-key (kbd (concat rysco-lead-key " " rysco-lead-key)) 'helm-mini)
-(global-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-semantic-or-imenu)
-(global-set-key (kbd (concat rysco-lead-key " <RET>")) 'helm-resume)
-(global-set-key (kbd (concat rysco-lead-key " s")) 'helm-occur)
-(global-set-key (kbd (concat rysco-lead-key " y")) 'helm-show-kill-ring)
-(global-set-key (kbd (concat rysco-lead-key " v")) 'rysco-revert-buffer)
+(rysco-bind-keys
+ rysco-lead-key
 
-(global-set-key (kbd (concat rysco-lead-key " <right>")) 'split-window-right)
-(global-set-key (kbd (concat rysco-lead-key " <down>")) 'split-window-below)
-(global-set-key (kbd (concat rysco-lead-key " <left>")) 'delete-window)
-(global-set-key (kbd (concat rysco-lead-key " <up>")) 'delete-other-windows)
-
-;; Home-row bindings for rysco features (dvorak)
-(global-set-key (kbd (concat rysco-lead-key " g")) 'delete-window)
-(global-set-key (kbd (concat rysco-lead-key " r")) 'delete-other-windows)
-
-(global-set-key (kbd (concat rysco-lead-key " n")) 'rysco-split-right-dwim)
-(global-set-key (kbd (concat rysco-lead-key " t")) 'rysco-split-down-dwim)
-(global-set-key (kbd (concat rysco-lead-key " h")) 'rysco-split-left-dwim)
-(global-set-key (kbd (concat rysco-lead-key " c")) 'rysco-split-up-dwim)
-
-(global-set-key (kbd (concat rysco-lead-key " /")) 'make-frame)
-(global-set-key (kbd (concat rysco-lead-key " =")) 'delete-frame)
-(global-set-key (kbd (concat rysco-lead-key " \\")) 'other-frame)
+ "f" 'find-tag
+ rysco-lead-key 'helm-mini
+ "SPC" 'helm-semantic-or-imenu
+ "<RET>" 'helm-resume
+ "s" 'helm-occur
+ "y" 'helm-show-kill-ring
+ "v" 'rysco-revert-buffer
+ ;;Windows
+ "<right>" 'split-window-right
+ "<down>" 'split-window-below
+ "<left>" 'delete-window
+ "<up>" 'delete-other-windows
+ ;; Home-row bindings for rysco features (dvorak)
+ "g" 'delete-window
+ "r" 'delete-other-windows
+ "n" 'rysco-split-right-dwim
+ "t" 'rysco-split-down-dwim
+ "h" 'rysco-split-left-dwim
+ "c" 'rysco-split-up-dwim
+ ;; Frames
+ "/" 'make-frame
+ "=" 'delete-frame
+ "\\" 'other-frame)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
+
+;; Multiple-Cursors
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
 ;; Helpers for things that have a lot of muscle memory
 (global-set-key (kbd "<escape>d") 'kill-word)
