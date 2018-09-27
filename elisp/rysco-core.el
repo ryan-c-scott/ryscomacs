@@ -31,6 +31,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
+(setq load-prefer-newer t)
+
 (require 'rysco-util)
 (require 'async)
 
