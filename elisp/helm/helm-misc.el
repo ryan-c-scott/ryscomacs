@@ -1,6 +1,6 @@
 ;;; helm-misc.el --- Various functions for helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2018 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,13 +57,43 @@
 
 
 ;;; Latex completion
+;;
+;; Test
+;; (setq LaTeX-math-menu '("Math"
+;; ["foo" val0 t]
+;; ("bar"
+;; ["baz" val1 t])
+;; ("aze"
+;; ["zer" val2 t])
+;; ("AMS"
+;; ("rec"
+;; ["fer" val3 t])
+;; ("rty"
+;; ["der" val4 t]))
+;; ("ABC"
+;; ("xcv"
+;; ["sdf" val5 t])
+;; ("dfg"
+;; ["fgh" val6 t]))))
+;; (helm-latex-math-candidates)
+;; =>
+;; (("foo" . val0)
+;; ("baz" . val1)
+;; ("zer" . val2)
+;; ("fer" . val3)
+;; ("der" . val4)
+;; ("sdf" . val5)
+;; ("fgh" . val6))
+
 (defvar LaTeX-math-menu)
 (defun helm-latex-math-candidates ()
-  "Collect candidates for latex math completion."
-  (cl-loop for i in (cddr LaTeX-math-menu)
-        for elm = (cl-loop for s in i when (vectorp s)
-                        collect (cons (aref s 0) (aref s 1)))
-        append elm))
+  (cl-labels ((helm-latex--math-collect (L)
+                (cond ((vectorp L)
+                       (list (cons (aref L 0) (aref L 1))))
+                      ((listp L)
+                       (cl-loop for a in L nconc
+                                (helm-latex--math-collect a))))))
+    (helm-latex--math-collect LaTeX-math-menu)))
 
 (defvar helm-source-latex-math
   (helm-build-sync-source "Latex Math Menu"
@@ -99,6 +129,9 @@
 
 ;;; World time
 ;;
+(defvar zoneinfo-style-world-list)
+(defvar legacy-style-world-list)
+
 (defun helm-time-zone-transformer (candidates _source)
   (cl-loop for i in candidates
            for (z . p) in display-time-world-list
@@ -113,7 +146,22 @@
 
 (defvar helm-source-time-world
   (helm-build-in-buffer-source "Time World List"
-    :init (lambda () (require 'time))
+    :init (lambda ()
+            (require 'time)
+            (unless (and display-time-world-list
+                         (listp display-time-world-list))
+              ;; adapted from `time--display-world-list' from
+              ;; emacs-27 for compatibility as
+              ;; `display-time-world-list' is set by default to t.
+              (setq display-time-world-list
+                    ;; Determine if zoneinfo style timezones are
+                    ;; supported by testing that America/New York and
+                    ;; Europe/London return different timezones.
+                    (let ((nyt (format-time-string "%z" nil "America/New_York"))
+                          (gmt (format-time-string "%z" nil "Europe/London")))
+                      (if (string-equal nyt gmt)
+                          legacy-style-world-list
+                        zoneinfo-style-world-list)))))
     :data (lambda ()
             (with-temp-buffer
               (display-time-world-display display-time-world-list)

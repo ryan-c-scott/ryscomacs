@@ -1,6 +1,6 @@
 ;;; helm-grep.el --- Helm Incremental Grep. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2018 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'format-spec)
 (require 'helm)
 (require 'helm-help)
 (require 'helm-regexp)
@@ -27,6 +28,7 @@
 (declare-function helm-buffer-list "helm-buffers")
 (declare-function View-quit "view")
 (declare-function doc-view-goto-page "doc-view" (page))
+(declare-function pdf-view-goto-page "pdf-view" (page &optional window))
 (declare-function helm-mm-split-pattern "helm-multi-match")
 (declare-function helm--ansi-color-apply "helm-lib")
 (defvar helm--ansi-color-regexp)
@@ -144,7 +146,8 @@ e.g In Ubuntu you can set it to:
 
     \"evince --page-label=%p '%f'\"
 
-If set to nil `doc-view-mode' will be used instead of an external command."
+If set to nil either `doc-view-mode' or `pdf-view-mode' will be used
+instead of an external command."
   :group 'helm-grep
   :type  'string)
 
@@ -234,6 +237,12 @@ You probably don't need to use this unless you know what you are doing."
   :group 'helm-grep
   :type 'string)
 
+(defcustom helm-grep-input-idle-delay 0.6
+  "Same as `helm-input-idle-delay' but for grep commands.
+It have a higher value than `helm-input-idle-delay' to avoid
+flickering when updating."
+  :group 'helm-grep
+  :type 'integer)
 
 ;;; Faces
 ;;
@@ -247,7 +256,8 @@ You probably don't need to use this unless you know what you are doing."
 (defface helm-grep-match
   '((((background light)) :foreground "#b00000")
     (((background dark))  :foreground "gold1"))
-  "Face used to highlight grep matches."
+  "Face used to highlight grep matches.
+Have no effect when grep backend use \"--color=\"."
   :group 'helm-grep-faces)
 
 (defface helm-grep-file
@@ -283,6 +293,7 @@ You probably don't need to use this unless you know what you are doing."
     (define-key map (kbd "C-c o")    'helm-grep-run-other-window-action)
     (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
     (define-key map (kbd "C-x C-s")  'helm-grep-run-save-buffer)
+    (define-key map (kbd "DEL")      'helm-delete-backward-no-update)
     (when helm-grep-use-ioccur-style-keys
       (define-key map (kbd "<right>")  'helm-execute-persistent-action)
       (define-key map (kbd "<left>")  'helm-grep-run-default-action))
@@ -294,6 +305,7 @@ You probably don't need to use this unless you know what you are doing."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "M-<down>") 'helm-goto-next-file)
     (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
+    (define-key map (kbd "DEL")      'helm-delete-backward-no-update)
     map)
   "Keymap used in pdfgrep.")
 
@@ -471,11 +483,12 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
                                   "i")))
          (helm-grep-default-command
           (concat helm-grep-default-command " %m")) ; `%m' like multi.
-         (patterns (helm-mm-split-pattern helm-pattern))
+         (patterns (helm-mm-split-pattern helm-pattern t))
          (pipe-switches (mapconcat 'identity helm-grep-pipe-cmd-switches " "))
          (pipes
           (helm-aif (cdr patterns)
-              (cl-loop with pipcom = (helm-grep--pipe-command-for-grep-command smartcase pipe-switches)
+              (cl-loop with pipcom = (helm-grep--pipe-command-for-grep-command
+                                      smartcase pipe-switches)
                        for p in it concat
                        (format " | %s %s" pipcom (shell-quote-argument p)))
             "")))
@@ -611,7 +624,9 @@ WHERE can be one of other-window, other-frame."
       (grep         (helm-grep-save-results-1))
       (pdf          (if helm-pdfgrep-default-read-command
                         (helm-pdfgrep-action-1 split lineno (car split))
-                      (find-file (car split)) (doc-view-goto-page lineno)))
+                      (find-file (car split)) (if (derived-mode-p 'pdf-view-mode)
+                                                  (pdf-view-goto-page lineno)
+                                                (doc-view-goto-page lineno))))
       (t            (find-file fname)))
     (unless (or (eq where 'grep) (eq where 'pdf))
       (helm-goto-line lineno))
@@ -673,6 +688,8 @@ If N is positive go forward otherwise go backward."
         ;; Exit when current-fname is not matched or in `helm-grep-mode'
         ;; the line is not a grep line i.e 'fname:num:tag'.
         (setq sel (buffer-substring (point-at-bol) (point-at-eol)))
+        (when helm-allow-mouse
+          (helm--mouse-reset-selection-help-echo))
         (unless (or (string= current-fname
                              (car (helm-grep-split-line sel)))
                     (and (eq major-mode 'helm-grep-mode)
@@ -1096,6 +1113,7 @@ in recurse, and ignore EXTS, search being made recursively on files matching
      'helm-grep-in-recurse recurse
      'helm-grep-use-zgrep (eq backend 'zgrep)
      'helm-grep-default-command com
+     'helm-input-idle-delay helm-grep-input-idle-delay
      'default-directory helm-ff-default-directory) ;; [1]
     ;; Setup the source.
     (set source (helm-make-source src-name 'helm-grep-class
@@ -1154,7 +1172,13 @@ in recurse, and ignore EXTS, search being made recursively on files matching
          (line   (if ansi-p (helm--ansi-color-apply candidate) candidate))
          (split  (helm-grep-split-line line))
          (fname  (if (and root split)
-                     (expand-file-name (car split) root)
+                     ;; Filename should always be provided as a local
+                     ;; path, if the root directory is remote, the
+                     ;; tramp prefix will be added before executing
+                     ;; action, see `helm-grep-action' and issue #2032.
+                     (expand-file-name (car split)
+                                       (or (file-remote-p root 'localname)
+                                           root))
                    (car-safe split)))
          (lineno (nth 1 split))
          (str    (nth 2 split))
@@ -1421,12 +1445,12 @@ Ripgrep (rg) types are also supported if this backend is used."
   "Prepare AG command line to search PATTERN in DIRECTORY.
 When TYPE is specified it is one of what returns `helm-grep-ag-get-types'
 if available with current AG version."
-  (let* ((patterns (helm-mm-split-pattern pattern))
+  (let* ((patterns (helm-mm-split-pattern pattern t))
          (pipe-switches (mapconcat 'identity helm-grep-ag-pipe-cmd-switches " "))
-         (pipe-cmd (pcase (helm-grep--ag-command)
-                     ((and com (or "ag" "pt"))
-                      (format "%s -S --color%s" com (concat " " pipe-switches)))
-                     (`"rg" (format "rg -N -S --color=always%s"
+         (pipe-cmd (helm-acase (helm-grep--ag-command)
+                     (("ag" "pt")
+                      (format "%s -S --color%s" it (concat " " pipe-switches)))
+                     ("rg" (format "rg -N -S --color=always%s"
                                     (concat " " pipe-switches)))))
          (cmd (format helm-grep-ag-command
                       (mapconcat 'identity type " ")
@@ -1536,6 +1560,7 @@ if available with current AG version."
                                  name (abbreviate-file-name directory)))
           :candidates-process
           (lambda () (helm-grep-ag-init directory type))))
+  (helm-set-local-variable 'helm-input-idle-delay helm-grep-input-idle-delay)
   (helm :sources 'helm-source-grep-ag
         :keymap helm-grep-map
         :history 'helm-grep-ag-history
@@ -1562,7 +1587,7 @@ When WITH-TYPES is non-nil provide completion on AG types."
 (defvar helm-source-grep-git nil)
 
 (defcustom helm-grep-git-grep-command
-  "git --no-pager grep -n%cH --color=always --exclude-standard --no-index --full-name -e %p -- %f"
+  "git --no-pager grep -n%cH --color=always --full-name -e %p -- %f"
   "The git grep default command line.
 The option \"--color=always\" can be used safely.
 The color of matched items can be customized in your .gitconfig
@@ -1570,7 +1595,8 @@ See `helm-grep-default-command' for more infos.
 
 The \"--exclude-standard\" and \"--no-index\" switches allow
 skipping unwanted files specified in ~/.gitignore_global
-and searching files not already staged.
+and searching files not already staged (not enabled by default).
+
 You have also to enable this in global \".gitconfig\" with
     \"git config --global core.excludesfile ~/.gitignore_global\"."
   :group 'helm-grep

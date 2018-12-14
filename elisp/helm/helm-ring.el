@@ -1,6 +1,6 @@
 ;;; helm-ring.el --- kill-ring, mark-ring, and register browsers for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2018 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,11 +46,6 @@ will not have anymore separators between candidates."
           (integer :tag "Max candidate offset"))
   :group 'helm-ring)
 
-(defcustom helm-register-max-offset 160
-  "Max size of string register entries before truncating."
-  :group 'helm-ring
-  :type  'integer)
-
 (defcustom helm-kill-ring-actions
   '(("Yank marked" . helm-kill-ring-action-yank)
     ("Delete marked" . helm-kill-ring-action-delete))
@@ -58,6 +53,15 @@ will not have anymore separators between candidates."
   :group 'helm-ring
   :type '(alist :key-type string :value-type function))
 
+(defcustom helm-kill-ring-separator "\n"
+  "The separator used to separate marked candidates when yanking."
+  :group 'helm-ring
+  :type 'string)
+
+(defcustom helm-register-max-offset 160
+  "Max size of string register entries before truncating."
+  :group 'helm-ring
+  :type  'integer)
 
 ;;; Kill ring
 ;;
@@ -91,10 +95,13 @@ will not have anymore separators between candidates."
   "Source for browse and insert contents of kill-ring.")
 
 (defun helm-kill-ring-candidates ()
-  (cl-loop for kill in (helm-fast-remove-dups kill-ring :test 'equal)
-        unless (or (< (length kill) helm-kill-ring-threshold)
-                   (string-match "\\`[\n[:blank:]]+\\'" kill))
-        collect kill))
+  (cl-loop with cands = (helm-fast-remove-dups kill-ring :test 'equal)
+           for kill in (if (eq (helm-attr 'last-command) 'yank)
+                            (cdr cands)
+                          cands)
+           unless (or (< (length kill) helm-kill-ring-threshold)
+                      (string-match "\\`[\n[:blank:]]+\\'" kill))
+           collect kill))
 
 (defun helm-kill-ring-transformer (candidates _source)
   "Ensure CANDIDATES are not read-only."
@@ -142,16 +149,16 @@ Same as `helm-kill-selection-and-quit' called with a prefix arg."
   "Insert concatenated marked candidates in current-buffer.
 
 When two prefix args are given prompt to choose separator, otherwise
-a new line as default separator is used."
+use `helm-kill-ring-separator' as default."
   (let ((marked (helm-marked-candidates))
         (sep (if (equal helm-current-prefix-arg '(16))
                  (read-string "Separator: ")
-               "\n")))
+               helm-kill-ring-separator)))
     (helm-kill-ring-action-yank-1
      (cl-loop for c in (butlast marked)
               concat (concat c sep) into str
               finally return (concat str (car (last marked)))))))
-  
+
 (defun helm-kill-ring-action-yank-1 (str)
   "Insert STR in `kill-ring' and set STR to the head.
 
@@ -172,6 +179,8 @@ replace with STR as yanked string."
                                   (set-marker (mark-marker)
                                               (point)
                                               helm-current-buffer)))))))
+    ;; Prevent inserting and saving highlighted items.
+    (set-text-properties 0 (length str) nil str)
     (with-helm-current-buffer
       (unwind-protect
            (progn
@@ -269,7 +278,7 @@ This is a command for `helm-kill-ring-map'."
 (defvar helm-source-mark-ring
   (helm-build-sync-source "mark-ring"
     :candidates #'helm-mark-ring-get-candidates
-    :action '(("Goto line" . helm-mark-ring-default-action)) 
+    :action '(("Goto line" . helm-mark-ring-default-action))
     :persistent-help "Show this line"
     :group 'helm-ring))
 
@@ -500,7 +509,9 @@ This command is useful when used with persistent action."
              "Concat marked macros"
              'helm-kbd-macro-concat-macros
              "Delete marked macros"
-             'helm-kbd-macro-delete-macro)
+             'helm-kbd-macro-delete-macro
+             "Edit marked macro"
+             'helm-kbd-macro-edit-macro)
             :group 'helm-ring)
           :buffer "*helm kmacro*")))
 
@@ -519,14 +530,26 @@ This command is useful when used with persistent action."
       (setq last-kbd-macro
             (mapconcat 'identity
                        (cl-loop for km in mkd
-                                collect (car km))
+                                if (vectorp km)
+                                append (cl-loop for k across km collect
+                                                (key-description (vector k)))
+                                into result
+                                else collect (car km) into result
+                                finally return result)
                        "")))))
 
 (defun helm-kbd-macro-delete-macro (_candidate)
   (let ((mkd (helm-marked-candidates)))
+    (kmacro-push-ring)
     (cl-loop for km in mkd
              do (setq kmacro-ring (delete km kmacro-ring)))
     (kmacro-pop-ring1)))
+
+(defun helm-kbd-macro-edit-macro (candidate)
+  (kmacro-push-ring)
+  (setq kmacro-ring (delete candidate kmacro-ring))
+  (kmacro-split-ring-element candidate)
+  (kmacro-edit-macro))
 
 (provide 'helm-ring)
 

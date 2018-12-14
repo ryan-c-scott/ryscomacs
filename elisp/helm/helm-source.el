@@ -1,6 +1,6 @@
 ;;; helm-source.el --- Helm source creation. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 ~ 2017  Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2015 ~ 2018  Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
 ;; URL: http://github.com/emacs-helm/helm
@@ -222,8 +222,8 @@
     :documentation
     "  A string to explain persistent-action of this source. It also
   accepts a function or a variable name.
-  It will be displayed in `header-line'.
-  Have no effect when `helm-echo-input-in-header-line' is non--nil.")
+  It will be displayed in `header-line' or in `minibuffer' depending
+  of value of `helm-echo-input-in-header-line' and `helm-display-header-line'.")
 
    (help-message
     :initarg :help-message
@@ -349,6 +349,15 @@
   Note: This have nothing to do with display-to-real.
   It is unuseful as the same can be performed by using more than
   one function in transformers, it is kept only for backward compatibility.")
+
+   (marked-with-props
+    :initarg :marked-with-props
+    :initform nil
+    :custom (choice boolean symbol)
+    :documentation
+    "  Get candidates with their properties in `helm-marked-candidates'.
+  Allow using the FORCE-DISPLAY-PART of `helm-get-selection' in marked
+  candidates, use t or 'withprop to pass it to `helm-get-selection'.")
 
    (action-transformer
     :initarg :action-transformer
@@ -525,7 +534,8 @@
     :custom (choice string function)
     :documentation
     "  Source local `header-line-format'.
-  Have no effect when `helm-echo-input-in-header-line' is non--nil.
+  It will be displayed in `header-line' or in `minibuffer' depending
+  of value of `helm-echo-input-in-header-line' and `helm-display-header-line'.
   It accepts also variable/function name.")
 
    (resume

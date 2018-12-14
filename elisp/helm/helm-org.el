@@ -1,6 +1,6 @@
 ;;; helm-org.el --- Helm for org headlines and keywords completion -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2018 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ Note this have no effect in `helm-org-in-buffer-headings'."
 (defcustom helm-org-headings-actions
   '(("Go to heading" . helm-org-goto-marker)
     ("Open in indirect buffer `C-c i'" . helm-org--open-heading-in-indirect-buffer)
-    ("Refile heading(s) (multiple-marked-to-selected, or current-to-selected) `C-c w`" . helm-org--refile-heading-to)
+    ("Refile heading(s) (marked-to-selected|current-to-selected) `C-c w`" . helm-org--refile-heading-to)
     ("Insert link to this heading `C-c l`" . helm-org-insert-link-to-heading-at-marker))
   "Default actions alist for
   `helm-source-org-headings-for-files'."
@@ -98,8 +98,8 @@ Note this have no effect in `helm-org-in-buffer-headings'."
   (switch-to-buffer (marker-buffer marker))
   (goto-char (marker-position marker))
   (org-show-context)
-  (re-search-backward "^\\*+ " nil t))
-  ;; (org-show-entry))
+  (re-search-backward "^\\*+ " nil t)
+  (org-show-entry))
 
 (defun helm-org--open-heading-in-indirect-buffer (marker)
   (helm-org-goto-marker marker)
@@ -221,7 +221,7 @@ nothing to CANDIDATES."
           (search-fn (lambda ()
                        (re-search-forward
                         org-complex-heading-regexp nil t)))
-          (file (unless nofname
+          (file (unless (or (bufferp filename) nofname)
                   (concat (helm-basename filename) ":"))))
       (when parents
         (add-function :around (var search-fn)
