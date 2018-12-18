@@ -28,6 +28,7 @@
 (require 'cl-lib)
 (require 'bindat)
 (require 'json)
+(require 'helm-monky)
 
 (defgroup monky nil
   "Controlling Hg from Emacs."
@@ -1752,7 +1753,8 @@ before the last command."
    (monky-with-wash-status status file
      (monky-with-section file 'file
        (monky-set-section-info file)
-       (insert "\t" file "\n")))))
+       (insert "\t" file "\n")
+       (add-to-list 'monky-all-untracked-files file)))))
 
 ;; Hunk
 
@@ -1873,6 +1875,7 @@ before the last command."
 ;;; Untracked files
 
 (defun monky-insert-untracked-files ()
+  (setq monky-all-untracked-files nil)
   (monky-hg-section 'untracked "Untracked files:" #'monky-wash-files
                     "status" "--unknown"))
 
@@ -1888,6 +1891,8 @@ before the last command."
   (monky-wash-sequence
    (monky-with-wash-status status file
      (let ((monky-section-hidden-default monky-hide-diffs))
+       (add-to-list 'monky-all-changed-files file)
+       
        (if (or monky-staged-all-files
                (member file monky-old-staged-files))
            (monky-stage-file file)
@@ -1906,19 +1911,21 @@ before the last command."
 (defun monky-insert-changes ()
   (let ((monky-hide-diffs t))
     (setq monky-old-staged-files (copy-list monky-staged-files))
-    (setq monky-staged-files '())
+    (setq monky-staged-files '()
+          monky-all-changed-files nil)
     (monky-hg-section 'changes "Changes:" #'monky-wash-changes
                       "status" "--modified" "--added" "--removed")))
 
 ;; Staged Changes
 
 (defvar monky-staged-all-files nil)
-(defvar monky-old-staged-files '())
+(monky-def-permanent-buffer-local monky-old-staged-files '())
 (monky-def-permanent-buffer-local monky-staged-files)
+(monky-def-permanent-buffer-local monky-all-changed-files)
+(monky-def-permanent-buffer-local monky-all-untracked-files)
 
 (defun monky-stage-file (file)
-  (if (not (member file monky-staged-files))
-      (setq monky-staged-files (cons file monky-staged-files))))
+  (add-to-list 'monky-staged-files file))
 
 (defun monky-unstage-file (file)
   (setq monky-staged-files (delete file monky-staged-files)))
