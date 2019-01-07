@@ -52,7 +52,8 @@
 	       (powerline-buffer-id face3 'l)
 	       (when (and (boundp 'which-func-mode) which-func-mode)
 		 (powerline-raw which-func-format nil 'l))
-	       (powerline-raw " " face3)
+
+               (powerline-raw " " face3)
 
 	       (funcall separator-left face3 face1)
 	       (when (boundp 'erc-modified-channels-object)
@@ -69,12 +70,18 @@
 	     (rhs
 	      (list
 	       (powerline-raw global-mode-string face2 'r)
+
+               (when (and (boundp 'redtick-mode) redtick-mode (redtick--selected-window-p))
+                 (powerline-raw redtick--current-bar face2))
+	       (powerline-raw " " face2)
+               
 	       (funcall separator-right-secondary face2 face1)
 	       (unless window-system
 	       	 (powerline-raw (char-to-string #xe0a1) face1 'l))
 	       (powerline-raw "%4l " face1 'l)
 	       ;; (powerline-raw ":" face1 'l)
 	       ;; (powerline-raw "%c" face1 'l)
+               
 	       (funcall separator-right face1 mode-line)
 	       (powerline-raw " ")
 	       (powerline-raw "%6p" nil 'r)

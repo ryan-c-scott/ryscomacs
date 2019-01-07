@@ -77,6 +77,7 @@
 (require 'windmove)
 (require 'ispell)
 (require 'multiple-cursors)
+(require 'redtick)
 
 (require 'run-assoc)
 (setq associated-program-alist
