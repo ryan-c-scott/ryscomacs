@@ -39,10 +39,13 @@
   (auto-fill-mode)
   (set-fill-column 80)
 
-  (setq font-lock-defaults
-	`(((,(format "^%s:" (regexp-opt '("KODI" "Playing" "Position" "Streams" "Plot") 'words)) . font-lock-function-name-face)
-	   ("^KODI:.*(\\(.*\\))$" . (1 font-lock-keyword-face)))))
+  (setq
+   cursor-type nil
+   font-lock-defaults
+   `(((,(format "^%s:" (regexp-opt '("KODI" "Playing" "Position" "Streams" "Plot") 'words)) . font-lock-function-name-face)
+      ("^KODI:.*(\\(.*\\))$" . (1 font-lock-keyword-face)))))
 
+  (read-only-mode t)
   (font-lock-mode)
   (kodi-draw-title "Connected"))
 
@@ -51,6 +54,23 @@
   (while keys
       (setq alist (cdr (assoc (pop keys) alist))))
     alist)
+
+(defun kodi-get-query-path (&rest path)
+  (let ((result '())
+        (parts))
+    (mapc (lambda (part)
+            (setq result (append result (s-split "/" part))))
+          path)
+    result))
+
+(defun kodi-query-data (data &rest path)
+  (cl-loop for key in (apply 'kodi-get-query-path path) do
+           (cond
+            ((listp data)
+             (setq data (cdr (assoc-string key data))))
+            ((hash-table-p data)
+             (setq data (gethash key data)))))
+  data)
 
 (defun kodi-process-time (time)
   (let* ((hours (kodi-get '(hours) time))
@@ -363,28 +383,32 @@
 (defun kodi-draw-setup ()
   (interactive)
   ""
-  (with-current-buffer "*kodi-client*" (insert "KODI: .
+  (with-current-buffer "*kodi-client*"
+    (let ((inhibit-read-only t))
+      (insert "KODI: .
 
 Playing: .
 Position: .
 Streams: .
 
-Plot: .")))
+Plot: ."))))
 
 (defun kodi-draw (label value &optional kill-to-end)
   ""
   (with-current-buffer "*kodi-client*"
-    (goto-char (point-min))
-    (search-forward label)
+    (let ((inhibit-read-only t))
+      (goto-char (point-min))
+      (search-forward label)
 
-    (if kill-to-end (delete-region (point) (point-max))
-      (delete-region
-       (point)
-       (progn (end-of-line 1) (point))))
-    
-    (let ((current (point)))
-      (insert "\t" value)
-      (fill-region current (point)))))
+      (if kill-to-end (delete-region (point) (point-max))
+        (delete-region
+         (point)
+         (progn (end-of-line 1) (point))))
+      
+      (let ((current (point)))
+        (insert "\t" value)
+        (fill-region current (point))))
+    (set-buffer-modified-p nil)))
 
 (defun kodi-draw-title (&optional status)
   ""

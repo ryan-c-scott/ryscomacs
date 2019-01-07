@@ -18,22 +18,39 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
 
 (defun helm-kodi-handle-shows (results)
   "Internal input filter callback function that processes show listing results and engages helm with that as a resource."
-  (let ((shows (mapcar (lambda (elt)`( ,(cdr (assoc 'label elt)) . ,(cdr (assoc 'tvshowid elt))))
-                       (cdr (assoc 'tvshows (cdar results))))))
+
+  (let ((shows
+         (cl-loop for entry across (kodi-query-data results "result/tvshows")
+                  collect
+                  (cons
+                   (kodi-query-data entry "label")
+                   (kodi-query-data entry "tvshowid")))))
     (helm :sources '((name . "KODI: Shows")
                      (candidates . shows)
                      (action . (lambda (candidate) (helm-kodi-episodes candidate)))))))
 
 (defun helm-kodi-handle-episodes (results)
   "Internal input filter callback function that processes episode listing results and engages helm with that as a resource."
-  (let ((episodes (mapcar (lambda (elt)`( ,(concat
-                                            (format "%s s%de%d. %s:  "
-						    (if (> (cdr (assoc 'playcount elt)) 0) "*" " ")
-                                                    (cdr (assoc 'season elt))
-                                                    (cdr (assoc 'episode elt))
-                                                    (cdr (assoc 'title elt)))
-                                            (cdr (assoc 'plot elt))) . ,(cdr (assoc 'episodeid elt))))
-                          (cdr (assoc 'episodes (cdar results))))))
+
+  (let ((episodes
+         (cl-loop for entry across (kodi-query-data results "result/episodes")
+                  collect
+                  (cons
+                   (format "%s %s. %s:  %s"
+			   (if (> (kodi-query-data entry "playcount") 0) "*" " ")
+                           (propertize
+                            (format "s%de%d"
+                                    (kodi-query-data entry "season")
+                                    (kodi-query-data entry "episode"))
+                            'font-lock-face 'font-lock-keyword-face)
+                           
+                           (propertize (kodi-query-data entry "title")
+                                       'font-lock-face 'font-lock-function-name-face)
+                           
+                           (kodi-query-data entry "plot"))
+                   
+                   (kodi-query-data entry "episodeid")))))
+    
     (helm :sources '((name . "KODI: Episodes")
                      (candidates . episodes)
                      (action . (lambda (candidate) (helm-kodi-play-file `(("episodeid" . ,candidate)))))))))
@@ -53,7 +70,7 @@ On success the function pointed to by 'helm-kodi-results-callback' is called wit
     (let ((stream (open-network-stream "kodi-connection" "*kodi-connection*" kodi-host 9090)))
       (with-current-buffer (get-buffer "*kodi-connection*") (erase-buffer))
       (setq helm-kodi-temp-results "")
-      
+
       (setq helm-kodi-results-callback 'helm-kodi-handle-shows)
       (set-process-filter stream 'helm-kodi-input-filter)
       (process-send-string stream (kodi-create-packet "VideoLibrary.GetTVShows" `(,helm-kodi-default-sorting) '(("id" . "libTvShows"))))))
