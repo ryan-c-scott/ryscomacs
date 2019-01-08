@@ -276,7 +276,7 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
   (cl-loop
    with start = (color-name-to-rgb start)
    with end = (color-name-to-rgb end)
-   for i from 0 to steps
+   for i from 0 to (1- steps)
    collect
    (apply
     'color-rgb-to-hex
