@@ -265,6 +265,22 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     (magit-status))
    (t
     (message "Not a git or hg repository"))))
-   
+
+(defun color-lerp (start end mix)
+  (cl-loop for scol in (if (stringp start) (color-name-to-rgb start) start)
+           for ecol in (if (stringp end) (color-name-to-rgb end) end)
+           collect (+ (* scol (- 1 mix))
+                      (* ecol mix))))
+
+(defun color-ramp (start end steps)
+  (cl-loop
+   with start = (color-name-to-rgb start)
+   with end = (color-name-to-rgb end)
+   for i from 0 to steps
+   collect
+   (apply
+    'color-rgb-to-hex
+    (color-lerp start end (/ (float i) steps)))))
+
 ;;
 (provide 'rysco-util)
