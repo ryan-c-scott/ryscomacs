@@ -372,6 +372,17 @@
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
 
+;; Temp:  Redtick indicators and colors;  These will change soon.
+(setq redtick--bars
+      (cl-loop with work
+               with rest
+               for icon in '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿")
+               for work-color in '("#ffff66" "#ffcc66" "#cc9966" "#ff9966" "#cc6666" "#ff6666" "#ff3366" "#ff0066")
+               for rest-color in '("#00cc66" "#33cc66" "#66cc66" "#00ff66" "#33ff66" "#66ff66" "#99ff66" "#ccff66")
+               collect (list redtick--workbar-interval icon work-color) into work
+               collect (list redtick--restbar-interval icon rest-color) into rest
+               finally return
+               (append work rest '((nil "✓" "#cf6a4c")))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
 (if (and rysco-fancy-modeline (image-type-available-p 'svg))

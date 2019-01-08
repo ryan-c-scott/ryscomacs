@@ -18,6 +18,10 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
+(defface powerline-rysco-redtick '((t (:foreground "#Fafad2" :weight bold)))
+	 "Powerline face 3."
+	 :group 'powerline)
+
 (defun powerline-rysco-minor-modes ()
   (s-join "•"
           (cl-loop for m in (s-split " " (format-mode-line minor-mode-alist))
@@ -70,24 +74,23 @@
 	     (rhs
 	      (list
 	       (powerline-raw global-mode-string face2 'r)
-
-               (when (and (boundp 'redtick-mode) redtick-mode (redtick--selected-window-p))
-                 (powerline-raw redtick--current-bar face2))
-	       (powerline-raw " " face2)
                
 	       (funcall separator-right-secondary face2 face1)
+
 	       (unless window-system
 	       	 (powerline-raw (char-to-string #xe0a1) face1 'l))
 	       (powerline-raw "%4l " face1 'l)
 	       ;; (powerline-raw ":" face1 'l)
 	       ;; (powerline-raw "%c" face1 'l)
-               
+
 	       (funcall separator-right face1 mode-line)
 	       (powerline-raw " ")
 	       (powerline-raw "%6p" nil 'r)
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
-	       )))
+
+               (when redtick-mode
+                 (powerline-raw redtick--current-bar 'powerline-rysco-redtick 'r)))))
 
 	(concat (powerline-render lhs)
 		(powerline-fill face2 (powerline-width rhs))
