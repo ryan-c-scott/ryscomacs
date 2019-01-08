@@ -54,7 +54,7 @@
 (defcustom redtick-rest-interval (* 60 5)
   "Interval of time you will be resting, in seconds."
   :type 'number)
-(defcustom redtick-history-file "~/redtick-history.txt"
+(defcustom redtick-history-file "~/.emacs.d/redtick-history.txt"
   "File to store all the completed pomodoros."
   :type 'string)
 (defcustom redtick-popup-header '(format "Working with '%s'" (current-buffer))
@@ -96,8 +96,15 @@
 (defvar redtick--restbar-interval (/ redtick-rest-interval 8.0))
 
 ;; intervals, bars & colours
-(defvar redtick--bars
-      (cl-loop with work
+(defvar redtick--bars)
+
+(defun redtick--setup ()
+  "Recalculate variables"
+  (setq redtick--workbar-interval (/ redtick-work-interval 8.0)
+        redtick--restbar-interval (/ redtick-rest-interval 8.0))
+  
+  (setq redtick--bars
+        (cl-loop with work
                with rest
                for icon in '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿")
                for work-color in (color-ramp "Deepskyblue4" "white" 8)
@@ -105,19 +112,20 @@
                collect (list redtick--workbar-interval icon work-color) into work
                collect (list redtick--restbar-interval icon rest-color) into rest
                finally return
-               (append work rest '((nil "✓" "PaleGreen")))))
+               (append work rest '((nil "✓" "PaleGreen"))))))
+
+(redtick--setup)
 
 (defun redtick--ended-work-interval-p (redtick--current-bars)
   "Return t when ended work interval based on REDTICK--CURRENT-BARS."
-  (equal `(,redtick--restbar-interval "█")
+  (equal `(,redtick--restbar-interval "⣿")
        (butlast (car redtick--current-bars))))
 
 (defun redtick--ding ()
   (let ((ring-bell-function nil))
     (ding t)))
 
-(add-hook 'redtick-before-work-hook #'redtick--ding)
-(add-hook 'redtick-before-rest-hook #'redtick--ding)
+(add-hook 'redtick-after-work-hook #'redtick--ding)
 (add-hook 'redtick-after-rest-hook #'redtick--ding)
 
 (defun redtick--seconds-since (time)
