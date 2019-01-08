@@ -38,21 +38,9 @@
 ;; After importing, it shows a little red tick (✓) in the mode-line.
 ;; When you click on it, it starts a pomodoro timer.
 ;;
-;; It only shows the timer in the selected window (a moving timer
-;; replicated in each window is a little bit distracting!).
-;;
-;; I thought about this, after seeing the spinner.el package.
-;;
-;; I tried to make it efficient:
-;;   - It uses an elisp timer to program the next modification of the
-;;     mode line: no polling, no sleeps...
-;;   - Only works when the mode-line is changed.
-;;   - It uses SOX player, that supports looping wav files without gaps.
-;;     Thanks to the loop, I only launch a player process when starting
-;;     the work or rest interval.
-;;
-
 ;;; Code:
+
+(require 'rysco-util)
 
 (defgroup redtick nil
   "Little pomodoro timer in the mode-line."
@@ -78,9 +66,6 @@
 (defcustom redtick-sound-volume "0.3"
   "Sound volume as numeric string (low < 1.0 < high)."
   :type 'string)
-(defcustom redtick-sox-buffer nil
-  "Name of the buffer used for SOX output (p.e. '*sox-debug*')."
-  :type 'string)
 (defcustom redtick-work-sound
   (expand-file-name "./resources/work.wav"
                     (file-name-directory (or load-file-name buffer-file-name)))
@@ -90,11 +75,6 @@
   (expand-file-name "./resources/rest.wav"
                     (file-name-directory (or load-file-name buffer-file-name)))
   "Sound file to loop during the rest period."
-  :type 'string)
-(defcustom redtick-end-rest-sound
-  (expand-file-name "./resources/end-rest.mp3"
-                    (file-name-directory (or load-file-name buffer-file-name)))
-  "Sound file to play at the end of the rest period."
   :type 'string)
 
 (require 'which-func)
@@ -117,69 +97,28 @@
 
 ;; intervals, bars & colours
 (defvar redtick--bars
-  `((,redtick--workbar-interval "█" "#ffff66")
-    (,redtick--workbar-interval "▇" "#ffcc66")
-    (,redtick--workbar-interval "▆" "#cc9966")
-    (,redtick--workbar-interval "▅" "#ff9966")
-    (,redtick--workbar-interval "▄" "#cc6666")
-    (,redtick--workbar-interval "▃" "#ff6666")
-    (,redtick--workbar-interval "▂" "#ff3366")
-    (,redtick--workbar-interval "▁" "#ff0066")
-    (,redtick--restbar-interval "█" "#00cc66")
-    (,redtick--restbar-interval "▇" "#33cc66")
-    (,redtick--restbar-interval "▆" "#66cc66")
-    (,redtick--restbar-interval "▅" "#00ff66")
-    (,redtick--restbar-interval "▄" "#33ff66")
-    (,redtick--restbar-interval "▃" "#66ff66")
-    (,redtick--restbar-interval "▂" "#99ff66")
-    (,redtick--restbar-interval "▁" "#ccff66")
-    (nil "✓" "#cf6a4c")))
+      (cl-loop with work
+               with rest
+               for icon in '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿")
+               for work-color in (color-ramp "Deepskyblue4" "white" 8)
+               for rest-color in (color-ramp "#00cc66" "#ccff66" 8)
+               collect (list redtick--workbar-interval icon work-color) into work
+               collect (list redtick--restbar-interval icon rest-color) into rest
+               finally return
+               (append work rest '((nil "✓" "PaleGreen")))))
 
 (defun redtick--ended-work-interval-p (redtick--current-bars)
   "Return t when ended work interval based on REDTICK--CURRENT-BARS."
   (equal `(,redtick--restbar-interval "█")
        (butlast (car redtick--current-bars))))
 
-;; variable that stores the sound process object
-(defvar redtick--sound-process nil)
+(defun redtick--ding ()
+  (let ((ring-bell-function nil))
+    (ding t)))
 
-(defun redtick--play-sound (file &optional args)
-  "Play FILE using sox with optional ARGS."
-  (if redtick-play-sound
-      (if (executable-find "sox")
-          (setq redtick--sound-process
-                (apply 'start-process "sox" redtick-sox-buffer
-                       "sox" file "-d" "vol" redtick-sound-volume args))
-        (warn "SoX executable not found"))))
-
-(defun redtick--stop-sound ()
-  "Stops sound if playing."
-  (if redtick--sound-process
-      (delete-process redtick--sound-process)))
-
-(defun redtick--play-sound-during (file seconds)
-  "Play FILE during SECONDS, repeating or cutting if needed."
-  (let ((fade (if (< seconds 8) "0" "4")))
-       (redtick--play-sound file `("repeat" "-" "fade" "t" ,fade
-                                   ,(number-to-string seconds)))))
-
-(defun redtick--play-work-sound ()
-  (redtick--stop-sound)
-  (redtick--play-sound-during redtick-work-sound redtick-work-interval))
-
-(add-hook 'redtick-before-work-hook #'redtick--play-work-sound)
-
-(defun redtick--play-rest-sound ()
-  (redtick--stop-sound)
-  (redtick--play-sound-during redtick-rest-sound redtick-rest-interval))
-
-(add-hook 'redtick-before-rest-hook #'redtick--play-rest-sound)
-
-(defun redtick--play-end-of-rest-sound ()
-  (redtick--stop-sound)
-  (redtick--play-sound redtick-end-rest-sound))
-
-(add-hook 'redtick-after-rest-hook #'redtick--play-end-of-rest-sound)
+(add-hook 'redtick-before-work-hook #'redtick--ding)
+(add-hook 'redtick-before-rest-hook #'redtick--ding)
+(add-hook 'redtick-after-rest-hook #'redtick--ding)
 
 (defun redtick--seconds-since (time)
   "Seconds since TIME."
@@ -201,7 +140,6 @@
 (defun redtick--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
-              ;; 'face `(:inherit mode-line :foreground ,bar-color)
               'face `(:foreground ,bar-color)
               'help-echo '(redtick--popup-message redtick--pomodoro-started-at
                                                   redtick--pomodoro-description)
