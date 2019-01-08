@@ -201,7 +201,7 @@
 (defun redtick--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
-              'face `(:inherit mode-line :foreground ,bar-color)
+              ;; 'face `(:inherit mode-line :foreground ,bar-color)
               'help-echo '(redtick--popup-message redtick--pomodoro-started-at
                                                   redtick--pomodoro-description)
               'pointer 'hand
