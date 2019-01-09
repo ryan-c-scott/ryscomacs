@@ -298,17 +298,13 @@
                  (format ":'%s'" (which-function))))))
 
 ;;;###autoload
-(defun bluedot ()
-  "Enable minor-mode, and start the pomodoro."
-  (interactive)
-  (bluedot-with-description (bluedot--default-desc)))
-
-;;;###autoload
-(defun bluedot-with-description (description)
+(defun bluedot (&optional description)
   "Ask for DESCRIPTION, enable minor-mode, and start the pomodoro."
   (interactive (list (read-string (format "Description (%s): "
                                           (bluedot--default-desc))
                                   nil nil (bluedot--default-desc))))
+  (unless description
+    (setq description (bluedot--default-desc)))
   (bluedot-mode t)
   (if bluedot--timer (cancel-timer bluedot--timer))
   (run-hooks 'bluedot-before-work-hook)
@@ -317,5 +313,6 @@
         bluedot--notified-done nil)
   (bluedot--update-current-bar bluedot--bars))
 
+;;;;;;;;
 (provide 'bluedot)
-;;; bluedot.el ends here
+
