@@ -217,6 +217,40 @@
 
 (add-hook 'bluedot-after-rest-hook #'bluedot--save-history)
 
+(defun bluedot--retrieve-history (&optional file)
+  (when bluedot-history-file
+    (with-current-buffer (find-file-existing (or file bluedot-history-file))
+      (prog1
+          (read (buffer-string))
+        (kill-current-buffer)))))
+
+(cl-defun bluedot--format-history (&key history format)
+  (cl-loop
+   for (time work rest desc) in (or history (bluedot--retrieve-history)) collect
+   (list
+    (format-time-string (or format "%Y-%m-%d-%H:%M") time)
+    (/ work 60)
+    (/ rest 60)
+    desc)))
+
+(cl-defun bluedot-org-insert-history (&optional block)
+  (interactive "N")
+  (save-excursion
+    (if block
+        (progn
+          (insert "#+begin_src elisp\n(bluedot--format-history)\n#+end_src\n")
+          (forward-line -1)
+          (let ((org-confirm-babel-evaluate nil))
+            (org-babel-execute-src-block)))
+      ;;
+      (insert
+       (cl-loop for entry in (bluedot--format-history)
+                concat "|"
+                concat (s-join "|" (mapcar (lambda (el) (format "%s" el)) entry))
+                concat "|\n"))
+      (forward-line -1)
+      (org-table-align))))
+
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
 
