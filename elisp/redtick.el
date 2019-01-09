@@ -60,27 +60,22 @@
 (defcustom redtick-popup-header '(format "Working with '%s'" (current-buffer))
   "Header used in popup."
   :type 'sexp)
-(defcustom redtick-play-sound nil
+(defcustom redtick-play-sound t
   "Play sounds when true."
+  :type 'boolean)
+(defcustom redtick-show-notification t
+  "Sends system notifications when true."
   :type 'boolean)
 (defcustom redtick-sound-volume "0.3"
   "Sound volume as numeric string (low < 1.0 < high)."
-  :type 'string)
-(defcustom redtick-work-sound
-  (expand-file-name "./resources/work.wav"
-                    (file-name-directory (or load-file-name buffer-file-name)))
-  "Sound file to loop during the work period."
-  :type 'string)
-(defcustom redtick-rest-sound
-  (expand-file-name "./resources/rest.wav"
-                    (file-name-directory (or load-file-name buffer-file-name)))
-  "Sound file to loop during the rest period."
   :type 'string)
 
 (require 'which-func)
 
 ;; stores redtick timer, to be cancelled if restarted
 (defvar redtick--timer nil)
+(defvar redtick--notification nil)
+(defvar redtick--notified-done nil)
 
 ;; stores the number of completed pomodoros
 (defvar redtick--completed-pomodoros 0)
@@ -109,24 +104,45 @@
                for icon in '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿")
                for work-color in (color-ramp "Deepskyblue4" "white" 8)
                for rest-color in (color-ramp "#00cc66" "#ccff66" 8)
-               collect (list redtick--workbar-interval icon work-color) into work
-               collect (list redtick--restbar-interval icon rest-color) into rest
+               collect (list icon work-color) into work
+               collect (list icon rest-color) into rest
                finally return
-               (append work rest '((nil "✓" "PaleGreen"))))))
+               (append work rest '(("✓" "PaleGreen"))))))
 
 (redtick--setup)
 
-(defun redtick--ended-work-interval-p (redtick--current-bars)
+(defun redtick--ended-work-interval-p (time)
   "Return t when ended work interval based on REDTICK--CURRENT-BARS."
-  (equal `(,redtick--restbar-interval "⣿")
-       (butlast (car redtick--current-bars))))
+  (>= (redtick--seconds-since time) redtick-work-interval))
 
 (defun redtick--ding ()
   (let ((ring-bell-function nil))
     (ding t)))
 
-(add-hook 'redtick-after-work-hook #'redtick--ding)
-(add-hook 'redtick-after-rest-hook #'redtick--ding)
+(defun redtick--notify (title msg)
+  (when (eq system-type 'windows-nt)
+    (w32-notification-close redtick--notification)
+    
+    (--when-let (w32-notification-notify :tip title :title title :body msg)
+      (setq redtick--notification it)
+      (run-at-time 2 nil #'w32-notification-close it))))
+
+(defun redtick--notify-work-done ()
+  (message "work done")
+  (when redtick-play-sound
+    (redtick--ding))
+  (when redtick-show-notification
+    (redtick--notify "Time to Rest" redtick--pomodoro-description)))
+
+(defun redtick--notify-rest-done ()
+  (message "rest done")
+  (when redtick-play-sound
+    (redtick--ding))
+  (when redtick-show-notification
+    (redtick--notify "Back to Work" "Get to it")))
+
+(add-hook 'redtick-after-work-hook #'redtick--notify-work-done)
+(add-hook 'redtick-after-rest-hook #'redtick--notify-rest-done)
 
 (defun redtick--seconds-since (time)
   "Seconds since TIME."
@@ -155,8 +171,7 @@
               'local-map (make-mode-line-mouse-map 'mouse-1 'redtick)))
 
 ;; initializing current bar
-(defvar redtick--current-bar (apply #'redtick--propertize
-                                    (cdar (last redtick--bars))))
+(defvar redtick--current-bar (apply #'redtick--propertize (car (last redtick--bars))))
 ;; setting as risky, so it's painted with colour
 (put 'redtick--current-bar 'risky-local-variable t)
 
@@ -208,23 +223,40 @@
 
 (add-hook 'redtick-after-rest-hook #'redtick--save-history)
 
-(defun redtick--update-current-bar (redtick--current-bars)
+(defun redtick--update-current-bar (&optional redtick--current-bars)
   "Update current bar, and program next update using REDTICK--CURRENT-BARS."
-  (setq redtick--current-bar (apply #'redtick--propertize
-                                    (cdar redtick--current-bars)))
-  (when (redtick--ended-work-interval-p redtick--current-bars)
-    (run-hooks 'redtick-after-work-hook
-               'redtick-before-rest-hook))
-  (if (caar redtick--current-bars)
-      (setq redtick--timer
-            (run-at-time (caar redtick--current-bars)
-                         nil
-                         #'redtick--update-current-bar
-                         (cdr redtick--current-bars)))
-    (run-hooks 'redtick-after-rest-hook)
-    (setq redtick--completed-pomodoros
-          (1+ redtick--completed-pomodoros)))
-  (force-mode-line-update t))
+
+  (let* ((elapsed (float (redtick--seconds-since redtick--pomodoro-started-at)))
+         (working (min 1 (/ elapsed redtick-work-interval)))
+         (resting (/ (max 0 (- elapsed redtick-work-interval))
+                     redtick-rest-interval)))
+    (setq redtick--current-bar
+          (apply #'redtick--propertize
+                 (--if-let
+                     (nth
+                      (truncate (+ (* working 8)
+                                   (* resting 8)))
+                      redtick--bars)
+                     it
+                   (nth 16 redtick--bars))))
+
+    (when (and (>= working 1)
+               (not redtick--notified-done))
+      (run-hooks 'redtick-after-work-hook
+                 'redtick-before-rest-hook)
+      (setq redtick--notified-done t))
+
+    (if (< resting 1)
+        (setq redtick--timer
+              (run-at-time
+               (/ (if (< working 1) redtick-work-interval redtick-rest-interval) 8.0)
+               nil #'redtick--update-current-bar))
+      ;;
+      (run-hooks 'redtick-after-rest-hook)
+      (setq redtick--completed-pomodoros
+            (1+ redtick--completed-pomodoros)))
+    
+    (force-mode-line-update t)))
 
 ;;;###autoload
 (define-minor-mode redtick-mode
@@ -253,7 +285,8 @@
   (if redtick--timer (cancel-timer redtick--timer))
   (run-hooks 'redtick-before-work-hook)
   (setq redtick--pomodoro-started-at (current-time)
-        redtick--pomodoro-description description)
+        redtick--pomodoro-description description
+        redtick--notified-done nil)
   (redtick--update-current-bar redtick--bars))
 
 (provide 'redtick)
