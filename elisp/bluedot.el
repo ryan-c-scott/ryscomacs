@@ -87,18 +87,11 @@
 ;; current pomodoro description
 (defvar bluedot--pomodoro-description "Start your first pomodoro now!!!")
 
-;; bluedot intervals for every bar
-(defvar bluedot--workbar-interval (/ bluedot-work-interval 8.0))
-(defvar bluedot--restbar-interval (/ bluedot-rest-interval 8.0))
-
 ;; intervals, bars & colours
 (defvar bluedot--bars)
 
 (defun bluedot--setup ()
   "Recalculate variables"
-  (setq bluedot--workbar-interval (/ bluedot-work-interval 8.0)
-        bluedot--restbar-interval (/ bluedot-rest-interval 8.0))
-  
   (setq bluedot--bars
         (cl-loop with work
                with rest
@@ -250,7 +243,7 @@
     (if (< resting 1)
         (setq bluedot--timer
               (run-at-time
-               (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 8.0)
+               (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
                nil #'bluedot--update-current-bar))
       ;;
       (run-hooks 'bluedot-after-rest-hook)
