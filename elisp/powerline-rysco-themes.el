@@ -18,7 +18,7 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-redtick '((t (:foreground "#Fafad2" :weight bold)))
+(defface powerline-rysco-bluedot '((t (:foreground "#Fafad2" :weight bold)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
@@ -89,8 +89,8 @@
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
 
-               (when redtick-mode
-                 (powerline-raw redtick--current-bar 'powerline-rysco-redtick 'r)))))
+               (when bluedot-mode
+                 (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
 
 	(concat (powerline-render lhs)
 		(powerline-fill face2 (powerline-width rhs))
