@@ -71,6 +71,8 @@
   "Sound volume as numeric string (low < 1.0 < high)."
   :type 'string)
 
+(defvar bluedot-bar-characters nil)
+
 (require 'which-func)
 
 ;; stores bluedot timer, to be cancelled if restarted
@@ -95,7 +97,7 @@
   (setq bluedot--bars
         (cl-loop with work
                with rest
-               for icon in '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿")
+               for icon in (or bluedot-bar-characters '("⠁" "⠉" "⠋" "⠛" "⠟" "⠿" "⡿" "⣿"))
                for work-color in (color-ramp "Deepskyblue4" "white" 8)
                for rest-color in (color-ramp "#00cc66" "#ccff66" 8)
                collect (list icon work-color) into work
