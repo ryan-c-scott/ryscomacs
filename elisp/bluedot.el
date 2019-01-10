@@ -234,7 +234,7 @@
     desc)))
 
 (cl-defun bluedot-org-insert-history (&optional block)
-  (interactive "N")
+  (interactive "P")
   (save-excursion
     (if block
         (progn
