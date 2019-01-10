@@ -461,7 +461,8 @@
  ;; Frames
  "/" 'make-frame
  "=" 'delete-frame
- "\\" 'other-frame)
+ "\\" 'other-frame
+ "-" 'select-frame-by-name)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)

@@ -283,4 +283,20 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     (color-lerp start end (/ (float i) steps)))))
 
 ;;
+;;;###autoload
+(defun helm-rysco-project-ag (arg)
+  "Preconfigured helm for grepping with AG in (projectile-project-root).
+With prefix-arg prompt for type if available with your AG version."
+  (interactive "P")
+  (--when-let (projectile-project-root)
+    (require 'helm-files)
+    (helm-grep-ag it arg)))
+
+(defun rysco-name-frame-project ()
+  (interactive)
+  (let ((name (projectile-project-name)))
+    (unless (string= name "-")
+      (set-frame-name (format "[ %s ]" (upcase name))))))
+
+;;
 (provide 'rysco-util)
