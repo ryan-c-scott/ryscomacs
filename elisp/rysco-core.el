@@ -230,6 +230,7 @@
 (menu-bar-mode -1)
 (toggle-indicate-empty-lines)
 (defalias 'yes-or-no-p 'y-or-n-p)
+(setq tooltip-use-echo-area t)
 (setq indent-tabs-mode nil)
 (setq truncate-partial-width-windows nil)
 (setq ring-bell-function 'ignore)
