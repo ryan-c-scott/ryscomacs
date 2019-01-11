@@ -171,24 +171,9 @@
 ;; setting as risky, so it's painted with colour
 (put 'bluedot--current-bar 'risky-local-variable t)
 
-;; storing selected window to use from mode-line
-(defvar bluedot--selected-window (selected-window))
-
-;; function that updates selected window variable
-(defun bluedot--update-selected-window (windows)
-  "WINDOWS parameter avoids error when called before 'pre-redisplay-function'."
-  (when (not (minibuffer-window-active-p (frame-selected-window)))
-    (setq bluedot--selected-window (selected-window))))
-
-(add-function :before pre-redisplay-function #'bluedot--update-selected-window)
-
-(defun bluedot--selected-window-p ()
-  "Check if current window is the selected one."
-  (eq bluedot--selected-window (get-buffer-window)))
-
 ;; adding to mode-line
 (add-to-list 'mode-line-misc-info
-             '(:eval (if (and bluedot-mode (bluedot--selected-window-p))
+             '(:eval (when bluedot-mode
                          bluedot--current-bar))
              t)
 
@@ -208,7 +193,7 @@
 (defun bluedot--save-history ()
   "Adding current-pomodoro info to history file."
   (when bluedot-history-file
-    (let ((history (bluedot--load bluedot-history-file)))
+    (let ((history (bluedot--retrieve-history))
       (bluedot--save bluedot-history-file
                      (add-to-list 'history
                                   (list bluedot--pomodoro-started-at
@@ -220,11 +205,7 @@
 (add-hook 'bluedot-after-rest-hook #'bluedot--save-history)
 
 (defun bluedot--retrieve-history (&optional file)
-  (when bluedot-history-file
-    (with-current-buffer (find-file-existing (or file bluedot-history-file))
-      (prog1
-          (read (buffer-string))
-        (kill-current-buffer)))))
+  (bluedot--load (or file bluedot-history-file)))
 
 (cl-defun bluedot--format-history (&key history format)
   (cl-loop
