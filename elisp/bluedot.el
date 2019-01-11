@@ -193,7 +193,7 @@
 (defun bluedot--save-history ()
   "Adding current-pomodoro info to history file."
   (when bluedot-history-file
-    (let ((history (bluedot--retrieve-history))
+    (let ((history (bluedot--retrieve-history)))
       (bluedot--save bluedot-history-file
                      (add-to-list 'history
                                   (list bluedot--pomodoro-started-at
