@@ -177,32 +177,37 @@
                          bluedot--current-bar))
              t)
 
-(defun bluedot--save (file data)
-  "Use FILE to save DATA."
-  (with-temp-file file
-    (let ((standard-output (current-buffer))
-          (print-circle t))  ; Allow circular data
-      (prin1 data))))
-
 (defun bluedot--load (file)
   "Use FILE to load DATA."
-  (ignore-errors (with-temp-buffer
-                   (insert-file-contents file)
-                   (read (current-buffer)))))
+  (ignore-errors
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
 
-(defun bluedot--save-history ()
+      (let ((buffer (current-buffer)))
+        (save-excursion
+          (goto-char (point-min))
+          (cl-loop with entry
+                   do (setq entry (ignore-errors (read buffer)))
+                   while entry
+                   collect entry))))))
+
+(defun bluedot--add-history ()
   "Adding current-pomodoro info to history file."
-  (when bluedot-history-file
-    (let ((history (bluedot--retrieve-history)))
-      (bluedot--save bluedot-history-file
-                     (add-to-list 'history
-                                  (list bluedot--pomodoro-started-at
-                                        bluedot-work-interval
-                                        bluedot-rest-interval
-                                        bluedot--pomodoro-description)
-                                  t)))))
+  (--when-let bluedot-history-file
+    (with-current-buffer (find-file it)
+      (save-excursion
+        (goto-char (point-max))
+        (insert (prin1-to-string
+                 (list bluedot--pomodoro-started-at
+                       bluedot-work-interval
+                       bluedot-rest-interval
+                       bluedot--pomodoro-description))
+                "\n")
+        (save-buffer)
+        (kill-buffer (current-buffer))))))
 
-(add-hook 'bluedot-after-rest-hook #'bluedot--save-history)
+(add-hook 'bluedot-after-rest-hook #'bluedot--add-history)
 
 (defun bluedot--retrieve-history (&optional file)
   (bluedot--load (or file bluedot-history-file)))
