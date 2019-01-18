@@ -310,7 +310,7 @@
            (last-time (car entry))
            (description (car (last entry))))
       (when (< (- (time-to-seconds time) (time-to-seconds last-time))
-               (+ bluedot-work-interval bluedot-rest-interval))
+               (+ (nth 1 entry) (nth 2 entry)))
 
         (bluedot-mode t)
 
