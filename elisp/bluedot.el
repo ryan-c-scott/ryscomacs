@@ -137,9 +137,6 @@
   (when bluedot-show-notification
     (bluedot--notify "Back to Work" "Get to it")))
 
-(add-hook 'bluedot-after-work-hook #'bluedot--notify-work-done)
-(add-hook 'bluedot-after-rest-hook #'bluedot--notify-rest-done)
-
 (defun bluedot--seconds-since (time)
   "Seconds since TIME."
   (truncate (- (float-time (current-time)) (float-time time))))
@@ -207,8 +204,6 @@
         (save-buffer)
         (kill-buffer (current-buffer))))))
 
-(add-hook 'bluedot-after-rest-hook #'bluedot--add-history)
-
 (defun bluedot--retrieve-history (&optional file)
   (bluedot--load (or file bluedot-history-file)))
 
@@ -274,6 +269,11 @@
     
     (force-mode-line-update t)))
 
+;; Hooks
+(add-hook 'bluedot-after-work-hook #'bluedot--notify-work-done)
+(add-hook 'bluedot-after-rest-hook #'bluedot--notify-rest-done)
+(add-hook 'bluedot-before-work-hook #'bluedot--add-history)
+
 ;;;###autoload
 (define-minor-mode bluedot-mode
   "Little pomodoro timer in the mode-line."
@@ -300,6 +300,28 @@
         bluedot--pomodoro-description description
         bluedot--notified-done nil)
   (bluedot--update-current-bar bluedot--bars))
+
+(defun bluedot-resume ()
+  "Detects and resumes any currently active timer in the history"
+  (interactive)
+  (--when-let (bluedot--retrieve-history)
+    (let* ((entry (car (last it)))
+           (time (current-time))
+           (last-time (car entry))
+           (description (car (last entry))))
+      (when (< (- (time-to-seconds time) (time-to-seconds last-time))
+               (+ bluedot-work-interval bluedot-rest-interval))
+
+        (bluedot-mode t)
+
+        (when bluedot--timer
+          (cancel-timer bluedot--timer))
+
+        (setq bluedot--pomodoro-started-at last-time
+              bluedot--pomodoro-description description
+              bluedot--notified-done nil)
+        
+        (bluedot--update-current-bar bluedot--bars)))))
 
 ;;;;;;;;
 (provide 'bluedot)
