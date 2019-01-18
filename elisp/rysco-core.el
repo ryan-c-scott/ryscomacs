@@ -245,6 +245,8 @@
 ;; Local config
 (load "localconfig" :missing-ok t)
 
+(bluedot-resume)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
 (cl-defmacro rysco-bind-keys (lead &rest bindings)
