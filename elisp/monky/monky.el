@@ -1315,10 +1315,8 @@ With a prefix argument, visit in other window."
                      (monky-read-remote
                       (format "Push branch %s to : " branch))
                    monky-outgoing-repository)))
-    (monky-run-hg-async "push" "--branch" branch
-                        (unless (string-empty-p remote)
-                          remote)))
-  (monky-hg-clear-cache))
+    (monky-run-hg-async "push" "--branch" branch remote)
+    (monky-hg-clear-cache)))
 
 (defun monky-checkout (node)
   (interactive (list (monky-read-revision "Update to : ")))
