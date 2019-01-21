@@ -32,6 +32,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (setq load-prefer-newer t)
+(setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
 (require 'rysco-util)
 (require 'async)
