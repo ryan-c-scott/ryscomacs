@@ -157,7 +157,7 @@
 (defun bluedot--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
-              'face `(:foreground ,bar-color)
+              'face `(:foreground ,bar-color :height 0.95)
               'help-echo '(bluedot--popup-message bluedot--pomodoro-started-at
                                                   bluedot--pomodoro-description)
               'pointer 'hand
