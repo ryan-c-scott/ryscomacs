@@ -28,12 +28,14 @@
 (add-to-list 'load-path "~/ryscomacs/elisp/magit/ghub")
 (add-to-list 'load-path "~/ryscomacs/elisp/monky")
 (add-to-list 'load-path "~/ryscomacs/elisp/multiple-cursors.el")
+(add-to-list 'load-path "~/ryscomacs/elisp/all-the-icons.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (setq load-prefer-newer t)
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
+(require 'all-the-icons)
 (require 'rysco-util)
 (require 'async)
 

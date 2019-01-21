@@ -50,6 +50,7 @@
 	     (lhs
 	      (list
 	       (powerline-raw "%z" face3 'l)
+
 	       ;(powerline-raw "%*" nil 'l)
 	       ;; 	 (powerline-buffer-size nil 'l))
 	       ;; 	 (powerline-raw mode-line-mule-info nil 'l))
@@ -60,8 +61,14 @@
                (powerline-raw " " face3)
 
 	       (funcall separator-left face3 face1)
+
 	       (when (boundp 'erc-modified-channels-object)
 		 (powerline-raw erc-modified-channels-object face1 'l))
+
+               (--when-let (all-the-icons-icon-for-mode major-mode :face `(:inherit ,face1 :height 0.8))
+                 (unless (equal it major-mode)
+                   (powerline-raw it face1 'l)))
+               
 	       (powerline-major-mode face1 'l)
 	       (powerline-process face1)
 	       (powerline-narrow face1 'l)
@@ -74,7 +81,7 @@
 	     (rhs
 	      (list
 	       (powerline-raw global-mode-string face2 'r)
-               
+
 	       (funcall separator-right-secondary face2 face1)
 
 	       (unless window-system
