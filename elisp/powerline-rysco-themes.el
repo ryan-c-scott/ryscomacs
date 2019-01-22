@@ -67,7 +67,7 @@
 
                (--when-let (all-the-icons-icon-for-mode major-mode :face `(:inherit ,face1 :height 0.8))
                  (unless (equal it major-mode)
-                   (powerline-raw it face1 'l)))
+                   (powerline-raw (propertize it 'display '(raise 0)) face1 'l)))
                
 	       (powerline-major-mode face1 'l)
 	       (powerline-process face1)
