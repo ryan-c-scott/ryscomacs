@@ -71,7 +71,9 @@
                
 	       (powerline-major-mode face1 'l)
 	       (powerline-process face1)
-	       (powerline-narrow face1 'l)
+               (when (buffer-narrowed-p)
+                 (--when-let (all-the-icons-faicon "compress" :face `(:inherit ,face1 :height 0.8))
+	         (powerline-raw (propertize it 'display '(raise 0)) face1 'l)))
 	       (powerline-raw " " face1)
 
 	       (funcall separator-left-secondary face1 face2)
