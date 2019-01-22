@@ -198,10 +198,10 @@
 (helm-mode 1)
 
 (projectile-global-mode)
-(setq projectile-completion-system 'helm)
-(setq projectile-indexing-method 'alien)
-(setq projectile-switch-project-action 'helm-projectile)
-(setq projectile-tags-command "ctags -Re --exclude='\.svn' --extra=q -f \"%s\" %s")
+(setq projectile-completion-system 'helm
+      projectile-indexing-method 'alien
+      projectile-switch-project-action 'helm-projectile
+      projectile-tags-command "ctags -Re --exclude='\.svn' --extra=q -f \"%s\" %s")
 (helm-projectile-on)
 ;(setq projectile-enable-caching t)
 (setq helm-grep-ag-command "rg --color=always --smart-case --no-heading --line-number %s %s %s")
@@ -209,22 +209,22 @@
 (when (string-equal system-type "windows-nt")
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 
-(setq custom-theme-directory "~/ryscomacs/themes/")
-(setq org-export-allow-bind-keywords t)
-(setq org-log-done 'time)
-(setq org-enforce-todo-dependencies t)
-(setq markdown-asymmetric-header t)
-(setq markdown-header-scaling t)
-(setq markdown-command "pandoc --smart -r markdown_github -w html")
-(setq graphviz-dot-auto-indent-on-braces nil)
-(setq graphviz-dot-auto-indent-on-semi nil)
-(setq graphviz-dot-auto-indent-on-newline nil)
+(setq custom-theme-directory "~/ryscomacs/themes/"
+      org-export-allow-bind-keywords t
+      org-log-done 'time
+      org-enforce-todo-dependencies t
+      markdown-asymmetric-header t
+      markdown-header-scaling t
+      markdown-command "pandoc --smart -r markdown_github -w html"
+      graphviz-dot-auto-indent-on-braces nil
+      graphviz-dot-auto-indent-on-semi nil
+      graphviz-dot-auto-indent-on-newline nil)
 
 ;; OSX Specific key bindings/fixes
-(setq mac-option-key-is-meta nil)
-(setq mac-command-key-is-meta t)
-(setq mac-command-modifier 'meta)
-(setq mac-option-modifier nil)
+(setq mac-option-key-is-meta nil
+      mac-command-key-is-meta t
+      mac-command-modifier 'meta
+      mac-option-modifier nil)
 
 (transient-mark-mode t)
 (global-font-lock-mode t)
@@ -234,17 +234,17 @@
 (menu-bar-mode -1)
 (toggle-indicate-empty-lines)
 (defalias 'yes-or-no-p 'y-or-n-p)
-(setq tooltip-use-echo-area t)
-(setq indent-tabs-mode nil)
-(setq truncate-partial-width-windows nil)
-(setq ring-bell-function 'ignore)
-(setq eshell-prefer-lisp-functions t)
-(setq dired-recursive-deletes 'always)
-(setq uniquify-buffer-name-style 'reverse)
-(setq uniquify-separator "|")
-(setq uniquify-after-kill-buffer-p t)
-(setq uniquify-ignore-buffers-re "^\\*")
-(setq ispell-program-name "aspell")
+(setq tooltip-use-echo-area t
+      indent-tabs-mode nil
+      truncate-partial-width-windows nil
+      ring-bell-function 'ignore
+      eshell-prefer-lisp-functions t
+      dired-recursive-deletes 'always
+      uniquify-buffer-name-style 'reverse
+      uniquify-separator "|"
+      uniquify-after-kill-buffer-p t
+      uniquify-ignore-buffers-re "^\\*"
+      ispell-program-name "aspell")
 
 ;; Local config
 (load "localconfig" :missing-ok t)
@@ -273,8 +273,8 @@
 (add-hook 'c-mode-common-hook
 	  '(lambda () (c-set-style "stroustrup")
              (semantic-mode t)
-	     (setq tab-width 4)
-	     (setq indent-tabs-mode nil)
+	     (setq tab-width 4
+	           indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
 	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
@@ -285,8 +285,8 @@
 	     ;; (setq hs-isearch-open t)
              (semantic-mode t)
 	     (c-set-style "c#")
-	     (setq indent-tabs-mode nil)
-	     (setq tab-width 4)
+	     (setq indent-tabs-mode nil
+	           tab-width 4)
              
              ;; No idea why this isn't the default, but here we are...
              (local-set-key "{" 'c-electric-brace)
@@ -303,9 +303,9 @@
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
-	     (setq indent-tabs-mode nil)
-             (setq tab-width 4)
-             (setq js-indent-level 2)
+	     (setq indent-tabs-mode nil
+                   tab-width 4
+                   js-indent-level 2)
              (local-set-key (kbd "M-.") 'find-tag)))
 
 (add-hook 'json-mode-hook
@@ -391,14 +391,7 @@
 
       (require 'ocodo-svg-modelines)
       (ocodo-svg-modelines-init)
-      (smt/set-theme rysco-fancy-modeline-theme)
-
-      ;; HACK:  The unicode characters that ocodo uses for modified buffer status are maybe not so universal
-      (smt/defwidget buffer-dirty
-	:text (lambda (widget)
-		(when (buffer-file-name)
-		  (if (and (buffer-modified-p) (or buffer-file-name buffer-offer-save))
-		      " ▣ " " √ ")))))
+      (smt/set-theme rysco-fancy-modeline-theme))
 
   ;; Powerline
   (require 'powerline)
