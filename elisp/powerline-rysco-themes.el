@@ -28,6 +28,20 @@
                    if (not (member m '("" "Helm" "Projectile[-]" "ElDoc"))) collect
                    (s-replace "Projectile" "" m))))
 
+(defun powerline-rysco-vc (face justification)
+  (when (and (buffer-file-name (current-buffer)) vc-mode)
+    (concat
+     (powerline-raw
+      (format "%s%s"
+              (propertize
+               (all-the-icons-octicon "git-commit" :face `(:inherit ,face :height 0.8))
+               'display '(raise 0))
+
+              (replace-regexp-in-string
+               " \\(Hg\\|Git\\)[:-]" ""
+               (substring-no-properties vc-mode)))
+      face justification))))
+
 (defun powerline-rysco-theme ()
   "Setup the default mode-line."
   (interactive)
@@ -78,7 +92,7 @@
 
 	       (funcall separator-left-secondary face1 face2)
 	       (powerline-raw (powerline-rysco-minor-modes) face2 'l)
-	       (powerline-vc face2 'r)))
+	       (powerline-rysco-vc face2 'l)))
 
 	     (rhs
 	      (list
