@@ -9,6 +9,9 @@
 (defvar rysco-font-size "15.0")
 (defvar rysco-writing-font "Georgia")
 
+(require 'cl)
+(require 'rysco-util)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
 (rysco-add-to-loadpath
@@ -38,39 +41,33 @@
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
 (require 'all-the-icons)
-(require 'rysco-util)
 (require 'async)
 
-(autoload 'magit-status "magit" nil t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Auto-loads
+(rysco-autoloads
+ (magit-status "magit")
+ (csharp-mode "csharp-mode" "Major mode for editing C# code.")
+ (cg-mode "cg-mode" "Major mode for editing CG program code.")
+ (json-mode "json-mode" "Major mode for editing json data.")
+ (lua-mode "lua-mode" "Lua editing mode.")
+ (php-mode "php-mode" "PHP editing mode.")
+ (rust-mode "rust-mode" "RustLang editing mode.")
+ (protobuf-mode "protobuf-mode" "Protobuf editing mode.")
+ (screenwriter-mode "screenwriter" "Major mode for the screenwriter tool.")
+ (helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode.")
+ (csv-mode "csv-mode" "Major mode for dealing with CSV data.")
+ (writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose.")
+ (markdown-mode "markdown-mode" "Major mode for the Markdown format.")
+ (gfm-mode "markdown-mode"  "Major mode for editing GitHub Flavored Markdown files")
+ (graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files")
+ (helm-kodi-shows "helm-kodi")
+ (helm-kodi-movies "helm-kodi")
+ (kodi-connect "kodi")
+ (shift-number-up "shift-number")
+ (shift-number-down "shift-number"))
 
 (require 'monky)
-;; (setq monky-process-type 'cmdserver)
-
-(add-hook 'monky-mode-hook
-          (lambda ()
-            (visual-line-mode)
-            
-            (set-face-attribute
-             'monky-section-title nil :foreground "#F92672" :height 1.2 :underline t)
-            (set-face-attribute
-             'monky-diff-add nil :background "grey18" :foreground "cyan3")
-            (set-face-attribute
-             'monky-diff-del nil :background "grey13" :foreground "yellow3")
-            (set-face-attribute
-             'monky-diff-title nil :background "darkgreen" :box t :foreground "white")
-            (set-face-attribute
-             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")
-            (set-face-attribute
-             'monky-log-sha1 nil :background nil :foreground "yellow")
-            (set-face-attribute
-             'monky-log-author nil :background nil :foreground "grey55" :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-local nil :background nil :foreground "sky blue" :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
-
 (require 'expand-region)
 (require 'multi)
 (require 's)
@@ -119,29 +116,6 @@
           (extension "py" "c" "cpp" "h" "hpp" "lua" "go" "el" "glsl" "rs"))
          ("Exe"
           (extension "exe" "sh" "bat")))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Auto-loads
-(rysco-autoloads
- (csharp-mode "csharp-mode" "Major mode for editing C# code.")
- (cg-mode "cg-mode" "Major mode for editing CG program code.")
- (json-mode "json-mode" "Major mode for editing json data.")
- (lua-mode "lua-mode" "Lua editing mode.")
- (php-mode "php-mode" "PHP editing mode.")
- (rust-mode "rust-mode" "RustLang editing mode.")
- (protobuf-mode "protobuf-mode" "Protobuf editing mode.")
- (screenwriter-mode "screenwriter" "Major mode for the screenwriter tool.")
- (helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode.")
- (csv-mode "csv-mode" "Major mode for dealing with CSV data.")
- (writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose.")
- (markdown-mode "markdown-mode" "Major mode for the Markdown format.")
- (gfm-mode "markdown-mode"  "Major mode for editing GitHub Flavored Markdown files")
- (graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files")
- (helm-kodi-shows "helm-kodi")
- (helm-kodi-movies "helm-kodi")
- (kodi-connect "kodi")
- (shift-number-up "shift-number")
- (shift-number-down "shift-number"))
 
 (rysco-auto-modes
  ("\\.h$" . c++-mode)
@@ -247,6 +221,31 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
+
+(add-hook 'monky-mode-hook
+          (lambda ()
+            (visual-line-mode)
+            
+            (set-face-attribute
+             'monky-section-title nil :foreground "#F92672" :height 1.2 :underline t)
+            (set-face-attribute
+             'monky-diff-add nil :background "grey18" :foreground "cyan3")
+            (set-face-attribute
+             'monky-diff-del nil :background "grey13" :foreground "yellow3")
+            (set-face-attribute
+             'monky-diff-title nil :background "darkgreen" :box t :foreground "white")
+            (set-face-attribute
+             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")
+            (set-face-attribute
+             'monky-log-sha1 nil :background nil :foreground "yellow")
+            (set-face-attribute
+             'monky-log-author nil :background nil :foreground "grey55" :slant 'italic)
+            (set-face-attribute
+             'monky-log-head-label-local nil :background nil :foreground "sky blue" :slant 'italic)
+            (set-face-attribute
+             'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)
+            (set-face-attribute
+             'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
 
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
