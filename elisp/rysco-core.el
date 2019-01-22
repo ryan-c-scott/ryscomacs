@@ -81,6 +81,7 @@
 (require 'ispell)
 (require 'multiple-cursors)
 (require 'bluedot)
+(require 'font-lock+)
 
 (require 'run-assoc)
 (setq associated-program-alist
