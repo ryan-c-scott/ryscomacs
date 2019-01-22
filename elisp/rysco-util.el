@@ -340,7 +340,8 @@ With prefix-arg prompt for type if available with your AG version."
 (defun helm-rysco-insert-icon ()
   "Helper for discovering fonts from all-the-icons"
   (interactive)
-  (helm :sources
+  (helm :candidate-number-limit nil
+        :sources
         (cl-loop for family in '(alltheicon faicon fileicon octicon material wicon) collect
                  (helm-build-sync-source (format "%s" family)
                    :candidates
