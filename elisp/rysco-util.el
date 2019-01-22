@@ -13,6 +13,13 @@
         for entry in elements collect
         `(add-to-list 'auto-mode-alist ',entry))))
 
+(cl-defmacro rysco-add-to-list (list &rest entries)
+  `(progn
+     ,@(reverse
+        (cl-loop
+         for it in entries collect
+         `(add-to-list ',list ',it)))))
+
 (cl-defmacro rysco-add-to-loadpath (&rest pathlist)
   `(progn
      ,@(reverse
@@ -329,6 +336,24 @@ With prefix-arg prompt for type if available with your AG version."
   (let ((name (projectile-project-name)))
     (unless (string= name "-")
       (set-frame-name (format "[ %s ]" (upcase name))))))
+
+(defun helm-rysco-insert-icon ()
+  "Helper for discovering fonts from all-the-icons"
+  (interactive)
+  (helm :sources
+        (cl-loop for family in '(alltheicon faicon fileicon octicon material wicon) collect
+                 (helm-build-sync-source (format "%s" family)
+                   :candidates
+                   (let* ((data-f (all-the-icons--data-name family))
+                          (insert-f (all-the-icons--function-name family))
+                          (data (funcall data-f)))
+                     (mapcar
+                      (lambda (it)
+                        (cons
+                         (format "%s - %s" (funcall insert-f (car it)) (car it))
+                         (format "(all-the-icons-%s \"%s\")" family (car it))))
+                      data))
+                   :action #'insert))))
 
 ;;
 (provide 'rysco-util)

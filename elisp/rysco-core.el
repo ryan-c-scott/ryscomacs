@@ -146,6 +146,16 @@
  ("\\.gv$" . graphviz-dot-mode)
  ("\\.rs$" . rust-mode))
 
+;;;; Icons for modes
+(rysco-add-to-list
+ all-the-icons-mode-icon-alist
+ (monky-mode all-the-icons-faicon "mercury")
+ (kodi-mode all-the-icons-material "tv"))
+
+;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
+(memoize-restore 'all-the-icons-icon-for-mode)
+(memoize 'all-the-icons-icon-for-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 (setq ns-use-srgb-colorspace nil)
