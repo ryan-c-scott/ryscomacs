@@ -1,4 +1,36 @@
 ;;;;;;;;;
+(cl-defmacro rysco-bind-keys (lead &rest bindings)
+  `(progn
+     ,@(cl-loop
+        for (key bind) on bindings by 'cddr collect
+        `(global-set-key
+          (kbd (concat ,lead " " ,key))
+          ,bind))))
+
+(cl-defmacro rysco-auto-modes (list &rest elements)
+  `(progn
+     ,@(cl-loop
+        for entry in elements collect
+        `(add-to-list 'auto-mode-alist ',entry))))
+
+(cl-defmacro rysco-add-to-loadpath (&rest pathlist)
+  `(progn
+     ,@(reverse
+        (cl-loop
+         with base = nil
+         for path in pathlist
+         if (and (listp path) (equal (car path) :base)) do
+         (setq base (cadr path))
+         else collect
+         `(add-to-list 'load-path ,(concat base "/" path))))))
+
+(cl-defmacro rysco-autoloads (&rest entries)
+  `(progn
+     ,@(cl-loop
+        for (sym file doc) in entries collect
+        `(autoload ',sym ,file ,doc t))))
+
+;;;;;;;;;
 (defun rysco-split-dwim (dir &optional switch)
   ""
   (let* ((can-horizontal (not (or (windmove-find-other-window 'left) (windmove-find-other-window 'right))))

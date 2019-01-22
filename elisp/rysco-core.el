@@ -11,24 +11,26 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
-(add-to-list 'load-path "~/ryscomacs/elisp/")
-(add-to-list 'load-path "~/ryscomacs/elisp/helm/")
-(add-to-list 'load-path "~/ryscomacs/elisp/dash")
-(add-to-list 'load-path "~/ryscomacs/elisp/go-mode/")
-(add-to-list 'load-path "~/ryscomacs/elisp/kodi/")
-(add-to-list 'load-path "~/ryscomacs/elisp/expand-region/")
-(add-to-list 'load-path "~/ryscomacs/elisp/emacs-async/")
-(add-to-list 'load-path "~/ryscomacs/elisp/svg-mode-line-themes")
-(add-to-list 'load-path "~/ryscomacs/elisp/ocodo-svg-modelines")
-(add-to-list 'load-path "~/ryscomacs/elisp/powerline")
-(add-to-list 'load-path "~/ryscomacs/elisp/dired-hacks/")
-(add-to-list 'load-path "~/ryscomacs/elisp/magit/magit/lisp")
-(add-to-list 'load-path "~/ryscomacs/elisp/magit/magit-popup")
-(add-to-list 'load-path "~/ryscomacs/elisp/magit/with-editor")
-(add-to-list 'load-path "~/ryscomacs/elisp/magit/ghub")
-(add-to-list 'load-path "~/ryscomacs/elisp/monky")
-(add-to-list 'load-path "~/ryscomacs/elisp/multiple-cursors.el")
-(add-to-list 'load-path "~/ryscomacs/elisp/all-the-icons.el")
+(rysco-add-to-loadpath
+ (:base "~/ryscomacs/elisp")
+ ""
+ "helm/"
+ "dash"
+ "go-mode/"
+ "kodi/"
+ "expand-region/"
+ "emacs-async/"
+ "svg-mode-line-themes"
+ "ocodo-svg-modelines"
+ "powerline"
+ "dired-hacks/"
+ "magit/magit/lisp"
+ "magit/magit-popup"
+ "magit/with-editor"
+ "magit/ghub"
+ "monky"
+ "multiple-cursors.el"
+ "all-the-icons.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -120,63 +122,55 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
-(autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
-(autoload 'cg-mode "cg-mode" "Major mode for editing CG program code." t)
-(autoload 'json-mode "json-mode" "Major mode for editing json data." t)
-(autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-(autoload 'php-mode "php-mode" "PHP editing mode." t)
-(autoload 'rust-mode "rust-mode" "RustLang editing mode." t)
-(autoload 'protobuf-mode "protobuf-mode" "Protobuf editing mode." t)
-(autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
-(autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
-(autoload 'csv-mode "csv-mode" "Major mode for dealing with CSV data." t)
-(autoload 'writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose." t)
-(autoload 'markdown-mode "markdown-mode" "Major mode for the Markdown format." t)
-(autoload 'gfm-mode "markdown-mode"
-  "Major mode for editing GitHub Flavored Markdown files" t)
-(autoload 'graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files" t)
+(rysco-autoloads
+ (csharp-mode "csharp-mode" "Major mode for editing C# code.")
+ (cg-mode "cg-mode" "Major mode for editing CG program code.")
+ (json-mode "json-mode" "Major mode for editing json data.")
+ (lua-mode "lua-mode" "Lua editing mode.")
+ (php-mode "php-mode" "PHP editing mode.")
+ (rust-mode "rust-mode" "RustLang editing mode.")
+ (protobuf-mode "protobuf-mode" "Protobuf editing mode.")
+ (screenwriter-mode "screenwriter" "Major mode for the screenwriter tool.")
+ (helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode.")
+ (csv-mode "csv-mode" "Major mode for dealing with CSV data.")
+ (writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose.")
+ (markdown-mode "markdown-mode" "Major mode for the Markdown format.")
+ (gfm-mode "markdown-mode"  "Major mode for editing GitHub Flavored Markdown files")
+ (graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files")
+ (helm-kodi-shows "helm-kodi")
+ (helm-kodi-movies "helm-kodi")
+ (kodi-connect "kodi")
+ (shift-number-up "shift-number")
+ (shift-number-down "shift-number"))
 
-(autoload 'helm-kodi-shows "helm-kodi" "" t)
-(autoload 'helm-kodi-movies "helm-kodi" "" t)
-(autoload 'kodi-connect "kodi" "" t)
-
-(autoload 'shift-number-up "shift-number" nil t)
-(autoload 'shift-number-down "shift-number" nil t)
-
-(autoload 'org-table-matrix-mode "org-table-matrix" "" t)
-
-(setq auto-mode-alist
-      (append
-       (list
-	'("\\.h$" . c++-mode)
-	'("\\.ino$" . c++-mode)
-        '("\\.xml$" . xml-mode)
-        '("\\.css$" . css-mode)
-        '("\\.cs$" . csharp-mode)
-        '("\\.cg$" . cg-mode)
-        '("\\.glsl$" . cg-mode)
-        '("\\.shader$" . lua-mode)
-        '("\\.fs$" . c++-mode)
-        '("\\.vs$" . c++-mode)
-        '("\\.lua$" . lua-mode)
-        '("\\.particle$" . lua-mode)
-        '("\\.material$" . lua-mode)
-        '("\\.prefab$" . lua-mode)
-        '("\\.scene$" . lua-mode)
-        '("\\.deps$" . lua-mode)
-	'("\\.item_list$" . lua-mode)
-        '("\\.json$" . json-mode)
-        '("\\.php$" . php-mode)
-        '("\\.proto$" . protobuf-mode)
-	'("\\.markdown$" . gfm-mode)
-	'("\\.md$" . gfm-mode)
-	'("\\.screenplay$" . screenwriter-mode)
-	'("\\.csv$" . csv-mode)
-        '("\\.dot$" . graphviz-dot-mode)
-        '("\\.gv$" . graphviz-dot-mode)
-        '("\\.rs$" . rust-mode)
-		)
-       auto-mode-alist))
+(rysco-auto-modes
+ ("\\.h$" . c++-mode)
+ ("\\.ino$" . c++-mode)
+ ("\\.xml$" . xml-mode)
+ ("\\.css$" . css-mode)
+ ("\\.cs$" . csharp-mode)
+ ("\\.cg$" . cg-mode)
+ ("\\.glsl$" . cg-mode)
+ ("\\.shader$" . lua-mode)
+ ("\\.fs$" . c++-mode)
+ ("\\.vs$" . c++-mode)
+ ("\\.lua$" . lua-mode)
+ ("\\.particle$" . lua-mode)
+ ("\\.material$" . lua-mode)
+ ("\\.prefab$" . lua-mode)
+ ("\\.scene$" . lua-mode)
+ ("\\.deps$" . lua-mode)
+ ("\\.item_list$" . lua-mode)
+ ("\\.json$" . json-mode)
+ ("\\.php$" . php-mode)
+ ("\\.proto$" . protobuf-mode)
+ ("\\.markdown$" . gfm-mode)
+ ("\\.md$" . gfm-mode)
+ ("\\.screenplay$" . screenwriter-mode)
+ ("\\.csv$" . csv-mode)
+ ("\\.dot$" . graphviz-dot-mode)
+ ("\\.gv$" . graphviz-dot-mode)
+ ("\\.rs$" . rust-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
@@ -253,12 +247,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
-(cl-defmacro rysco-bind-keys (lead &rest bindings)
-  `(progn
-     ,@(cl-loop for (key bind) on bindings by 'cddr collect
-                `(global-set-key
-                  (kbd (concat ,lead " " ,key))
-                  ,bind))))
 
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
