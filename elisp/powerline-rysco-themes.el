@@ -53,7 +53,7 @@
             ((and start-visible end-visible) "all_inclusive")
             (start-visible "vertical_align_top")
             (end-visible "vertical_align_bottom"))
-           :face `(:inherit face :height 0.8))
+           :face `(:height 0.8))
           face 'l)
          (powerline-raw " " face 'r))
       ;;
