@@ -2,7 +2,7 @@
 (cl-defmacro rysco-bind-keys (lead &rest bindings)
   `(progn
      ,@(cl-loop
-        for (key bind) on bindings by 'cddr collect
+        for (key bind) in bindings collect
         `(global-set-key
           (kbd (concat ,lead " " ,key))
           ,bind))))

@@ -436,32 +436,34 @@
 (rysco-bind-keys
  rysco-lead-key
 
- "f" 'find-tag
- rysco-lead-key 'helm-mini
- "SPC" 'helm-semantic-or-imenu
- "<RET>" 'helm-resume
- "s" 'helm-occur
- "y" 'helm-show-kill-ring
- "v" 'rysco-revert-buffer
+ ("f" 'find-tag)
+ (rysco-lead-key 'helm-mini)
+ ("SPC" 'helm-semantic-or-imenu)
+ ("<RET>" 'helm-resume)
+ ("s" 'helm-occur)
+ ("y" 'helm-show-kill-ring)
+ ("v" 'rysco-revert-buffer)
+ ("p" 'rysco-repo-status)
+ 
  ;;Windows
- "<right>" 'split-window-right
- "<down>" 'split-window-below
- "<left>" 'delete-window
- "<up>" 'delete-other-windows
- ;; Home-row bindings for rysco features (dvorak)
- "g" 'delete-window
- "r" 'delete-other-windows
- "n" 'rysco-split-right-dwim
- "t" 'rysco-split-down-dwim
- "h" 'rysco-split-left-dwim
- "c" 'rysco-split-up-dwim
- ;; Frames
- "/" 'make-frame
- "=" 'delete-frame
- "\\" 'other-frame
- "-" 'select-frame-by-name
+ ("<right>" 'split-window-right)
+ ("<down>" 'split-window-below)
+ ("<left>" 'delete-window)
+ ("<up>" 'delete-other-windows)
 
- "p" 'rysco-repo-status)
+ ;; Home-row bindings for rysco features (dvorak)
+ ("g" 'delete-window)
+ ("r" 'delete-other-windows)
+ ("n" 'rysco-split-right-dwim)
+ ("t" 'rysco-split-down-dwim)
+ ("h" 'rysco-split-left-dwim)
+ ("c" 'rysco-split-up-dwim)
+
+ ;; Frames
+ ("/" 'make-frame)
+ ("=" 'delete-frame)
+ ("\\" 'other-frame)
+ ("-" 'select-frame-by-name))
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
