@@ -1535,7 +1535,8 @@ before the last command."
   (setq disable-point-adjustment t))
 
 (defun monky-post-command-hook ()
-  (monky-correct-point-after-command))
+  (monky-correct-point-after-command)
+  (set-buffer-modified-p nil))
 
 ;;; Monky mode
 
