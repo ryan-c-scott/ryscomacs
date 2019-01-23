@@ -1995,9 +1995,13 @@ before the last command."
 
 ;;; Commits
 (defun monky-wash-recent-commits ()
-  (let ((data
-         (json-read-from-string
-          (concat "[" (substring (buffer-string) 0 -1) "]"))))
+  (let* ((str (buffer-string))
+         (data
+          (json-read-from-string
+           (concat "["
+                   (when (> (length str) 0)
+                      (substring str 0 -1))
+                  "]"))))
     (delete-region (point-min) (point-max))
 
     (cl-loop for entry across data do
