@@ -459,7 +459,9 @@
  "/" 'make-frame
  "=" 'delete-frame
  "\\" 'other-frame
- "-" 'select-frame-by-name)
+ "-" 'select-frame-by-name
+
+ "p" 'rysco-repo-status)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
