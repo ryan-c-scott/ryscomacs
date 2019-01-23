@@ -297,17 +297,18 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
 (defun rysco-repo-status (&optional dir)
   "Run either `monky-status' or `magit-status' for hg or git repositories respectively"
   (interactive)
-  (let ((dir (or dir (expand-file-name "."))))
-    (cond
-     ((vc-find-root dir ".hg")
-      (monky-status dir))
-     ((vc-find-root dir ".git")
-      (magit-status dir))
-     (t
-      (--if-let (helm :sources
-                      (helm-build-sync-source "Projects" :candidates projectile-known-projects))
-          (rysco-repo-status it)
-        (message "Not a git or hg repository"))))))
+  (helm :sources
+        (helm-build-sync-source "Projects"
+          :candidates (cons "." projectile-known-projects)
+          :action
+          (lambda (dir)
+            (cond
+             ((--when-let (vc-find-root dir ".hg")
+                (monky-status it)))
+             ((--when-let (vc-find-root dir ".git")
+                (magit-status it)))
+             (t
+              (message "Not a git or hg repository")))))))
 
 (defun color-lerp (start end mix)
   (cl-loop for scol in (if (stringp start) (color-name-to-rgb start) start)
