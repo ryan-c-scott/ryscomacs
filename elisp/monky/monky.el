@@ -1281,8 +1281,7 @@ With a prefix argument, visit in other window."
   (let ((remote (if current-prefix-arg
                     (monky-read-remote "Fetch from : ")
                   monky-incoming-repository)))
-    (monky-run-hg-async "fetch" remote
-                        "--config" "extensions.fetch=")))
+    (monky-run-hg-async "pull" remote)))
 
 (defun monky-pull ()
   "Run hg pull."
@@ -1291,7 +1290,7 @@ With a prefix argument, visit in other window."
   (let ((remote (if current-prefix-arg
                     (monky-read-remote "Pull from : ")
                   monky-incoming-repository)))
-    (monky-run-hg-async "pull" remote))
+    (monky-run-hg-async "pull" "-u" remote))
   (monky-hg-clear-cache))
 
 (defun monky-remotes ()
