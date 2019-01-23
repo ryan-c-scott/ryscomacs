@@ -10,7 +10,7 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "firebrick4" :weight normal)))
+(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "dimgray" :weight normal)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
@@ -115,11 +115,23 @@
 	      (list
 	       (powerline-raw global-mode-string face2 'r)
 
+               
+               (when buffer-read-only
+                 (powerline-raw
+                  (format "%s "
+                          (propertize
+                           (all-the-icons-material
+                            "error_outline"
+                            :face `(:inherit ,face2 :foreground "white" :height 0.8))
+                           'display '(raise -0.175)))
+                  face2 'l))
+
 	       (funcall separator-right-secondary face2 face1)
 
 	       (unless window-system
 	       	 (powerline-raw (char-to-string #xe0a1) face1 'l))
-	       (powerline-raw "%4l " face1 'l)
+
+               (powerline-raw "%4l " face1 'l)
 	       ;; (powerline-raw ":" face1 'l)
 	       ;; (powerline-raw "%c" face1 'l)
 
