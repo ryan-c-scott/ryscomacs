@@ -306,9 +306,8 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
      (t
       (--if-let (helm :sources
                       (helm-build-sync-source "Projects" :candidates projectile-known-projects))
-          (rysco-repo-status it))
-      
-      (message "Not a git or hg repository")))))
+          (rysco-repo-status it)
+        (message "Not a git or hg repository"))))))
 
 (defun color-lerp (start end mix)
   (cl-loop for scol in (if (stringp start) (color-name-to-rgb start) start)
