@@ -294,16 +294,21 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
             (goto-char (point-min))
             (replace-regexp key value)))))
 
-(defun rysco-repo-status ()
+(defun rysco-repo-status (&optional dir)
   "Run either `monky-status' or `magit-status' for hg or git repositories respectively"
   (interactive)
-  (cond
-   ((vc-find-root "." ".hg")
-    (monky-status))
-   ((vc-find-root "." ".git")
-    (magit-status))
-   (t
-    (message "Not a git or hg repository"))))
+  (let ((dir (or dir (expand-file-name "."))))
+    (cond
+     ((vc-find-root dir ".hg")
+      (monky-status dir))
+     ((vc-find-root dir ".git")
+      (magit-status dir))
+     (t
+      (--if-let (helm :sources
+                      (helm-build-sync-source "Projects" :candidates projectile-known-projects))
+          (rysco-repo-status it))
+      
+      (message "Not a git or hg repository")))))
 
 (defun color-lerp (start end mix)
   (cl-loop for scol in (if (stringp start) (color-name-to-rgb start) start)
