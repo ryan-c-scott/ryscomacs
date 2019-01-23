@@ -42,6 +42,23 @@
                (substring-no-properties vc-mode)))
       face justification))))
 
+(defun powerline-rysco-pos (&optional face)
+  (let ((start-visible (equal (window-start) (point-min)))
+        (end-visible (equal (window-end) (point-max))))
+    (if (or start-visible end-visible)
+        (concat
+         (powerline-raw
+          (all-the-icons-material 
+           (cond
+            ((and start-visible end-visible) "all_inclusive")
+            (start-visible "vertical_align_top")
+            (end-visible "vertical_align_bottom"))
+           :face `(:inherit face :height 0.8))
+          face 'l)
+         (powerline-raw " " face 'r))
+      ;;
+      (powerline-raw "%p" face 'r))))
+
 (defun powerline-rysco-theme ()
   "Setup the default mode-line."
   (interactive)
@@ -108,7 +125,7 @@
 
 	       (funcall separator-right face1 mode-line)
 	       (powerline-raw " ")
-	       (powerline-raw "%6p" nil 'r)
+               (powerline-rysco-pos)
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
 
