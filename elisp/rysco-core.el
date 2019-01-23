@@ -150,7 +150,8 @@
 (rysco-add-to-list
  all-the-icons-mode-icon-alist
  (monky-mode all-the-icons-faicon "mercury")
- (kodi-mode all-the-icons-material "tv"))
+ (kodi-mode all-the-icons-material "tv")
+ (lua-mode all-the-icons-fileicon "lua"))
 
 ;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
 (memoize-restore 'all-the-icons-icon-for-mode)
