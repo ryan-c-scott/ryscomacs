@@ -77,6 +77,7 @@
 	     (separator-left-secondary (intern "powerline-rounded-left"))
 	     (separator-right (intern "powerline-rounded-right"))
 	     (separator-right-secondary (intern "powerline-bar-right"))
+             (padding-hack 0)
 
 	     (lhs
 	      (list
@@ -125,6 +126,9 @@
                               form)
 
                              ((equal type :icon)
+                              ;; HACK:
+                              (incf padding-hack)
+                              
                               `(propertize
                                 (,(plist-get form :family)
                                  ,(plist-get form :icon)
@@ -134,9 +138,12 @@
                              (t ""))
 
                             `((face ,face2)))))
-                  face2 'l))
-               
+                  face2 'r))
+
                (when buffer-read-only
+                 ;; HACK:
+                 (incf padding-hack)
+                 
                  (powerline-raw
                   (format "%s "
                           (propertize
@@ -165,7 +172,7 @@
                  (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
 
 	(concat (powerline-render lhs)
-		(powerline-fill face2 (powerline-width rhs))
+		(powerline-fill face2 (+ (powerline-width rhs) padding-hack))
 		(powerline-render rhs)))))))
 
 (provide 'powerline-rysco-themes)
