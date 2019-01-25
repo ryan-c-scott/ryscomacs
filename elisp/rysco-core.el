@@ -36,7 +36,8 @@
  "monky"
  "multiple-cursors.el"
  "all-the-icons.el"
- "emacs-doom-themes")
+ "emacs-doom-themes"
+ "emacs-kaolin-themes")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -45,6 +46,7 @@
 
 (require 'doom-themes)
 (doom-themes-org-config)
+(require 'kaolin-themes)
 
 (require 'all-the-icons)
 (require 'async)
