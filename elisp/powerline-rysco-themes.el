@@ -115,6 +115,26 @@
 	      (list
 	       (powerline-raw global-mode-string face2 'r)
 
+               (--when-let rysco-modeline-extras
+                 (powerline-raw
+                  (cl-loop for (type form) in it concat
+                           (concat " "
+                           (eval
+                            (cond
+                             ((equal type :eval)
+                              form)
+
+                             ((equal type :icon)
+                              `(propertize
+                                (,(plist-get form :family)
+                                 ,(plist-get form :icon)
+                                 :face `(:inherit ,face :height ,(plist-get form :height)))
+                                'display '(raise ,(plist-get form :raise))))
+
+                             (t ""))
+
+                            `((face ,face2)))))
+                  face2 'l))
                
                (when buffer-read-only
                  (powerline-raw

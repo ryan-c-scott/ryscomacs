@@ -9,6 +9,7 @@
 (defvar rysco-font "Source Code Pro")
 (defvar rysco-font-size "15.0")
 (defvar rysco-writing-font "Georgia")
+(defvar-local rysco-modeline-extras nil)
 
 (require 'cl)
 (require 'rysco-util)
