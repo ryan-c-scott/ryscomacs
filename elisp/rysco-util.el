@@ -310,6 +310,10 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
              (t
               (message "Not a git or hg repository")))))))
 
+(defun color-invert (color)
+  (cl-loop for el in (if (stringp color) (color-name-to-rgb color) color)
+           collect (- 1 el)))
+
 (defun color-lerp (start end mix)
   (cl-loop for scol in (if (stringp start) (color-name-to-rgb start) start)
            for ecol in (if (stringp end) (color-name-to-rgb end) end)
