@@ -34,12 +34,16 @@
  "magit/ghub"
  "monky"
  "multiple-cursors.el"
- "all-the-icons.el")
+ "all-the-icons.el"
+ "emacs-doom-themes")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (setq load-prefer-newer t)
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
+
+(require 'doom-themes)
+(doom-themes-org-config)
 
 (require 'all-the-icons)
 (require 'async)
