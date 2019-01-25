@@ -10,13 +10,4 @@
 (setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
 
 (require 'rysco-core)
-(server-start)
-
-(custom-set-variables
- '(custom-safe-themes
-   (quote
-    ("a0432a35716d4e77d954f702401abde456a51e114d9567afa7a906306fd53b6c" "b936b76d83fa0559eb1445fd4424ca2f6f25de1fe95d3a3825454b7b958646fb" "b571f92c9bfaf4a28cb64ae4b4cdbda95241cd62cf07d942be44dc8f46c491f4" default))))
-(custom-set-faces)
-
 ;;;;;;;;;;;;
-(load-theme 'molokai)

@@ -2,6 +2,7 @@
 ;; Vars
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
+(defvar rysco-theme nil)
 (defvar rysco-capslock-mapped nil)
 (defvar rysco-ssh-config-directories nil)
 (defvar rysco-lead-key "<escape>")
@@ -477,6 +478,17 @@
 ;; Helpers for things that have a lot of muscle memory
 (global-set-key (kbd "<escape>d") 'kill-word)
 (global-set-key (kbd "<escape>DEL") 'backward-kill-word)
+
+;;
+(defun rysco-post-init-setup ()
+  (unless (equal rysco-theme :none)
+    (load-theme
+     (if rysco-theme
+         rysco-theme
+       'molokai)))
+  (server-start))
+
+(add-hook 'after-init-hook 'rysco-post-init-setup)
 
 ;;;;;;;;;;;;
 (provide 'rysco-core)
