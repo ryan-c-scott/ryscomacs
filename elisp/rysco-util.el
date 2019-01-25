@@ -365,5 +365,18 @@ With prefix-arg prompt for type if available with your AG version."
                       data))
                    :action #'insert))))
 
+(defun rysco-load-theme (&optional theme)
+  (interactive)
+  (let ((theme (or theme
+                   (helm :sources
+                         (helm-build-sync-source "Themes"
+                           :candidates
+                           (cl-loop for it in custom-known-themes collect
+                                    (cons (format "%s" it) it)))))))
+    (when theme
+      (cl-loop for current-theme in custom-enabled-themes do
+               (disable-theme current-theme))
+      (load-theme theme))))
+
 ;;
 (provide 'rysco-util)
