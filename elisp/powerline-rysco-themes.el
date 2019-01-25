@@ -135,7 +135,7 @@
 	       ;; (powerline-raw ":" face1 'l)
 	       ;; (powerline-raw "%c" face1 'l)
 
-	       (funcall separator-right face1 mode-line)
+	       (funcall separator-right face1 nil)
 	       (powerline-raw " ")
                (powerline-rysco-pos)
 	       ;; (when powerline-display-hud
