@@ -615,6 +615,7 @@ FUNC should leave point at the end of the modified region"
     (define-key map (kbd "X") 'monky-reset-tip)
     (define-key map (kbd "A") 'monky-addremove-all)
     (define-key map (kbd "L") 'monky-rollback)
+    (define-key map (kbd "C-M-s") 'helm-monky-stage)
     map))
 
 (defvar monky-log-mode-map
