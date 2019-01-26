@@ -142,7 +142,7 @@
 
                (when buffer-read-only
                  ;; HACK:
-                 (incf padding-hack)
+                 (incf padding-hack 2)
                  
                  (powerline-raw
                   (format "%s "
@@ -172,7 +172,7 @@
                  (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
 
 	(concat (powerline-render lhs)
-		(powerline-fill face2 (+ (powerline-width rhs) padding-hack))
+		(powerline-fill face2 (+ (powerline-width rhs) (/ padding-hack 2)))
 		(powerline-render rhs)))))))
 
 (provide 'powerline-rysco-themes)
