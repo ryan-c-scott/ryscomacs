@@ -2,6 +2,10 @@
   "Powerline face 1."
   :group 'powerline)
 
+(defface powerline-rysco-inactive1 '((t (:background "grey22" :foreground "grey45" :weight normal)))
+  "Powerline face 1."
+  :group 'powerline)
+
 (defface powerline-rysco-backing '((t (:foreground "black" :background "dimgray" :weight normal)))
 	 "Powerline face 3."
 	 :group 'powerline)
@@ -68,7 +72,7 @@
      (:eval
       (let* ((active (powerline-selected-window-active))
 	     (mode-line (if active 'mode-line 'mode-line-inactive))
-	     (face1 (if active 'powerline-rysco-active1 'powerline-inactive1))
+	     (face1 (if active 'powerline-rysco-active1 'powerline-rysco-inactive1))
 	     (face2 (cond ((buffer-modified-p) 'powerline-rysco-backing-modified)
 			  (buffer-read-only 'powerline-rysco-backing-ro)
 			  (t 'powerline-rysco-backing)))
@@ -163,8 +167,8 @@
 	       ;; (powerline-raw "%c" face1 'l)
 
 	       (funcall separator-right face1 nil)
-	       (powerline-raw " ")
-               (powerline-rysco-pos)
+               (powerline-raw " " nil)
+               (powerline-rysco-pos nil)
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
 

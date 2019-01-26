@@ -615,6 +615,7 @@ FUNC should leave point at the end of the modified region"
     (define-key map (kbd "X") 'monky-reset-tip)
     (define-key map (kbd "A") 'monky-addremove-all)
     (define-key map (kbd "L") 'monky-rollback)
+    (define-key map (kbd "C-M-s") 'helm-monky-stage)
     map))
 
 (defvar monky-log-mode-map
@@ -1758,6 +1759,62 @@ before the last command."
        (insert "\t" file "\n")
        (add-to-list 'monky-all-untracked-files file)))))
 
+(defun monky-process-status (data)
+  (cl-loop
+   with modified
+   with added
+   with removed
+   with missing
+   with untracked
+   with other
+
+   for entry across data do
+   (--when-let (cdr (assoc 'status entry))
+
+     (add-to-list
+      (cond
+       ((string= it "M")
+        'modified)
+       ((string= it "A")
+        'added)
+       ((string= it "R")
+        'removed)
+       ((string= it "!")
+        'missing)
+       ((string= it "?")
+        'untracked)
+       (t
+        'other))
+      
+      (cdr (assoc 'path entry))
+      t))
+   
+   finally do
+   (progn
+     (setq monky-all-untracked-files nil)
+
+     (when untracked
+       (monky-with-section "Untracked Test:" 'untracked
+         (insert (propertize "Untracked Test:" 'face 'monky-section-title) "\n")
+         (cl-loop with status = 'untracked
+                  for file in untracked do
+                  (monky-with-section file 'file
+                    (monky-set-section-info file)
+                    (insert "\t" file "\n")
+                    (add-to-list 'monky-all-untracked-files file)))
+         (insert "\n")))
+
+     (when missing
+       (monky-with-section "Missing Test:" 'missing
+         (insert (propertize "Missing Test:" 'face 'monky-section-title) "\n")
+         (cl-loop with status = 'missing
+                  for file in missing do
+                  (monky-with-section file 'file
+                    (monky-set-section-info file)
+                    (insert "\t" file "\n")
+                    (add-to-list 'monky-all-untracked-files file)))
+         (insert "\n"))))))
+
 ;; Hunk
 
 (defun monky-hunk-item-diff (hunk)
@@ -1874,18 +1931,21 @@ before the last command."
     (format "    • %-10s %s\n" (capitalize (symbol-name status)) file)
     'face 'monky-diff-title)))
 
-;;; Untracked files
+(defun monky-insert-uber-status ()
+  (let* ((cmd monky-hg-executable)
+         (args '("status" "-Tjson"))
+         (body-beg (point)))
 
-(defun monky-insert-untracked-files ()
-  (setq monky-all-untracked-files nil)
-  (monky-hg-section 'untracked "Untracked files:" #'monky-wash-files
-                    "status" "--unknown"))
+    (--if-let (monky-hg-get-cached-output (cons cmd args))
+        (insert it)
+      (apply 'monky-process-file cmd nil t nil args)
+      (monky-hg-cache-output (cons cmd args) (buffer-substring body-beg (point))))
 
-;;; Missing files
-
-(defun monky-insert-missing-files ()
-  (monky-hg-section 'missing "Missing files:" #'monky-wash-files
-                    "status" "--deleted"))
+    (--when-let (point)
+      (goto-char body-beg)
+      (monky-process-status
+       (prog1 (json-read)
+         (delete-and-extract-region (point-min) it))))))
 
 ;;; Changes
 
@@ -2056,20 +2116,21 @@ before the last command."
 (defun monky-refresh-status ()
   (setq monky-parents '()
         monky-merged-files '())
+
   (monky-create-buffer-sections
     (monky-with-section 'status nil
-      (monky-insert-parents)
-      
       (if (monky-merge-p)
           (progn
             (monky-insert-merged-files)
             (monky-insert-resolved-files))
-        (monky-insert-untracked-files)
-        (monky-insert-missing-files)
+
+        (monky-insert-uber-status)
 
         (setq monky-diff-set (monky-get-all-diffs))
         (monky-insert-changes)
         (monky-insert-staged-changes))
+
+      (monky-insert-parents)
       (monky-insert-recent-commits))))
 
 (define-minor-mode monky-status-mode
