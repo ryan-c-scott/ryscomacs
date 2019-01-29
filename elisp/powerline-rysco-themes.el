@@ -26,6 +26,10 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
+(defface powerline-rysco-right '((t (:background "black" :box nil)))
+  ""
+  :group 'powerline)
+
 (defun powerline-rysco-minor-modes ()
   (s-join "•"
           (cl-loop for m in (s-split " " (format-mode-line minor-mode-alist))
@@ -57,7 +61,7 @@
             ((and start-visible end-visible) "all_inclusive")
             (start-visible "vertical_align_top")
             (end-visible "vertical_align_bottom"))
-           :face `(:height 0.8))
+           :face `(:inherit ,face :height 0.8))
           face 'l)
          (powerline-raw " " face 'r))
       ;;
@@ -77,6 +81,7 @@
 			  (buffer-read-only 'powerline-rysco-backing-ro)
 			  (t 'powerline-rysco-backing)))
 	     (face3 'powerline-rysco-buffer-id)
+             (face-theme 'powerline-rysco-right)
 	     (separator-left (intern "powerline-arrow-left"))
 	     (separator-left-secondary (intern "powerline-rounded-left"))
 	     (separator-right (intern "powerline-rounded-right"))
@@ -166,9 +171,9 @@
 	       ;; (powerline-raw ":" face1 'l)
 	       ;; (powerline-raw "%c" face1 'l)
 
-	       (funcall separator-right face1 nil)
-               (powerline-raw " " nil)
-               (powerline-rysco-pos nil)
+               (funcall separator-right face1 face-theme)
+               (powerline-raw " " face-theme)
+               (powerline-rysco-pos face-theme)
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
 
