@@ -13,6 +13,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
+(defvar rysco-use-straight-packages nil)
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-theme nil)
@@ -36,44 +37,52 @@
  "dired-hacks/"
  "monky")
 
-(rysco-packages
- :manual "~/ryscomacs/elisp/packages"
- :packages
- (autothemer
-  cg
-  csharp-mode
-  csv-mode
-  dash
-  dired-hacks-utils
-  eimp
-  async
-  doom-themes
-  kaolin-themes
-  expand-region
-  f
-  fill-column-indicator
-  glsl-mode
-  go-mode
-  graphviz-dot-mode
-  helm
-  helm-projectile
-  json-mode
-  magit
-  markdown-mode
-  memoize
-  multiple-cursors
-  ocodo-svg-modelines
-  php-mode
-  powerline
-  projectile
-  protobuf-mode
-  rust-mode
-  s
-  shift-number
-  svg-mode-line-themes
-  websocket
-  writegood-mode
-  xmlgen))
+;; Local config
+(load "localconfig" :missing-ok t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Packages
+(if (not rysco-use-straight-packages)
+    (rysco-packages :manual "~/ryscomacs/elisp/packages")
+
+  ;;
+  (rysco-packages
+   :packages
+   (autothemer
+    cg
+    csharp-mode
+    csv-mode
+    dash
+    dired-hacks-utils
+    eimp
+    async
+    doom-themes
+    kaolin-themes
+    expand-region
+    f
+    fill-column-indicator
+    glsl-mode
+    go-mode
+    graphviz-dot-mode
+    helm
+    helm-projectile
+    json-mode
+    magit
+    markdown-mode
+    memoize
+    multiple-cursors
+    ocodo-svg-modelines
+    php-mode
+    powerline
+    projectile
+    protobuf-mode
+    rust-mode
+    s
+    shift-number
+    svg-mode-line-themes
+    websocket
+    writegood-mode
+    xmlgen)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -252,8 +261,6 @@
       uniquify-ignore-buffers-re "^\\*"
       ispell-program-name "aspell")
 
-;; Local config
-(load "localconfig" :missing-ok t)
 
 (bluedot-resume)
 

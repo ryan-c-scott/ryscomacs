@@ -39,17 +39,31 @@
 
 
 (cl-defmacro rysco-packages (&key packages manual)
-  `(progn
-     ,@(if manual
-           (cl-loop for dir in (cddr (directory-files manual))
-                    as pkg-dir = (concat manual "/" dir)
-                    if (file-directory-p pkg-dir) collect
-                    `(progn
-                       (add-to-list 'load-path ,pkg-dir)
-                       (require ',(intern (format "%s-autoloads" dir)))))
-         (cl-loop
-          for pkg in packages
-          collect `(straight-use-package ',pkg)))))
+  (if manual
+      (cl-loop
+       with autoloads
+       with paths
+       for dir in (cddr (directory-files manual))
+       as pkg-dir = (concat manual "/" dir)
+       as is-dir = (file-directory-p pkg-dir)
+       if is-dir collect `(add-to-list 'load-path ,pkg-dir) into paths
+       if is-dir collect `(require ',(intern (format "%s-autoloads" dir))) into autoloads
+
+       finally return
+       `(progn
+          (message "Loading ryscomacs bundled packages:")
+          ,@paths
+          ,@autoloads))
+    ;;
+    
+    (cl-loop
+     with loads
+     for pkg in packages
+     collect `(straight-use-package ',pkg) into loads
+     finally return
+     `(progn
+        (message "Loading straight.el packages:")
+        ,@loads))))
 
 ;;;;;;;;;
 (defun rysco-split-dwim (dir &optional switch)
