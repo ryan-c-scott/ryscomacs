@@ -1,3 +1,16 @@
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
 (defvar rysco-fancy-modeline nil)
@@ -19,25 +32,48 @@
 (rysco-add-to-loadpath
  (:base "~/ryscomacs/elisp")
  ""
- "helm/"
- "dash"
- "go-mode/"
  "kodi/"
- "expand-region/"
- "emacs-async/"
- "svg-mode-line-themes"
- "ocodo-svg-modelines"
- "powerline"
  "dired-hacks/"
- "magit/magit/lisp"
- "magit/magit-popup"
- "magit/with-editor"
- "magit/ghub"
- "monky"
- "multiple-cursors.el"
- "all-the-icons.el"
- "emacs-doom-themes"
- "emacs-kaolin-themes")
+ "monky")
+
+(rysco-packages
+ :manual "~/ryscomacs/elisp/packages"
+ :packages
+ (autothemer
+  cg
+  csharp-mode
+  csv-mode
+  dash
+  dired-hacks-utils
+  eimp
+  async
+  doom-themes
+  kaolin-themes
+  expand-region
+  f
+  fill-column-indicator
+  glsl-mode
+  go-mode
+  graphviz-dot-mode
+  helm
+  helm-projectile
+  json-mode
+  magit
+  markdown-mode
+  memoize
+  multiple-cursors
+  ocodo-svg-modelines
+  php-mode
+  powerline
+  projectile
+  protobuf-mode
+  rust-mode
+  s
+  shift-number
+  svg-mode-line-themes
+  websocket
+  writegood-mode
+  xmlgen))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -54,38 +90,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
 (rysco-autoloads
- (magit-status "magit")
- (csharp-mode "csharp-mode" "Major mode for editing C# code.")
- (cg-mode "cg-mode" "Major mode for editing CG program code.")
- (json-mode "json-mode" "Major mode for editing json data.")
- (lua-mode "lua-mode" "Lua editing mode.")
- (php-mode "php-mode" "PHP editing mode.")
- (rust-mode "rust-mode" "RustLang editing mode.")
- (protobuf-mode "protobuf-mode" "Protobuf editing mode.")
- (screenwriter-mode "screenwriter" "Major mode for the screenwriter tool.")
- (helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode.")
- (csv-mode "csv-mode" "Major mode for dealing with CSV data.")
- (writegood-mode "writegood-mode" "Minor mode for identifying poorly constructed prose.")
- (markdown-mode "markdown-mode" "Major mode for the Markdown format.")
- (gfm-mode "markdown-mode"  "Major mode for editing GitHub Flavored Markdown files")
- (graphviz-dot-mode "graphviz-dot-mode" "Major mode for working with graphviz dot files")
  (helm-kodi-shows "helm-kodi")
  (helm-kodi-movies "helm-kodi")
- (kodi-connect "kodi")
- (shift-number-up "shift-number")
- (shift-number-down "shift-number"))
+ (kodi-connect "kodi"))
 
 (require 'monky)
-(require 'expand-region)
 (require 'multi)
 (require 's)
-(require 'go-mode-autoloads)
 (require 'helm-config)
 (require 'projectile)
 (require 'helm-projectile)
 (require 'uniquify)
 (require 'windmove)
-(require 'ispell)
+;; (require 'ispell)
 (require 'multiple-cursors)
 (require 'bluedot)
 (require 'font-lock+)
@@ -101,8 +118,8 @@
 (require 'dired-collapse)
 (require 'dired-filter)
 (add-hook 'dired-mode-hook (lambda ()
-                             (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
-                             (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
+                            (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
+                            (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
 
 (setq dired-filter-group-saved-groups
       `(("default"
@@ -184,7 +201,9 @@
 (setq helm-split-window-default-side 'other)
 (helm-mode 1)
 
-(projectile-global-mode)
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
 (setq projectile-completion-system 'helm
       projectile-indexing-method 'alien
       projectile-switch-project-action 'helm-projectile

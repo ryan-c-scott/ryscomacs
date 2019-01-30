@@ -37,6 +37,20 @@
         for (sym file doc) in entries collect
         `(autoload ',sym ,file ,doc t))))
 
+
+(cl-defmacro rysco-packages (&key packages manual)
+  `(progn
+     ,@(if manual
+           (cl-loop for dir in (cddr (directory-files manual))
+                    as pkg-dir = (concat manual "/" dir)
+                    if (file-directory-p pkg-dir) collect
+                    `(progn
+                       (add-to-list 'load-path ,pkg-dir)
+                       (require ',(intern (format "%s-autoloads" dir)))))
+         (cl-loop
+          for pkg in packages
+          collect `(straight-use-package ',pkg)))))
+
 ;;;;;;;;;
 (defun rysco-split-dwim (dir &optional switch)
   ""
