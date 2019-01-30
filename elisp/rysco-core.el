@@ -99,6 +99,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
 (rysco-autoloads
+ (screenwriter-mode "screenwriter")
+ (helm-screenwriter-init "helm-screenwriter")
  (helm-kodi-shows "helm-kodi")
  (helm-kodi-movies "helm-kodi")
  (kodi-connect "kodi"))
