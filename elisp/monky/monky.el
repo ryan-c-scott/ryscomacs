@@ -1794,8 +1794,8 @@ before the last command."
      (setq monky-all-untracked-files nil)
 
      (when untracked
-       (monky-with-section "Untracked Test:" 'untracked
-         (insert (propertize "Untracked Test:" 'face 'monky-section-title) "\n")
+       (monky-with-section "Untracked:" 'untracked
+         (insert (propertize "Untracked:" 'face 'monky-section-title) "\n")
          (cl-loop with status = 'untracked
                   for file in untracked do
                   (monky-with-section file 'file
@@ -1805,8 +1805,8 @@ before the last command."
          (insert "\n")))
 
      (when missing
-       (monky-with-section "Missing Test:" 'missing
-         (insert (propertize "Missing Test:" 'face 'monky-section-title) "\n")
+       (monky-with-section "Missing:" 'missing
+         (insert (propertize "Missing:" 'face 'monky-section-title) "\n")
          (cl-loop with status = 'missing
                   for file in missing do
                   (monky-with-section file 'file
