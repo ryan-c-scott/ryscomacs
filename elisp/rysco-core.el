@@ -67,6 +67,7 @@
     helm
     helm-projectile
     json-mode
+    lua-mode
     magit
     markdown-mode
     memoize
