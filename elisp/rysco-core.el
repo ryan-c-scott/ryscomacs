@@ -414,6 +414,13 @@
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
 
+;; HACK:  I don't like way that this function would call org-show-entry at the end.
+(defun helm-org-goto-marker (marker)
+  (switch-to-buffer (marker-buffer marker))
+  (goto-char (marker-position marker))
+  (org-show-context)
+  (re-search-backward "^\\*+ " nil t))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
 (if (and rysco-fancy-modeline (image-type-available-p 'svg))
