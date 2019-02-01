@@ -1,32 +1,32 @@
-(defface powerline-rysco-active1 '((t (:background "grey22" :foreground "white" :weight normal)))
+(defface powerline-rysco-active1 '((t (:background "grey22" :foreground "white" :weight normal :box nil)))
   "Powerline face 1."
   :group 'powerline)
 
-(defface powerline-rysco-inactive1 '((t (:background "grey22" :foreground "grey45" :weight normal)))
+(defface powerline-rysco-inactive1 '((t (:background "grey22" :foreground "grey45" :weight normal :box nil)))
   "Powerline face 1."
   :group 'powerline)
 
-(defface powerline-rysco-backing '((t (:foreground "black" :background "dimgray" :weight normal)))
+(defface powerline-rysco-backing '((t (:foreground "black" :background "dimgray" :weight normal :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-backing-modified '((t (:foreground "black" :background "lightgray" :weight normal)))
+(defface powerline-rysco-backing-modified '((t (:foreground "black" :background "lightgray" :weight normal :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "dimgray" :weight normal)))
+(defface powerline-rysco-backing-ro '((t (:foreground "black" :background "dimgray" :weight normal :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-buffer-id '((t (:foreground "white" :background "Turquoise4" :weight normal)))
+(defface powerline-rysco-buffer-id '((t (:foreground "white" :background "Turquoise4" :weight normal :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-bluedot '((t (:foreground "#Fafad2" :weight bold)))
+(defface powerline-rysco-bluedot '((t (:foreground "#Fafad2" :weight bold :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-right '((t (:background "black" :box nil)))
+(defface powerline-rysco-right '((t (:background "black" :box nil :box nil)))
   ""
   :group 'powerline)
 
