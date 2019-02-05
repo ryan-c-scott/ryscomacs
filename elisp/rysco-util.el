@@ -97,11 +97,14 @@
   (interactive)
   (rysco-split-dwim 'left t))
 
-(defun rysco-comment-dwim ()
+(defun rysco-comment-dwim (arg)
   ""
-  (interactive)
+  (interactive "*P")
   (if mark-active
-      (comment-dwim nil)
+      (progn
+        (when arg
+          (kill-ring-save (region-beginning) (region-end)))
+        (comment-dwim nil))
     (comment-line 1)
     (forward-line -1)))
 
