@@ -22,7 +22,7 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-bluedot '((t (:foreground "#Fafad2" :weight bold :box nil)))
+(defface powerline-rysco-bluedot '((t (:background "black" :height 0.95 :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
@@ -92,10 +92,6 @@
 	     (lhs
 	      (list
 	       (powerline-raw "%z" face3 'l)
-
-	       ;(powerline-raw "%*" nil 'l)
-	       ;; 	 (powerline-buffer-size nil 'l))
-	       ;; 	 (powerline-raw mode-line-mule-info nil 'l))
 	       (powerline-buffer-id face3 'l)
 	       (when (and (boundp 'which-func-mode) which-func-mode)
 		 (powerline-raw which-func-format nil 'l))
@@ -124,8 +120,6 @@
 
 	     (rhs
 	      (list
-	       (powerline-raw global-mode-string face2 'r)
-
                (--when-let rysco-modeline-extras
                  (powerline-raw
                   (cl-loop for (type form) in it concat
@@ -174,15 +168,31 @@
 
                (funcall separator-right face1 face-theme)
                (powerline-raw " " face-theme)
+
+               ;; TODO:  Look at ways to handle this more cleanly.
+               (powerline-raw
+                (mapcar (lambda (el)
+                          (propertize
+                           (if (symbolp el)
+                               (string-trim (eval el))
+                             (string-trim el))
+                           'face face-theme))
+                        global-mode-string)
+                face-theme 'r)
+
                (powerline-rysco-pos face-theme)
 	       ;; (when powerline-display-hud
 	       ;; 	 (powerline-hud face2 face1))
 
                (when bluedot-mode
-                 (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
+                 (powerline-raw bluedot--current-bar face-theme 'r)))))
 
 	(concat (powerline-render lhs)
 		(powerline-fill face2 (+ (powerline-width rhs) (/ padding-hack 2)))
 		(powerline-render rhs)))))))
+
+;;;; Misc.
+(setq org-clock-string-limit 7
+      bluedot-modeline-face 'powerline-rysco-bluedot)
 
 (provide 'powerline-rysco-themes)

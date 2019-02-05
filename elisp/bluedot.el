@@ -71,6 +71,10 @@
   "Sound volume as numeric string (low < 1.0 < high)."
   :type 'string)
 
+(defcustom bluedot-modeline-face nil
+  "Face to serve as the base for modeline display"
+  :type 'face)
+
 (defvar bluedot-bar-characters nil)
 
 (require 'which-func)
@@ -157,7 +161,7 @@
 (defun bluedot--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
-              'face `(:foreground ,bar-color :height 0.95)
+              'face `(:inherit ,bluedot-modeline-face :foreground ,bar-color :height 0.95)
               'help-echo '(bluedot--popup-message bluedot--pomodoro-started-at
                                                   bluedot--pomodoro-description)
               'pointer 'hand

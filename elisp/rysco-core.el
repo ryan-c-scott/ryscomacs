@@ -299,9 +299,6 @@ Inserted by installing org-mode or when a release is made."
       uniquify-ignore-buffers-re "^\\*"
       ispell-program-name "aspell")
 
-
-(bluedot-resume)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
 
@@ -564,7 +561,8 @@ Inserted by installing org-mode or when a release is made."
      (if rysco-theme
          rysco-theme
        'molokai)))
-  (server-start))
+  (server-start)
+  (bluedot-resume))
 
 (add-hook 'after-init-hook 'rysco-post-init-setup)
 
