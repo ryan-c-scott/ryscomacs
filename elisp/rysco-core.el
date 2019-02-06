@@ -292,6 +292,7 @@ Inserted by installing org-mode or when a release is made."
       truncate-partial-width-windows nil
       ring-bell-function 'ignore
       eshell-prefer-lisp-functions t
+      eshell-prompt-function 'rysco-eshell-prompt
       dired-recursive-deletes 'always
       uniquify-buffer-name-style 'reverse
       uniquify-separator "|"
@@ -301,6 +302,16 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
+
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (cl-loop
+             with aliases = '(("d" "dired-other-window $1")
+                              ("ff" "find-file-other-window $1")
+                              ("dir" "ls $*"))
+             for alias in aliases do
+             (add-to-list 'eshell-command-aliases-list alias))))
+
 
 (add-hook 'monky-mode-hook
           (lambda ()
@@ -435,8 +446,6 @@ Inserted by installing org-mode or when a release is made."
             (when (not (eq system-type 'windows-nt))
               (flyspell-mode t))
             (require 'hugo)))
-
-(setq eshell-prompt-function 'rysco-eshell-prompt)
 
 (defun custom-diff-colors ()
   "update the colors for diff faces"
