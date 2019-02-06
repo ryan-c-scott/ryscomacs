@@ -406,5 +406,27 @@ With prefix-arg prompt for type if available with your AG version."
       (cl-loop for current-theme in current do
                (disable-theme current-theme))))
 
+(defun rysco-eshell-prompt ()
+  (cl-loop
+   with default-face = '(:height 0.9 :background "DarkSlateGray" :foreground "white" :box nil)
+   with dir-face = '(:foreground "salmon" :background "gray22")
+   with components = `("["
+                       ,(format-time-string "%H:%M ")
+                       (,(eshell/whoami) . '(:inherit ,default-face :foreground "darkgoldenrod1" :slant 'italic :weight 'bold))
+                       "@"
+                       ,(system-name)
+                       "]"
+                       (" " . ,dir-face)
+                       (,(s-replace (expand-file-name "~") "~" (eshell/pwd)) . ,dir-face)
+                       (" " . ,dir-face)
+                       ("$" . ,dir-face)
+                       (" " . nil))
+
+   for piece in components concat
+   (if (consp piece)
+       (propertize (car piece) 'face (cdr piece))
+     (propertize piece 'face default-face))))
+
+
 ;;
 (provide 'rysco-util)

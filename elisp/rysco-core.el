@@ -436,6 +436,8 @@ Inserted by installing org-mode or when a release is made."
               (flyspell-mode t))
             (require 'hugo)))
 
+(setq eshell-prompt-function 'rysco-eshell-prompt)
+
 (defun custom-diff-colors ()
   "update the colors for diff faces"
   (set-face-attribute
