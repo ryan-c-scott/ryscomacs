@@ -408,7 +408,8 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-eshell-prompt ()
   (cl-loop
-   with vc-backend = (vc-deduce-backend)
+   with vc-backend = (when (fboundp 'vc-deduce-backend)
+                       (vc-deduce-backend))
    with default-face = '(:height 0.9 :background "DarkSlateGray" :foreground "white" :box nil)
    with dir-face = '(:foreground "salmon" :background "gray22")
    with vc-face = `(:foreground "Gray47" :background "gray22" :height 0.8)

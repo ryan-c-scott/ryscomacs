@@ -292,6 +292,7 @@ Inserted by installing org-mode or when a release is made."
       truncate-partial-width-windows nil
       ring-bell-function 'ignore
       eshell-prefer-lisp-functions t
+      pcomplete-cycle-completions nil
       eshell-prompt-function 'rysco-eshell-prompt
       dired-recursive-deletes 'always
       uniquify-buffer-name-style 'reverse
