@@ -408,8 +408,10 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-eshell-prompt ()
   (cl-loop
+   with vc-backend = (vc-deduce-backend)
    with default-face = '(:height 0.9 :background "DarkSlateGray" :foreground "white" :box nil)
    with dir-face = '(:foreground "salmon" :background "gray22")
+   with vc-face = `(:foreground "Gray47" :background "gray22" :height 0.8)
    with components = `("["
                        ,(format-time-string "%H:%M ")
                        (,(eshell/whoami) . '(:inherit ,default-face :foreground "darkgoldenrod1" :slant 'italic :weight 'bold))
@@ -417,15 +419,30 @@ With prefix-arg prompt for type if available with your AG version."
                        ,(system-name)
                        "]"
                        (" " . ,dir-face)
+                       (,(--when-let vc-backend
+                           (cond
+                            ((equal it 'Hg)
+                             (all-the-icons-faicon "mercury" :face vc-face))
+                            ((equal it 'Git)
+                             (all-the-icons-alltheicon "git" :face vc-face))))
+                        . nil)
+                       (,(when vc-backend " ") . ,dir-face)
                        (,(s-replace (expand-file-name "~") "~" (eshell/pwd)) . ,dir-face)
                        (" " . ,dir-face)
                        ("$" . ,dir-face)
                        (" " . nil))
 
-   for piece in components concat
-   (if (consp piece)
-       (propertize (car piece) 'face (cdr piece))
-     (propertize piece 'face default-face))))
+                       for piece in components if (or
+                                                   (stringp piece)
+                                                   (and (listp piece) (car piece)))
+                       concat
+                       (cond
+                        ((consp piece)
+                         (--if-let (cdr piece)
+                             (propertize (car piece) 'face it)
+                           (car piece)))
+                        (t
+                         (propertize piece 'face default-face)))))
 
 
 ;;

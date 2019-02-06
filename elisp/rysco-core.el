@@ -310,8 +310,19 @@ Inserted by installing org-mode or when a release is made."
                               ("ff" "find-file-other-window $1")
                               ("dir" "ls $*"))
              for alias in aliases do
-             (add-to-list 'eshell-command-aliases-list alias))))
+             (add-to-list 'eshell-command-aliases-list alias))
 
+            ;; HACK:  vc is not currently eshell aware
+            (require 'vc)
+            (defun vc-deduce-backend ()
+              (cond ((derived-mode-p 'vc-dir-mode)   vc-dir-backend)
+	            ((derived-mode-p 'log-view-mode) log-view-vc-backend)
+	            ((derived-mode-p 'log-edit-mode) log-edit-vc-backend)
+	            ((derived-mode-p 'diff-mode)     diff-vc-backend)
+                    ;; Maybe we could even use comint-mode rather than shell-mode?
+	            ((derived-mode-p 'dired-mode 'shell-mode 'compilation-mode 'eshell-mode)
+	             (ignore-errors (vc-responsible-backend default-directory)))
+	            (vc-mode (vc-backend buffer-file-name))))))
 
 (add-hook 'monky-mode-hook
           (lambda ()
