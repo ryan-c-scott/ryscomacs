@@ -374,8 +374,16 @@ With prefix-arg prompt for type if available with your AG version."
 (defun rysco-name-frame-project ()
   (interactive)
   (let ((name (projectile-project-name)))
-    (unless (string= name "-")
+    (if (string= name "-")
+        (--when-let (read-string "Name: ")
+          (set-frame-name it))
       (set-frame-name (format "[ %s ]" (upcase name))))))
+
+(defun rysco-frame-by-name (arg)
+  (interactive "P")
+  (if arg
+      (call-interactively 'rysco-name-frame-project arg)
+    (call-interactively 'select-frame-by-name)))
 
 (defun helm-rysco-insert-icon ()
   "Helper for discovering fonts from all-the-icons"

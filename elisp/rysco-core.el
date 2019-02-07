@@ -562,7 +562,7 @@ Inserted by installing org-mode or when a release is made."
  ("/" 'make-frame)
  ("=" 'delete-frame)
  ("\\" 'other-frame)
- ("-" 'select-frame-by-name))
+ ("-" 'rysco-frame-by-name))
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
