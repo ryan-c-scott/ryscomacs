@@ -122,8 +122,9 @@
 	      (list
                (--when-let rysco-modeline-extras
                  (powerline-raw
-                  (cl-loop for (type form) in it concat
-                           (concat " "
+                  (cl-loop
+                   for (type form) in (cl-loop for (group . data) in it append data) concat
+                   (concat " "
                            (eval
                             (cond
                              ((equal type :eval)
