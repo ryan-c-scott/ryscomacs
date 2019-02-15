@@ -18,11 +18,11 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-buffer-id '((t (:foreground "white" :background "Turquoise4" :weight normal :box nil)))
+(defface powerline-rysco-buffer-id '((t (:foreground "white" :background "Turquoise4" :weight normal :slant italic :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
-(defface powerline-rysco-buffer-id-god '((t (:inherit powerline-rysco-buffer-id :background "Orange")))
+(defface powerline-rysco-buffer-id-god '((t (:inherit powerline-rysco-buffer-id :foreground "Gray13" :background "goldenrod" :weight bold)))
 	 "Powerline face 3."
 	 :group 'powerline)
 
