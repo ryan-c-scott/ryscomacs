@@ -22,6 +22,10 @@
 	 "Powerline face 3."
 	 :group 'powerline)
 
+(defface powerline-rysco-buffer-id-god '((t (:inherit powerline-rysco-buffer-id :background "Orange")))
+	 "Powerline face 3."
+	 :group 'powerline)
+
 (defface powerline-rysco-bluedot '((t (:background "black" :height 0.95 :box nil)))
 	 "Powerline face 3."
 	 :group 'powerline)
@@ -80,7 +84,7 @@
 	     (face2 (cond ((buffer-modified-p) 'powerline-rysco-backing-modified)
 			  (buffer-read-only 'powerline-rysco-backing-ro)
 			  (t 'powerline-rysco-backing)))
-	     (face3 'powerline-rysco-buffer-id)
+	     (face3 (if god-local-mode 'powerline-rysco-buffer-id-god 'powerline-rysco-buffer-id))
              (face-theme 'powerline-rysco-right)
              (active-text (if active 'powerline-rysco-active1 'powerline-rysco-inactive1))
 	     (separator-left (intern "powerline-arrow-left"))

@@ -537,7 +537,7 @@ Inserted by installing org-mode or when a release is made."
  rysco-lead-key
 
  ("f" 'find-tag)
- ("." 'god-local-mode)
+ ("." 'god-mode-all)
  (rysco-lead-key 'helm-mini)
  ("SPC" 'helm-semantic-or-imenu)
  ("<RET>" 'helm-resume)
@@ -565,6 +565,9 @@ Inserted by installing org-mode or when a release is made."
  ("=" 'delete-frame)
  ("\\" 'other-frame)
  ("-" 'rysco-frame-by-name))
+
+(define-key god-local-mode-map (kbd "i") 'god-mode-all)
+(define-key god-local-mode-map (kbd ".") 'repeat)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
