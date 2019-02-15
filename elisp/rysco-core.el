@@ -118,7 +118,8 @@ Inserted by installing org-mode or when a release is made."
     svg-mode-line-themes
     websocket
     writegood-mode
-    xmlgen)))
+    xmlgen
+    god-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -536,6 +537,7 @@ Inserted by installing org-mode or when a release is made."
  rysco-lead-key
 
  ("f" 'find-tag)
+ ("." 'god-local-mode)
  (rysco-lead-key 'helm-mini)
  ("SPC" 'helm-semantic-or-imenu)
  ("<RET>" 'helm-resume)
