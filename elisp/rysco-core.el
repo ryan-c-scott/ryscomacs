@@ -132,6 +132,7 @@ Inserted by installing org-mode or when a release is made."
 
 (require 'all-the-icons)
 (require 'async)
+(require 'god-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
