@@ -539,9 +539,9 @@ Inserted by installing org-mode or when a release is made."
 
  ("f" 'find-tag)
  ("." 'god-mode-all)
- (rysco-lead-key 'helm-mini)
+ (rysco-lead-key 'god-mode-all)
  ("SPC" 'helm-semantic-or-imenu)
- ("<RET>" 'god-mode-all)
+ ("<RET>" 'helm-mini)
  ("s" 'helm-rysco-occur-or-resume)
  ("y" 'helm-show-kill-ring)
  ("v" 'rysco-revert-buffer)
