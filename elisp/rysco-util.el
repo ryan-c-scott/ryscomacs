@@ -371,6 +371,12 @@ With prefix-arg prompt for type if available with your AG version."
     (require 'helm-files)
     (helm-grep-ag it arg)))
 
+(defun helm-rysco-occur-or-resume (arg)
+  (interactive "P")
+  (if arg
+      (helm-resume nil)
+    (helm-occur)))
+
 (defun rysco-name-frame-project ()
   (interactive)
   (let ((name (projectile-project-name)))
