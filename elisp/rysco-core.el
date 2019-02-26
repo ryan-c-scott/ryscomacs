@@ -368,7 +368,8 @@ Inserted by installing org-mode or when a release is made."
 	     (setq tab-width 4
 	           indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'csharp-mode-hook
 	  '(lambda ()
@@ -387,18 +388,25 @@ Inserted by installing org-mode or when a release is made."
              ;; with point inside the block, use these keys to hide/show
 	     (local-set-key "\C-c>"  'hs-hide-block)
 	     (local-set-key "\C-c<"  'hs-show-block)
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'python-mode-hook
 	  '(lambda ()
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+
+(add-hook 'lua-mode-hook
+          '(lambda ()
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'js-mode-hook
 	  '(lambda ()
 	     (setq indent-tabs-mode nil
                    tab-width 4
                    js-indent-level 2)
-             (local-set-key (kbd "M-.") 'find-tag)))
+             (local-set-key (kbd "M-.") 'find-tag)
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'json-mode-hook
 	  '(lambda ()
