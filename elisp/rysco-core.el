@@ -413,6 +413,10 @@ Inserted by installing org-mode or when a release is made."
 	     (setq-default indent-tabs-mode nil)
              (setq js-indent-level 2)))
 
+(add-hook 'emacs-lisp-mode-hook
+          '(lambda ()
+             (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+
 (add-hook 'sql-interactive-mode-hook
           (lambda ()
             (toggle-truncate-lines t)))
