@@ -352,6 +352,8 @@ Inserted by installing org-mode or when a release is made."
             (set-face-attribute
              'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
 
+(add-to-list 'god-exempt-major-modes 'monky-commit-mode)
+
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
   (add-to-list 'default-frame-alist `(font . ,font))
