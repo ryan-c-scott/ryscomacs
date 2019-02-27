@@ -132,7 +132,12 @@ Inserted by installing org-mode or when a release is made."
 
 (require 'all-the-icons)
 (require 'async)
+
 (require 'god-mode)
+(require 'god-mode-isearch)
+(define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
+(define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
+(add-to-list 'god-exempt-major-modes 'monky-log-edit-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
@@ -351,8 +356,6 @@ Inserted by installing org-mode or when a release is made."
              'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)
             (set-face-attribute
              'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
-
-(add-to-list 'god-exempt-major-modes 'monky-commit-mode)
 
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
