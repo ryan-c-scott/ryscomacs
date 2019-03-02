@@ -369,7 +369,7 @@ Inserted by installing org-mode or when a release is made."
 
 (add-hook 'c-mode-common-hook
 	  '(lambda () (c-set-style "stroustrup")
-             (semantic-mode t)
+             (rysco-semantic-mode t)
 	     (setq tab-width 4
 	           indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
@@ -381,7 +381,7 @@ Inserted by installing org-mode or when a release is made."
 	     ;; for hide/show support
 	     ;; (hs-minor-mode 1)
 	     ;; (setq hs-isearch-open t)
-             (semantic-mode t)
+             (rysco-semantic-mode t)
 	     (c-set-style "c#")
 	     (setq indent-tabs-mode nil
 	           tab-width 4)

@@ -37,7 +37,6 @@
         for (sym file doc) in entries collect
         `(autoload ',sym ,file ,doc t))))
 
-
 (cl-defmacro rysco-packages (&key packages manual)
   (if manual
       (cl-loop
@@ -64,6 +63,30 @@
      `(progn
         (message "Loading straight.el packages:")
         ,@loads))))
+
+(cl-defmacro rysco-exec-path (&rest paths)
+  `(prog1 nil
+     ,@(cl-loop
+        with path-form
+        with path-env
+        for p in paths
+        collect `(add-to-list 'exec-path ,p) into path-form
+        concat (format
+                "%s%s"
+                p
+                (if (eq system-type 'windows-nt)
+                    ";"
+                  ":"))
+        into path-env
+        finally return
+        (prog1 path-form
+          (setenv "PATH" (concat path-env (getenv "PATH")))))))
+  
+(defun rysco-semantic-mode (&optional state)
+  (if state
+      (with-demoted-errors
+          (semantic-mode t))
+    (semantic-mode -1)))
 
 ;;;;;;;;;
 (defun rysco-split-dwim (dir &optional switch)
