@@ -29,7 +29,7 @@
 (require 'rysco-util)
 
 ;; Local config
-(load "localconfig" :missing-ok t)
+(load "localconfig" t t)
 
 ;; HACK:  Org-mode has issues installing via straight.el
 (when rysco-use-straight-packages
