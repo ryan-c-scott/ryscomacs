@@ -608,7 +608,8 @@ Inserted by installing org-mode or when a release is made."
          rysco-theme
        'molokai)))
   (server-start)
-  (bluedot-resume))
+  (bluedot-resume)
+  (god-mode-all))
 
 (add-hook 'after-init-hook 'rysco-post-init-setup)
 
