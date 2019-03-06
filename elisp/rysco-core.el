@@ -518,7 +518,6 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
 (require 'ido) 
-(ido-mode 'files)
 
 (setq 
   ido-save-directory-list-file nil ;"~/.emacs.d/ido.last"
@@ -609,7 +608,8 @@ Inserted by installing org-mode or when a release is made."
        'molokai)))
   (server-start)
   (bluedot-resume)
-  (god-mode-all))
+  (god-mode-all)
+  (ido-mode 'files))
 
 (add-hook 'after-init-hook 'rysco-post-init-setup)
 
