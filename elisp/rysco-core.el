@@ -101,6 +101,7 @@ Inserted by installing org-mode or when a release is made."
     graphviz-dot-mode
     helm
     helm-projectile
+    helm-descbinds
     json-mode
     lua-mode
     magit
