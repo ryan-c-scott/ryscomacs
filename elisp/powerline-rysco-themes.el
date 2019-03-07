@@ -37,7 +37,7 @@
 (defun powerline-rysco-minor-modes ()
   (s-join "•"
           (cl-loop for m in (s-split " " (format-mode-line minor-mode-alist))
-                   if (not (member m '("" "Helm" "Projectile[-]" "ElDoc"))) collect
+                   if (not (member m '("" "Helm" "Projectile[-]" "ElDoc" "God"))) collect
                    (s-replace "Projectile" "" m))))
 
 (defun powerline-rysco-vc (face justification)
