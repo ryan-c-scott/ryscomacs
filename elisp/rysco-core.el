@@ -412,7 +412,12 @@ Inserted by installing org-mode or when a release is made."
                    tab-width 4
                    js-indent-level 2)
              (local-set-key (kbd "M-.") 'find-tag)
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
              (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+
+(add-hook 'html-mode-hook
+          '(lambda ()
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'json-mode-hook
 	  '(lambda ()
