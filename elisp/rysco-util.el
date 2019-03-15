@@ -414,6 +414,12 @@ With prefix-arg prompt for type if available with your AG version."
       (call-interactively 'rysco-name-frame-project arg)
     (call-interactively 'select-frame-by-name)))
 
+(defun helm-rysco-semantic-or-imenu (arg)
+  (interactive "P")
+  (if arg
+      (call-interactively 'helm-imenu-in-all-buffers)
+    (call-interactively 'helm-semantic-or-imenu)))
+
 (defun helm-rysco-insert-icon ()
   "Helper for discovering fonts from all-the-icons"
   (interactive)
