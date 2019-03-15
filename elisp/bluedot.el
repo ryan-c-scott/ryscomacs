@@ -299,10 +299,10 @@
     (setq description (bluedot--default-desc)))
   (bluedot-mode t)
   (if bluedot--timer (cancel-timer bluedot--timer))
-  (run-hooks 'bluedot-before-work-hook)
   (setq bluedot--pomodoro-started-at (current-time)
         bluedot--pomodoro-description description
         bluedot--notified-done nil)
+  (run-hooks 'bluedot-before-work-hook)
   (bluedot--update-current-bar bluedot--bars))
 
 (defun bluedot-resume ()
