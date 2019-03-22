@@ -139,6 +139,7 @@ Inserted by installing org-mode or when a release is made."
 (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
 (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
 (add-to-list 'god-exempt-major-modes 'monky-log-edit-mode)
+(add-to-list 'god-exempt-major-modes 'rcirc-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
