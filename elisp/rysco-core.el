@@ -592,6 +592,7 @@ Inserted by installing org-mode or when a release is made."
 
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
 (define-key god-local-mode-map (kbd ".") 'repeat)
+(global-set-key (kbd "C-i") 'god-mode-all)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
