@@ -592,7 +592,10 @@ Inserted by installing org-mode or when a release is made."
 
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
 (define-key god-local-mode-map (kbd ".") 'repeat)
-(global-set-key (kbd "C-i") 'god-mode-all)
+
+;; HACK:  C-i is bound to tab in some deep ways; this maps it elsewhere and then uses C-i to toggle god mode
+(keyboard-translate ?\C-i ?\H-i)
+(global-set-key [?\H-i] 'god-mode-all)
 
 (global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "M-p") 'backward-paragraph)
