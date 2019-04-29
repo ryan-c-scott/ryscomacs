@@ -120,7 +120,8 @@ Inserted by installing org-mode or when a release is made."
     websocket
     writegood-mode
     xmlgen
-    god-mode)))
+    god-mode
+    desktop+)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -160,6 +161,7 @@ Inserted by installing org-mode or when a release is made."
 (require 'windmove)
 ;; (require 'ispell)
 (require 'multiple-cursors)
+(require 'rysco-desktop+)
 (require 'bluedot)
 (require 'font-lock+)
 
