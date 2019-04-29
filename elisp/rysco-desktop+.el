@@ -22,8 +22,8 @@
 (desktop+-add-handler
     'magit-status-mode
   (lambda () (eq major-mode 'magit-status-mode))
-  'rysco-magit-save
-  'rysco-magit-restore)
+  'rysco-desktop+-magit-save
+  'rysco-desktop+-magit-restore)
 
 (desktop+-add-handler
     'monky-mode
