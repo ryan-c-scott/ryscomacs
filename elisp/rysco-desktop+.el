@@ -13,12 +13,16 @@
   (monky-status (car args)))
 
 ;;;;
-(add-to-list 'desktop+-special-buffer-handlers
-             'magit-status-mode)
+(defun rysco-desktop+-disable-auto-save (&rest args)
+  (desktop-save-mode-off))
 
-(add-to-list 'desktop+-special-buffer-handlers
-             'monky-mode)
-  
+(advice-add 'desktop+-create :after #'rysco-desktop+-disable-auto-save)
+(advice-add 'desktop+-load :after #'rysco-desktop+-disable-auto-save)
+
+(add-to-list 'desktop+-special-buffer-handlers 'magit-status-mode)
+(add-to-list 'desktop+-special-buffer-handlers 'monky-mode)
+(add-to-list 'desktop+-special-buffer-handlers 'eshell-mode)
+
 (desktop+-add-handler
     'magit-status-mode
   (lambda () (eq major-mode 'magit-status-mode))
@@ -30,6 +34,13 @@
   (lambda () (eq major-mode 'monky-mode))
   'rysco-desktop+-monky-save
   'rysco-desktop+-monky-restore)
+
+(desktop+-add-handler
+    'eshell-mode
+  (lambda () (eq major-mode 'eshell-mode))
+  (lambda () '())
+  (lambda (name &rest args)
+    (eshell)))
 
 ;;;;
 (provide 'rysco-desktop+)
