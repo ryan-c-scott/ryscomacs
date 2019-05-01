@@ -1,5 +1,18 @@
 (require 'desktop+)
 
+(defun rysco-desktop+-create ()
+  (interactive)
+  (--when-let
+      (helm
+       :sources
+       `(,(helm-build-sync-source "Existing"
+            :candidates
+            (remove "."
+                    (remove ".."
+                            (directory-files desktop+-base-dir))))
+         ,(helm-build-dummy-source "New")))
+    (desktop+-create it)))
+
 (defun rysco-desktop+-magit-save ()
   `(,(vc-find-root "." ".git")))
 
@@ -12,10 +25,10 @@
 (defun rysco-desktop+-monky-restore (name &rest args)
   (monky-status (car args)))
 
-;;;;
 (defun rysco-desktop+-disable-auto-save (&rest args)
   (desktop-save-mode-off))
 
+(advice-add 'desktop+--set-frame-title :override (lambda ()))
 (advice-add 'desktop+-create :after #'rysco-desktop+-disable-auto-save)
 (advice-add 'desktop+-load :after #'rysco-desktop+-disable-auto-save)
 
