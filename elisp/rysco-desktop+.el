@@ -17,7 +17,7 @@
   `(,(vc-find-root "." ".git")))
 
 (defun rysco-desktop+-magit-restore (name &rest args)
-  (magit-status (car args)))
+  (magit-status-internal (car args)))
 
 (defun rysco-desktop+-monky-save ()
   `(,(vc-find-root "." ".hg")))
@@ -54,6 +54,9 @@
   (lambda () '())
   (lambda (name &rest args)
     (eshell)))
+
+;; Preserve frame titles
+(push '(name . nil) frameset-filter-alist)
 
 ;;;;
 (provide 'rysco-desktop+)
