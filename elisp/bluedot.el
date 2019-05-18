@@ -290,20 +290,28 @@
                  (format ":'%s'" (which-function))))))
 
 ;;;###autoload
-(defun bluedot (&optional description)
+(defun bluedot ()
   "Ask for DESCRIPTION, enable minor-mode, and start the pomodoro."
-  (interactive (list (read-string (format "Description (%s): "
-                                          (bluedot--default-desc))
-                                  nil nil (bluedot--default-desc))))
-  (unless description
-    (setq description (bluedot--default-desc)))
-  (bluedot-mode t)
-  (if bluedot--timer (cancel-timer bluedot--timer))
-  (setq bluedot--pomodoro-started-at (current-time)
-        bluedot--pomodoro-description description
-        bluedot--notified-done nil)
-  (run-hooks 'bluedot-before-work-hook)
-  (bluedot--update-current-bar bluedot--bars))
+  (interactive)
+
+  (--when-let (helm
+               :sources
+               `(,(helm-build-sync-source "History"
+                    :candidates
+                    (lambda ()
+                      (delete-dups
+                       (reverse
+                        (cl-loop for (time work rest label) in (bluedot--retrieve-history)
+                                 collect label)))))
+                 ,(helm-build-dummy-source "Description")))
+
+    (bluedot-mode t)
+    (if bluedot--timer (cancel-timer bluedot--timer))
+    (setq bluedot--pomodoro-started-at (current-time)
+          bluedot--pomodoro-description it
+          bluedot--notified-done nil)
+    (run-hooks 'bluedot-before-work-hook)
+    (bluedot--update-current-bar bluedot--bars)))
 
 (defun bluedot-resume ()
   "Detects and resumes any currently active timer in the history"
