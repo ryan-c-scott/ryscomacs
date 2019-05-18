@@ -296,14 +296,16 @@
 
   (--when-let (helm
                :sources
-               `(,(helm-build-sync-source "History"
+               `(,(helm-build-sync-source "Previous Labels"
                     :candidates
                     (lambda ()
-                      (delete-dups
-                       (reverse
-                        (cl-loop for (time work rest label) in (bluedot--retrieve-history)
-                                 collect label)))))
-                 ,(helm-build-dummy-source "Description")))
+                      (seq-take
+                       (delete-dups
+                        (reverse
+                         (cl-loop for (time work rest label) in (bluedot--retrieve-history)
+                                  collect label)))
+                       20)))
+                 ,(helm-build-dummy-source "New Label")))
 
     (bluedot-mode t)
     (if bluedot--timer (cancel-timer bluedot--timer))
