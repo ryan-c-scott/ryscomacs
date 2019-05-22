@@ -590,7 +590,11 @@ Inserted by installing org-mode or when a release is made."
  ("/" 'make-frame)
  ("=" 'delete-frame)
  ("\\" 'other-frame)
- ("-" 'rysco-frame-by-name))
+ ("-" 'rysco-frame-by-name)
+
+ ;; Desktops
+ ("b" 'rysco-desktop+)
+ ("m" 'desktop+-load))
 
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
 (define-key god-local-mode-map (kbd ".") 'repeat)
