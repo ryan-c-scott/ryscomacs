@@ -593,7 +593,7 @@ Inserted by installing org-mode or when a release is made."
  ("-" 'rysco-frame-by-name)
 
  ;; Desktops
- ("b" 'rysco-desktop+)
+ ("b" 'rysco-desktop+-create)
  ("m" 'desktop+-load))
 
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
