@@ -384,6 +384,23 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     'color-rgb-to-hex
     (color-lerp start end (/ (float i) steps)))))
 
+  (defun int-to-bin-string (val &optional pad set-char unset-char)
+    (let ((pad (or pad 1))
+          (count (logb val))
+          (set-char (or set-char "1"))
+          (unset-char (or unset-char "0")))
+      ;; 
+      (cl-loop
+       with out
+       for pos from 0 to count concat
+       (prog1 (if (= (logand 1 val) 1) set-char unset-char)
+         (setq val (lsh val -1)))
+       into out
+       finally return
+       (let ((out-length (length out)))
+         (concat
+          (make-string (max 0 (- (or pad out-length) out-length)) (string-to-char unset-char))
+          (reverse out))))))
 ;;
 ;;;###autoload
 (defun helm-rysco-project-ag (arg)
