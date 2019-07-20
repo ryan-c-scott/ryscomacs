@@ -401,7 +401,22 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
          (concat
           (make-string (max 0 (- (or pad out-length) out-length)) (string-to-char unset-char))
           (reverse out))))))
-;;
+
+(defun pivot-table-columns (data &optional add-hlines)
+  (let ((result
+         (cl-loop
+          for i from 0 below (length (car data)) collect
+          (-select-column i data))))
+    (if add-hlines
+        (add-table-hlines result)
+      result)))
+
+(defun add-table-hlines (tbl)
+  `(,(car tbl)
+    hline
+    ,@(cdr tbl)
+    hline))
+
 ;;;###autoload
 (defun helm-rysco-project-ag (arg)
   "Preconfigured helm for grepping with AG in (projectile-project-root).
