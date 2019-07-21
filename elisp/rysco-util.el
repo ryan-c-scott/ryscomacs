@@ -412,7 +412,8 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
       result)))
 
 (defun add-table-hlines (tbl)
-  `(,(car tbl)
+  `(hline
+    ,(car tbl)
     hline
     ,@(cdr tbl)
     hline))
