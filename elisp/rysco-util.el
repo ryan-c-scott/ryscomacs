@@ -418,6 +418,12 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     ,@(cdr tbl)
     hline))
 
+(defun rysco-ido-fix ()
+  (interactive)
+  "Enable ido-mode with 'files option.
+For some reason, currently, ido-mode will get disabled..."
+  (ido-mode 'files))
+
 ;;;###autoload
 (defun helm-rysco-project-ag (arg)
   "Preconfigured helm for grepping with AG in (projectile-project-root).
