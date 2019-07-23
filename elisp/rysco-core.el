@@ -453,7 +453,12 @@ Inserted by installing org-mode or when a release is made."
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
   (local-unset-key (kbd "<S-up>"))
-  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings))
+  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   (append org-babel-load-languages
+           '((python     . t)))))
 
 (add-hook 'org-mode-hook 'rysco-org-hook)
 (add-hook 'org-agenda-mode-hook 'rysco-org-hook)
