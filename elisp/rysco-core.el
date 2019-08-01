@@ -89,8 +89,10 @@ Inserted by installing org-mode or when a release is made."
     csv-mode
     dash
     dired-hacks-utils
+    dired+
     eimp
     async
+    request
     doom-themes
     kaolin-themes
     expand-region
