@@ -411,6 +411,15 @@ Inserted by installing org-mode or when a release is made."
           '(lambda ()
              (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
+;; HACK:  There's some funky alignment decisions in lua-mode that I don't want.
+;; .This fixes things most of the way.  The notable exception being anonymous function indentations when 'function' starts on the line with a function call open paren
+(with-eval-after-load "lua-mode"
+  (defun rysco-lua-at-most-one-indent (old-function &rest arguments)
+    (let ((old-res (apply old-function arguments)))
+      (min old-res tab-width)))
+
+  (advice-add #'lua-calculate-indentation-block-modifier :around #'rysco-lua-at-most-one-indent))
+
 (add-hook 'js-mode-hook
 	  '(lambda ()
 	     (setq indent-tabs-mode nil
