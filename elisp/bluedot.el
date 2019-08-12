@@ -296,7 +296,12 @@
 
   (--when-let (helm
                :sources
-               `(,(helm-build-sync-source "Previous Labels"
+               `(,(when (equal major-mode 'org-mode)
+                    (helm-build-sync-source "Org Heading"
+                      :candidates
+                      `(,(org-get-heading t t t t))))
+                 
+                 ,(helm-build-sync-source "Previous Labels"
                     :candidates
                     (lambda ()
                       (seq-take
