@@ -254,7 +254,8 @@ Use TIMESTAMP as start time and SECONDS as amount of logged work in seconds."
   (jiralib2-session-call "/rest/api/2/issue/"
                          :type "POST"
                          :data (json-encode
-                                `((fields . ((project . ,project-id)
+                                `((fields . ((project . ((key . ,project-id)))
+                                             (issuetype . ((name . "Task")))
                                              (summary . ,summary)
                                              (description . ,description)))))))
 
