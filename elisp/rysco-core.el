@@ -317,14 +317,21 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
 
+(cl-defun rysco-eshell-new ()
+ "Open a new instance of eshell."
+  (interactive)
+  (eshell 'N))
+
+(cl-defun rysco-eshell-rename (name)
+  "Open a new instance of eshell."
+  (interactive "sName: ")
+  (rename-buffer (format "*eshell <%s>*" name)))
+
 (add-hook 'eshell-mode-hook
           (lambda ()
-            (cl-loop
-             with aliases = '(("d" "dired-other-window $1")
-                              ("ff" "find-file-other-window $1")
-                              ("dir" "ls $*"))
-             for alias in aliases do
-             (add-to-list 'eshell-command-aliases-list alias))
+            (eshell/alias "d" "dired-other-window $1")
+            (eshell/alias "ff" "find-file-other-window $1")
+            (eshell/alias "dir" "ls $*")
 
             ;; HACK:  vc is not currently eshell aware
             (require 'vc)
