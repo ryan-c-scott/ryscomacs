@@ -488,6 +488,16 @@ With prefix-arg prompt for type if available with your AG version."
       (cl-loop for current-theme in current do
                (disable-theme current-theme))))
 
+(cl-defun rysco-eshell-new ()
+ "Open a new instance of eshell."
+  (interactive)
+  (eshell 'N))
+
+(cl-defun rysco-eshell-rename (name)
+  "Open a new instance of eshell."
+  (interactive "sName: ")
+  (rename-buffer (format "*eshell <%s>*" name)))
+
 (defun rysco-eshell-prompt ()
   (cl-loop
    with vc-backend = (when (fboundp 'vc-deduce-backend)

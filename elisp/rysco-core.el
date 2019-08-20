@@ -317,16 +317,6 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
 
-(cl-defun rysco-eshell-new ()
- "Open a new instance of eshell."
-  (interactive)
-  (eshell 'N))
-
-(cl-defun rysco-eshell-rename (name)
-  "Open a new instance of eshell."
-  (interactive "sName: ")
-  (rename-buffer (format "*eshell <%s>*" name)))
-
 (add-hook 'eshell-mode-hook
           (lambda ()
             (eshell/alias "d" "dired-other-window $1")
