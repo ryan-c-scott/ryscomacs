@@ -538,5 +538,34 @@ With prefix-arg prompt for type if available with your AG version."
                          (propertize piece 'face default-face)))))
 
 
+(defun rysco-magit-parse-origin-url (url)
+  (let* ((parts (cdr (s-match "\\([^@]+\\)@\\([^:]+\\):\\(.*\\).git" url)))
+         (user (first parts))
+         (host (nth 1 parts))
+         (path (nth 2 parts)))
+    (format "https://%s/%s" host path)))
+
+(defun rysco-magit-get-origin-url ()
+  (rysco-magit-parse-origin-url (magit-get "remote" "origin" "url")))
+
+(defun rysco-magit-pull-request ()
+  (interactive)
+  (browse-url
+   (format "%s/compare/%s?expand=1"
+           (rysco-magit-get-origin-url)
+           (magit-get-current-branch))))
+
+(defun rysco-magit-goto-branch ()
+  (interactive)
+  (browse-url
+   (format "%s/tree/%s"
+           (rysco-magit-get-origin-url)
+           (magit-get-current-branch))))
+
+(defun rysco-magit-goto-origin ()
+  (interactive)
+  (browse-url
+   (rysco-magit-get-origin-url)))
+
 ;;
 (provide 'rysco-util)
