@@ -284,7 +284,8 @@ Inserted by installing org-mode or when a release is made."
       markdown-command "pandoc --smart -r markdown_github -w html"
       graphviz-dot-auto-indent-on-braces nil
       graphviz-dot-auto-indent-on-semi nil
-      graphviz-dot-auto-indent-on-newline nil)
+      graphviz-dot-auto-indent-on-newline nil
+      git-commit-style-convention-checks nil)
 
 ;; OSX Specific key bindings/fixes
 (setq mac-option-key-is-meta nil
