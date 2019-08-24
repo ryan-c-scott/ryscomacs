@@ -319,6 +319,8 @@ Inserted by installing org-mode or when a release is made."
 
 (add-hook 'eshell-mode-hook
           (lambda ()
+            (setq pcomplete-cycle-completions nil)
+
             (eshell/alias "d" "dired-other-window $1")
             (eshell/alias "ff" "find-file-other-window $1")
             (eshell/alias "dir" "ls $*")
