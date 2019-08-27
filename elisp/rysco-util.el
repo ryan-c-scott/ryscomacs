@@ -548,12 +548,26 @@ With prefix-arg prompt for type if available with your AG version."
 (defun rysco-magit-get-origin-url ()
   (rysco-magit-parse-origin-url (magit-get "remote" "origin" "url")))
 
+(defun rysco-magit-goto-compare (&optional head base)
+  (interactive)
+  (let* ((source
+          `(,(helm-build-sync-source "Comman Branches"
+               :candidates '("development" "master"))
+            ,(helm-build-sync-source "Other Branches"
+               :candidates
+               (cl-loop for branch in (magit-list-remote-branch-names) collect
+                        (substring branch (length "origin/"))))))
+         (head (or head (helm :sources source)))
+         (base (or base (helm :sources source))))
+    (browse-url
+     (format "%s/compare/%s...%s?expand=1"
+             (rysco-magit-get-origin-url)
+             base
+             head))))
+
 (defun rysco-magit-pull-request ()
   (interactive)
-  (browse-url
-   (format "%s/compare/%s?expand=1"
-           (rysco-magit-get-origin-url)
-           (magit-get-current-branch))))
+  (rysco-magit-goto-compare (magit-get-current-branch)))
 
 (defun rysco-magit-goto-branch ()
   (interactive)
