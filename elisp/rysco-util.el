@@ -537,33 +537,40 @@ With prefix-arg prompt for type if available with your AG version."
                         (t
                          (propertize piece 'face default-face)))))
 
+(cl-defstruct rysco-magit-origin host host-type path url)
 
-(defun rysco-magit-parse-origin-url (url)
-  (let* ((parts (cdr (s-match "\\([^@]+\\)@\\([^:]+\\):\\(.*\\).git" url)))
+(defun rysco-magit-get-origin (&optional origin-url)
+  (let* ((origin-url (or origin-url (magit-get "remote" "origin" "url")))
+         (parts (cdr (s-match "\\([^@]+\\)@\\([^:]+\\):\\(.*\\).git" origin-url)))
          (user (first parts))
          (host (nth 1 parts))
          (path (nth 2 parts)))
-    (format "https://%s/%s" host path)))
-
-(defun rysco-magit-get-origin-url ()
-  (rysco-magit-parse-origin-url (magit-get "remote" "origin" "url")))
+    (make-rysco-magit-origin
+     :host host
+     :host-type (pcase host
+                  ("github.com" 'gh)
+                  ("bitbucket.org" 'bb))
+     :path path
+     :url (format "https://%s/%s" host path))))
 
 (defun rysco-magit-goto-compare (&optional head base)
   (interactive)
-  (let* ((source
+  (let* ((origin (rysco-magit-get-origin))
+         (url (rysco-magit-origin-url origin))
+         (source
           `(,(helm-build-sync-source "Comman Branches"
-               :candidates '("development" "master"))
+               :candidates '("master"))
             ,(helm-build-sync-source "Other Branches"
                :candidates
                (cl-loop for branch in (magit-list-remote-branch-names) collect
                         (substring branch (length "origin/"))))))
          (head (or head (helm :sources source)))
-         (base (or base (helm :sources source))))
-    (browse-url
-     (format "%s/compare/%s...%s?expand=1"
-             (rysco-magit-get-origin-url)
-             base
-             head))))
+         (base (or base (when head (helm :sources source)))))
+    (when (and head base)
+      (browse-url
+       (pcase (rysco-magit-origin-host-type origin)
+         ('gh (format "%s/compare/%s...%s?expand=1" url base head))
+         ('bb (format "%s/branches/compare/%s..%s" url base head)))))))
 
 (defun rysco-magit-pull-request ()
   (interactive)
@@ -571,15 +578,19 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-magit-goto-branch ()
   (interactive)
-  (browse-url
-   (format "%s/tree/%s"
-           (rysco-magit-get-origin-url)
-           (magit-get-current-branch))))
+  (let* ((origin (rysco-magit-get-origin))
+         (url (rysco-magit-origin-url origin)))
+
+    (browse-url
+     (pcase (rysco-magit-origin-host-type origin)
+       ('gh (format "%s/tree/%s" url (magit-get-current-branch)))
+       ('bb (format "%s/branch/%s" url (magit-get-current-branch)))))))
 
 (defun rysco-magit-goto-origin ()
   (interactive)
   (browse-url
-   (rysco-magit-get-origin-url)))
+   (rysco-magit-origin-url
+    (rysco-magit-get-origin))))
 
 ;;
 (provide 'rysco-util)
