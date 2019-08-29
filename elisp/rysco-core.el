@@ -147,6 +147,7 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
 (rysco-autoloads
+ (org-goto-calendar "org")
  (screenwriter-mode "screenwriter")
  (helm-screenwriter-init "helm-screenwriter")
  (helm-kodi-shows "helm-kodi")
@@ -631,6 +632,11 @@ Inserted by installing org-mode or when a release is made."
 ;; Helpers for things that have a lot of muscle memory
 (global-set-key (kbd "<escape>d") 'kill-word)
 (global-set-key (kbd "<escape>DEL") 'backward-kill-word)
+
+;; Timestamp insertion
+(add-hook
+ 'calendar-mode-hook
+ (lambda () (define-key calendar-mode-map (kbd "RET") 'rysco-calendar-exit-and-insert-date)))
 
 ;;
 (defun rysco-post-init-setup ()

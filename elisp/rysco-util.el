@@ -156,10 +156,15 @@
     (while (re-search-forward from nil t)
       (replace-match to))))
 
-(defun insert-standard-date ()
-  "Inserts standard date time string." 
-  (interactive)
-  (insert (format-time-string "%Y-%m-%d %H:%M")))
+(defun rysco-calendar-exit-and-insert-date (arg)
+  "Capture the date at point, exit the Calendar, and insert the date using 'org-date-from-calendar."
+  (interactive "P")
+  (when (equal major-mode 'calendar-mode)
+    (calendar-exit)
+    (if (or arg (equal major-mode 'org-mode))
+        (org-date-from-calendar)
+      (seq-let (month day year) (org-get-date-from-calendar)
+        (insert (format "%d-%02d-%02d" year month day))))))
 
 (defun ryscomacs-compile()
   "Byte compiles all of ~/ryscomacs/elisp."
