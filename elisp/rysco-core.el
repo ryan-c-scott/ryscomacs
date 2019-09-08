@@ -261,6 +261,9 @@ Inserted by installing org-mode or when a release is made."
 
 (setq helm-split-window-default-side 'other)
 (helm-mode 1)
+(setq helm-completing-read-handlers-alist
+      (append '((find-file . ido))
+              helm-completing-read-handlers-alist))
 
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -301,6 +304,7 @@ Inserted by installing org-mode or when a release is made."
 (show-paren-mode t)
 (menu-bar-mode -1)
 (toggle-indicate-empty-lines)
+(put 'narrow-to-region 'disabled nil)
 (defalias 'yes-or-no-p 'y-or-n-p)
 (setq tooltip-use-echo-area t
       indent-tabs-mode nil
@@ -647,8 +651,7 @@ Inserted by installing org-mode or when a release is made."
        'molokai)))
   (server-start)
   (bluedot-resume)
-  (god-mode-all)
-  (ido-mode 'files))
+  (god-mode-all))
 
 (add-hook 'after-init-hook 'rysco-post-init-setup)
 
