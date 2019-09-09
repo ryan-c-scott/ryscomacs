@@ -262,7 +262,8 @@ Inserted by installing org-mode or when a release is made."
 (setq helm-split-window-default-side 'other)
 (helm-mode 1)
 (setq helm-completing-read-handlers-alist
-      (append '((find-file . ido))
+      (append '((find-file . ido)
+                (dired . ido))
               helm-completing-read-handlers-alist))
 
 (projectile-mode +1)
