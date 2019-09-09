@@ -368,6 +368,15 @@ Inserted by installing org-mode or when a release is made."
             (set-face-attribute
              'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
 
+;; flycheck
+(when (eq system-type 'windows-nt)
+  (defun rysco-fix-flycheck-cmd (cmd)
+    `(,(car cmd)
+      ,@(cl-loop for part in (cdr cmd) collect
+                 (replace-regexp-in-string "/" "\\" part t t))))
+
+  (custom-set-variables '(flycheck-command-wrapper-function 'rysco-fix-flycheck-cmd)))
+
 ;; Font 
 (let ((font (concat rysco-font "-" rysco-font-size)))
   (add-to-list 'default-frame-alist `(font . ,font))
