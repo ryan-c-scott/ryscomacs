@@ -79,7 +79,6 @@
    '("%e"
      (:eval
       (let* ((active (powerline-selected-window-active))
-	     (mode-line (if active 'mode-line 'mode-line-inactive))
 	     (face1 'powerline-rysco-inactive1)
 	     (face2 (cond ((buffer-modified-p) 'powerline-rysco-backing-modified)
 			  (buffer-read-only 'powerline-rysco-backing-ro)
@@ -190,7 +189,7 @@
 	       ;; 	 (powerline-hud face2 face1))
 
                (when bluedot-mode
-                 (powerline-raw bluedot--current-bar face-theme 'r)))))
+                 (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
 
 	(concat (powerline-render lhs)
 		(powerline-fill face2 (+ (powerline-width rhs) (/ padding-hack 2)))
