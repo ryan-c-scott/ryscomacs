@@ -369,6 +369,9 @@ Inserted by installing org-mode or when a release is made."
             (set-face-attribute
              'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
 
+;; Disables auto-fill in commit message buffers
+(add-hook 'git-commit-setup-hook 'turn-off-auto-fill t)
+
 ;; flycheck
 (when (eq system-type 'windows-nt)
   (defun rysco-fix-flycheck-cmd (cmd)
