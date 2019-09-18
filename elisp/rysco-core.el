@@ -123,6 +123,8 @@ Inserted by installing org-mode or when a release is made."
     writegood-mode
     xmlgen
     god-mode
+    flycheck
+    helm-flycheck
     desktop+)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
