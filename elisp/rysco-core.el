@@ -498,6 +498,10 @@ Inserted by installing org-mode or when a release is made."
                         '(("^ +\\([-*]\\) "
                            (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
+(with-eval-after-load 'org-colview
+  (define-key org-columns-map "n" nil)
+  (define-key org-columns-map "p" nil))
+
 (defun markdown-unset-move-keys ()
   ""
   (interactive)
