@@ -512,7 +512,7 @@ With prefix-arg prompt for type if available with your AG version."
    with vc-face = `(:foreground "Gray47" :background "gray22" :height 0.8)
    with components = `("["
                        ,(format-time-string "%H:%M ")
-                       (,(eshell/whoami) . '(:inherit ,default-face :foreground "darkgoldenrod1" :slant 'italic :weight 'bold))
+                       (,(eshell/whoami) . (:inherit ,default-face :foreground "darkgoldenrod1" :slant italic :weight bold))
                        "@"
                        ,(system-name)
                        "]"
