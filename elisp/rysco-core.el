@@ -438,7 +438,11 @@ Inserted by installing org-mode or when a release is made."
     (let ((old-res (apply old-function arguments)))
       (min old-res tab-width)))
 
-  (advice-add #'lua-calculate-indentation-block-modifier :around #'rysco-lua-at-most-one-indent))
+  (defun rysco-lua-no-left-shifting ()
+    t)
+
+  (advice-add #'lua-calculate-indentation-block-modifier :around #'rysco-lua-at-most-one-indent)
+  (advice-add #'lua-point-is-after-left-shifter-p :override #'rysco-lua-no-left-shifting))
 
 (add-hook 'js-mode-hook
 	  '(lambda ()

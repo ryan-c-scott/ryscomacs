@@ -1266,10 +1266,12 @@ use standalone."
         (forward-comment (point-max))
         ;; If the next token is on this line and it's not a block opener,
         ;; the next line should align to that token.
-        (if (and (zerop (count-lines found-bol (line-beginning-position)))
-                 (not (looking-at lua-indentation-modifier-regexp)))
-            (cons 'absolute (current-column))
-          (cons 'relative lua-indent-level)))))
+        ;; (if (and (zerop (count-lines found-bol (line-beginning-position)))
+        ;;          (not (looking-at lua-indentation-modifier-regexp)))
+        ;;     (cons 'absolute (current-column))
+        ;;   (cons 'relative lua-indent-level)))))
+        ;; HACK:  Essentially disabling the absolute positioning capabilities
+        (cons 'relative lua-indent-level))))
 
    ;; These are not really block starters. They should not add to indentation.
    ;; The corresponding "then" and "do" handle the indentation.
