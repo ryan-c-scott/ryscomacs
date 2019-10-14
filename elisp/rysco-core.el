@@ -105,6 +105,7 @@ Inserted by installing org-mode or when a release is made."
     helm-projectile
     helm-descbinds
     json-mode
+    rjsx-mode
     lua-mode
     magit
     markdown-mode
