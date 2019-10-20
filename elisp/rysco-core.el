@@ -157,7 +157,7 @@ Inserted by installing org-mode or when a release is made."
  (helm-kodi-movies "helm-kodi")
  (kodi-connect "kodi"))
 
-(require 'monky)
+;; (require 'monky)
 (require 'multi)
 (require 's)
 (require 'helm-config)
@@ -165,6 +165,7 @@ Inserted by installing org-mode or when a release is made."
 (require 'helm-projectile)
 (require 'uniquify)
 (require 'windmove)
+(require 'rotate)
 ;; (require 'ispell)
 (require 'multiple-cursors)
 (require 'rysco-desktop+)
