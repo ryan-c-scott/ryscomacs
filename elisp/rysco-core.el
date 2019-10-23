@@ -624,6 +624,9 @@ Inserted by installing org-mode or when a release is made."
  ("<left>" 'delete-window)
  ("<up>" 'delete-other-windows)
 
+ ;; Layouts
+ ("l" 'rysco-rotate-windows)
+
  ;; Home-row bindings for rysco features (dvorak)
  ("g" 'delete-window)
  ("r" 'delete-other-windows)

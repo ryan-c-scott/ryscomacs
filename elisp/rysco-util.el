@@ -171,6 +171,30 @@
   (interactive)
   (byte-recompile-directory "~/ryscomacs/elisp" 0))
 
+(cl-defun helm-rysco-rotate-windows ()
+  (interactive)
+  (helm
+   :sources
+   (helm-build-sync-source "Layouts"
+     :candidates
+     '(("even-horizontal" . rotate:even-horizontal)
+       ("even-vertical" . rotate:even-vertical)
+       ("main-horizontal" . rotate:main-horizontal)
+       ("main-vertical" . rotate:main-vertical)
+       ("tiled" . rotate:tiled)
+       ("*next*" . rotate:layout))
+     :action
+     (lambda (func)
+       (funcall-interactively func)))))
+
+(cl-defun rysco-rotate-windows (arg)
+  (interactive "P")
+  (if arg
+      (helm-rysco-rotate-windows)
+    (--when-let (selected-window)
+      (rotate-window)
+      (select-window it))))
+
 (defun vertical-windows-with-related()
   (interactive)
   (delete-other-windows)
