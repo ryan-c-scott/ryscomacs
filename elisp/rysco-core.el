@@ -614,6 +614,7 @@ Inserted by installing org-mode or when a release is made."
  ("SPC" 'helm-rysco-semantic-or-imenu)
  ("<RET>" 'helm-mini)
  ("s" 'helm-rysco-occur-or-resume)
+ ("w" 'helm-rysco-project-ag)
  ("y" 'helm-show-kill-ring)
  ("v" 'rysco-revert-buffer)
  ("p" 'rysco-repo-status)
