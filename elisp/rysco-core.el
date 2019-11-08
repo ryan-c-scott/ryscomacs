@@ -327,6 +327,7 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
+(eval-after-load 'dash '(dash-enable-font-lock))
 
 (add-hook 'eshell-mode-hook
           (lambda ()
