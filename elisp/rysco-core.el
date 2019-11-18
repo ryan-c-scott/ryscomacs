@@ -501,6 +501,11 @@ Inserted by installing org-mode or when a release is made."
 (add-hook 'org-mode-hook 'rysco-org-hook)
 (add-hook 'org-agenda-mode-hook 'rysco-org-hook)
 
+(add-hook 'org-babel-after-execute-hook
+          (lambda ()
+            (when org-inline-image-overlays
+              (org-redisplay-inline-images))))
+
 (font-lock-add-keywords 'org-mode
                         '(("^ +\\([-*]\\) "
                            (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
