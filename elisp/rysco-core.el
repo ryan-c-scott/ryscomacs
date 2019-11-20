@@ -496,7 +496,26 @@ Inserted by installing org-mode or when a release is made."
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
-           '((python     . t)))))
+           '((python     . t)
+             (dot . t)))))
+
+(custom-set-variables
+ '(org-src-lang-modes
+   '(("C" . c)
+     ("C++" . c++)
+     ("asymptote" . asy)
+     ("bash" . sh)
+     ("beamer" . latex)
+     ("calc" . fundamental)
+     ("cpp" . c++)
+     ("ditaa" . artist)
+     ("dot" . graphviz-dot)
+     ("elisp" . emacs-lisp)
+     ("ocaml" . tuareg)
+     ("screen" . shell-script)
+     ("shell" . sh)
+     ("sqlite" . sql)))
+ '(org-src-window-setup 'other-window))
 
 (add-hook 'org-mode-hook 'rysco-org-hook)
 (add-hook 'org-agenda-mode-hook 'rysco-org-hook)
