@@ -520,6 +520,17 @@ Inserted by installing org-mode or when a release is made."
 (add-hook 'org-mode-hook 'rysco-org-hook)
 (add-hook 'org-agenda-mode-hook 'rysco-org-hook)
 
+(defun rysco-org-latex-export-list-newline-fixup (output)
+  "Kills the trailing latex newline for any \\item lines"
+  (replace-regexp-in-string
+   "\\(\\item[ [\\]+.*\\)\\\\\\\\$" "\\1"
+   output))
+
+(with-eval-after-load 'ox-latex
+  (advice-add
+   #'org-latex-plain-list
+   :filter-return #'rysco-org-latex-export-list-newline-fixup))
+
 (add-hook 'org-babel-after-execute-hook
           (lambda ()
             (when org-inline-image-overlays
