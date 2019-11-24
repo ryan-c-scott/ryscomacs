@@ -323,7 +323,8 @@ Inserted by installing org-mode or when a release is made."
       uniquify-separator "|"
       uniquify-after-kill-buffer-p t
       uniquify-ignore-buffers-re "^\\*"
-      ispell-program-name "aspell")
+      ispell-program-name "aspell"
+      kill-do-not-save-duplicate t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
