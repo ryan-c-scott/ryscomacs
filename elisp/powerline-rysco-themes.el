@@ -194,9 +194,28 @@
                (when bluedot-mode
                  (powerline-raw bluedot--current-bar 'powerline-rysco-bluedot 'r)))))
 
-	(concat (powerline-render lhs)
-		(powerline-fill face2 (+ (powerline-width rhs) (/ padding-hack 2)))
-		(powerline-render rhs)))))))
+        ;; TODO:  Clean this up
+        (let ((space (-
+                      (window-width)
+                      (+
+                       (powerline-width lhs)
+                       (powerline-width rhs)))))
+	  (concat
+           (if (< space 0)
+               (let* ((char-width-modeline
+                       (powerline-width
+                        `(,(powerline-raw " " face2))))
+                      (trunc (ceiling (abs (/ space char-width-modeline)))))
+                 (concat
+                  (substring (powerline-render lhs) 0 (* -1 trunc))
+                  (powerline-render
+                   `(,(powerline-raw
+                       "…"
+                       face2)))))
+             (powerline-render lhs))
+
+	   (powerline-fill face2 (+ (powerline-width rhs) (/ padding-hack 2)))
+	   (powerline-render rhs))))))))
 
 ;;;; Misc.
 (setq org-clock-string-limit 7
