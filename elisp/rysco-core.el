@@ -330,6 +330,9 @@ Inserted by installing org-mode or when a release is made."
 ;; Hooks/setups
 (eval-after-load 'dash '(dash-enable-font-lock))
 
+(defun eshell/w32-explorer-path ()
+  (s-replace "/" "\\" (eshell/pwd)))
+
 (add-hook 'eshell-mode-hook
           (lambda ()
             (setq pcomplete-cycle-completions nil)
@@ -337,6 +340,10 @@ Inserted by installing org-mode or when a release is made."
             (eshell/alias "d" "dired-other-window $1")
             (eshell/alias "ff" "find-file-other-window $1")
             (eshell/alias "dir" "ls $*")
+            (eshell/alias "exp"
+                          (if (string= system-type "windows-nt")
+                              "cmd /C \"start explorer ${eshell/w32-explorer-path}\""
+                            "open (eshell/pwd)"))
 
             ;; HACK:  vc is not currently eshell aware
             (require 'vc)
