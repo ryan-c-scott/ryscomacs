@@ -621,5 +621,22 @@ With prefix-arg prompt for type if available with your AG version."
    (rysco-magit-origin-url
     (rysco-magit-get-origin))))
 
+(defun rysco-export-org-to-pdf ()
+  "Searches for a file named `.pdf-master' in ancestor directories and uses the file name specified inside of that file as the file to open and export using `org-latex-export-to-pdf'"
+  (interactive)
+  (--if-let (locate-dominating-file (buffer-file-name) ".pdf-master")
+      (let ((path
+             (concat
+              it
+              (with-temp-buffer
+                (insert-file-contents (concat it ".pdf-master"))
+                (s-trim
+                 (buffer-string))))))
+        (message "Found .pdf-master in %s.  Exporting." it)
+        (with-current-buffer (find-file path)
+          (let ((org-confirm-babel-evaluate nil))
+            (org-latex-export-to-pdf))))
+    (message "No .pdf-master found in directory ancestors.")))
+
 ;;
 (provide 'rysco-util)
