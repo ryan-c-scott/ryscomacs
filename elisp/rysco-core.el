@@ -142,19 +142,10 @@ Inserted by installing org-mode or when a release is made."
 
 (require 'god-mode)
 (require 'god-mode-isearch)
-(defun rysco-god-special-mode-p ()
-  "Override to allow god-mode in special buffers"
-  nil)
-(advice-add #'god-special-mode-p :override #'rysco-god-special-mode-p)
-
-(defun rysco-god-magit-mode-p ()
-  (s-starts-with? "magit-" (format "%s" major-mode)))
-
 (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
 (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
 (add-to-list 'god-exempt-major-modes 'monky-log-edit-mode)
 (add-to-list 'god-exempt-major-modes 'rcirc-mode)
-(add-to-list 'god-exempt-predicates 'rysco-god-magit-mode-p)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
@@ -338,6 +329,11 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
 (eval-after-load 'dash '(dash-enable-font-lock))
+
+(add-hook 'help-mode-hook
+          (lambda ()
+            (local-set-key (kbd "n") 'next-line)
+            (local-set-key (kbd "p") 'previous-line)))
 
 (defun eshell/w32-explorer-path ()
   (s-replace "/" "\\" (eshell/pwd)))
