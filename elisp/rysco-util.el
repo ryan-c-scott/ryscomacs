@@ -527,22 +527,27 @@ With prefix-arg prompt for type if available with your AG version."
                    
                    :action
                    `(("Insert Icon & Label" .
-                      (lambda (el)
-                        (setq helm-rysco-insert-icon--last
-                              (car el))
-                        (insert
-                         (car el)
-                         "\n")))
+                      (lambda (item)
+                        (cl-loop
+                         for (label . parts) in (helm-marked-candidates :all-sources t) do
+                         (progn
+                           (setq helm-rysco-insert-icon--last label)
+                           (insert label "\n")))))
 
                      ("Insert Icon Only" .
-                      (lambda (el)
-                        (insert
-                         (cl-cadddr el))))
+                      (lambda (item)
+                        (cl-loop
+                         for (label _ _ icon) in (helm-marked-candidates :all-sources t) do
+                         (progn
+                           (setq helm-rysco-insert-icon--last label)
+                           (insert icon "\n")))))
                         
                      ("Insert Code" .
-                      (lambda (el)
+                      (lambda (item)
+                        (cl-loop
+                         for (label family name icon) in (helm-marked-candidates :all-sources t) do
                         (insert
-                         (format "(all-the-icons-%s \"%s\")" (cadr el) (caddr el))))))))))
+                         (format "(all-the-icons-%s \"%s\")\n" family name))))))))))
 
 (defun rysco-load-theme (&optional theme)
   (interactive)
