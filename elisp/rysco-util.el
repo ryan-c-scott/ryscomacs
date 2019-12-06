@@ -488,10 +488,17 @@ With prefix-arg prompt for type if available with your AG version."
       (call-interactively 'helm-imenu-in-all-buffers)
     (call-interactively 'helm-semantic-or-imenu)))
 
-(defun helm-rysco-insert-icon ()
+(defvar helm-rysco-insert-icon--last nil)
+
+(defun helm-rysco-insert-icon (arg)
   "Helper for discovering fonts from all-the-icons"
-  (interactive)
+  (interactive "P")
+
+  (when arg
+    (setq helm-rysco-insert-icon--last nil))
+
   (helm :candidate-number-limit nil
+        :preselect helm-rysco-insert-icon--last
         :sources
         (cl-loop for family in '(alltheicon faicon fileicon octicon material wicon) collect
                  (helm-build-sync-source (format "%s" family)
@@ -501,11 +508,41 @@ With prefix-arg prompt for type if available with your AG version."
                           (data (funcall data-f)))
                      (mapcar
                       (lambda (it)
-                        (cons
-                         (format "%s - %s" (funcall insert-f (car it)) (car it))
-                         (format "(all-the-icons-%s \"%s\")" family (car it))))
+                        (let ((entry
+                               `(,(format "%s - %s"
+                                          (funcall
+                                           insert-f
+                                           (car it))
+                                          (car it))
+                                 ,family
+                                 ,(car it)
+                                 ,(funcall
+                                   insert-f
+                                   (car it)))))
+                                                                  
+                          (cons
+                           (car entry)
+                           entry)))
                       data))
-                   :action #'insert))))
+                   
+                   :action
+                   `(("Insert Icon & Label" .
+                      (lambda (el)
+                        (setq helm-rysco-insert-icon--last
+                              (car el))
+                        (insert
+                         (car el)
+                         "\n")))
+
+                     ("Insert Icon Only" .
+                      (lambda (el)
+                        (insert
+                         (cl-cadddr el))))
+                        
+                     ("Insert Code" .
+                      (lambda (el)
+                        (insert
+                         (format "(all-the-icons-%s \"%s\")" (cadr el) (caddr el))))))))))
 
 (defun rysco-load-theme (&optional theme)
   (interactive)
