@@ -146,10 +146,15 @@ Inserted by installing org-mode or when a release is made."
   "Override to allow god-mode in special buffers"
   nil)
 (advice-add #'god-special-mode-p :override #'rysco-god-special-mode-p)
+
+(defun rysco-god-magit-mode-p ()
+  (s-starts-with? "magit-" (format "%s" major-mode)))
+
 (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
 (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
 (add-to-list 'god-exempt-major-modes 'monky-log-edit-mode)
 (add-to-list 'god-exempt-major-modes 'rcirc-mode)
+(add-to-list 'god-exempt-predicates 'rysco-god-magit-mode-p)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
