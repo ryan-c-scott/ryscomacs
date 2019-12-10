@@ -120,6 +120,45 @@
   (interactive)
   (rysco-split-dwim 'left t))
 
+(cl-defun rysco-clone-and-narrow ()
+  (interactive)
+  (let ((master
+         (or
+          (and (boundp 'rysco-cloned-from) rysco-cloned-from)
+          (current-buffer))))
+
+    (with-current-buffer (clone-indirect-buffer-other-window nil t)
+      (setq-local rysco-cloned-from master)
+      (if (region-active-p)
+          (narrow-to-region (region-beginning) (region-end))
+        (pcase major-mode
+          ('org-mode (org-narrow-to-subtree))
+          (_ (narrow-to-defun)))))))
+
+(cl-defun rysco-kill-all-clones ()
+  (interactive)
+  (cl-loop
+   with kill-list
+   with get-master = (lambda (&optional buf)
+                       (with-current-buffer (or buf (current-buffer))
+                         (or
+                          (and (boundp 'rysco-cloned-from) rysco-cloned-from)
+                          (current-buffer))))
+   with master = (funcall get-master)
+   for buf being the buffers
+   as this-master = (funcall get-master buf)
+   if (and this-master
+           (not (equal buf master))
+           (equal this-master master))
+   collect buf into kill-list
+
+   finally do
+   (progn
+     (message "Killing %s clones %s" master kill-list)
+     (cl-loop
+      for buf in kill-list do
+      (kill-buffer buf)))))
+
 (defun rysco-comment-dwim (arg)
   ""
   (interactive "*P")
