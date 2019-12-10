@@ -120,6 +120,18 @@
   (interactive)
   (rysco-split-dwim 'left t))
 
+(cl-defun rysco-delete-or-clone-window-dwim (arg)
+  (interactive "P")
+  (if arg
+      (rysco-clone-and-narrow)
+    (delete-window)))
+
+(cl-defun rysco-delete-or-kill-other-windows-dwim (arg)
+  (interactive "P")
+  (if arg
+      (rysco-kill-all-clones)
+    (delete-other-windows)))
+
 (cl-defun rysco-clone-and-narrow ()
   (interactive)
   (let ((master

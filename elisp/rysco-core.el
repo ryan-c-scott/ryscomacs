@@ -678,8 +678,8 @@ Inserted by installing org-mode or when a release is made."
  ("l" 'rysco-rotate-windows)
 
  ;; Home-row bindings for rysco features (dvorak)
- ("g" 'delete-window)
- ("r" 'delete-other-windows)
+ ("g" 'rysco-delete-or-clone-window-dwim)
+ ("r" 'rysco-delete-or-kill-other-windows-dwim)
  ("n" 'rysco-split-right-dwim)
  ("t" 'rysco-split-down-dwim)
  ("h" 'rysco-split-left-dwim)
