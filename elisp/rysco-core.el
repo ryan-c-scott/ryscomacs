@@ -715,6 +715,9 @@ Inserted by installing org-mode or when a release is made."
 (global-set-key (kbd "<escape>d") 'kill-word)
 (global-set-key (kbd "<escape>DEL") 'backward-kill-word)
 
+;; Unsetting things I don't use that accidentally get hit
+(global-unset-key (kbd "C-x C-b"))
+
 ;; Timestamp insertion
 (add-hook
  'calendar-mode-hook
