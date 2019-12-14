@@ -512,6 +512,16 @@ Inserted by installing org-mode or when a release is made."
            '((python     . t)
              (dot . t)))))
 
+;; HACK:  I don't like way that this function would call org-show-entry at the end.
+(with-eval-after-load "org"
+  (defun rysco-helm-org-goto-marker (marker)
+    (switch-to-buffer (marker-buffer marker))
+    (goto-char (marker-position marker))
+    (org-show-set-visibility 'canonical)
+    (re-search-backward "^\\*+ " nil t))
+
+  (advice-add 'helm-org-goto-marker :override 'rysco-helm-org-goto-marker))
+
 (custom-set-variables
  '(org-src-lang-modes
    '(("C" . c)
@@ -591,13 +601,6 @@ Inserted by installing org-mode or when a release is made."
   (set-face-attribute
    'diff-changed nil :background "grey5" :foreground "purple"))
 (eval-after-load "diff-mode" '(custom-diff-colors))
-
-;; HACK:  I don't like way that this function would call org-show-entry at the end.
-(defun helm-org-goto-marker (marker)
-  (switch-to-buffer (marker-buffer marker))
-  (goto-char (marker-position marker))
-  (org-show-context)
-  (re-search-backward "^\\*+ " nil t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
