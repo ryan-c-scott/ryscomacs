@@ -509,7 +509,8 @@ Inserted by installing org-mode or when a release is made."
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
-           '((python     . t)
+           '((python . t)
+             (latex . t)
              (dot . t)))))
 
 ;; HACK:  I don't like way that this function would call org-show-entry at the end.
