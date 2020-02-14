@@ -1,6 +1,6 @@
 ;;; helm-types.el --- Helm types classes and methods. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 ~ 2018  Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2015 ~ 2019  Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
 ;; URL: http://github.com/emacs-helm/helm
@@ -167,18 +167,22 @@
    'helm-buffer-switch-buffers-other-window
    "Switch to buffer other frame `C-c C-o'"
    'switch-to-buffer-other-frame
-   "Browse project from buffer"
+   (lambda () (and (fboundp 'tab-bar-mode)
+                   "Switch to buffer other tab `C-c C-t'"))
+   'switch-to-buffer-other-tab
+   "Browse project `C-x C-d'"
    'helm-buffers-browse-project
    "Query replace regexp `C-M-%'"
    'helm-buffer-query-replace-regexp
    "Query replace `M-%'" 'helm-buffer-query-replace
    "View buffer" 'view-buffer
    "Display buffer" 'display-buffer
-   "Rename buffer" 'helm-buffers-rename-buffer
-   "Grep buffers `M-g s' (C-u grep all buffers)"
+   "Rename buffer `M-R'" 'helm-buffers-rename-buffer
+   "Grep buffer(s) `M-g s' (C-u grep all buffers)"
    'helm-zgrep-buffers
-   "Multi occur buffer(s) `C-s'" 'helm-multi-occur-as-action
-   "Revert buffer(s) `M-U'" 'helm-revert-marked-buffers
+   "Multi occur buffer(s) `C-s (C-u search also in current)'"
+   'helm-multi-occur-as-action
+   "Revert buffer(s) `M-G'" 'helm-revert-marked-buffers
    "Insert buffer" 'insert-buffer
    "Kill buffer(s) `M-D'" 'helm-kill-marked-buffers
    "Diff with file `C-='" 'diff-buffer-with-file
@@ -211,9 +215,9 @@
 
 (defcustom helm-type-function-actions
   (helm-make-actions
-   "Describe command" 'describe-function
-   "Add command to kill ring" 'helm-kill-new
+   "Describe command" 'helm-describe-function
    "Go to command's definition" 'find-function
+   "Info lookup" 'helm-info-lookup-symbol
    "Debug on entry" 'debug-on-entry
    "Cancel debug on entry" 'cancel-debug-on-entry
    "Trace function" 'trace-function
@@ -221,7 +225,9 @@
    "Untrace function" 'untrace-function)
     "Default actions for type functions."
   :group 'helm-elisp
-  :type '(alist :key-type string :value-type function))
+  ;; Use symbol as value type because some functions may not be
+  ;; autoloaded (like untrace-function).
+  :type '(alist :key-type string :value-type symbol))
 
 (defmethod helm-source-get-action-from-type ((object helm-type-function))
   (slot-value object 'action))
@@ -253,18 +259,20 @@
 
 (defcustom helm-type-command-actions
   (append (helm-make-actions
-           "Call interactively" 'helm-call-interactively)
-          (helm-actions-from-type-function))
+           "Execute command" 'helm-M-x-execute-command)
+          (symbol-value
+           (helm-actions-from-type-function)))
   "Default actions for type command."
   :group 'helm-command
-  :type '(alist :key-type string :value-type function))
+  :type '(alist :key-type string :value-type symbol))
 
 (defmethod helm--setup-source :primary ((_source helm-type-command)))
 
 (defmethod helm--setup-source :before ((source helm-type-command))
   (setf (slot-value source 'action) 'helm-type-command-actions)
   (setf (slot-value source 'coerce) 'helm-symbolify)
-  (setf (slot-value source 'persistent-action) 'describe-function)
+  (setf (slot-value source 'persistent-action) 'helm-M-x-persistent-action)
+  (setf (slot-value source 'persistent-help) "Describe this command")
   (setf (slot-value source 'group) 'helm-command))
 
 ;; Timers

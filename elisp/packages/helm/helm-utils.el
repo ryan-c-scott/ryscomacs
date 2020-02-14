@@ -1,6 +1,6 @@
 ;;; helm-utils.el --- Utilities Functions for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2018 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,6 +24,12 @@
 
 (declare-function helm-find-files-1 "helm-files.el" (fname &optional preselect))
 (declare-function popup-tip "ext:popup")
+(declare-function markdown-show-subtree "outline.el")
+(declare-function outline-show-subtree "outline.el")
+(declare-function org-reveal "org.el")
+(declare-function tab-bar-tabs "tab-bar.el")
+(declare-function tab-bar-select-tab "tab-bar.el")
+(defvar org-directory)
 (defvar winner-boring-buffers)
 (defvar helm-show-completion-overlay)
 
@@ -264,7 +270,42 @@ If a prefix arg is given split windows vertically."
                  (and other-window initial-ow-fn))
       (if other-window
           (funcall initial-ow-fn (car buffers))
-        (switch-to-buffer (car buffers))))))
+        (helm-buffers-switch-to-buffer-or-tab (car buffers))))))
+
+(defvar tab-bar-tab-name-function)
+(declare-function tab-bar-switch-to-tab "tab-bar.el")
+(declare-function tab-bar-tab-name-all "tab-bar.el")
+
+(defun helm-buffers-switch-to-buffer-or-tab (buffer)
+  "Switch to BUFFER in its tab if some."
+  (if (and (fboundp 'tab-bar-mode)
+           helm-buffers-maybe-switch-to-tab)
+      (let* ((tab-bar-tab-name-function #'tab-bar-tab-name-all)
+             (tabs (tab-bar-tabs))
+             (tab-names (mapcar (lambda (tab)
+                                  (cdr (assq 'name tab)))
+                                tabs))
+             (bname (buffer-name (get-buffer buffer)))
+             (tab (helm-buffers--get-tab-from-name bname tabs)))
+        (if (helm-buffers--buffer-in-tab-p bname tab-names)
+            (progn
+              (tab-bar-switch-to-tab (alist-get 'name tab))
+              (select-window (get-buffer-window bname)))
+          (switch-to-buffer buffer)))
+    (switch-to-buffer buffer)))
+
+(defun helm-buffers--get-tab-from-name (tab-name tabs)
+  "Return tab from TABS when it contains TAB-NAME."
+  (cl-loop for tab in tabs
+           when (member tab-name (split-string (cdr (assq 'name tab)) ", " t))
+           return tab))
+
+(defun helm-buffers--buffer-in-tab-p (buffer-name tab-names)
+  "Check if BUFFER-NAME is in TAB-NAMES list."
+  (cl-loop for name in tab-names
+           ;; Buf names are separated with "," in TAB-NAMES
+           ;; e.g. '("tab-bar.el" "*scratch*, helm-buffers.el").
+           thereis (member buffer-name (split-string name ", " t))))
 
 (defun helm-window-default-split-fn (candidates &optional other-window-fn)
   "Split windows in one direction and balance them.
@@ -405,12 +446,17 @@ Default is `helm-current-buffer'."
 
 (defun helm-goto-char (loc)
   "Go to char, revealing if necessary."
-  (require 'org) ; On some old Emacs versions org may not be loaded.
   (goto-char loc)
-  (let ((fn (cond ((eq major-mode 'org-mode) #'org-reveal)
+  (let ((fn (cond ((eq major-mode 'org-mode)
+                   ;; On some old Emacs versions org may not be loaded.
+                   (require 'org)
+                   #'org-reveal)
                   ((and (boundp 'outline-minor-mode)
                         outline-minor-mode)
-                   (lambda () (outline-flag-subtree nil))))))
+                   #'outline-show-subtree)
+                  ((and (boundp 'markdown-mode-map)
+                        (derived-mode-p 'markdown-mode))
+                   #'markdown-show-subtree))))
     ;; outline may fail in some conditions e.g. with markdown enabled
     ;; (issue #1919).
     (condition-case nil
@@ -512,9 +558,12 @@ from its directory."
                                       (helm-basename f) f))))
              (helm-find-files-1 f))))
      (let* ((sel       (helm-get-selection))
-            (marker    (if (consp sel) (markerp (cdr sel))))
+            (marker    (and (consp sel) (markerp (cdr sel))))
             (grep-line (and (stringp sel)
                             (helm-grep-split-line sel)))
+            (occur-fname (helm-aand (numberp sel)
+                                    (helm-attr 'buffer-name)
+                                    (buffer-file-name (get-buffer it))))
             (bmk-name  (and (stringp sel)
                             (not grep-line)
                             (replace-regexp-in-string "\\`\\*" "" sel)))
@@ -552,9 +601,8 @@ from its directory."
          ((and grep-line (file-exists-p (car grep-line)))
           (expand-file-name (car grep-line)))
          ;; Occur.
-         (grep-line
-          (with-current-buffer (get-buffer (car grep-line))
-            (expand-file-name (or (buffer-file-name) default-directory))))
+         ((and occur-fname (file-exists-p occur-fname))
+          (expand-file-name occur-fname))
          ;; Package (installed).
          ((and pkg (package-installed-p pkg))
           (expand-file-name (package-desc-dir pkg)))
@@ -578,7 +626,8 @@ that is sorting is done against real value of candidate."
          (reg1  (concat "\\_<" qpattern "\\_>"))
          (reg2  (concat "\\_<" qpattern))
          (reg3  helm-pattern)
-         (split (helm-mm-split-pattern helm-pattern))
+         (split (helm-remove-if-match
+                 "\\`!" (helm-mm-split-pattern helm-pattern)))
          (str1  (if (consp s1) (cdr s1) s1))
          (str2  (if (consp s2) (cdr s2) s2))
          (score (lambda (str r1 r2 r3 lst)
@@ -588,21 +637,27 @@ that is sorting is done against real value of candidate."
                                    (string-match
                                     (concat "\\_<" (regexp-quote (car lst))) str)
                                    (cl-loop for r in (cdr lst)
-                                            always (string-match r str))) 4)
+                                            always (string-match r str)))
+                              4)
                              ((and (string-match " " qpattern)
                                    (cl-loop for r in lst
-                                            always (string-match r str))) 3)
+                                            always (string-match r str)))
+                              3)
                              ((string-match r2 str) 2)
                              ((string-match r3 str) 1)
                              (t 0)))))
-         (sc1 (funcall score str1 reg1 reg2 reg3 split))
-         (sc2 (funcall score str2 reg1 reg2 reg3 split)))
-    (cond ((or (zerop (string-width qpattern))
-               (and (zerop sc1) (zerop sc2)))
+         (sc1 (get-text-property 0 'completion-score str1))
+         (sc2 (get-text-property 0 'completion-score str2))
+         (sc3 (if sc1 0 (funcall score str1 reg1 reg2 reg3 split)))
+         (sc4 (if sc2 0 (funcall score str2 reg1 reg2 reg3 split))))
+    (cond ((and sc1 sc2) ; helm-flex style.
+           (> sc1 sc2))
+          ((or (zerop (string-width qpattern))
+               (and (zerop sc3) (zerop sc4)))
            (string-lessp str1 str2))
-          ((= sc1 sc2)
+          ((= sc3 sc4)
            (< (length str1) (length str2)))
-          (t (> sc1 sc2)))))
+          (t (> sc3 sc4)))))
 
 (cl-defun helm-file-human-size (size &optional (kbsize helm-default-kbsize))
   "Return a string showing SIZE of a file in human readable form.

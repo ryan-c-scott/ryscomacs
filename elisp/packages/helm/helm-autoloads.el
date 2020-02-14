@@ -59,7 +59,7 @@ Preconfigured `helm' to list buffers.
 \(fn)" t nil)
 
 (autoload 'helm-mini "helm-buffers" "\
-Preconfigured `helm' lightweight version (buffer -> recentf).
+Preconfigured `helm' displaying `helm-mini-default-sources'.
 
 \(fn)" t nil)
 
@@ -79,6 +79,28 @@ Preconfigured `helm' for color.
 
 ;;;***
 
+;;;### (autoloads nil "helm-comint" "helm-comint.el" (0 0 0 0))
+;;; Generated autoloads from helm-comint.el
+
+(autoload 'helm-comint-prompts "helm-comint" "\
+Pre-configured `helm' to browse the prompts of the current comint buffer.
+
+\(fn)" t nil)
+
+(autoload 'helm-comint-prompts-all "helm-comint" "\
+Pre-configured `helm' to browse the prompts of all comint sessions.
+
+\(fn)" t nil)
+
+(autoload 'helm-comint-input-ring "helm-comint" "\
+Preconfigured `helm' that provide completion of `comint' history.
+
+\(fn)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-comint" '("helm-")))
+
+;;;***
+
 ;;;### (autoloads nil "helm-command" "helm-command.el" (0 0 0 0))
 ;;; Generated autoloads from helm-command.el
 
@@ -93,7 +115,7 @@ while in `helm-M-x' session will disable it.
 
 You can get help on each command by persistent action.
 
-\(fn ARG &optional COMMAND-NAME)" t nil)
+\(fn ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-command" '("helm-")))
 
@@ -269,7 +291,7 @@ You can set your own list of commands with
 (autoload 'helm-projects-history "helm-files" "\
 
 
-\(fn)" t nil)
+\(fn ARG)" t nil)
 
 (autoload 'helm-browse-project "helm-files" "\
 Preconfigured helm to browse projects.
@@ -427,12 +449,12 @@ Find here the documentation of all documented sources.
 
 \(fn)" t nil)
 
-(defvar helm-comp-read-mode-line "\\<helm-comp-read-map>C/\\[helm-cr-empty-string]:Empty \\<helm-map>\\[helm-help]:Help \\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend")
+(defvar helm-comp-read-mode-line "\\<helm-comp-read-map>C/\\[helm-cr-empty-string]:Empty \\<helm-map>\\[helm-help]:Help \\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend \\[helm-customize-group]:Conf")
 
-(defvar helm-read-file-name-mode-line-string "\\<helm-read-file-map>\\[helm-help]:Help C/\\[helm-cr-empty-string]:Empty \\<helm-map>\\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend" "\
+(defvar helm-read-file-name-mode-line-string "\\<helm-read-file-map>\\[helm-help]:Help C/\\[helm-cr-empty-string]:Empty \\<helm-map>\\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend \\[helm-customize-group]:Conf" "\
 String displayed in mode-line in `helm-source-find-files'.")
 
-(defvar helm-top-mode-line "\\<helm-top-map>\\[helm-help]:Help \\<helm-map>\\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend")
+(defvar helm-top-mode-line "\\<helm-top-map>\\[helm-help]:Help \\<helm-map>\\[helm-select-action]:Act \\[helm-maybe-exit-minibuffer]/f1/f2/f-n:NthAct \\[helm-toggle-suspend-update]:Tog.suspend \\[helm-customize-group]:Conf")
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-help" '("helm-")))
 
@@ -572,11 +594,6 @@ Preconfigured `helm' for `minibuffer-history'.
 
 \(fn)" t nil)
 
-(autoload 'helm-comint-input-ring "helm-misc" "\
-Preconfigured `helm' that provide completion of `comint' history.
-
-\(fn)" t nil)
-
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-misc" '("helm-")))
 
 ;;;***
@@ -674,10 +691,17 @@ Keys description:
 - MATCH-PART: Allow matching only one part of candidate.
   See match-part documentation in `helm-source'.
 
+- MATCH-DYNAMIC: See match-dynamic in `helm-source-sync'
+  It have no effect when used with CANDIDATES-IN-BUFFER.
+
 - ALLOW-NEST: Allow nesting this `helm-comp-read' in a helm session.
   See `helm'.
 
 - MULTILINE: See multiline in `helm-source'.
+
+- COERCE: See coerce in `helm-source'.
+
+- GROUP: See group in `helm-source'.
 
 Any prefix args passed during `helm-comp-read' invocation will be recorded
 in `helm-current-prefix-arg', otherwise if prefix args were given before
@@ -685,7 +709,7 @@ in `helm-current-prefix-arg', otherwise if prefix args were given before
 That's mean you can pass prefix args before or after calling a command
 that use `helm-comp-read' See `helm-M-x' for example.
 
-\(fn PROMPT COLLECTION &key TEST INITIAL-INPUT DEFAULT PRESELECT (BUFFER \"*Helm Completions*\") MUST-MATCH FUZZY REVERSE-HISTORY (REQUIRES-PATTERN 0) HISTORY INPUT-HISTORY (CASE-FOLD helm-comp-read-case-fold-search) (DEL-INPUT t) (PERSISTENT-ACTION nil) (PERSISTENT-HELP \"DoNothing\") (MODE-LINE helm-comp-read-mode-line) HELP-MESSAGE (KEYMAP helm-comp-read-map) (NAME \"Helm Completions\") HEADER-NAME CANDIDATES-IN-BUFFER MATCH-PART EXEC-WHEN-ONLY-ONE QUIT-WHEN-NO-CAND (VOLATILE t) SORT FC-TRANSFORMER HIST-FC-TRANSFORMER MARKED-CANDIDATES NOMARK (ALISTP t) (CANDIDATE-NUMBER-LIMIT helm-candidate-number-limit) MULTILINE ALLOW-NEST)" nil nil)
+\(fn PROMPT COLLECTION &key TEST INITIAL-INPUT DEFAULT PRESELECT (BUFFER \"*Helm Completions*\") MUST-MATCH FUZZY REVERSE-HISTORY (REQUIRES-PATTERN 0) HISTORY INPUT-HISTORY (CASE-FOLD helm-comp-read-case-fold-search) (DEL-INPUT t) (PERSISTENT-ACTION nil) (PERSISTENT-HELP \"DoNothing\") (MODE-LINE helm-comp-read-mode-line) HELP-MESSAGE (KEYMAP helm-comp-read-map) (NAME \"Helm Completions\") HEADER-NAME CANDIDATES-IN-BUFFER MATCH-PART MATCH-DYNAMIC EXEC-WHEN-ONLY-ONE QUIT-WHEN-NO-CAND (VOLATILE t) SORT FC-TRANSFORMER HIST-FC-TRANSFORMER MARKED-CANDIDATES NOMARK (ALISTP t) (CANDIDATE-NUMBER-LIMIT helm-candidate-number-limit) MULTILINE ALLOW-NEST COERCE (GROUP \\='helm))" nil nil)
 
 (autoload 'helm-read-file-name "helm-mode" "\
 Read a file name with helm completion.
@@ -702,6 +726,9 @@ Keys description:
 - BUFFER: `helm-buffer' name default to \"*Helm Completions*\".
 
 - TEST: A predicate called with one arg 'candidate'.
+
+- NORET: Allow disabling helm-ff-RET (have no effect if helm-ff-RET
+                                      isn't bound to RET).
 
 - CASE-FOLD: Same as `helm-case-fold-search'.
 
@@ -725,7 +752,7 @@ Keys description:
 
 - MODE-LINE: A mode line message, default is `helm-read-file-name-mode-line-string'.
 
-\(fn PROMPT &key (NAME \"Read File Name\") (INITIAL-INPUT default-directory) (BUFFER \"*Helm file completions*\") TEST (CASE-FOLD helm-file-name-case-fold-search) PRESELECT HISTORY MUST-MATCH (FUZZY t) DEFAULT MARKED-CANDIDATES (CANDIDATE-NUMBER-LIMIT helm-ff-candidate-number-limit) NOMARK (ALISTP t) (PERSISTENT-ACTION-IF \\='helm-find-files-persistent-action-if) (PERSISTENT-HELP \"Hit1 Expand Candidate, Hit2 or (C-u) Find file\") (MODE-LINE helm-read-file-name-mode-line-string))" nil nil)
+\(fn PROMPT &key (NAME \"Read File Name\") (INITIAL-INPUT default-directory) (BUFFER \"*Helm file completions*\") TEST NORET (CASE-FOLD helm-file-name-case-fold-search) PRESELECT HISTORY MUST-MATCH (FUZZY t) DEFAULT MARKED-CANDIDATES (CANDIDATE-NUMBER-LIMIT helm-ff-candidate-number-limit) NOMARK (ALISTP t) (PERSISTENT-ACTION-IF \\='helm-find-files-persistent-action-if) (PERSISTENT-HELP \"Hit1 Expand Candidate, Hit2 or (C-u) Find file\") (MODE-LINE helm-read-file-name-mode-line-string))" nil nil)
 
 (defvar helm-mode nil "\
 Non-nil if Helm mode is enabled.
@@ -740,29 +767,20 @@ or call the function `helm-mode'.")
 (autoload 'helm-mode "helm-mode" "\
 Toggle generic helm completion.
 
-All functions in Emacs that use `completing-read'
-or `read-file-name' and friends will use helm interface
-when this mode is turned on.
+All functions in Emacs that use `completing-read',
+`read-file-name', `completion-in-region' and friends will use helm
+interface when this mode is turned on.
 
 However you can modify this behavior for functions of your choice
 with `helm-completing-read-handlers-alist'.
 
-Also commands using `completion-in-region' will be helmized when
-`helm-mode-handle-completion-in-region' is non nil, you can modify
-this behavior with `helm-mode-no-completion-in-region-in-modes'.
-
 Called with a positive arg, turn on unconditionally, with a
 negative arg turn off.
-You can turn it on with `helm-mode'.
-
-Some crap emacs functions may not be supported,
-e.g `ffap-alternate-file' and maybe others
-You can add such functions to `helm-completing-read-handlers-alist'
-with a nil value.
+You can toggle it with M-x `helm-mode'.
 
 About `ido-mode':
-When you are using `helm-mode', DO NOT use `ido-mode', instead if you
-want some commands use `ido', add these commands to
+DO NOT enable `ido-everywhere' when using `helm-mode' and instead of
+using `ido-mode', add the commands where you want to use ido to
 `helm-completing-read-handlers-alist' with `ido' as value.
 
 Note: This mode is incompatible with Emacs23.
@@ -821,73 +839,14 @@ Preconfigured `helm' for google search with google suggest.
 
 \(fn)" t nil)
 
-(autoload 'helm-wikipedia-suggest "helm-net" "\
-Preconfigured `helm' for Wikipedia lookup with Wikipedia suggest.
-
-\(fn)" t nil)
-
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-net" '("helm-")))
 
 ;;;***
 
-;;;### (autoloads nil "helm-org" "helm-org.el" (0 0 0 0))
-;;; Generated autoloads from helm-org.el
+;;;### (autoloads nil "helm-occur" "helm-occur.el" (0 0 0 0))
+;;; Generated autoloads from helm-occur.el
 
-(autoload 'helm-org-agenda-files-headings "helm-org" "\
-Preconfigured helm for org files headings.
-
-\(fn)" t nil)
-
-(autoload 'helm-org-in-buffer-headings "helm-org" "\
-Preconfigured helm for org buffer headings.
-
-\(fn)" t nil)
-
-(autoload 'helm-org-parent-headings "helm-org" "\
-Preconfigured helm for org headings that are parents of the
-current heading.
-
-\(fn)" t nil)
-
-(autoload 'helm-org-capture-templates "helm-org" "\
-Preconfigured helm for org templates.
-
-\(fn)" t nil)
-
-(autoload 'helm-org-completing-read-tags "helm-org" "\
-Completing read function for Org tags.
-
-This function is used as a `completing-read' function in
-`helm-completing-read-handlers-alist' by `org-set-tags' and
-`org-capture'.
-
-NOTE: Org tag completion will work only if you disable org fast tag
-selection, see (info \"(org) setting tags\").
-
-\(fn PROMPT COLLECTION PRED REQ INITIAL HIST DEF INHERIT-INPUT-METHOD NAME BUFFER)" nil nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-org" '("helm-")))
-
-;;;***
-
-;;;### (autoloads nil "helm-regexp" "helm-regexp.el" (0 0 0 0))
-;;; Generated autoloads from helm-regexp.el
-
-(autoload 'helm-moccur-mode "helm-regexp" "\
-Major mode to provide actions in helm moccur saved buffer.
-
-Special commands:
-\\{helm-moccur-mode-map}
-
-\(fn)" t nil)
-
-(autoload 'helm-regexp "helm-regexp" "\
-Preconfigured helm to build regexps.
-`query-replace-regexp' can be run from there against found regexp.
-
-\(fn)" t nil)
-
-(autoload 'helm-occur "helm-regexp" "\
+(autoload 'helm-occur "helm-occur" "\
 Preconfigured helm for searching lines matching pattern in `current-buffer'.
 
 When `helm-source-occur' is member of
@@ -902,16 +861,18 @@ buffers (i.e. a helm command using `helm-source-buffers-list' like
 
 This is the helm implementation that collect lines matching pattern
 like vanilla emacs `occur' but have nothing to do with it, the search
-engine beeing completely different.
+engine beeing completely different and also much faster.
 
 \(fn)" t nil)
 
-(autoload 'helm-occur-from-isearch "helm-regexp" "\
+(autoload 'helm-occur-from-isearch "helm-occur" "\
 Invoke `helm-occur' from isearch.
 
+To use this bind it to a key in `isearch-mode-map'.
+
 \(fn)" t nil)
 
-(autoload 'helm-multi-occur-from-isearch "helm-regexp" "\
+(autoload 'helm-multi-occur-from-isearch "helm-occur" "\
 Invoke `helm-multi-occur' from isearch.
 
 With a prefix arg, reverse the behavior of
@@ -919,7 +880,22 @@ With a prefix arg, reverse the behavior of
 The prefix arg can be set before calling
 `helm-multi-occur-from-isearch' or during the buffer selection.
 
-\(fn &optional ARG)" t nil)
+To use this bind it to a key in `isearch-mode-map'.
+
+\(fn)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-occur" '("helm-")))
+
+;;;***
+
+;;;### (autoloads nil "helm-regexp" "helm-regexp.el" (0 0 0 0))
+;;; Generated autoloads from helm-regexp.el
+
+(autoload 'helm-regexp "helm-regexp" "\
+Preconfigured helm to build regexps.
+`query-replace-regexp' can be run from there against found regexp.
+
+\(fn)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-regexp" '("helm-")))
 
@@ -989,6 +965,15 @@ Fill in the symbol at point by default.
 \(fn ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-semantic" '("helm-s")))
+
+;;;***
+
+;;;### (autoloads nil "helm-shell" "helm-shell.el" (0 0 0 0))
+;;; Generated autoloads from helm-shell.el
+
+(defalias 'helm-shell-prompts 'helm-comint-prompts)
+
+(defalias 'helm-shell-prompts-all 'helm-comint-prompts-all)
 
 ;;;***
 
