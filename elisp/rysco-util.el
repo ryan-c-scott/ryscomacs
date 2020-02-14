@@ -43,6 +43,9 @@
        with autoloads
        with paths
        for dir in (cddr (directory-files manual))
+       as dir = (if (listp dir)
+                    (car dir)
+                  dir)
        as pkg-dir = (concat manual "/" dir)
        as is-dir = (file-directory-p pkg-dir)
        if is-dir collect `(add-to-list 'load-path ,pkg-dir) into paths
