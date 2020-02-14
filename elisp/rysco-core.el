@@ -106,6 +106,7 @@ Inserted by installing org-mode or when a release is made."
     go-mode
     graphviz-dot-mode
     helm
+    (helm-org :type git :host github :repo "emacs-helm/helm-org")
     helm-projectile
     helm-descbinds
     json-mode
