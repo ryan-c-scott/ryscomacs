@@ -27,6 +27,7 @@
 (defvar rysco-font "Source Code Pro")
 (defvar rysco-font-size "15.0")
 (defvar rysco-writing-font "Georgia")
+(defvar-local org-export-directory "org-export")
 (defvar-local rysco-modeline-extras nil)
 
 (require 'cl)
@@ -526,7 +527,14 @@ Inserted by installing org-mode or when a release is made."
     (org-show-set-visibility 'canonical)
     (re-search-backward "^\\*+ " nil t))
 
-  (advice-add 'helm-org-goto-marker :override 'rysco-helm-org-goto-marker))
+  (advice-add 'helm-org-goto-marker :override 'rysco-helm-org-goto-marker)
+
+  (defadvice org-export-output-file-name (before org-add-export-dir activate)
+    "Modifies org-export to place exported files in a different directory"
+    (when (not pub-dir)
+      (setq pub-dir org-export-directory)
+      (when (not (file-directory-p pub-dir))
+        (make-directory pub-dir)))))
 
 (custom-set-variables
  '(org-src-lang-modes
