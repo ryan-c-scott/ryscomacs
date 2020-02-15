@@ -510,17 +510,17 @@ Inserted by installing org-mode or when a release is made."
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
   (local-unset-key (kbd "<S-up>"))
-  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings)
+  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings))
 
+;; HACK:  I don't like way that this function would call org-show-entry at the end.
+(with-eval-after-load "org"
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
            '((python . t)
              (latex . t)
-             (dot . t)))))
+             (dot . t))))
 
-;; HACK:  I don't like way that this function would call org-show-entry at the end.
-(with-eval-after-load "org"
   (defun rysco-helm-org-goto-marker (marker)
     (switch-to-buffer (marker-buffer marker))
     (goto-char (marker-position marker))
@@ -535,6 +535,9 @@ Inserted by installing org-mode or when a release is made."
       (setq pub-dir org-export-directory)
       (when (not (file-directory-p pub-dir))
         (make-directory pub-dir)))))
+
+(with-eval-after-load "ox-latex"
+    (add-to-list 'org-latex-logfiles-extensions "tex"))
 
 (custom-set-variables
  '(org-src-lang-modes
