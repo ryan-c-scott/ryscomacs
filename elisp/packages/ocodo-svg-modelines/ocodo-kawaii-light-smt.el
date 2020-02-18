@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/ocodo-svg-modelines/ocodo-kawaii-light-smt.el

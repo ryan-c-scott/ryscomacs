@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/autothemer/autothemer.el

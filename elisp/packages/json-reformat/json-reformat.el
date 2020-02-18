@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/json-reformat/json-reformat.el

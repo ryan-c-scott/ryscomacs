@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/go-mode.el/go-mode.el

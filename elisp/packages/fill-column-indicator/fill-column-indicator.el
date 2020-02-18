@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/Fill-Column-Indicator/fill-column-indicator.el

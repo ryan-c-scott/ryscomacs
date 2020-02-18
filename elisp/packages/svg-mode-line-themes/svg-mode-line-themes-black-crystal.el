@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/svg-mode-line-themes/svg-mode-line-themes-black-crystal.el

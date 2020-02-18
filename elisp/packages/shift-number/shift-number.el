@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/shift-number.el/shift-number.el

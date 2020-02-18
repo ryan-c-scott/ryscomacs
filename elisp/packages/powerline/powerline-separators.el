@@ -1,1 +1,0 @@
-/Users/ryan/.emacs.d/straight/repos/powerline/powerline-separators.el
