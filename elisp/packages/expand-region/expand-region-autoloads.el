@@ -140,6 +140,13 @@ If set to nil, always place the cursor at the beginning of the region.")
 
 (custom-autoload 'expand-region-smart-cursor "expand-region-custom" t)
 
+(define-obsolete-variable-alias 'er/enable-subword-mode\? 'expand-region-subword-enabled "2019-03-23")
+
+(defvar expand-region-subword-enabled nil "\
+Whether expand-region should use subword expansions.")
+
+(custom-autoload 'expand-region-subword-enabled "expand-region-custom" t)
+
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "expand-region-custom" '("expand-region-guess-python-mode")))
 
 ;;;***

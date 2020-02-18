@@ -1,3 +1,1 @@
-(define-package "ocodo-svg-modelines" "0.1.4"
-  "A collection of beautiful SVG modelines"
-  '((svg-mode-line-themes "0")))
+/Users/ryan/.emacs.d/straight/repos/ocodo-svg-modelines/ocodo-svg-modelines-pkg.el

@@ -1,2 +1,1 @@
-(define-package "expand-region" "0.11.0"
-                "Increase selected region by semantic units.")
+/Users/ryan/.emacs.d/straight/repos/expand-region.el/expand-region-pkg.el

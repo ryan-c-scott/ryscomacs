@@ -46,7 +46,22 @@ CSV mode provides the following specific keyboard key bindings:
 
 (add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "csv-mode" '("csv-")))
+(add-to-list 'auto-mode-alist '("\\.tsv\\'" . tsv-mode))
+
+(autoload 'tsv-mode "csv-mode" "\
+Major mode for editing files of tab-separated value type.
+
+\(fn)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "csv-mode" '("csv-" "tsv-")))
+
+;;;***
+
+;;;### (autoloads nil "csv-mode-tests" "csv-mode-tests.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from csv-mode-tests.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "csv-mode-tests" '("csv-mode-tests--align-fields")))
 
 ;;;***
 

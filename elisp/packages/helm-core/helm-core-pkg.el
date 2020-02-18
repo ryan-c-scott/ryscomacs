@@ -1,11 +1,1 @@
-;;; helm-core-pkg.el --- define helm-core for package.el
-
-(define-package "helm-core" "3.6.0"
-  "Development files for Helm"
-  '((emacs "24.4")
-    (async "1.9.4"))
-  :url "https://emacs-helm.github.io/helm/")
-
-;; Local Variables:
-;; no-byte-compile: t
-;; End:
+/Users/ryan/.emacs.d/straight/repos/helm/helm-core-pkg.el

@@ -3,6 +3,20 @@
 ;;; Code:
 
 
+;;;### (autoloads nil "company-graphviz-dot" "company-graphviz-dot.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from company-graphviz-dot.el
+
+(autoload 'company-graphviz-dot-backend "company-graphviz-dot" "\
+Company backend for `graphviz-dot-mode'.
+In the signature, COMMAND, ARG and IGNORED are mandated by `company-mode'.
+
+\(fn COMMAND &optional ARG &rest IGNORED)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "company-graphviz-dot" '("company-g")))
+
+;;;***
+
 ;;;### (autoloads nil "graphviz-dot-mode" "graphviz-dot-mode.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from graphviz-dot-mode.el
@@ -15,58 +29,36 @@ TAB indents for graph lines.
 \\[graphviz-dot-preview]	- Previews graph in a buffer.
 \\[graphviz-dot-view]	- Views graph in an external viewer.
 \\[graphviz-dot-indent-line]	- Indents current line of code.
-\\[graphviz-dot-complete-word]	- Completes the current word.
-\\[electric-graphviz-dot-terminate-line]	- Electric newline.
-\\[electric-graphviz-dot-open-brace]	- Electric open braces.
-\\[electric-graphviz-dot-close-brace]	- Electric close braces.
-\\[electric-graphviz-dot-semi]	- Electric semi colons.
 
 Variables specific to this mode:
 
-  graphviz-dot-dot-program            (default `dot')
-       Location of the dot program.
-  graphviz-dot-view-command           (default `doted %s')
+  `graphviz-dot-dot-program'                   (default `dot')
+       Program used to compile the graphs.
+  `graphviz-dot-preview-extension'             (default `png')
+       File type to use for output.
+  `graphviz-dot-view-command'                  (default `dotty %s')
        Command to run when `graphviz-dot-view' is executed.
-  graphviz-dot-view-edit-command      (default nil)
+  `graphviz-dot-view-edit-command'             (default nil)
        If the user should be asked to edit the view command.
-  graphviz-dot-save-before-view       (default t)
+  `graphviz-dot-save-before-view'              (default t)
        Automatically save current buffer berore `graphviz-dot-view'.
-  graphviz-dot-preview-extension      (default `png')
-       File type to use for `graphviz-dot-preview'.
-  graphviz-dot-auto-indent-on-newline (default t)
-       Whether to run `electric-graphviz-dot-terminate-line' when
-       newline is entered.
-  graphviz-dot-auto-indent-on-braces (default t)
-       Whether to run `electric-graphviz-dot-open-brace' and
-       `electric-graphviz-dot-close-brace' when braces are
-       entered.
-  graphviz-dot-auto-indent-on-semi (default t)
-       Whether to run `electric-graphviz-dot-semi' when semi colon
-       is typed.
-  graphviz-dot-toggle-completions  (default nil)
-       If completions should be displayed in the buffer instead of a
-       completion buffer when \\[graphviz-dot-complete-word] is
-       pressed repeatedly.
-
-This mode can be customized by running \\[graphviz-dot-customize].
-
-Turning on Graphviz Dot mode calls the value of the variable
-`graphviz-dot-mode-hook' with no args, if that value is non-nil.
 
 \(fn)" t nil)
 
 (autoload 'graphviz-dot-preview "graphviz-dot-mode" "\
-
+Compile the graph and preview it in an other buffer.
 
 \(fn)" t nil)
 
 (autoload 'graphviz-turn-on-live-preview "graphviz-dot-mode" "\
-Turns on live preview on save.
+Turn on live preview.
+This will update the preview on every save.
 
 \(fn)" t nil)
 
 (autoload 'graphviz-turn-off-live-preview "graphviz-dot-mode" "\
-Turns off live preview on save.
+Turn off live preview.
+Saving the file will no longer also update the preview.
 
 \(fn)" t nil)
 
@@ -74,7 +66,7 @@ Turns off live preview on save.
 
 (add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "graphviz-dot-mode" '("graphviz-" "electric-graphviz-dot-" "dot-menu")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "graphviz-dot-mode" '("dot-menu" "graphviz-")))
 
 ;;;***
 

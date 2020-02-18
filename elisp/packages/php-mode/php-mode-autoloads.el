@@ -3,105 +3,69 @@
 ;;; Code:
 
 
-;;;### (autoloads nil "php-array" "php-array.el" (0 0 0 0))
-;;; Generated autoloads from php-array.el
+;;;### (autoloads nil "php" "php.el" (0 0 0 0))
+;;; Generated autoloads from php.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-array" '("php-")))
+(let ((loads (get 'php 'custom-loads))) (if (member '"php" loads) nil (put 'php 'custom-loads (cons '"php" loads))))
 
-;;;***
-
-;;;### (autoloads nil "php-classobj" "php-classobj.el" (0 0 0 0))
-;;; Generated autoloads from php-classobj.el
+(autoload 'php-mode-maybe "php" "\
+Select PHP mode or other major mode.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-classobj" '("php")))
+\(fn)" t nil)
 
-;;;***
-
-;;;### (autoloads nil "php-control-structures" "php-control-structures.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from php-control-structures.el
+(autoload 'php-current-class "php" "\
+Insert current class name if cursor in class context.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-control-structures" '("php-")))
+\(fn)" t nil)
 
-;;;***
-
-;;;### (autoloads nil "php-crack" "php-crack.el" (0 0 0 0))
-;;; Generated autoloads from php-crack.el
+(autoload 'php-current-namespace "php" "\
+Insert current namespace if cursor in namespace context.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-crack" '("php-crack-")))
+\(fn)" t nil)
 
-;;;***
-
-;;;### (autoloads nil "php-dio" "php-dio.el" (0 0 0 0))
-;;; Generated autoloads from php-dio.el
+(autoload 'php-copyit-fqsen "php" "\
+Copy/kill class/method FQSEN.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-dio" '("php-dio_")))
+\(fn)" t nil)
 
-;;;***
-
-;;;### (autoloads nil "php-dom" "php-dom.el" (0 0 0 0))
-;;; Generated autoloads from php-dom.el
+(autoload 'php-run-builtin-web-server "php" "\
+Run PHP Built-in web server.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-dom" '("php-dom")))
+`ROUTER-OR-DIR': Path to router PHP script or Document root.
+`HOSTNAME': Hostname or IP address of Built-in web server.
+`PORT': Port number of Built-in web server.
+`DOCUMENT-ROOT': Path to Document root.
 
-;;;***
-
-;;;### (autoloads nil "php-exceptions" "php-exceptions.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from php-exceptions.el
+When `DOCUMENT-ROOT' is NIL, the document root is obtained from `ROUTER-OR-DIR'.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-exceptions" '("php-try-catch")))
+\(fn ROUTER-OR-DIR HOSTNAME PORT &optional DOCUMENT-ROOT)" t nil)
+
+(autoload 'php-find-system-php-ini-file "php" "\
+Find php.ini FILE by `php --ini'.
+
+\(fn &optional FILE)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php" '("php-")))
 
 ;;;***
 
-;;;### (autoloads nil "php-exif" "php-exif.el" (0 0 0 0))
-;;; Generated autoloads from php-exif.el
+;;;### (autoloads nil "php-face" "php-face.el" (0 0 0 0))
+;;; Generated autoloads from php-face.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-exif" '("php-exif_")))
+(let ((loads (get 'php-faces 'custom-loads))) (if (member '"php-face" loads) nil (put 'php-faces 'custom-loads (cons '"php-face" loads))))
 
-;;;***
-
-;;;### (autoloads nil "php-ext" "php-ext.el" (0 0 0 0))
-;;; Generated autoloads from php-ext.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-ext" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-filesystem" "php-filesystem.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from php-filesystem.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-filesystem" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-gd" "php-gd.el" (0 0 0 0))
-;;; Generated autoloads from php-gd.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-gd" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-math" "php-math.el" (0 0 0 0))
-;;; Generated autoloads from php-math.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-math" '("php-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-face" '("php-annotations-annotation-face")))
 
 ;;;***
 
 ;;;### (autoloads nil "php-mode" "php-mode.el" (0 0 0 0))
 ;;; Generated autoloads from php-mode.el
 
-(let ((loads (get 'php 'custom-loads))) (if (member '"php-mode" loads) nil (put 'php 'custom-loads (cons '"php-mode" loads))))
-
 (let ((loads (get 'php-mode 'custom-loads))) (if (member '"php-mode" loads) nil (put 'php-mode 'custom-loads (cons '"php-mode" loads))))
 
 (if (version< emacs-version "24.4") (dolist (i '("php" "php5" "php7")) (add-to-list 'interpreter-mode-alist (cons i 'php-mode))) (add-to-list 'interpreter-mode-alist (cons "php\\(?:-?[3457]\\(?:\\.[0-9]+\\)*\\)?" 'php-mode)))
 
 (define-obsolete-variable-alias 'php-available-project-root-files 'php-project-available-root-files "1.19.0")
-
-(let ((loads (get 'php-faces 'custom-loads))) (if (member '"php-mode" loads) nil (put 'php-faces 'custom-loads (cons '"php-mode" loads))))
 
 (autoload 'php-mode "php-mode" "\
 Major mode for editing PHP code.
@@ -110,26 +74,21 @@ Major mode for editing PHP code.
 
 \(fn)" t nil)
 
-(autoload 'php-current-class "php-mode" "\
-Insert current class name if cursor in class context.
+(add-to-list 'auto-mode-alist '("/\\.php_cs\\(?:\\.dist\\)?\\'" . php-mode))
 
-\(fn)" t nil)
+(add-to-list 'auto-mode-alist '("\\.\\(?:php\\.inc\\|stub\\)\\'" . php-mode))
 
-(autoload 'php-current-namespace "php-mode" "\
-Insert current namespace if cursor in namespace context.
-
-\(fn)" t nil)
-
-(add-to-list 'auto-mode-alist (cons (eval-when-compile (rx (or (: "." (or (: "php" (32 (in "s345t"))) "amk" "phtml")) (: "/" (or "Amkfile" ".php_cs" ".php_cs.dist"))) string-end)) 'php-mode) t)
+(add-to-list 'auto-mode-alist '("\\.\\(?:php[s345]?\\|phtml\\)\\'" . php-mode-maybe))
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-mode" '("php-")))
 
 ;;;***
 
-;;;### (autoloads nil "php-pcre" "php-pcre.el" (0 0 0 0))
-;;; Generated autoloads from php-pcre.el
+;;;### (autoloads nil "php-mode-debug" "php-mode-debug.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from php-mode-debug.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-pcre" '("php-preg_")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-mode-debug" '("php-mode-debug")))
 
 ;;;***
 
@@ -151,6 +110,10 @@ STRING
       of the root directory, not the marker.")
 
 (put 'php-project-root 'safe-local-variable #'(lambda (v) (or (stringp v) (assq v php-project-available-root-files))))
+
+(defvar-local php-project-etags-file nil)
+
+(put 'php-project-etags-file 'safe-local-variable #'(lambda (v) (or (functionp v) (eq v t) (php-project--eval-bootstrap-scripts v))))
 
 (defvar-local php-project-bootstrap-scripts nil "\
 List of path to bootstrap php script file.
@@ -177,38 +140,46 @@ Typically it is `pear', `drupal', `wordpress', `symfony2' and `psr2'.")
 
 (put 'php-project-coding-style 'safe-local-variable #'symbolp)
 
-(defvar php-project-repl nil "\
-Function name or path to REPL (interactive shell) script.")
+(defvar-local php-project-php-file-as-template 'auto "\
 
-(make-variable-buffer-local 'php-project-repl)
+`auto' (default)
+      Automatically switch to mode for template when HTML tag detected in file.
+
+`t'
+      Switch all PHP files in that directory to mode for HTML template.
+
+`nil'
+      Any .php  in that directory is just a PHP script.
+
+\((PATTERN . SYMBOL))
+      Alist of file name pattern regular expressions and the above symbol pairs.
+      PATTERN is regexp pattern.
+")
+
+(put 'php-project-php-file-as-template 'safe-local-variable #'php-project--validate-php-file-as-template)
+
+(defvar-local php-project-repl nil "\
+Function name or path to REPL (interactive shell) script.")
 
 (put 'php-project-repl 'safe-local-variable #'(lambda (v) (or (functionp v) (php-project--eval-bootstrap-scripts v))))
 
-(defvar php-project-unit-test nil "\
+(defvar-local php-project-unit-test nil "\
 Function name or path to unit test script.")
-
-(make-variable-buffer-local 'php-project-unit-test)
 
 (put 'php-project-unit-test 'safe-local-variable #'(lambda (v) (or (functionp v) (php-project--eval-bootstrap-scripts v))))
 
-(defvar php-project-deploy nil "\
+(defvar-local php-project-deploy nil "\
 Function name or path to deploy script.")
-
-(make-variable-buffer-local 'php-project-deploy)
 
 (put 'php-project-deploy 'safe-local-variable #'(lambda (v) (or (functionp v) (php-project--eval-bootstrap-scripts v))))
 
-(defvar php-project-build nil "\
+(defvar-local php-project-build nil "\
 Function name or path to build script.")
-
-(make-variable-buffer-local 'php-project-build)
 
 (put 'php-project-build 'safe-local-variable #'(lambda (v) (or (functionp v) (php-project--eval-bootstrap-scripts v))))
 
-(defvar php-project-server-start nil "\
+(defvar-local php-project-server-start nil "\
 Function name or path to server-start script.")
-
-(make-variable-buffer-local 'php-project-server-start)
 
 (put 'php-project-server-start 'safe-local-variable #'(lambda (v) (or (functionp v) (php-project--eval-bootstrap-scripts v))))
 
@@ -226,45 +197,11 @@ Return path to current PHP project.
 
 ;;;***
 
-;;;### (autoloads nil "php-regex" "php-regex.el" (0 0 0 0))
-;;; Generated autoloads from php-regex.el
+;;;### (autoloads nil "php-util-buffer" "php-util-buffer.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from php-util-buffer.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-regex" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-simplexml" "php-simplexml.el" (0 0 0 0))
-;;; Generated autoloads from php-simplexml.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-simplexml" '("php-simplexml_")))
-
-;;;***
-
-;;;### (autoloads nil "php-strings" "php-strings.el" (0 0 0 0))
-;;; Generated autoloads from php-strings.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-strings" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-var" "php-var.el" (0 0 0 0))
-;;; Generated autoloads from php-var.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-var" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-xmlparser" "php-xmlparser.el" (0 0 0 0))
-;;; Generated autoloads from php-xmlparser.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-xmlparser" '("php-")))
-
-;;;***
-
-;;;### (autoloads nil "php-xmlreader" "php-xmlreader.el" (0 0 0 0))
-;;; Generated autoloads from php-xmlreader.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-xmlreader" '("php-xmlreader")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "php-util-buffer" '("php-util-buffer-")))
 
 ;;;***
 

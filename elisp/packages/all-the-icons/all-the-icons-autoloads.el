@@ -22,6 +22,15 @@ inserting functions.
 
 \(fn MODE &rest ARG-OVERRIDES)" nil nil)
 
+(autoload 'all-the-icons-icon-for-url "all-the-icons" "\
+Get the formatted icon for URL.
+If an icon for URL isn't found in `all-the-icons-url-alist', a globe is used.
+ARG-OVERRIDES should be a plist containining `:height',
+`:v-adjust' or `:face' properties like in the normal icon
+inserting functions.
+
+\(fn URL &rest ARG-OVERRIDES)" nil nil)
+
 (autoload 'all-the-icons--icon-info-for-buffer "all-the-icons" "\
 Get icon info for the current buffer.
 
@@ -43,7 +52,7 @@ When FAMILY is non-nil, limit the candidates to the icon set matching it.
 
 \(fn &optional ARG FAMILY)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "all-the-icons" '("material" "wicon" "octicon" "fileicon" "faicon" "all" "define-icon")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "all-the-icons" '("all" "define-icon" "faicon" "fileicon" "material" "octicon" "wicon")))
 
 ;;;***
 

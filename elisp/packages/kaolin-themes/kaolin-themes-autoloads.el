@@ -43,14 +43,6 @@
 
 ;;;***
 
-;;;### (autoloads nil "kaolin-fusion-theme" "kaolin-fusion-theme.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from kaolin-fusion-theme.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-fusion-theme" '("fusion")))
-
-;;;***
-
 ;;;### (autoloads nil "kaolin-galaxy-theme" "kaolin-galaxy-theme.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-galaxy-theme.el
@@ -63,7 +55,7 @@
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-light-theme.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-light-theme" '("light" "kaolin-light-alt-bg")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-light-theme" '("kaolin-light-alt-bg" "light")))
 
 ;;;***
 
@@ -79,7 +71,15 @@
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-ocean-theme.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-ocean-theme" '("ocean")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-ocean-theme" '("kaolin-ocean-alt-bg" "ocean")))
+
+;;;***
+
+;;;### (autoloads nil "kaolin-temple-theme" "kaolin-temple-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from kaolin-temple-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-temple-theme" '("temple")))
 
 ;;;***
 
@@ -93,7 +93,7 @@ Enable kaolin-themes treemacs theme with all-the-icons package.
 
 (when (and (boundp 'custom-theme-load-path) load-file-name) (let* ((base (file-name-directory load-file-name)) (dir (expand-file-name "themes/" base))) (add-to-list 'custom-theme-load-path (or (and (file-directory-p dir) dir) base))))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-themes" '("define-kaolin-theme" "kaolin-themes-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-themes" '("define-kaolin-theme" "kaolin-theme")))
 
 ;;;***
 
@@ -101,7 +101,7 @@ Enable kaolin-themes treemacs theme with all-the-icons package.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-themes-lib.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-themes-lib" '("kaolin-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-themes-lib" '("color-" "kaolin-")))
 
 ;;;***
 
@@ -117,7 +117,7 @@ Enable kaolin-themes treemacs theme with all-the-icons package.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-valley-dark-theme.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-valley-dark-theme" '("valley-dark")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-valley-dark-theme" '("kaolin-valley-dark-alt-bg" "valley-dark")))
 
 ;;;***
 
@@ -125,7 +125,7 @@ Enable kaolin-themes treemacs theme with all-the-icons package.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from kaolin-valley-light-theme.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-valley-light-theme" '("valley-light" "kaolin-valley-light-alt-bg")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kaolin-valley-light-theme" '("kaolin-valley-light-alt-bg" "valley-light")))
 
 ;;;***
 

@@ -53,7 +53,7 @@ Return empty space using FACE and leaving RESERVE space on the right.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from powerline-separators.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "powerline-separators" '("powerline-image-apple-rgb" "pl/")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "powerline-separators" '("pl/" "powerline-image-apple-rgb")))
 
 ;;;***
 

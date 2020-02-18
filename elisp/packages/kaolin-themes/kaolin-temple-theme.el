@@ -1,0 +1,1 @@
+/Users/ryan/.emacs.d/straight/repos/emacs-kaolin-themes/themes/kaolin-temple-theme.el

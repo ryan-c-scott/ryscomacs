@@ -15,7 +15,7 @@
 (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode))
 
 (autoload 'glsl-mode "glsl-mode" "\
-Major mode for editing OpenGLSL shader files.
+Major mode for editing GLSL shader files.
 
 \(fn)" t nil)
 

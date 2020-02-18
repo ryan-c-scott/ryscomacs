@@ -99,8 +99,11 @@ option has no effect.)")
 
 (custom-autoload 'diredp-image-show-this-file-use-frame-flag "dired+" t)
 
-(defvar diredp-list-file-attributes (list '(5 8) 'auto) "\
-Which file attributes `diredp-list-file' uses, and when.")
+(defvar diredp-list-file-attributes (list 5 8) "\
+Which file attributes `diredp-list-file' uses, and when.
+A list of file attribute numbers means use only the values of those
+attributes.
+A non-list means use all attribute values.")
 
 (custom-autoload 'diredp-list-file-attributes "dired+" t)
 
@@ -239,7 +242,7 @@ files in the Dired buffer.
 \(fn COMMAND &optional ARG)" t nil)
 
 (autoload 'diredp-dired-for-files "dired+" "\
-Dired file names that you enter, in a Dired buffer that you name.
+Dired the file names that you enter, in a Dired buffer that you name.
 You are prompted for the name of the Dired buffer to use.
 You are then prompted for names of files and directories to list,
  which can be located anywhere.
@@ -256,21 +259,39 @@ Same as `diredp-dired-for-files', except uses another window.
 
 \(fn ARG &optional SWITCHES)" t nil)
 
-(autoload 'diredp-dired-recent-dirs "dired+" "\
-Open Dired in BUFFER, showing recently used directories.
-You are prompted for BUFFER.
+(autoload 'diredp-dired-recent-files "dired+" "\
+Open Dired in BUFFER, showing recently visited files and directories.
+You are prompted for BUFFER (default: `Recently Visited Files').
+
+With a numeric prefix arg you can enter names of recent files to
+include or exclude.
 
 No prefix arg or a plain prefix arg (`C-u', `C-u C-u', etc.) means
-list all of the recently used directories.
+list all of the recently used files.
 
 With a prefix arg:
 * If 0, `-', or plain (`C-u') then you are prompted for the `ls'
   switches to use.
 * If not plain (`C-u') then:
-  * If >= 0 then the directories to include are read, one by one.
-  * If  < 0 then the directories to exclude are read, one by one.
+  * If >= 0 then the files to include are read, one by one.
+  * If  < 0 then the files to exclude are read, one by one.
 
-When entering directories to include or exclude, use `C-g' to end.
+When entering files to include or exclude, use `C-g' to end.
+
+The file listing is always in the order of `recentf-list', which is
+reverse chronological order of opening or writing files you access.
+
+\(fn BUFFER &optional ARG)" t nil)
+
+(autoload 'diredp-dired-recent-files-other-window "dired+" "\
+Same as `diredp-dired-recent-files', but use other window.
+
+\(fn BUFFER &optional ARG)" t nil)
+
+(autoload 'diredp-dired-recent-dirs "dired+" "\
+Open Dired in BUFFER, showing recently visited directories.
+Like `diredp-dired-recent-files', but limited to recent directories.
+A directory is recent if any of its files is recent.
 
 \(fn BUFFER &optional ARG)" t nil)
 
@@ -278,6 +299,48 @@ When entering directories to include or exclude, use `C-g' to end.
 Same as `diredp-dired-recent-dirs', but use other window.
 
 \(fn BUFFER &optional ARG)" t nil)
+
+(autoload 'diredp-do-add-to-recentf "dired+" "\
+Add all marked (or next ARG) files to list of recently used files.
+That is, add them from variable `recentf-list'.
+
+\(This does not refresh any Dired buffer listing the recently visited
+files.  You can refresh it manually using `\\[revert-buffer]'.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'diredp-do-remove-from-recentf "dired+" "\
+Remove all marked (or next ARG) files from list of recently used files.
+That is, remove them from variable `recentf-list'.
+
+\(This does not refresh any Dired buffer listing the recently visited
+files.  You can refresh it manually using `\\[revert-buffer]'.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'diredp-add-this-to-recentf "dired+" "\
+In Dired, add this file to the list of recently used files.
+
+\(fn)" t nil)
+
+(autoload 'diredp-remove-this-from-recentf "dired+" "\
+In Dired, remove this file from the list of recently used files.
+
+\(fn)" t nil)
+
+(autoload 'diredp-add-file-to-recentf "dired+" "\
+Add FILE to the front of `recentf-list'.
+If FILE is already present, move it to the front of the list.
+In Dired, FILE defaults to the file of the current Dired line.
+
+\(fn &optional FILE INTERACTIVEP)" t nil)
+
+(autoload 'diredp-remove-file-from-recentf "dired+" "\
+Remove FILE from `recentf-list'.
+In Dired, FILE defaults to the file of the current Dired line.  After
+removing, revert any displayed buffers showing `recentf-list'.
+
+\(fn &optional FILE INTERACTIVEP)" t nil)
 
 (autoload 'diredp-dired-union "dired+" "\
 Create a Dired buffer that is the union of some existing Dired buffers.
@@ -753,7 +816,7 @@ When called from Lisp, optional arg DETAILS is passed to
 Do `query-replace-regexp' on marked files, including in marked subdirs.
 Query-replace FROM with TO.
 
-Like `dired-do-query-replace', but act recursively on subdirs.
+Like `dired-do-query-replace-regexp', but act recursively on subdirs.
 The files included are those that are marked in the current Dired
 buffer, or all files in the directory if none are marked.  Marked
 subdirectories are handled recursively in the same way.
@@ -1059,27 +1122,29 @@ When called from Lisp, optional arg DETAILS is passed to
 
 \(fn &optional IGNORE-MARKS-P DETAILS)" t nil)
 
-(autoload 'diredp-do-apply-function-recursive "dired+" "\
-Apply FUNCTION to the marked files.
-Like `diredp-do-apply-function' but act recursively on subdirs and do
-no result or error logging or echoing.
+(autoload 'diredp-do-apply/eval-recursive "dired+" "\
+Apply a function to marked files, or evaluate a sexp in them.
+Like `diredp-do-apply/eval' but act recursively on subdirs, and do no
+result- or error-logging or echoing.
 
 The files acted on are those that are marked in the current Dired
 buffer, or all files in the directory if none are marked.  Marked
 subdirectories are handled recursively in the same way.
 
-With a plain prefix ARG (`C-u'), visit each file and invoke FUNCTION
- with no arguments.
-Otherwise, apply FUNCTION to each file name.
+With a plain prefix ARG (`C-u'), visit each file and eval the sexp or
+ invoke the function there.  (The function is passed no arguments.)
+Otherwise, apply the function to each file name.
 
-Any other prefix arg behaves according to the ARG argument of
-`dired-get-marked-files'.  In particular, `C-u C-u' operates on all
-files in the Dired buffer.
+Any prefix arg other than single `C-u' behaves according to the ARG
+argument of `dired-get-marked-files'.  In particular, `C-u C-u'
+operates on all files in the Dired buffer.
 
-When called from Lisp, optional arg DETAILS is passed to
-`diredp-get-files'.
+When called from Lisp:
+ * If ARG is `(4)' then invoke the function, or eval the sexp, while
+   visiting each file.
+ * Optional arg DETAILS is passed to `diredp-get-files'.
 
-\(fn FUNCTION &optional ARG DETAILS)" t nil)
+\(fn FUN/SEXP &optional ARG DETAILS)" t nil)
 
 (autoload 'diredp-do-delete-recursive "dired+" "\
 Delete marked (not flagged) files, including in marked subdirs.
@@ -1660,13 +1725,13 @@ Try to guess a useful default value for FILE2, as follows:
 
 \(fn FILE2)" t nil)
 
-(autoload 'diredp-do-apply-function "dired+" "\
-Apply FUNCTION to the marked files.
-You are prompted for the FUNCTION.
+(autoload 'diredp-do-apply/eval "dired+" "\
+Apply a function to the marked files, or evaluate a sexp in them.
+You are prompted for the function or sexp.
 
-With a plain prefix ARG (`C-u'), visit each file and invoke FUNCTION
- with no arguments.
-Otherwise, apply FUNCTION to each file name.
+With a plain prefix ARG (`C-u'), visit each file, and eval the sexp or
+ invoke the function there.  (The function is passed no arguments.)
+Otherwise, apply the function to each file name.
 
 Any prefix arg other than single `C-u' behaves according to the ARG
 argument of `dired-get-marked-files'.  In particular, `C-u C-u'
@@ -1677,7 +1742,10 @@ to see all such results and any error messages.  If there are fewer
 marked files than `diredp-do-report-echo-limit' then each result is
 also echoed momentarily.
 
-\(fn FUNCTION &optional ARG)" t nil)
+When called from Lisp, if ARG is `(4)' then eval the sexp or invoke
+the function while visiting each file.
+
+\(fn FUN/SEXP &optional ARG)" t nil)
 
 (autoload 'dired-do-compress "dired+" "\
 Compress or uncompress marked (or next prefix argument) files.
@@ -1943,11 +2011,11 @@ The form of a file name used for matching:
  - No prefix arg (to mark) or a plain prefix arg (`C-u', to unmark)
    means use the relative file name (no directory part).
 
- - A negative arg (e.g. `M--', to mark) or a zero arg (e.g. `M-0', to
+ - A negative arg (e.g. `M--', to mark) or a zero arg (e.g. `M-0'), to
    unmark) means use the absolute file name, that is, including all
    directory components.
 
- - A positive arg (e.g. `M-+', to mark) or a double plain arg (`C-u
+ - A positive arg (e.g. `M-9', to mark) or a double plain arg (`C-u
    C-u', to unmark) means construct the name relative to
    `default-directory'.  For an entry in an inserted subdir listing,
    this means prefix the relative file name (no directory part) with
@@ -1962,7 +2030,9 @@ against names that are relative to the `default-directory'.
 What Dired+ offers in addition is the possibility to match against
 names that are relative (have no directory part - no prefix arg or
 `C-u' to mark and unmark, respectively) or absolute (`M--' or `M-0',
-respectively).  The default behavior uses relative names because this
+respectively).
+
+The default behavior uses relative names because this
 is likely to be the more common use case.  But matching against
 absolute names gives you more flexibility.
 
@@ -2021,7 +2091,7 @@ Makes the first char of the name uppercase and the others lowercase.
 \(fn &optional ARG)" t nil)
 
 (autoload 'diredp-delete-this-file "dired+" "\
-In Dired, delete the file on the cursor line, upon confirmation.
+In Dired, delete this file, upon confirmation.
 This uses `delete-file'.
 If the file is a symlink, remove the symlink.  If the file has
 multiple names, it continues to exist with the other names.
@@ -2033,28 +2103,28 @@ deleting it.
 \(fn &optional USE-TRASH-CAN)" t nil)
 
 (autoload 'diredp-capitalize-this-file "dired+" "\
-In Dired, rename the file on the cursor line by capitalizing it.
+In Dired, rename this file by capitalizing it.
 Makes the first char of the name uppercase and the others lowercase.
 
 \(fn)" t nil)
 
 (autoload 'diredp-downcase-this-file "dired+" "\
-In Dired, rename the file on the cursor line to lower case.
+In Dired, rename this file to lower case.
 
 \(fn)" t nil)
 
 (autoload 'diredp-upcase-this-file "dired+" "\
-In Dired, rename the file on the cursor line to upper case.
+In Dired, rename this file to upper case.
 
 \(fn)" t nil)
 
 (autoload 'diredp-rename-this-file "dired+" "\
-In Dired, rename the file on the cursor line.
+In Dired, rename this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-copy-this-file "dired+" "\
-In Dired, copy the file on the cursor line.
+In Dired, copy this file.
 
 \(fn)" t nil)
 
@@ -2064,27 +2134,27 @@ In Dired, make a relative symbolic link to file on cursor line.
 \(fn)" t nil)
 
 (autoload 'diredp-symlink-this-file "dired+" "\
-In Dired, make a symbolic link to the file on the cursor line.
+In Dired, make a symbolic link to this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-hardlink-this-file "dired+" "\
-In Dired, add a name (hard link) to the file on the cursor line.
+In Dired, add a name (hard link) to this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-print-this-file "dired+" "\
-In Dired, print the file on the cursor line.
+In Dired, print this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-grep-this-file "dired+" "\
-In Dired, grep the file on the cursor line.
+In Dired, grep this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-compress-this-file "dired+" "\
-In Dired, compress or uncompress the file on the cursor line.
+In Dired, compress or uncompress this file.
 
 \(fn)" t nil)
 
@@ -2097,24 +2167,24 @@ buffer `*Async Shell Command*'.
 \(fn COMMAND FILELIST)" t nil)
 
 (autoload 'diredp-shell-command-this-file "dired+" "\
-In Dired, run a shell COMMAND on the file on the cursor line.
+In Dired, run a shell COMMAND on this file.
 
 \(fn COMMAND FILELIST)" t nil)
 
 (autoload 'diredp-bookmark-this-file "dired+" "\
-In Dired, bookmark the file on the cursor line.
+In Dired, bookmark this file.
 See `diredp-do-bookmark'.
 
 \(fn &optional PREFIX)" t nil)
 
 (autoload 'diredp-tag-this-file "dired+" "\
-In Dired, add some tags to the file on the cursor line.
+In Dired, add some tags to this file.
 You need library `bookmark+.el' to use this command.
 
 \(fn TAGS &optional PREFIX)" t nil)
 
 (autoload 'diredp-untag-this-file "dired+" "\
-In Dired, remove some tags from the file on the cursor line.
+In Dired, remove some tags from this file.
 With a prefix arg, remove all tags from the file.
 You need library `bookmark+.el' to use this command.
 
@@ -2193,12 +2263,12 @@ In Dired, byte compile the (Lisp source) file on the cursor line.
 \(fn)" t nil)
 
 (autoload 'diredp-load-this-file "dired+" "\
-In Dired, load the file on the cursor line.
+In Dired, load this file.
 
 \(fn)" t nil)
 
 (autoload 'diredp-chmod-this-file "dired+" "\
-In Dired, change the mode of the file on the cursor line.
+In Dired, change the mode of this file.
 
 \(fn)" t nil)
 
