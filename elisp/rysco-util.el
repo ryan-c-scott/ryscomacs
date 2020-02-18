@@ -38,6 +38,10 @@
         `(autoload ',sym ,file ,doc t))))
 
 (cl-defmacro rysco-packages (&key packages manual)
+  (cl-loop
+   for pkg in packages do
+   (add-to-list 'rysco-straight-packages pkg))
+
   (if manual
       (cl-loop
        with autoloads
@@ -66,6 +70,42 @@
      `(progn
         (message "Loading straight.el packages:")
         ,@loads))))
+
+(cl-defun rysco--get-package-list ()
+  ""
+  (cdr
+   (-uniq
+    (cl-loop
+     for pkg in rysco-straight-packages
+     as pkg = (format
+               "%s"
+               (if (listp pkg)
+                   (car pkg)
+                 pkg))
+     do (straight--compute-dependencies pkg)
+     append (straight--get-dependencies pkg)
+     collect pkg))))
+
+(cl-defun rysco-update-bundled-packages-from-straight ()
+  ""
+  (interactive)
+  (if (not rysco-use-straight-packages)
+      (error "Ryscomacs must be configured to use straight in order to update packages")
+
+    (when (yes-or-no-p "Update all bundled ryscomacs packages (everything under ryscomacs/elisp/packages will be destroyed and rebuilt from Straight)?")
+
+      (let ((package-dir "~/ryscomacs/elisp/packages/"))
+        (delete-directory package-dir t)
+        (make-directory package-dir)
+
+        (cl-loop
+         for pkg in (rysco--get-package-list)
+         as src = (format
+                   "%s/straight/build/%s"
+                   straight-base-dir
+                   pkg)
+         do
+         (copy-directory src package-dir))))))
 
 (cl-defmacro rysco-exec-path (&rest paths)
   `(prog1 nil

@@ -18,6 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
 (defvar rysco-use-straight-packages nil)
+(defvar rysco-straight-packages nil)
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-theme nil)
@@ -132,7 +133,14 @@ Inserted by installing org-mode or when a release is made."
     god-mode
     flycheck
     helm-flycheck
-    desktop+)))
+    desktop+
+    all-the-icons
+    epl
+    json-reformat
+    json-snatcher
+    pkg-info
+    org
+    with-editor)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
