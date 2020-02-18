@@ -15,9 +15,10 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(add-to-list 'straight-profiles '(rysco . "rysco.el"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
-(defvar rysco-straight-packages nil)
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-theme nil)
@@ -35,6 +36,13 @@
 
 ;; Local config
 (load "localconfig" t t)
+
+;;
+(let ((repo-versions "~/ryscomacs/versions/rysco.el")
+      (straight-versions "~/.emacs.d/straight/versions/"))
+  (when (file-exists-p repo-versions)
+    (mkdir straight-versions t)
+    (copy-file repo-versions straight-versions t)))
 
 ;; HACK:  Org-mode has issues installing via straight.el
 (require 'subr-x)

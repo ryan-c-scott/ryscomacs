@@ -39,32 +39,14 @@
 
 (cl-defmacro rysco-packages (&key packages)
   (cl-loop
-   for pkg in packages do
-   (add-to-list 'rysco-straight-packages pkg))
-
-  (cl-loop
    with loads
    for pkg in packages
    collect `(straight-use-package ',pkg) into loads
    finally return
    `(progn
       (message "Loading straight.el packages:")
-      ,@loads)))
-
-(cl-defun rysco--get-package-list ()
-  ""
-  (cdr
-   (-uniq
-    (cl-loop
-     for pkg in rysco-straight-packages
-     as pkg = (format
-               "%s"
-               (if (listp pkg)
-                   (car pkg)
-                 pkg))
-     do (straight--compute-dependencies pkg)
-     append (straight--get-dependencies pkg)
-     collect pkg))))
+      (let ((straight-current-profile 'rysco))
+        ,@loads))))
 
 (cl-defmacro rysco-exec-path (&rest paths)
   `(prog1 nil
