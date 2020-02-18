@@ -37,39 +37,19 @@
         for (sym file doc) in entries collect
         `(autoload ',sym ,file ,doc t))))
 
-(cl-defmacro rysco-packages (&key packages manual)
+(cl-defmacro rysco-packages (&key packages)
   (cl-loop
    for pkg in packages do
    (add-to-list 'rysco-straight-packages pkg))
 
-  (if manual
-      (cl-loop
-       with autoloads
-       with paths
-       for dir in (cddr (directory-files manual))
-       as dir = (if (listp dir)
-                    (car dir)
-                  dir)
-       as pkg-dir = (concat manual "/" dir)
-       as is-dir = (file-directory-p pkg-dir)
-       if is-dir collect `(add-to-list 'load-path ,pkg-dir) into paths
-       if is-dir collect `(require ',(intern (format "%s-autoloads" dir))) into autoloads
-
-       finally return
-       `(progn
-          (message "Loading ryscomacs bundled packages:")
-          ,@paths
-          ,@autoloads))
-    ;;
-    
-    (cl-loop
-     with loads
-     for pkg in packages
-     collect `(straight-use-package ',pkg) into loads
-     finally return
-     `(progn
-        (message "Loading straight.el packages:")
-        ,@loads))))
+  (cl-loop
+   with loads
+   for pkg in packages
+   collect `(straight-use-package ',pkg) into loads
+   finally return
+   `(progn
+      (message "Loading straight.el packages:")
+      ,@loads)))
 
 (cl-defun rysco--get-package-list ()
   ""
