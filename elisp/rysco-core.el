@@ -17,7 +17,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
-(defvar rysco-use-straight-packages nil)
 (defvar rysco-straight-packages nil)
 (defvar rysco-fancy-modeline nil)
 (defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
@@ -38,39 +37,38 @@
 (load "localconfig" t t)
 
 ;; HACK:  Org-mode has issues installing via straight.el
-(when rysco-use-straight-packages
-  (require 'subr-x)
-  (straight-use-package 'git)
+(require 'subr-x)
+(straight-use-package 'git)
 
-  (defun org-git-version ()
-    "The Git version of org-mode.
+(defun org-git-version ()
+  "The Git version of org-mode.
 Inserted by installing org-mode or when a release is made."
-    (require 'git)
-    (let ((git-repo (expand-file-name
-                     "straight/repos/org/" user-emacs-directory)))
-      (string-trim
-       (git-run "describe"
-                "--match=release\*"
-                "--abbrev=6"
-                "HEAD"))))
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (git-run "describe"
+              "--match=release\*"
+              "--abbrev=6"
+              "HEAD"))))
 
-  (defun org-release ()
-    "The release version of org-mode.
+(defun org-release ()
+  "The release version of org-mode.
 Inserted by installing org-mode or when a release is made."
-    (require 'git)
-    (let ((git-repo (expand-file-name
-                     "straight/repos/org/" user-emacs-directory)))
-      (string-trim
-       (string-remove-prefix
-        "release_"
-        (git-run "describe"
-                 "--match=release\*"
-                 "--abbrev=0"
-                 "HEAD")))))
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (string-remove-prefix
+      "release_"
+      (git-run "describe"
+               "--match=release\*"
+               "--abbrev=0"
+               "HEAD")))))
 
-  (provide 'org-version)
+(provide 'org-version)
 
-  (straight-use-package 'org))
+(straight-use-package 'org)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
