@@ -66,27 +66,6 @@
      append (straight--get-dependencies pkg)
      collect pkg))))
 
-(cl-defun rysco-update-bundled-packages-from-straight ()
-  ""
-  (interactive)
-  (if (not rysco-use-straight-packages)
-      (error "Ryscomacs must be configured to use straight in order to update packages")
-
-    (when (yes-or-no-p "Update all bundled ryscomacs packages (everything under ryscomacs/elisp/packages will be destroyed and rebuilt from Straight)?")
-
-      (let ((package-dir "~/ryscomacs/elisp/packages/"))
-        (delete-directory package-dir t)
-        (make-directory package-dir)
-
-        (cl-loop
-         for pkg in (rysco--get-package-list)
-         as src = (format
-                   "%s/straight/build/%s"
-                   straight-base-dir
-                   pkg)
-         do
-         (copy-directory src package-dir))))))
-
 (cl-defmacro rysco-exec-path (&rest paths)
   `(prog1 nil
      ,@(cl-loop
