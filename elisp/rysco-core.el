@@ -92,7 +92,6 @@ Inserted by installing org-mode or when a release is made."
 (rysco-packages
  :packages
  (autothemer
-  cg
   csharp-mode
   csv-mode
   dash
@@ -229,8 +228,6 @@ Inserted by installing org-mode or when a release is made."
  ("\\.xml$" . xml-mode)
  ("\\.css$" . css-mode)
  ("\\.cs$" . csharp-mode)
- ("\\.cg$" . cg-mode)
- ("\\.glsl$" . cg-mode)
  ("\\.shader$" . lua-mode)
  ("\\.fs$" . c++-mode)
  ("\\.vs$" . c++-mode)
