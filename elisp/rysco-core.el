@@ -31,12 +31,6 @@
 (defvar-local org-export-directory "org-export")
 (defvar-local rysco-modeline-extras nil)
 
-(require 'cl)
-(require 'rysco-util)
-
-;; Local config
-(load "localconfig" t t)
-
 ;; Setup the rysco versions file for straight
 ;; NOTE:  This overwrites whatever is currently in the users folder
 (let ((repo-versions "~/ryscomacs/versions/rysco.el")
@@ -77,14 +71,10 @@ Inserted by installing org-mode or when a release is made."
 
 (provide 'org-version)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Load paths
-;; (rysco-add-to-loadpath
-;;  (:base "~/ryscomacs/elisp")
-;;  ""
-;;  "kodi/")
- ;; "dired-hacks/"
- ;; "monky")
+(require 'rysco-util)
+
+;; Local config
+(load "localconfig" t t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
