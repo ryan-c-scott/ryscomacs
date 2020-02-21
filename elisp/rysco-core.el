@@ -517,6 +517,8 @@ Inserted by installing org-mode or when a release is made."
 
 ;; HACK:  I don't like way that this function would call org-show-entry at the end.
 (with-eval-after-load "org"
+  (require 'org-refile)
+
   (org-babel-do-load-languages
    'org-babel-load-languages
    (append org-babel-load-languages
