@@ -40,7 +40,7 @@
 ;; Setup the rysco versions file for straight
 ;; NOTE:  This overwrites whatever is currently in the users folder
 (let ((repo-versions "~/ryscomacs/versions/rysco.el")
-      (straight-versions "~/.emacs.d/straight/versions/"))
+      (straight-versions (expand-file-name "straight/versions/" user-emacs-directory)))
   (when (file-exists-p repo-versions)
     (mkdir straight-versions t)
     (copy-file repo-versions straight-versions t)))
@@ -79,12 +79,12 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
-(rysco-add-to-loadpath
- (:base "~/ryscomacs/elisp")
- ""
- "kodi/"
- "dired-hacks/"
- "monky")
+;; (rysco-add-to-loadpath
+;;  (:base "~/ryscomacs/elisp")
+;;  ""
+;;  "kodi/")
+ ;; "dired-hacks/"
+ ;; "monky")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
@@ -94,6 +94,7 @@ Inserted by installing org-mode or when a release is made."
   csharp-mode
   csv-mode
   dash
+  dired-hacks
   dired-hacks-utils
   dired+
   eimp
@@ -166,12 +167,8 @@ Inserted by installing org-mode or when a release is made."
 (rysco-autoloads
  (org-goto-calendar "org")
  (screenwriter-mode "screenwriter")
- (helm-screenwriter-init "helm-screenwriter")
- (helm-kodi-shows "helm-kodi")
- (helm-kodi-movies "helm-kodi")
- (kodi-connect "kodi"))
+ (helm-screenwriter-init "helm-screenwriter"))
 
-;; (require 'monky)
 (require 'multi)
 (require 's)
 (require 'helm-config)
@@ -651,7 +648,7 @@ Inserted by installing org-mode or when a release is made."
 
 (setq 
   ido-save-directory-list-file nil ;"~/.emacs.d/ido.last"
-  ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~src")
+  ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~/src")
   ido-case-fold  t                 ; be case-insensitive
   ido-enable-last-directory-history t ; remember last used dirs
   ido-max-work-directory-list 30   ; should be enough
