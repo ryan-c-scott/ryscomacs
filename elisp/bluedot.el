@@ -55,7 +55,7 @@
 (defcustom bluedot-rest-interval (* 60 5)
   "Interval of time you will be resting, in seconds."
   :type 'number)
-(defcustom bluedot-history-file "~/.emacs.d/bluedot-history.txt"
+(defcustom bluedot-history-file (expand-file-name "bluedot-history.txt"  user-emacs-directory)
   "File to store all the completed pomodoros."
   :type 'string)
 (defcustom bluedot-popup-header '(format "Working with '%s'" (current-buffer))
