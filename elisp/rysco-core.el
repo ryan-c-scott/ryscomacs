@@ -37,7 +37,8 @@
 ;; Local config
 (load "localconfig" t t)
 
-;;
+;; Setup the rysco versions file for straight
+;; NOTE:  This overwrites whatever is currently in the users folder
 (let ((repo-versions "~/ryscomacs/versions/rysco.el")
       (straight-versions "~/.emacs.d/straight/versions/"))
   (when (file-exists-p repo-versions)
@@ -75,8 +76,6 @@ Inserted by installing org-mode or when a release is made."
                "HEAD")))))
 
 (provide 'org-version)
-
-(straight-use-package 'org)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load paths
