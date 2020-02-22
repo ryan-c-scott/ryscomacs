@@ -268,6 +268,7 @@ Inserted by installing org-mode or when a release is made."
       (append '((find-file . ido)
                 (dired . ido))
               helm-completing-read-handlers-alist))
+(add-to-list 'helm-boring-file-regexp-list "\\.org_archive$")
 
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
