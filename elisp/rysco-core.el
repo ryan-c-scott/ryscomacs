@@ -650,10 +650,8 @@ Inserted by installing org-mode or when a release is made."
 
   ido-enable-flex-matching nil     ; don't try to be too smart
   ido-max-prospects 8              ; don't spam my minibuffer
-  ido-confirm-unique-completion t) ; wait for RET, even with unique completion
-
-;; when using ido, the confirmation is rather annoying...
-(setq confirm-nonexistent-file-or-buffer nil)
+  ido-confirm-unique-completion t ; wait for RET, even with unique completion
+  confirm-nonexistent-file-or-buffer nil) ; when using ido, the confirmation is rather annoying...
 
 ;;;;;;;;;;;;;
 ; Bind various keys
