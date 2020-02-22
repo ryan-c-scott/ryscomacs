@@ -138,7 +138,7 @@
 
                              ((equal type :icon)
                               ;; HACK:
-                              (incf padding-hack)
+                              (cl-incf padding-hack)
                               
                               `(propertize
                                 (,(plist-get form :family)
@@ -153,7 +153,7 @@
 
                (when buffer-read-only
                  ;; HACK:
-                 (incf padding-hack 2)
+                 (cl-incf padding-hack 2)
                  
                  (powerline-raw
                   (format "%s "
