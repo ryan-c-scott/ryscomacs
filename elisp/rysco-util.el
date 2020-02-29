@@ -715,5 +715,43 @@ With prefix-arg prompt for type if available with your AG version."
             (org-latex-export-to-pdf))))
     (message "No .pdf-master found in directory ancestors.")))
 
+(defun rysco-simple-graph (patch &optional filename)
+  (-let [temp-path (make-temp-file "patch" nil ".dot")]
+    (with-temp-file temp-path
+      (insert "digraph patch {\n"
+              "node  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
+
+      (cl-loop
+       for (mod . connections) in patch
+       do (insert (format "\"%s\";\n" mod)))
+
+      (cl-loop
+       for (mod . connections) in patch do
+       (cl-loop
+        for dest in connections do
+        (insert (format "\"%s\" -> \"%s\";\n" mod dest))))
+
+      (insert "\n}\n"))
+
+    (-let ((filename (or filename
+                         (when (boundp 'out)
+                           out)
+                         (when (equal major-mode 'org-mode)
+                           (concat
+                            (replace-regexp-in-string
+                             "[/\\]" "-"
+                             (s-join "-" (org-get-outline-path t)))
+                            ".png"))))
+           (out-path (format "%s.png" (file-name-sans-extension temp-path)))
+           (command-result (string-trim
+                            (shell-command-to-string
+                             (graphviz-compile-command temp-path)))))
+      (if (string-prefix-p "Error:" command-result)
+          (message command-result)
+
+        ;; Delete temp file?
+        (rename-file out-path filename t)
+        filename))))
+
 ;;
 (provide 'rysco-util)
