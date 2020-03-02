@@ -729,7 +729,14 @@ With prefix-arg prompt for type if available with your AG version."
        for (mod . connections) in patch do
        (cl-loop
         for dest in connections do
-        (insert (format "\"%s\" -> \"%s\";\n" mod dest))))
+        (insert
+         (format "\"%s\" -> " mod)
+         (pcase dest
+           (`(,dest ,comment)
+            (format "\"%s\" [label=\"%s\"]" dest comment))
+           (dest
+            (format "\"%s\"" dest)))
+         ";\n")))
 
       (insert "\n}\n"))
 
