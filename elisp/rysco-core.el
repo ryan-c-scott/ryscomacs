@@ -330,10 +330,12 @@ Inserted by installing org-mode or when a release is made."
 ;; Hooks/setups
 (eval-after-load 'dash '(dash-enable-font-lock))
 
-(add-hook 'help-mode-hook
-          (lambda ()
-            (local-set-key (kbd "n") 'next-line)
-            (local-set-key (kbd "p") 'previous-line)))
+(defun rysco-help-movement-hook ()
+  (local-set-key (kbd "n") 'next-line)
+  (local-set-key (kbd "p") 'previous-line))
+
+(add-hook 'help-mode-hook 'rysco-help-movement-hook)
+(add-hook 'Info-mode-hook 'rysco-help-movement-hook)
 
 (defun eshell/w32-explorer-path ()
   (s-replace "/" "\\" (eshell/pwd)))
