@@ -716,7 +716,8 @@ With prefix-arg prompt for type if available with your AG version."
     (message "No .pdf-master found in directory ancestors.")))
 
 (defun rysco-simple-graph (patch &optional filename)
-  (-let [temp-path (make-temp-file "patch" nil ".dot")]
+  (-let ((temp-path (make-temp-file "patch" nil ".dot"))
+         (color-cache (make-hash-table :test 'equal)))
     (with-temp-file temp-path
       (insert "digraph patch {\n"
               "node  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
@@ -733,7 +734,18 @@ With prefix-arg prompt for type if available with your AG version."
          (format "\"%s\" -> " mod)
          (pcase dest
            (`(,dest ,comment)
-            (format "\"%s\" [label=\"%s\"]" dest comment))
+            (let ((color (gethash comment color-cache)))
+              (unless color
+                (setq color
+                      (apply
+                       'color-rgb-to-hex
+                       `(,@(color-hsl-to-rgb
+                            (cl-random 1.0)
+                            (cl-random 1.0)
+                            0.5)
+                         2)))
+                (puthash comment color color-cache))
+              (format "\"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",]" dest comment color color)))
            (dest
             (format "\"%s\"" dest)))
          ";\n")))
