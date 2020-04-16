@@ -131,7 +131,10 @@ Inserted by installing org-mode or when a release is made."
   json-snatcher
   pkg-info
   org
-  with-editor))
+  with-editor
+  docker-compose-mode
+  dockerfile-mode
+  docker))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
