@@ -134,7 +134,8 @@ Inserted by installing org-mode or when a release is made."
   with-editor
   docker-compose-mode
   dockerfile-mode
-  docker))
+  docker
+  nginx-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
