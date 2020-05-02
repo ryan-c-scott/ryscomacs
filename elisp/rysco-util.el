@@ -248,7 +248,7 @@
 	(buffer-list)))
 
 (defun kill-all-matching-prefix (buffer-prefixes)
-  (interactive)
+  (interactive "s")
   (kill-all-matching (lambda (buffer)
                        (let ((names buffer-prefixes)
                              (bufname (buffer-name buffer))
@@ -275,6 +275,11 @@
   (interactive)
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
+
+(defun kill-rcirc-buffers ()
+  (interactive)
+  (kill-all-matching (lambda (buffer)
+		       (eq 'rcirc-mode (buffer-local-value 'major-mode buffer)))))
 
 (defun rysco-revert-buffer ()
     "Revert buffer, prompting if it has been modified."
