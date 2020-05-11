@@ -573,6 +573,13 @@ Inserted by installing org-mode or when a release is made."
    #'org-latex-plain-list
    :filter-return #'rysco-org-latex-export-list-newline-fixup))
 
+(defun rysco-org-babel-core-suppress-silent-echo (fun &rest args)
+  (let ((inhibit-message t))
+    (apply fun args)))
+
+(with-eval-after-load 'ob-core
+  (advice-add #'org-babel-insert-result :around #'rysco-org-babel-core-suppress-silent-echo))
+
 (add-hook 'org-babel-after-execute-hook
           (lambda ()
             (when org-inline-image-overlays
