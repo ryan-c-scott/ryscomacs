@@ -16,7 +16,7 @@
 
 ;; Setup the rysco versions file for straight
 ;; NOTE:  This overwrites whatever is currently in the users folder
-(let ((repo-versions (expand-file-name "straight/repos/ryscomacs/versions/" user-emacs-directory))
+(let ((repo-versions (expand-file-name "straight/repos/ryscomacs/versions/rysco.el" user-emacs-directory))
       (straight-versions (expand-file-name "straight/versions/" user-emacs-directory)))
   (when (file-exists-p repo-versions)
     (mkdir straight-versions t)
