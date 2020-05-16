@@ -201,11 +201,6 @@
       (seq-let (month day year) (org-get-date-from-calendar)
         (insert (format "%d-%02d-%02d" year month day))))))
 
-(defun rysco-compile()
-  "Byte compiles all of ~/ryscomacs/elisp."
-  (interactive)
-  (byte-recompile-directory "~/ryscomacs/elisp" 0))
-
 (cl-defun helm-rysco-rotate-windows ()
   (interactive)
   (helm

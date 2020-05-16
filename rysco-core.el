@@ -16,7 +16,7 @@
 
 ;; Setup the rysco versions file for straight
 ;; NOTE:  This overwrites whatever is currently in the users folder
-(let ((repo-versions "~/ryscomacs/versions/rysco.el")
+(let ((repo-versions (expand-file-name "straight/repos/ryscomacs/versions/" user-emacs-directory))
       (straight-versions (expand-file-name "straight/versions/" user-emacs-directory)))
   (when (file-exists-p repo-versions)
     (mkdir straight-versions t)
@@ -239,8 +239,7 @@
 (when (string-equal system-type "windows-nt")
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 
-(setq custom-theme-directory "~/ryscomacs/themes/"
-      org-export-allow-bind-keywords t
+(setq org-export-allow-bind-keywords t
       org-log-done 'time
       org-enforce-todo-dependencies t
       markdown-asymmetric-header t
