@@ -13,6 +13,13 @@ C languages are set to use the stroustrup style for code formatting
 ## Installation
 If you are bootstrapping a truly empty Emacs setup, you can copy `example/dotEmacs.el` to `~/.emacs` and you're all set.  That file also has the `straight.el` and accompanying `org-mode` hacks that all the kids are raving about these days.
 
+The following snippet will pull down the latest and get you setup
+
+``` shell
+cd ~
+wget -O .emacs https://bitbucket.org/scott105/ryscomacs/raw/master/example/dotEmacs.el
+```
+
 If you are integrating into an existing emacs configuration
 ``` emacs-lisp
 (straight-use-package
