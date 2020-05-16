@@ -1,3 +1,5 @@
+(require 'dash)
+
 ;;;;;;;;;
 (cl-defmacro rysco-bind-keys (lead &rest bindings)
   `(progn

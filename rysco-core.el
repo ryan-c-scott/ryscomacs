@@ -41,6 +41,7 @@
   eimp
   async
   request
+  molokai-theme
   doom-themes
   kaolin-themes
   expand-region
