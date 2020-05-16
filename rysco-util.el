@@ -588,7 +588,7 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-load-theme (&optional theme)
   (interactive)
-  (let ((current (copy-list custom-enabled-themes)))
+  (let ((current (cl-copy-list custom-enabled-themes)))
     (--if-let theme
         (load-theme theme)
       (call-interactively 'load-theme))
