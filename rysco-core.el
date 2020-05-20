@@ -629,6 +629,11 @@
     ("dk" "Key Briefly" describe-key-briefly)
     ("dc" "Character" describe-char)]
 
+   ["Utility"
+    ("ui" "IRC" rcirc)
+    ("ue" "EShell" eshell)
+    ("un" "New EShell" rysco-eshell-new)]
+
    ["Help"
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info-info)
