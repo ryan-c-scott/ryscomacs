@@ -39,7 +39,7 @@
         for (sym file doc) in entries collect
         `(autoload ',sym ,file ,doc t))))
 
-(cl-defmacro rysco-packages (&key packages)
+(cl-defmacro rysco-packages (&rest packages)
   (cl-loop
    with loads
    for pkg in packages
@@ -49,6 +49,16 @@
       (message "Loading straight.el packages:")
       (let ((straight-current-profile 'rysco))
         ,@loads))))
+
+(cl-defmacro rysco-use-package (pkg &rest args)
+  (let ((name (if (listp pkg) (car pkg) pkg))
+        (straight (if (listp pkg) pkg t)))
+  `(progn
+     (let ((straight-current-profile 'rysco))
+       (use-package
+           ,name
+           :straight ,straight
+           ,@args)))))
 
 (cl-defmacro rysco-exec-path (&rest paths)
   `(prog1 nil
