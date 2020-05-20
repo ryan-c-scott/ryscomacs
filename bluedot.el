@@ -42,6 +42,7 @@
 ;;; Code:
 
 (require 'rysco-util)
+(require 'helm-source)
 
 (defgroup bluedot nil
   "Little pomodoro timer in the mode-line."

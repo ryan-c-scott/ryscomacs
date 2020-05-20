@@ -22,11 +22,6 @@
     (mkdir straight-versions t)
     (copy-file repo-versions straight-versions t)))
 
-(require 'rysco-util)
-
-;; Local config
-(load "localconfig" t t)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 (rysco-packages
@@ -90,6 +85,11 @@
  docker
  nginx-mode)
 
+(require 'rysco-util)
+
+;; Local config
+(load "localconfig" t t)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (setq load-prefer-newer t)
@@ -120,6 +120,7 @@
 (require 's)
 (require 'helm-config)
 (require 'helm-info)
+(require 'helm-source)
 (require 'projectile)
 (require 'helm-projectile)
 (require 'transient)
