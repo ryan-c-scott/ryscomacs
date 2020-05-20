@@ -31,6 +31,7 @@
 ;; Packages
 (rysco-packages
  use-package
+ transient
  autothemer
  csharp-mode
  csv-mode
@@ -120,6 +121,7 @@
 (require 'helm-config)
 (require 'projectile)
 (require 'helm-projectile)
+(require 'transient)
 (require 'uniquify)
 (require 'windmove)
 (require 'rotate)
@@ -599,6 +601,37 @@
   (setq powerline-default-separator 'slant)
   (powerline-rysco-theme))
 
+
+;;;;;;;;;;;;;;;;;;;;
+;; Main ryscomacs transient
+(define-transient-command rysco-main-transient ()
+  "Ryscomacs Miscellany"
+  ["Ryscomacs Miscellany"
+   ["Desktops"
+    ("db" "Create" rysco-desktop+-create)
+    ("dm" "Load" desktop+-load)]
+
+   ["Windows"
+    ("wc" "Clone & Narrow" rysco-clone-and-narrow)]
+
+   ["Buffer Killing"
+    ("kc" "Clones" rysco-kill-all-clones)
+    ("ka" "All" killall)
+    ("kp" "Projectile" projectile-kill-buffers)
+    ("ki" "IRC" kill-rcirc-buffers)]
+
+   ["Time Management"
+    ("tb" "Bluedot" bluedot)]
+
+   ["Describe"
+    ("dm" "Mode" describe-mode)
+    ("dk" "Key Briefly" describe-key-briefly)
+    ("dc" "Character" describe-char)]
+
+   ["Help"
+    ("hl" "Lossage" view-lossage)
+    ("he" "Elisp" helm-info-elisp)]])
+
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
 (require 'ido) 
@@ -637,7 +670,7 @@
 
  ("f" 'find-tag)
  ("." 'god-mode-all)
- (rysco-lead-key 'god-mode-all)
+ (rysco-lead-key 'rysco-main-transient)
  ("SPC" 'helm-rysco-semantic-or-imenu)
  ("<RET>" 'helm-mini)
  ("s" 'helm-rysco-occur-or-resume)
