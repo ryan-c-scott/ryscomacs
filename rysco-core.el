@@ -119,6 +119,7 @@
 (require 'multi)
 (require 's)
 (require 'helm-config)
+(require 'helm-info)
 (require 'projectile)
 (require 'helm-projectile)
 (require 'transient)
@@ -630,7 +631,9 @@
 
    ["Help"
     ("hl" "Lossage" view-lossage)
-    ("he" "Elisp" helm-info-elisp)]])
+    ("hi" "Info" helm-info-info)
+    ("he" "Elisp" helm-info-elisp)
+    ("hc" "CL" helm-info-cl)]])
 
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
