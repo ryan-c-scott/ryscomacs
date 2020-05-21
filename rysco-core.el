@@ -641,6 +641,22 @@
     ("he" "Elisp" helm-info-elisp)
     ("hc" "CL" helm-info-cl)]])
 
+(define-transient-command rysco-magit-transient ()
+  "GitHub/Bitbucket helper transient for Magit"
+  ["Goto"
+   ("o" "Origin" rysco-magit-goto-origin)
+   ("b" "Branch" rysco-magit-goto-branch)
+   ("c" "Compare" rysco-magit-goto-compare)]
+  ["Pull Request"
+   ("p" "Create" rysco-magit-pull-request)])
+
+(add-hook 'magit-mode-hook
+          (lambda ()
+            (define-key magit-mode-map ">" 'rysco-magit-transient)
+            (transient-append-suffix 'magit-dispatch
+              "%"
+              '(">" "Goto GH/BB" rysco-magit-transient))))
+
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
 (require 'ido) 
