@@ -606,9 +606,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Main ryscomacs transient
+(defface rysco-main-transient-title
+  '((t
+     :foreground "white"
+     :weight normal
+     :slant italic
+     :height 1.2
+     :underline t))
+  "Face for Ryscomacs title in main transient"
+  :group 'ryscomacs-faces)
+
 (define-transient-command rysco-main-transient ()
-  "Ryscomacs Miscellany"
-  ["Ryscomacs Miscellany"
+  "Miscellany"
+  [:description
+   (lambda () (concat
+               (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
+               (propertize " Miscellany" 'face 'rysco-main-transient-title)
+               "\n"))
    ["Desktops"
     ("db" "Create" rysco-desktop+-create)
     ("dm" "Load" desktop+-load)]
