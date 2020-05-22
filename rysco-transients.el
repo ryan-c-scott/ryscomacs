@@ -45,6 +45,12 @@
     ("ue" "EShell" eshell)
     ("un" "New EShell" rysco-eshell-new)]
 
+   ["Packages"
+    ("pp" "Pull All" straight-pull-all)
+    ("pr" "Rebuild All" straight-rebuild-all)
+    ("pb" "Build Package" straight-rebuild-package)
+    ("pt" "Reset to Locked" straight-thaw-versions)]
+
    ["Help"
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info-info)
