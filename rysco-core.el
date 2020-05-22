@@ -278,9 +278,34 @@
       ispell-program-name "aspell"
       kill-do-not-save-duplicate t)
 
+;;;;
+(require 'rysco-transients)
+
 ;; Local config
+(define-transient-command rysco-personal-transient ()
+  "Personal"
+  [:description
+   (lambda ()
+     (concat
+      (all-the-icons-faicon "registered" :face `(:inherit rysco-main-trannsient-title :height 0.8 :underline nil))
+      (propertize " Personal" 'face 'rysco-main-transient-title)
+      "\n"))])
+
 (add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
-(load "localconfig" t t)
+
+(let (personal-transients)
+  (load "localconfig" t t)
+
+  (when personal-transients
+    (transient-append-suffix 'rysco-personal-transient '(0)
+      (vconcat
+       [:description
+        (lambda ()
+          (concat
+           (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
+           (propertize " Personal" 'face 'rysco-main-transient-title)
+           "\n"))]
+       (cl-loop for item in personal-transients vconcat (list item))))))
 
 ;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
 (memoize-restore 'all-the-icons-icon-for-mode)
@@ -604,9 +629,6 @@
   (setq powerline-default-separator 'slant)
   (powerline-rysco-theme))
 
-;;;;
-(require 'rysco-transients)
-
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
 (require 'ido) 
@@ -646,6 +668,7 @@
  ("f" 'find-tag)
  ("." 'god-mode-all)
  (rysco-lead-key 'rysco-main-transient)
+ ("<tab>" 'rysco-personal-transient)
  ("SPC" 'helm-rysco-semantic-or-imenu)
  ("<RET>" 'helm-mini)
  ("s" 'helm-rysco-occur-or-resume)
