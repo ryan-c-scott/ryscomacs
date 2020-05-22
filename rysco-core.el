@@ -87,9 +87,6 @@
  docker
  nginx-mode)
 
-;; Local config
-(load "localconfig" t t)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
 (setq load-prefer-newer t)
@@ -202,10 +199,6 @@
  (kodi-mode all-the-icons-material "tv")
  (lua-mode all-the-icons-fileicon "lua"))
 
-;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
-(memoize-restore 'all-the-icons-icon-for-mode)
-(memoize 'all-the-icons-icon-for-mode)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 (setq ns-use-srgb-colorspace nil)
@@ -284,6 +277,14 @@
       uniquify-ignore-buffers-re "^\\*"
       ispell-program-name "aspell"
       kill-do-not-save-duplicate t)
+
+;; Local config
+(add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
+(load "localconfig" t t)
+
+;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
+(memoize-restore 'all-the-icons-icon-for-mode)
+(memoize 'all-the-icons-icon-for-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
@@ -711,10 +712,8 @@
 ;;
 (defun rysco-post-init-setup ()
   (unless (equal rysco-theme :none)
-    (load-theme
-     (if rysco-theme
-         rysco-theme
-       'molokai)))
+    (load-theme (or rysco-theme 'molokai)))
+
   (server-start)
   (bluedot-resume)
   (god-mode-all))
