@@ -283,13 +283,7 @@
 
 ;; Local config
 (define-transient-command rysco-personal-transient ()
-  "Personal"
-  [:description
-   (lambda ()
-     (concat
-      (all-the-icons-faicon "registered" :face `(:inherit rysco-main-trannsient-title :height 0.8 :underline nil))
-      (propertize " Personal" 'face 'rysco-main-transient-title)
-      "\n"))])
+  "Personal" [])
 
 (add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
 
