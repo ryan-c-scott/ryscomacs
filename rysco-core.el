@@ -22,6 +22,8 @@
     (mkdir straight-versions t)
     (copy-file repo-versions straight-versions t)))
 
+(require 'rysco-util)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 (rysco-packages
@@ -84,8 +86,6 @@
  dockerfile-mode
  docker
  nginx-mode)
-
-(require 'rysco-util)
 
 ;; Local config
 (load "localconfig" t t)
