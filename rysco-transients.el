@@ -47,8 +47,9 @@
     ("un" "New EShell" rysco-eshell-new)]
 
    ["Packages"
-    ("pp" "Pull All" straight-pull-all)
+    ("pa" "Pull All" straight-pull-all)
     ("pr" "Rebuild All" straight-rebuild-all)
+    ("pp" "Pull Package" straight-pull-package)
     ("pb" "Build Package" straight-rebuild-package)
     ("pt" "Reset to Locked" straight-thaw-versions)]
 
