@@ -25,7 +25,8 @@
     ("dm" "Load" desktop+-load)]
 
    ["Windows"
-    ("wc" "Clone & Narrow" rysco-clone-and-narrow)]
+    ("wc" "Clone & Narrow" rysco-clone-and-narrow)
+    ("wf" "Buffer Font" rysco-set-buffer-local-font)]
 
    ["Buffer Killing"
     ("kc" "Clones" rysco-kill-all-clones)
@@ -39,12 +40,14 @@
    ["Describe"
     ("dm" "Mode" describe-mode)
     ("dk" "Key Briefly" describe-key-briefly)
-    ("dc" "Character" describe-char)]
+    ("dc" "Character" describe-char)]]
 
-   ["Utility"
+   [""
+    ["Utility"
     ("ui" "IRC" rcirc)
     ("ue" "EShell" eshell)
-    ("un" "New EShell" rysco-eshell-new)]
+    ("un" "New EShell" rysco-eshell-new)
+    ("ut" "Themes" rysco-load-theme)]
 
    ["Packages"
     ("pa" "Pull All" straight-pull-all)
