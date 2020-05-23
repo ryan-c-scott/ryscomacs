@@ -294,10 +294,8 @@
 (defun rysco-load-local-config (&optional init)
   (interactive)
 
-  (add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
-
   (let (personal-transients)
-    (load "localconfig" t t)
+    (load (expand-file-name "ryscomacs/config" user-emacs-directory) t t)
 
     (when personal-transients
       (transient-replace-suffix 'rysco-personal-transient '(0)

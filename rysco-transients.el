@@ -53,9 +53,9 @@
     ("pb" "Build Package" straight-rebuild-package)
     ("pt" "Reset to Locked" straight-thaw-versions)]
 
-   ["Local Config"
-    ("lr" "Reload" rysco-load-local-config)
-    ("le" "Edit" edit-local-config)]
+   ["Config"
+    ("cr" "Reload" rysco-load-local-config)
+    ("ce" "Edit" rysco-edit-config)]
 
    ["Help"
     ("hl" "Lossage" view-lossage)

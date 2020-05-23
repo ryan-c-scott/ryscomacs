@@ -4,7 +4,7 @@ ryscomacs
 My emacs settings, all in one convenient place
 
 # Configuration
-'localconfig.el' is loaded during startup to provide a place for installation specific configuration.
+'ryscomacs/config.el' is loaded during startup to provide a place for installation specific configuration.  It should be placed under '.emacs.d'.
 
 Buffers that aren't visiting files are hidden from the normal buffer switching lists.
 C languages are set to use the stroustrup style for code formatting
@@ -27,7 +27,7 @@ If you are integrating into an existing emacs configuration
 (require 'rysco-core)
 ```
 
-Fonts can be set in your `localconfig.el` by setting `rysco-font` and `rysco-font-size`
+Fonts can be set in your `ryscomacs/config.el` by setting `rysco-font` and `rysco-font-size`
 ``` emacs-lisp
 (setq rysco-font "Source Code Pro")
 (setq rysco-font-size "12.0")
@@ -76,16 +76,15 @@ Magit and a fork of Monky are provided for working with Git and Mercurial reposi
 `vc-mode` should provide most other things you need, with the most notable exception being P4.
 
 ## Custom Commands
-* `vertical-windows-with-related`:  Splits the window vertically and loads the related file (e.g. the header for a C file) in the other window
-* `edit-local-config`:  Opens/creates the `localconfig.el` file
-* `killall`:  Kills all buffers that don't start with '*' and maximizes the scratch buffer
+Two built-in "transient" menus are provided and by default bound to '<lead><lead>' and '<lead><tab>'.
+The main one provides an access point to some of the higher-level features of Ryscomacs.
+The second is an empty menu for users to place their items by adding 'transient' compatible suffix commands to the list 'personal-transients' during the processing of 'ryscomacs/config.el'.
 
 # Included Sources
-Many packages are directly included under [elisp/](elisp/).
+Several packages are directly included.
 These packages are not included via a package manager in order to effectively pin their versions to a single point and/or provide a simplified approach to making any necessary modifications.
 
-Specifically `powerline` is of note as affects what you will see in the modeline.
-Also included and integral to my own usage, `helm` and `projectile` are included and broadly enabled.
+Some bundled packages are developed as a part of ryscomacs, but may eventually be forked into their own repositories/packages.
 
 # Extras
 ## Key remapping (Caps->Ctrl et al)

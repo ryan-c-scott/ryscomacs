@@ -371,10 +371,10 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
             (goto-char (point-min)))
           (switch-to-buffer-other-window buffer))))))
 
-(defun edit-local-config()
-  "Open ~/.emacs.d/elisp/localconfig.el"
+(defun rysco-edit-config()
+  "Open the users 'ryscomacs/config.el under 'user-emacs-directory"
   (interactive)
-  (find-file "~/.emacs.d/elisp/localconfig.el"))
+  (find-file (expand-file-name "ryscomacs/config.el" user-emacs-directory)))
 
 (defun rysco-generate-ssh-config ()
   "Generates ssh config file from snippets in directories specified in 'rysco-ssh-config-directories"
