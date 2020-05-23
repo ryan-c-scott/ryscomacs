@@ -285,25 +285,36 @@
 (define-transient-command rysco-personal-transient ()
   "Personal" [])
 
-(add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
+(defun rysco--rememoize-mode-icons ()
+  (interactive)
+  ;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
+  (memoize-restore 'all-the-icons-icon-for-mode)
+  (memoize 'all-the-icons-icon-for-mode))
 
-(let (personal-transients)
-  (load "localconfig" t t)
+(defun rysco-load-local-config (&optional init)
+  (interactive)
 
-  (when personal-transients
-    (transient-append-suffix 'rysco-personal-transient '(0)
-      (vconcat
-       [:description
-        (lambda ()
-          (concat
-           (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
-           (propertize " Personal" 'face 'rysco-main-transient-title)
-           "\n"))]
-       (cl-loop for item in personal-transients vconcat (list item))))))
+  (add-to-list 'load-path (concat (expand-file-name user-emacs-directory) "/elisp"))
 
-;; Note:  Need to restore and re-memoize this function in order to get the changes to take effect
-(memoize-restore 'all-the-icons-icon-for-mode)
-(memoize 'all-the-icons-icon-for-mode)
+  (let (personal-transients)
+    (load "localconfig" t t)
+
+    (when personal-transients
+      (transient-replace-suffix 'rysco-personal-transient '(0)
+        (vconcat
+         [:description
+          (lambda ()
+            (concat
+             (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
+             (propertize " Personal" 'face 'rysco-main-transient-title)
+             "\n"))]
+         (cl-loop for item in personal-transients vconcat (list item))))))
+
+  (unless init
+    (rysco--rememoize-mode-icons)))
+
+(rysco-load-local-config t)
+(rysco--rememoize-mode-icons)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups

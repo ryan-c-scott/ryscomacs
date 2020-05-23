@@ -53,6 +53,10 @@
     ("pb" "Build Package" straight-rebuild-package)
     ("pt" "Reset to Locked" straight-thaw-versions)]
 
+   ["Local Config"
+    ("lr" "Reload" rysco-load-local-config)
+    ("le" "Edit" edit-local-config)]
+
    ["Help"
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info-info)
