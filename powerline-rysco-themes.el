@@ -37,7 +37,7 @@
 (defun powerline-rysco-minor-modes ()
   (s-join "•"
           (cl-loop for m in (s-split " " (format-mode-line minor-mode-alist))
-                   if (not (member m '("" "Helm" "Projectile[-]" "ElDoc" "God" "ARev"))) collect
+                   if (not (member m '("" "Helm" "Projectile[-]" "ElDoc" "God" "ARev" "GCMH"))) collect
                    (s-replace-regexp
                     "Projectile\\[\\(.*\\):.*\\]"
                     "[\\1]"

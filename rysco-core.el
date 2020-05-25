@@ -1,5 +1,20 @@
 (add-to-list 'straight-profiles '(rysco . "rysco.el"))
 
+;;;; GC Manipulation
+;; Disable GC for setup duration
+(setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
+      gc-cons-percentage 0.6)
+
+;; Enable gcmh as early as possible
+(require 'rysco-system)
+
+(rysco-packages
+ gcmh)
+
+(require 'gcmh)
+(gcmh-mode 1)
+;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
 (defvar rysco-fancy-modeline nil)
@@ -21,8 +36,6 @@
   (when (file-exists-p repo-versions)
     (mkdir straight-versions t)
     (copy-file repo-versions straight-versions t)))
-
-(require 'rysco-util)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
@@ -91,6 +104,8 @@
 ;; requires
 (setq load-prefer-newer t)
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
+
+(require 'rysco-util)
 
 (require 'doom-themes)
 (doom-themes-org-config)
@@ -744,7 +759,30 @@
   (bluedot-resume)
   (god-mode-all))
 
+;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
+;; .https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly
+
+(defun rysco-startup-hook ()
+  ;; Enable GC again
+  (setq gc-cons-threshold 16777216 ; 16mb
+        gc-cons-percentage 0.1))
+
+(add-hook 'emacs-startup-hook 'rysco-startup-hook)
 (add-hook 'after-init-hook 'rysco-post-init-setup)
+
+;; Enabling GC as per usual
+(defun rysco-defer-garbage-collection ()
+  (setq gc-cons-threshold most-positive-fixnum))
+
+(defun rysco-restore-garbage-collection ()
+  ;; Defer it so that commands launched immediately after will enjoy the
+  ;; benefits.
+  (run-at-time
+   1 nil (lambda () (setq gc-cons-threshold 16777216))))
+
+(add-hook 'minibuffer-setup-hook #'rysco-defer-garbage-collection)
+(add-hook 'minibuffer-exit-hook #'rysco-restore-garbage-collection)
+;;;;
 
 ;;;;;;;;;;;;
 (provide 'rysco-core)
