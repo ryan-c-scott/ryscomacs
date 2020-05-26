@@ -725,6 +725,11 @@
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
 (define-key god-local-mode-map (kbd ".") 'repeat)
 
+;; Extra bindings for more natural help commands while in god mode
+(define-key god-local-mode-map (kbd "C-<f1> C-f") 'describe-function)
+(define-key god-local-mode-map (kbd "C-<f1> C-v") 'describe-variable)
+(define-key god-local-mode-map (kbd "C-<f1> C-c") 'describe-key-briefly)
+
 ;; HACK:  C-i is bound to tab in some deep ways; this maps it elsewhere and then uses C-i to toggle god mode
 (keyboard-translate ?\C-i ?\H-i)
 (global-set-key [?\H-i] 'god-mode-all)
