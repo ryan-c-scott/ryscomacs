@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (add-to-list 'straight-profiles '(rysco . "rysco.el"))
 
 ;;;; GC Manipulation
