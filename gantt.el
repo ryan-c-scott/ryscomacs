@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (cl-defun gantt-get-start-time (key data &optional accum)
   (-let (((_ _ days _ depencies) (assoc key data))
          (time (or accum 0)))

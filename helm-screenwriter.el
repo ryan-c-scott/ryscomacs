@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;; helm-screenwriter.el --- Helm routines for interacting with screenwriter.el
 ;; Copyright (C) 2015  Ryan C. Scott
 

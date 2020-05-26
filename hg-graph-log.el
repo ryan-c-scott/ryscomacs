@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defgroup hg-graph-log-faces nil
   "Faces used in hg graph log Mode"
   :group 'hg-graph-log-faces

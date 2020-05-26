@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;;; bluedot.el --- Small pomodoro timer (1 char)
 
 ;; Author: Ryon C. Scott
