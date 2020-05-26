@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (require 'desktop+)
 
 (defun rysco-desktop+-create ()

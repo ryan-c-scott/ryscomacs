@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defface powerline-rysco-active1 '((t (:background "grey22" :foreground "white" :weight normal :box nil)))
   "Powerline face 1."
   :group 'powerline)

@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (cl-defmacro rysco-bind-keys (lead &rest bindings)
   `(progn
      ,@(cl-loop
