@@ -306,22 +306,23 @@
   (memoize-restore 'all-the-icons-icon-for-mode)
   (memoize 'all-the-icons-icon-for-mode))
 
+(defvar rysco-personal-transients nil "A list of items to be used to build the ryscomacs personal transient during local config loading")
+
 (defun rysco-load-local-config (&optional init)
   (interactive)
 
-  (let (personal-transients)
-    (load (expand-file-name "ryscomacs/config" user-emacs-directory) t t)
+  (load (expand-file-name "ryscomacs/config" user-emacs-directory) t t)
 
-    (when personal-transients
-      (transient-replace-suffix 'rysco-personal-transient '(0)
-        (vconcat
-         [:description
-          (lambda ()
-            (concat
-             (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
-             (propertize " Personal" 'face 'rysco-main-transient-title)
-             "\n"))]
-         (cl-loop for item in personal-transients vconcat (list item))))))
+  (when rysco-personal-transients
+    (transient-replace-suffix 'rysco-personal-transient '(0)
+      (vconcat
+       [:description
+        (lambda ()
+          (concat
+           (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
+           (propertize " Personal" 'face 'rysco-main-transient-title)
+           "\n"))]
+       (cl-loop for item in rysco-personal-transients vconcat (list item)))))
 
   (unless init
     (rysco--rememoize-mode-icons)))
