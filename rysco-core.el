@@ -2,10 +2,11 @@
 
 (add-to-list 'straight-profiles '(rysco . "rysco.el"))
 
-;;;; GC Manipulation
-;; Disable GC for setup duration
+;; Disable some features for setup duration
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
-      gc-cons-percentage 0.6)
+      gc-cons-percentage 0.6
+      rysco-file-name-handler-alist file-name-handler-alist
+      file-name-handler-alist nil)
 
 ;; Enable gcmh as early as possible
 (require 'rysco-system)
@@ -772,9 +773,10 @@
 ;; .https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly
 
 (defun rysco-startup-hook ()
-  ;; Enable GC again
+  ;; Enable temporarily disabled features again
   (setq gc-cons-threshold 16777216 ; 16mb
-        gc-cons-percentage 0.1))
+        gc-cons-percentage 0.1
+        file-name-handler-alist rysco-file-name-handler-alist))
 
 (add-hook 'emacs-startup-hook 'rysco-startup-hook)
 (add-hook 'after-init-hook 'rysco-post-init-setup)
@@ -784,8 +786,7 @@
   (setq gc-cons-threshold most-positive-fixnum))
 
 (defun rysco-restore-garbage-collection ()
-  ;; Defer it so that commands launched immediately after will enjoy the
-  ;; benefits.
+  ;; Defer it so that commands launched immediately after will enjoy the benefits
   (run-at-time
    1 nil (lambda () (setq gc-cons-threshold 16777216))))
 
