@@ -513,7 +513,9 @@
   (local-unset-key (kbd "<S-down>"))
   (local-unset-key (kbd "<S-right>"))
   (local-unset-key (kbd "<S-up>"))
-  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings))
+  (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings)
+  (electric-indent-local-mode -1)
+  (setq org-adapt-indentation nil))
 
 ;; HACK:  I don't like way that this function would call org-show-entry at the end.
 (with-eval-after-load "org"
