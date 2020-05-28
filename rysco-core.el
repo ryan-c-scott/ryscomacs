@@ -266,6 +266,8 @@
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
 
+(custom-set-variables '(org-startup-folded t))
+
 ;; OSX Specific key bindings/fixes
 (setq mac-option-key-is-meta nil
       mac-command-key-is-meta t
