@@ -651,12 +651,13 @@ With prefix-arg prompt for type if available with your AG version."
             (org-latex-export-to-pdf))))
     (message "No .pdf-master found in directory ancestors.")))
 
-(defun rysco-simple-graph (patch &optional filename)
+(cl-defun rysco-simple-graph (patch &key filename graph-code)
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
          (color-cache (make-hash-table :test 'equal)))
     (with-temp-file temp-path
       (insert "digraph patch {\n"
-              "node  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
+              (or graph-code "")
+              "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
 
       (cl-loop
        for (mod . connections) in patch
