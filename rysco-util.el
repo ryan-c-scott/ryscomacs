@@ -651,6 +651,9 @@ With prefix-arg prompt for type if available with your AG version."
             (org-latex-export-to-pdf))))
     (message "No .pdf-master found in directory ancestors.")))
 
+;;;;;; Graphing utilities
+(require 'graphviz-dot-mode)
+
 (cl-defun rysco-simple-graph (patch &key filename graph-code)
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
          (color-cache (make-hash-table :test 'equal)))
