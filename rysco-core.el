@@ -224,8 +224,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
-(setq ns-use-srgb-colorspace nil)
-
 (set-variable 'inhibit-splash-screen "True")
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
