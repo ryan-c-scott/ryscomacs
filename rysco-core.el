@@ -97,6 +97,9 @@
  json-snatcher
  pkg-info
  org
+ calfw
+ calfw-ical
+ calfw-org
  with-editor
  docker-compose-mode
  dockerfile-mode
@@ -267,6 +270,16 @@
       graphviz-dot-auto-indent-on-semi nil
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
+
+;; Unicode characters for calfw drawing
+(setq cfw:fchar-junction ?╋
+      cfw:fchar-vertical-line ?┃
+      cfw:fchar-horizontal-line ?━
+      cfw:fchar-left-junction ?┣
+      cfw:fchar-right-junction ?┫
+      cfw:fchar-top-junction ?┯
+      cfw:fchar-top-left-corner ?┏
+      cfw:fchar-top-right-corner ?┓)
 
 (custom-set-variables '(org-startup-folded t))
 
