@@ -62,6 +62,11 @@
     ("cr" "Reload" rysco-load-local-config)
     ("ce" "Edit" rysco-edit-config)]
 
+   ["Calendar"
+    ("go" "Open" rysco-calendar-open)
+    ("gf" "Fetch" org-gcal-fetch)
+    ("gs" "Save (HACK)" rysco-calendar-gcal-save)]
+
    ["Help"
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info-info)

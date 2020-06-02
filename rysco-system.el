@@ -77,6 +77,25 @@
         (prog1 path-form
           (setenv "PATH" (concat path-env (getenv "PATH")))))))
 
+(cl-defmacro rysco-configure-gcal (client-id client-secret &rest calendars)
+  (cl-loop
+   with calendar-list
+   with gcal-files
+
+   for (id color) in calendars
+   as id = (format "%s" id)
+   as path = (expand-file-name
+              (format "org-gcal/%s.org" id)
+              user-emacs-directory)
+
+   collect `(,id ,path ,color) into calendar-list
+   collect `(,id . ,path) into gcal-files
+   
+   finally return
+   `(setq org-gcal-client-id ,client-id
+          org-gcal-client-secret ,client-secret
+          org-gcal-file-alist ',gcal-files
+          rysco-gcal-calendars ',calendar-list)))
 
 ;;;;
 (provide 'rysco-system)

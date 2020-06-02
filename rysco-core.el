@@ -97,6 +97,7 @@
  json-snatcher
  pkg-info
  org
+ org-gcal
  calfw
  calfw-ical
  calfw-org
