@@ -18,7 +18,7 @@
   (interactive)
   (cl-loop
    for (_ . file) in org-gcal-file-alist do
-   (with-current-buffer (find-file file)
+   (with-current-buffer (find-file-noselect file)
      (save-buffer)
      (kill-buffer))))
 
