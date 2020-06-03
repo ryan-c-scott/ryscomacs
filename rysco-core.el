@@ -266,11 +266,12 @@
                            "TODO(t)"
                            "NEXT(n)"
                            "WAITING(w@)"
-                           "DONE(d!)")
+                           "DONE(d)")
                           (type
                            "INACTIVE(i)"
                            "CANCELLED(c@)"))
       org-use-fast-todo-selection 'expert
+      org-log-into-drawer t
 
       markdown-asymmetric-header t
       markdown-header-scaling t
