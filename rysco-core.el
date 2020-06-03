@@ -262,6 +262,16 @@
 (setq org-export-allow-bind-keywords t
       org-log-done 'time
       org-enforce-todo-dependencies t
+      org-todo-keywords '((sequence
+                           "TODO(t)"
+                           "NEXT(n)"
+                           "WAITING(w@)"
+                           "DONE(d!)")
+                          (type
+                           "INACTIVE(i)"
+                           "CANCELLED(c@)"))
+      org-use-fast-todo-selection 'expert
+
       markdown-asymmetric-header t
       markdown-header-scaling t
       markdown-command "pandoc --smart -r markdown_github -w html"
