@@ -14,7 +14,7 @@
   "Face for Ryscomacs title in main transient"
   :group 'ryscomacs-faces)
 
-(transient-define-prefix rysco-main-transient ()
+(define-transient-command rysco-main-transient ()
   "Miscellany"
   [:description
    (lambda ()
