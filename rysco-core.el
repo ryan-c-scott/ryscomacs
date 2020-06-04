@@ -276,11 +276,12 @@
       org-log-into-drawer t
 
       org-super-agenda-groups
-      '((:name "Today"
+      '((:name "NOW"
                :todo "NOW")
         (:name "Important"
                :priority "A")
-        (:todo "NEXT")
+        (:name "NEXT"
+               :todo "NEXT")
         (:todo "INACTIVE"
                :order 8)
         (:auto-property "ProjectId"))
