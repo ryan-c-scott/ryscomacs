@@ -97,6 +97,7 @@
  json-snatcher
  pkg-info
  org
+ org-super-agenda
  org-gcal
  calfw
  calfw-ical
@@ -265,6 +266,7 @@
       org-todo-keywords '((sequence
                            "TODO(t)"
                            "NEXT(n)"
+                           "NOW(q)"
                            "WAITING(w@)"
                            "DONE(d)")
                           (type
@@ -272,6 +274,16 @@
                            "CANCELLED(c@)"))
       org-use-fast-todo-selection 'expert
       org-log-into-drawer t
+
+      org-super-agenda-groups
+      '((:name "Today"
+               :todo "NOW")
+        (:name "Important"
+               :priority "A")
+        (:todo "NEXT")
+        (:todo "INACTIVE"
+               :order 8)
+        (:auto-property "ProjectId"))
 
       markdown-asymmetric-header t
       markdown-header-scaling t
@@ -547,6 +559,7 @@
 ;; HACK:  I don't like way that this function would call org-show-entry at the end.
 (with-eval-after-load "org"
   (require 'org-refile)
+  (org-super-agenda-mode 1)
 
   (org-babel-do-load-languages
    'org-babel-load-languages
