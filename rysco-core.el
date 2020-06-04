@@ -279,8 +279,9 @@
       '((:name "NOW"
                :todo "NOW"
                :order 0)
-        (:name "NEXT"
+        (:name "NEXT/WAITING"
                :todo "NEXT"
+               :todo "WAITING"
                :order 0)
         (:name "Important"
                :priority "A"
