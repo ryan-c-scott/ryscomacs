@@ -639,6 +639,10 @@
   (define-key org-columns-map "n" nil)
   (define-key org-columns-map "p" nil))
 
+(with-eval-after-load 'org-agenda
+  (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
+  (define-key org-agenda-mode-map "p" 'org-agenda-previous-item))
+
 (defun markdown-unset-move-keys ()
   ""
   (interactive)
