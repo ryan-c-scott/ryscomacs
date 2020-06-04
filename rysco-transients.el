@@ -37,6 +37,9 @@
     ("ki" "IRC" kill-rcirc-buffers)]
 
    ["Time Management"
+    ("ta" "Agenda" org-agenda)
+    ("tl" "Agenda List" org-agenda-list)
+    ("tt" "Agenda Tasks" org-todo-list)
     ("tb" "Bluedot" bluedot)]
 
    ["Describe"
