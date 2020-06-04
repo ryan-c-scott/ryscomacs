@@ -277,14 +277,18 @@
 
       org-super-agenda-groups
       '((:name "NOW"
-               :todo "NOW")
-        (:name "Important"
-               :priority "A")
+               :todo "NOW"
+               :order 0)
         (:name "NEXT"
-               :todo "NEXT")
+               :todo "NEXT"
+               :order 0)
+        (:name "Important"
+               :priority "A"
+               :order 0)
         (:todo "INACTIVE"
                :order 8)
-        (:auto-property "ProjectId"))
+        (:auto-property "ProjectId"
+                        :order 7))
 
       markdown-asymmetric-header t
       markdown-header-scaling t
