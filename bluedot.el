@@ -292,6 +292,20 @@
           (cond ((which-function)
                  (format ":'%s'" (which-function))))))
 
+(defun bluedot-get-heading-from-agenda ()
+  (interactive)
+  (when (derived-mode-p 'org-agenda-mode)
+    (let* ((marker (or (org-get-at-bol 'org-marker)
+		       (org-agenda-error)))
+	   (buffer (marker-buffer marker))
+	   (pos (marker-position marker)))
+      (with-current-buffer buffer
+        ;; TODO: Save the narrowing somehow
+        (widen)
+        (push-mark)
+        (goto-char pos)
+        (org-get-heading t t t t)))))
+
 ;;;###autoload
 (defun bluedot ()
   "Ask for DESCRIPTION, enable minor-mode, and start the pomodoro."
@@ -299,11 +313,13 @@
 
   (--when-let (helm
                :sources
-               `(,(when (equal major-mode 'org-mode)
+               `(,(when (or (derived-mode-p 'org-mode)
+                            (equal major-mode 'org-agenda-mode))
                     (helm-build-sync-source "Org Heading"
                       :candidates
-                      `(,(org-get-heading t t t t))))
-                 
+                      (-non-nil
+                       `(,(org-get-heading t t t t)
+                         ,(bluedot-get-heading-from-agenda)))))
                  ,(helm-build-sync-source "Previous Labels"
                     :candidates
                     (lambda ()
