@@ -646,7 +646,13 @@
 
 (with-eval-after-load 'org-agenda
   (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
-  (define-key org-agenda-mode-map "p" 'org-agenda-previous-item))
+  (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
+  (require 'rysco-org)
+  (advice-add 'helm-org-in-buffer-headings :before-until
+            'helm-rysco-org-agenda-buffer-items)
+
+  (advice-add 'helm-rysco-semantic-or-imenu :before-until
+              'helm-rysco-org-agenda-buffer-items))
 
 (defun markdown-unset-move-keys ()
   ""
