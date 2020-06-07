@@ -99,10 +99,9 @@
   (interactive)
   (run-associated-program (dired-get-filename)))
 
-(eval-after-load "dired"
-  '(progn
-     (define-key dired-mode-map [C-return] 'dired-run-associated-program)
-     (define-key dired-mode-map [menu-bar immediate dired-run-associated-program]
-       '("Open Associated Application" . dired-run-associated-program))))
+(with-eval-after-load "dired"
+  (define-key dired-mode-map [C-return] 'dired-run-associated-program)
+  (define-key dired-mode-map [menu-bar immediate dired-run-associated-program]
+    '("Open Associated Application" . dired-run-associated-program)))
 
 (provide 'run-assoc)
