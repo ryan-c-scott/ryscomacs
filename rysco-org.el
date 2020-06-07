@@ -7,27 +7,39 @@
       (and (derived-mode-p 'org-agenda-mode)
            (save-excursion
              (goto-char (point-min))
-
              (cl-loop
-              with inhibit-message = t
-              with last = (point)
+              with action = `(("Go to item" . (lambda (pos) (goto-char pos)))
+                              ("Go to heading" . (lambda (pos)
+                                                   (goto-char pos)
+                                                   (org-agenda-goto))))
 
-              do (org-agenda-next-item 1)
-              while (not (= (point) last))
-              ;; TODO:  Detect super agenda headings
-              as entry = (s-replace "\n" "" (thing-at-point 'line))
-              collect (cons entry (point))
-              do (setq last (point)))))
+              do (org-agenda-forward-block)
+              as heading = (s-replace "\n" "" (thing-at-point 'line))
+              do (forward-line 1)
+              while (< (point) (point-max))
+              as end = (save-excursion
+                         (org-agenda-forward-block)
+                         (if (= (point) (point-max))
+                             (point-max)
+                           (forward-line -1)
+                           (point)))
+
+              collect
+              (helm-build-sync-source heading
+                :candidates
+                (save-excursion
+                  (cl-loop
+                   while (< (point) end)
+                   collect
+                   (cons
+                    (s-replace "\n" "" (thing-at-point 'line))
+                    (point))
+                   do (forward-line 1)))
+
+                :action action))))
 
     (or
-     (helm
-      :sources
-      (helm-build-sync-source "Org Agenda Items"
-        :candidates it
-        :action `(("Go to item" . (lambda (pos) (goto-char pos)))
-                  ("Go to heading" . (lambda (pos)
-                                       (goto-char pos)
-                                       (org-agenda-goto))))))
+     (helm :sources it)
      t)))
 
 ;;
