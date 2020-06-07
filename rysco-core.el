@@ -818,6 +818,12 @@
  'calendar-mode-hook
  (lambda () (define-key calendar-mode-map (kbd "RET") 'rysco-calendar-exit-and-insert-date)))
 
+;; Magit keys
+(add-hook
+ 'magit-mode-hook
+ (lambda ()
+   (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)))
+
 ;;
 (defun rysco-post-init-setup ()
   (unless (equal rysco-theme :none)
