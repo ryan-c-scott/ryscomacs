@@ -148,18 +148,39 @@
   "Seconds since TIME."
   (truncate (- (float-time (current-time)) (float-time time))))
 
+(defun bluedot--format-seconds (seconds)
+  (format-time-string
+   (concat
+    (when (>= seconds 3600) "%H:")
+    "%M:%S")
+   (seconds-to-time seconds)))
+
 (defun bluedot--popup-message (time desc)
   "TIME since start, DESC(ription) and instructions."
-  (let* ((seconds (bluedot--seconds-since time))
-         (minutes (truncate seconds 60)))
-    (concat (format "%s completed pomodoro(s) in this session\n"
-                    bluedot--completed-pomodoros)
-            (format "%s, %s\n" (format-time-string "%T" time) desc)
-            (cond
-             ((= 0 minutes) (format "%s seconds" seconds))
-             ((= 1 minutes) "1 minute")
-             (t (format "%s minutes" minutes)))
-            " elapsed, click to (re)start")))
+  (let* ((elapsed (float (bluedot--seconds-since time)))
+         (working (min 1 (/ elapsed bluedot-work-interval)))
+         (resting (/ (max 0 (- elapsed bluedot-work-interval))
+                     bluedot-rest-interval)))
+
+    (concat
+     (format "%s completed\n" bluedot--completed-pomodoros)
+     (cond
+      ((>= resting 1)
+       "[Inactive]")
+
+      ((>= working 1)
+       (format
+        "[Resting] %s remaining"
+        (bluedot--format-seconds
+         (* (- 1 resting) bluedot-rest-interval))))
+
+       (t
+        (format
+         "[Working] %s remaining"
+         (bluedot--format-seconds
+          (* (- 1 working) bluedot-work-interval)))))
+
+     " click to start")))
 
 (defun bluedot--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
