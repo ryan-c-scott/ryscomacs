@@ -2,6 +2,7 @@
 
 (require 'desktop+)
 
+;;;###autoload
 (defun rysco-desktop+-create ()
   (interactive)
   (--when-let
