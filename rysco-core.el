@@ -132,25 +132,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
 (rysco-autoloads
+ (helm-configuration "helm-config" "helm-configuration autoload")
+ (helm-info-info "helm-info" "helm-info-info autoload")
+ (helm-source "helm-source" "helm-source autoload")
+ (helm-projectile "helm-projectile" "helm-projectile autoload")
  (org-goto-calendar "org")
  (screenwriter-mode "screenwriter")
  (helm-screenwriter-init "helm-screenwriter"))
 
 (require 'multi)
 (require 's)
-(require 'helm-config)
-(require 'helm-info)
-(require 'helm-source)
-(require 'projectile)
-(require 'helm-projectile)
 (require 'transient)
 (require 'uniquify)
 (require 'windmove)
 (require 'rotate)
-;; (require 'ispell)
-(require 'multiple-cursors)
-(require 'rysco-desktop+)
-(require 'bluedot)
 (require 'font-lock+)
 
 (require 'run-assoc)
@@ -161,13 +156,11 @@
              (start-process "open" nil "open" file)))
          "\\.*$")))
 
-(require 'dired+)
-(require 'dired-subtree)
-(require 'dired-collapse)
-(require 'dired-filter)
-(add-hook 'dired-mode-hook (lambda ()
-                            (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
-                            (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (require 'dired+)
+            (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
+            (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
 
 (setq dired-filter-group-saved-groups
       `(("default"
@@ -611,7 +604,6 @@
  '(org-src-window-setup 'other-window))
 
 (add-hook 'org-mode-hook 'rysco-org-hook)
-(add-hook 'org-agenda-mode-hook 'rysco-org-hook)
 
 (defun rysco-org-latex-export-list-newline-fixup (output)
   "Kills the trailing latex newline for any \\item lines"
@@ -829,9 +821,12 @@
   (unless (equal rysco-theme :none)
     (load-theme (or rysco-theme 'molokai)))
 
-  (server-start)
-  (bluedot-resume)
-  (god-mode-all))
+  (god-mode-all)
+  (run-with-idle-timer
+   0.25 nil
+   (lambda ()
+     (server-start)
+     (bluedot-resume))))
 
 ;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
 ;; .https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly
