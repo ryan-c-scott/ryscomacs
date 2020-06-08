@@ -316,16 +316,16 @@
 (defun bluedot-get-heading-from-agenda ()
   (interactive)
   (when (derived-mode-p 'org-agenda-mode)
-    (let* ((marker (or (org-get-at-bol 'org-marker)
-		       (org-agenda-error)))
-	   (buffer (marker-buffer marker))
-	   (pos (marker-position marker)))
-      (with-current-buffer buffer
-        ;; TODO: Save the narrowing somehow
-        (widen)
-        (push-mark)
-        (goto-char pos)
-        (org-get-heading t t t t)))))
+    (--when-let (org-get-at-bol 'org-marker)
+      (let* ((marker it)
+	     (buffer (marker-buffer marker))
+	     (pos (marker-position marker)))
+        (with-current-buffer buffer
+          ;; TODO: Save the narrowing somehow
+          (widen)
+          (push-mark)
+          (goto-char pos)
+          (org-get-heading t t t t))))))
 
 ;;;###autoload
 (defun bluedot ()
@@ -335,11 +335,12 @@
   (--when-let (helm
                :sources
                `(,(when (or (derived-mode-p 'org-mode)
-                            (equal major-mode 'org-agenda-mode))
+                            (derived-mode-p 'org-agenda-mode))
                     (helm-build-sync-source "Org Heading"
                       :candidates
                       (-non-nil
-                       `(,(org-get-heading t t t t)
+                       `(,(when (derived-mode-p 'org-mode)
+                            (org-get-heading t t t t))
                          ,(bluedot-get-heading-from-agenda)))))
                  ,(helm-build-sync-source "Previous Labels"
                     :candidates
@@ -360,6 +361,7 @@
     (run-hooks 'bluedot-before-work-hook)
     (bluedot--update-current-bar bluedot--bars)))
 
+;;;###autoload
 (defun bluedot-resume ()
   "Detects and resumes any currently active timer in the history"
   (interactive)
