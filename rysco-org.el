@@ -42,5 +42,10 @@
      (helm :sources it)
      t)))
 
+(defun rysco-org-agenda-goto-first-section ()
+  (interactive)
+  (goto-char (point-min))
+  (org-agenda-next-item 1))
+
 ;;
 (provide 'rysco-org)

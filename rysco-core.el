@@ -558,7 +558,6 @@
 ;; HACK:  I don't like way that this function would call org-show-entry at the end.
 (with-eval-after-load "org"
   (require 'org-refile)
-  (org-super-agenda-mode 1)
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -637,14 +636,19 @@
   (define-key org-columns-map "p" nil))
 
 (with-eval-after-load 'org-agenda
-  (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
-  (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
   (require 'rysco-org)
+  (org-super-agenda-mode 1)
+
   (advice-add 'helm-org-in-buffer-headings :before-until
             'helm-rysco-org-agenda-buffer-items)
 
   (advice-add 'helm-rysco-semantic-or-imenu :before-until
-              'helm-rysco-org-agenda-buffer-items))
+              'helm-rysco-org-agenda-buffer-items)
+
+  (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
+  (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
+  (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
+  (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
 (defun markdown-unset-move-keys ()
   ""
