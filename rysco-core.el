@@ -300,7 +300,9 @@
       cfw:fchar-right-junction ?┫
       cfw:fchar-top-junction ?┯
       cfw:fchar-top-left-corner ?┏
-      cfw:fchar-top-right-corner ?┓)
+      cfw:fchar-top-right-corner ?┓
+      cfw:fstring-period-start " "
+      cfw:fstring-period-end " ")
 
 (custom-set-variables '(org-startup-folded t))
 

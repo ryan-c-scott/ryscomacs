@@ -54,7 +54,33 @@
          (puthash evthash t hashes)
          (cons key data)))))))
 
+(defun rysco-calfw-render-truncate (org limit-width &optional ellipsis)
+  (let ((new (substring org 0 (s-index-of "\n" org)))
+        (ellipsis (when ellipsis "…")))
+    (if (< limit-width (string-width org))
+        (let ((str (truncate-string-to-width
+                    (substring new 0) limit-width 0 nil ellipsis)))
+          (cfw:tp str 'mouse-face 'highlight)
+          (unless (get-text-property 0 'help-echo str)
+            (cfw:tp str 'help-echo org))
+          str)
+      new)))
+
+(defun rysco-calfw-render-padding-change (args)
+  (-let [(width string padding) args]
+    `(,width
+      ,string
+      ,(--when-let padding
+         (if (equal padding ?-)
+             ?\s
+           padding)))))
+
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
+(advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
+(advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
+(advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
+(advice-add 'cfw:render-center :filter-args 'rysco-calfw-render-padding-change)
+
 (add-to-list 'god-exempt-major-modes 'cfw:calendar-mode)
 
 ;;;;
