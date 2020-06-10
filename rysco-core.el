@@ -284,6 +284,10 @@
         (:auto-property "ProjectId"
                         :order 7))
 
+      org-refile-targets
+      '((nil :maxlevel . 9)
+        (org-agenda-files :maxlevel . 9))
+
       markdown-asymmetric-header t
       markdown-header-scaling t
       markdown-command "pandoc --smart -r markdown_github -w html"
