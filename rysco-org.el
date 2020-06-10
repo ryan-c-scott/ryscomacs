@@ -1,6 +1,8 @@
 (require 'org-agenda)
 (require 'helm)
 
+(defvar rysco-org-refile-targets nil)
+
 (defun helm-rysco-org-agenda-buffer-items (&optional arg)
   (interactive "P")
   (--when-let
@@ -46,6 +48,12 @@
   (interactive)
   (goto-char (point-min))
   (org-agenda-next-item 1))
+
+(defun rysco-agenda-refile-wrapper (old &rest args)
+  (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
+    (apply old args)))
+
+(advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
 
 ;;
 (provide 'rysco-org)

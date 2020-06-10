@@ -286,7 +286,13 @@
 
       org-refile-targets
       '((nil :maxlevel . 9)
-        (org-agenda-files :maxlevel . 9))
+        (org-agenda-files . (:tag . "refile_target")))
+
+      rysco-org-refile-targets
+      '((org-agenda-files . (:tag . "refile_target")))
+
+      org-agenda-show-inherited-tags nil
+      org-reverse-note-order t
 
       markdown-asymmetric-header t
       markdown-header-scaling t
