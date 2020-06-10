@@ -77,6 +77,40 @@
         (prog1 path-form
           (setenv "PATH" (concat path-env (getenv "PATH")))))))
 
+(cl-defun rysco-flat-concat (&rest forms)
+  (cl-loop
+   with queue
+   with results
+   with ancestors
+   with root
+   with current = forms
+
+   unless current do
+   (progn
+     (pop ancestors)
+     (setq current (pop queue)
+           root (s-join "" (reverse ancestors))))
+
+   while current
+   as entry = (pop current)
+   do
+   (cond
+    ((listp entry)
+     (push current queue)
+     (push (car entry) ancestors)
+     (setq current (cdr entry)
+           root (s-join "" (reverse ancestors))))
+
+    (t
+     (push
+      (concat root entry)
+      results)))
+
+   finally return (nreverse results)))
+
+(cl-defmacro rysco-org-agenda-files (&rest forms)
+  `(setq org-agenda-files
+         ',(apply 'rysco-flat-concat forms)))
 (cl-defmacro rysco-configure-gcal (client-id client-secret &rest calendars)
   (cl-loop
    with calendar-list
