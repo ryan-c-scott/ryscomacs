@@ -641,6 +641,8 @@
   (require 'rysco-org)
   (org-super-agenda-mode 1)
 
+  (copy-face 'org-level-2 'org-super-agenda-header )
+
   (advice-add 'helm-org-in-buffer-headings :before-until
             'helm-rysco-org-agenda-buffer-items)
 
