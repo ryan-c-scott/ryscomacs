@@ -75,6 +75,35 @@
              ?\s
            padding)))))
 
+(defun rysco-calfw--extract-urls (s)
+  (s-match-strings-all
+   (rx
+    word-start (one-or-more word) "://"
+    (+ (not (any blank ","))))
+   s))
+
+(defun rysco-calfw-goto-loc-at-point ()
+  (interactive)
+  (--when-let
+      (caar
+       (rysco-calfw--extract-urls
+        (get-text-property (point) 'cfw:org-loc)))
+    (browse-url it)))
+
+(defun rysco-calfw--get-gcal-viewing-link (file-path)
+  (cl-loop
+   with link
+   until link
+   for (id path _ viewing-link) in rysco-gcal-calendars do
+   (when (equal path file-path)
+     (setq link viewing-link))
+   finally return link))
+
+(defun rysco-calfw-goto-gcal-at-point ()
+  (interactive)
+  (--when-let (rysco-calfw--get-gcal-viewing-link (get-text-property (point) 'cfw:org-file))
+    (browse-url it)))
+
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
 (advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
 (advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
@@ -82,6 +111,9 @@
 (advice-add 'cfw:render-center :filter-args 'rysco-calfw-render-padding-change)
 
 (add-to-list 'god-exempt-major-modes 'cfw:calendar-mode)
+
+(define-key cfw:calendar-mode-map (kbd "C-<RET>") 'rysco-calfw-goto-loc-at-point)
+(define-key cfw:calendar-mode-map (kbd "M-<RET>") 'rysco-calfw-goto-gcal-at-point)
 
 ;;;;
 (provide 'rysco-calendar)

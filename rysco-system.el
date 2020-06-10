@@ -82,13 +82,13 @@
    with calendar-list
    with gcal-files
 
-   for (id color) in calendars
+   for (id color view) in calendars
    as id = (format "%s" id)
    as path = (expand-file-name
               (format "org-gcal/%s.org" id)
               user-emacs-directory)
 
-   collect `(,id ,path ,color) into calendar-list
+   collect `(,id ,path ,color ,view) into calendar-list
    collect `(,id . ,path) into gcal-files
    
    finally return
