@@ -43,6 +43,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 (rysco-packages
+ org
  use-package
  transient
  autothemer
@@ -96,7 +97,6 @@
  json-reformat
  json-snatcher
  pkg-info
- org
  org-super-agenda
  org-gcal
  calfw
