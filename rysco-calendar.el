@@ -54,6 +54,19 @@
          (puthash evthash t hashes)
          (cons key data)))))))
 
+(defun rysco-calendar-convert-same-day-periods (event-list)
+  ;; Note:  Assumes (('periods ...) ...) structure
+  (loop
+   with events = (cdr event-list)
+   with periods
+
+   for ev in (cadar event-list)
+   if (equal (cfw:event-start-date ev) (cfw:event-end-date ev))
+   collect ev into events
+   else
+   collect ev into periods
+   finally return `((periods ,periods) ,@events)))
+
 (defun rysco-calfw-render-truncate (org limit-width &optional ellipsis)
   (let ((new (substring org 0 (s-index-of "\n" org)))
         (ellipsis (when ellipsis "…")))
@@ -105,6 +118,7 @@
     (browse-url it)))
 
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
+(advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
 (advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
 (advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
 (advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
