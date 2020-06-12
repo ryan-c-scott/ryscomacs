@@ -302,7 +302,7 @@
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
 
-;; Unicode characters for calfw drawing
+;; Calfw display
 (setq cfw:fchar-junction ?╋
       cfw:fchar-vertical-line ?┃
       cfw:fchar-horizontal-line ?━
@@ -312,7 +312,9 @@
       cfw:fchar-top-left-corner ?┏
       cfw:fchar-top-right-corner ?┓
       cfw:fstring-period-start " "
-      cfw:fstring-period-end " ")
+      cfw:fstring-period-end " "
+      cfw:face-item-separator-color "Gray23"
+      cfw:render-line-breaker 'cfw:render-line-breaker-wordwrap)
 
 (custom-set-variables '(org-startup-folded t))
 
