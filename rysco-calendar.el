@@ -19,6 +19,7 @@
   (cl-loop
    for (_ . file) in org-gcal-file-alist do
    (with-current-buffer (find-file-noselect file)
+     (setq buffer-file-coding-system 'utf-8-unix)
      (save-buffer)
      (kill-buffer))))
 
