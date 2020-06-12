@@ -112,8 +112,8 @@
 
 (add-to-list 'god-exempt-major-modes 'cfw:calendar-mode)
 
-(define-key cfw:calendar-mode-map (kbd "C-<RET>") 'rysco-calfw-goto-loc-at-point)
-(define-key cfw:calendar-mode-map (kbd "M-<RET>") 'rysco-calfw-goto-gcal-at-point)
+(define-key cfw:calendar-mode-map (kbd "C-<return>") 'rysco-calfw-goto-loc-at-point)
+(define-key cfw:calendar-mode-map (kbd "M-<return>") 'rysco-calfw-goto-gcal-at-point)
 
 ;;;;
 (provide 'rysco-calendar)
