@@ -79,6 +79,13 @@
    collect ev into periods
    finally return `((periods ,periods) ,@events)))
 
+(defun rysco-calendar-event-location-detection (event)
+  (unless (cfw:event-location event)
+    (let ((new-loc (car (rysco-calfw--extract-urls (cfw:event-description event)))))
+      (setf (cfw:event-title event) (cfw:tp (cfw:event-title event) 'cfw:org-loc new-loc)
+            (cfw:event-location event) new-loc)))
+  event)
+
 (defun rysco-calfw-render-truncate (org limit-width &optional ellipsis)
   (let ((new (substring org 0 (s-index-of "\n" org)))
         (ellipsis (when ellipsis "…")))
@@ -133,6 +140,8 @@
 
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
 (advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
+(advice-add 'cfw:org-convert-event :filter-return 'rysco-calendar-event-location-detection)
+
 (advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
 (advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
 (advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
