@@ -2,18 +2,29 @@
 (require 'calfw-ical)
 (require 'calfw-org)
 (require 'org-gcal)
+(require 'request-deferred)
 
 ;;;###autoload
 (defun rysco-calendar-open ()
   (interactive)
-
   (cfw:open-calendar-buffer
    :contents-sources
    (cl-loop
     for (id file color) in rysco-gcal-calendars collect
-    (funcall 'cfw:org-create-file-source id file color))))
+    (funcall 'cfw:org-create-file-source id file color)))
+  (rysco-calendar-gcal-fetch))
 
 ;;;###autoload
+(cl-defun rysco-calendar-gcal-fetch ()
+  (interactive)
+  (deferred:watch (org-gcal-sync nil t)
+    (lambda ()
+      (message "Gcal fetching completed")
+      (rysco-calendar-gcal-save)
+      (if (derived-mode-p 'cfw:calendar-mode)
+          (cfw:refresh-calendar-buffer)
+        (rysco-calendar-open)))))
+
 (cl-defun rysco-calendar-gcal-save ()
   (interactive)
   (cl-loop

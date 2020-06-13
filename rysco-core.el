@@ -317,7 +317,8 @@
       cfw:fstring-period-start " "
       cfw:fstring-period-end " "
       cfw:face-item-separator-color "Gray23"
-      cfw:render-line-breaker 'cfw:render-line-breaker-wordwrap)
+      cfw:render-line-breaker 'cfw:render-line-breaker-wordwrap
+      org-gcal-auto-archive nil)
 
 (custom-set-variables '(org-startup-folded t))
 
