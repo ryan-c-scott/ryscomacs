@@ -16,6 +16,9 @@
   (load bootstrap-file nil 'nomessage))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
+(straight-use-package 'org-plus-contrib)
+
 (straight-use-package
  '(ryscomacs :type git :repo "git@bitbucket.org:scott105/ryscomacs.git"))
 (require 'rysco-core)

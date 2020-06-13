@@ -8,9 +8,6 @@
       rysco-file-name-handler-alist file-name-handler-alist
       file-name-handler-alist nil)
 
-;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
-(rysco-packages org)
-
 ;; Enable gcmh as early as possible
 (require 'rysco-system)
 
