@@ -140,6 +140,13 @@
   (--when-let (rysco-calfw--get-gcal-viewing-link (get-text-property (point) 'cfw:org-file))
     (browse-url it)))
 
+(defun rysco-calfw-navi-forward-to-title (&rest _)
+  (interactive)
+  (when (and (eq (cfw:cp-get-view (cfw:cp-get-component)) 'day)
+             (get-text-property (point) 'cfw:row-count))
+    (forward-word 4)
+    (forward-char 1)))
+
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
 (advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
 (advice-add 'cfw:org-convert-event :filter-return 'rysco-calendar-event-location-detection)
@@ -148,6 +155,10 @@
 (advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
 (advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
 (advice-add 'cfw:render-center :filter-args 'rysco-calfw-render-padding-change)
+
+(advice-add 'cfw:navi-next-item-command :after 'rysco-calfw-navi-forward-to-title)
+(advice-add 'cfw:navi-prev-item-command :after 'rysco-calfw-navi-forward-to-title)
+
 
 (add-to-list 'god-exempt-major-modes 'cfw:calendar-mode)
 
