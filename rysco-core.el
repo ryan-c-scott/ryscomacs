@@ -277,7 +277,10 @@
       org-log-into-drawer t
 
       org-super-agenda-groups
-      '((:name "NOW"
+      '((:name "Unfiled"
+               :file-path "unfiled.org"
+               :order 0)
+        (:name "NOW"
                :todo "NOW"
                :order 0)
         (:name "NEXT/WAITING"
