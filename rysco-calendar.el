@@ -151,6 +151,10 @@
 
 (define-key cfw:calendar-mode-map (kbd "C-<return>") 'rysco-calfw-goto-loc-at-point)
 (define-key cfw:calendar-mode-map (kbd "M-<return>") 'rysco-calfw-goto-gcal-at-point)
+(define-key cfw:calendar-mode-map (kbd "M-p") 'cfw:navi-previous-week-command)
+(define-key cfw:calendar-mode-map (kbd "M-n") 'cfw:navi-next-week-command)
+(define-key cfw:calendar-mode-map (kbd "p") 'cfw:navi-prev-item-command)
+(define-key cfw:calendar-mode-map (kbd "n") 'cfw:navi-next-item-command)
 
 ;;;;
 (provide 'rysco-calendar)
