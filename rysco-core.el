@@ -86,6 +86,7 @@
  s
  shift-number
  svg-mode-line-themes
+ transpose-frame
  websocket
  writegood-mode
  xmlgen
@@ -781,6 +782,7 @@
 
  ;; Layouts
  ("l" 'rysco-rotate-windows)
+ ("[" 'rotate-frame-clockwise)
 
  ;; Home-row bindings for rysco features (dvorak)
  ("g" 'rysco-delete-or-clone-window-dwim)
