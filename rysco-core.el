@@ -129,6 +129,7 @@
 (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
 (add-to-list 'god-exempt-major-modes 'monky-log-edit-mode)
 (add-to-list 'god-exempt-major-modes 'rcirc-mode)
+(add-to-list 'god-exempt-major-modes 'org-agenda-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto-loads
