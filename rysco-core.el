@@ -2,6 +2,11 @@
 
 (add-to-list 'straight-profiles '(rysco . "rysco.el"))
 
+;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
+(let ((straight-current-profile 'rysco))
+  (straight-use-package 'org-plus-contrib))
+
+
 ;; Disable some features for setup duration
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
       gc-cons-percentage 0.6
