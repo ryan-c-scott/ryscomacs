@@ -29,6 +29,7 @@
 (defvar rysco-font "Source Code Pro")
 (defvar rysco-font-size "15.0")
 (defvar rysco-writing-font "Georgia")
+(defvar rysco-common-links nil)
 (defvar-local org-export-directory "org-export")
 (defvar-local rysco-modeline-extras nil)
 

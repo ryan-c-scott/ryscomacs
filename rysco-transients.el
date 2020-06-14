@@ -67,7 +67,8 @@
 
    ["Calendar"
     ("go" "Open" rysco-calendar-open)
-    ("gf" "Fetch" org-gcal-fetch)]
+    ("gf" "Fetch" org-gcal-fetch)
+    ("gl" "Links" helm-rysco-goto-common-links)]
 
    ["Help"
     ("hl" "Lossage" view-lossage)

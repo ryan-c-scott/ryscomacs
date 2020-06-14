@@ -4,6 +4,8 @@
 (require 'org-gcal)
 (require 'request-deferred)
 
+(defvar rysco-gcal-calendars nil)
+
 ;;;###autoload
 (defun rysco-calendar-open ()
   (interactive)

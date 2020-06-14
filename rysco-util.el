@@ -520,6 +520,27 @@ With prefix-arg prompt for type if available with your AG version."
                         (insert
                          (format "(all-the-icons-%s \"%s\")\n" family name))))))))))
 
+(defun helm-rysco-goto-common-links ()
+  (interactive)
+  (let ((action
+         (lambda (link)
+           (browse-url link))))
+    (helm
+     :sources
+     `(,(helm-build-sync-source "Calendars"
+          :candidates
+          (loop
+           for (id _ _ url) in rysco-gcal-calendars collect
+           `(,id . ,url))
+          :action action)
+
+       ,(helm-build-sync-source "Links"
+          :candidates
+          (loop
+           for (label link) in rysco-common-links collect
+           `(,(format "%s :: %s" label link) link))
+          :action action)))))
+
 (defun rysco-load-theme (&optional theme)
   (interactive)
   (let ((current (cl-copy-list custom-enabled-themes)))
