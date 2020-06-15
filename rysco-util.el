@@ -538,7 +538,7 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (label link) in rysco-common-links collect
-           `(,(format "%s :: %s" label link) link))
+           `(,(format "%s :: %s" label link) . ,link))
           :action action)))))
 
 (defun rysco-load-theme (&optional theme)
