@@ -121,7 +121,7 @@
 (defun rysco-calfw-goto-loc-at-point ()
   (interactive)
   (--when-let
-      (caar
+      (car
        (rysco-calfw--extract-urls
         (get-text-property (point) 'cfw:org-loc)))
     (browse-url it)))
