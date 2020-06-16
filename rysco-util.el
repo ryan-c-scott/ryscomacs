@@ -719,7 +719,7 @@ With prefix-arg prompt for type if available with your AG version."
                          (when (equal major-mode 'org-mode)
                            (concat
                             (replace-regexp-in-string
-                             "[/\\]" "-"
+                             "[/\\:]" "-"
                              (s-join "-" (org-get-outline-path t)))
                             ".png"))))
            (out-path (format "%s.png" (file-name-sans-extension temp-path)))
