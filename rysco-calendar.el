@@ -43,30 +43,35 @@
     "%s|%s|%s"
     (cfw:event-start-date evt)
     (cfw:event-end-date evt)
-    (cfw:event-title evt))))
+    (substring-no-properties
+     (cfw:event-title evt)))))
 
 (defun rysco-calendar-calfw-unique-events (results)
   (cl-loop
    with hashes = (make-hash-table :test 'equal)
 
-   for (key . data) in results collect
-   (cond
-    ((equal key 'periods)
-     (cons
-      'periods
-      (cl-loop
-       for (beg end evt) in data
-       as evthash = (rysco-calendar-hash-cfw:event evt)
-       unless (gethash evthash hashes) collect
-       (progn
-         (puthash evthash t hashes)
-         `(,beg ,end ,evt)))))
+   for (key . data) in results
+   if (equal key 'periods) collect
+   (cons
+    'periods
+    (cl-loop
+     for (beg end evt) in data
+     as evthash = (rysco-calendar-hash-cfw:event evt)
+     unless (gethash evthash hashes) collect
+     (progn
+       (puthash evthash t hashes)
+       `(,beg ,end ,evt))))
 
-    (t
-     (let ((evthash (rysco-calendar-hash-cfw:event (car data))))
-       (unless (gethash evthash hashes)
-         (puthash evthash t hashes)
-         (cons key data)))))))
+   else collect
+   (cons
+    key
+    (cl-loop
+     for evt in data
+     as evthash = (rysco-calendar-hash-cfw:event evt)
+     unless (gethash evthash hashes) collect
+     (progn
+       (puthash evthash t hashes)
+       evt)))))
 
 (defun rysco-calendar-convert-same-day-periods (event-list)
   ;; Note:  Assumes (('periods ...) ...) structure
