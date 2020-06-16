@@ -435,31 +435,6 @@
 	             (ignore-errors (vc-responsible-backend default-directory)))
 	            (vc-mode (vc-backend buffer-file-name))))))
 
-(add-hook 'monky-mode-hook
-          (lambda ()
-            (visual-line-mode)
-            
-            (set-face-attribute
-             'monky-section-title nil :foreground "#F92672" :height 1.2 :underline t)
-            (set-face-attribute
-             'monky-diff-add nil :background "grey18" :foreground "cyan3")
-            (set-face-attribute
-             'monky-diff-del nil :background "grey13" :foreground "yellow3")
-            (set-face-attribute
-             'monky-diff-title nil :background "darkgreen" :box t :foreground "white")
-            (set-face-attribute
-             'monky-diff-hunk-header nil :background "grey18" :foreground "purple")
-            (set-face-attribute
-             'monky-log-sha1 nil :background nil :foreground "yellow")
-            (set-face-attribute
-             'monky-log-author nil :background nil :foreground "grey55" :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-local nil :background nil :foreground "sky blue" :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-tags nil :foreground "black" :weight 'normal :slant 'italic)
-            (set-face-attribute
-             'monky-log-head-label-phase nil :foreground "lightgreen" :background nil :height 1 :weight 'normal :box t :underline nil :slant 'normal)))
-
 ;; Disables auto-fill in commit message buffers
 (add-hook 'git-commit-setup-hook 'turn-off-auto-fill t)
 
