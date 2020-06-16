@@ -308,6 +308,8 @@
 
       org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted"))
+      org-latex-minted-options '(("breaklines" "true")
+                                 ("breakanywhere" "true"))
       org-latex-pdf-process
       '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
