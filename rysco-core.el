@@ -306,6 +306,13 @@
       org-agenda-show-inherited-tags nil
       org-reverse-note-order t
 
+      org-latex-listings 'minted
+      org-latex-packages-alist '(("" "minted"))
+      org-latex-pdf-process
+      '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "%latex -shell-escape -interaction nonstopmode -output-directory %o %f")
+
       markdown-asymmetric-header t
       markdown-header-scaling t
       markdown-command "pandoc --smart -r markdown_github -w html"
@@ -576,12 +583,20 @@
 
   (advice-add 'helm-org-goto-marker :override 'rysco-helm-org-goto-marker)
 
-  (defadvice org-export-output-file-name (before org-add-export-dir activate)
-    "Modifies org-export to place exported files in a different directory"
-    (when (not pub-dir)
-      (setq pub-dir org-export-directory)
-      (when (not (file-directory-p pub-dir))
-        (make-directory pub-dir)))))
+  (defun rysco-pdf-export-cleanup (out)
+    "Moves the generated pdf file to '"
+    (when (f-exists? out)
+      (let* ((dir (f-dirname out))
+             (name (f-base out))
+             (new-out (f-join dir org-export-directory (concat name ".pdf")))
+             (minted-dir (f-join dir (concat "_minted-" name))))
+
+        (f-move out new-out)
+        (f-delete minted-dir t)
+
+        new-out)))
+
+  (advice-add 'org-latex-export-to-pdf :filter-return 'rysco-pdf-export-cleanup))
 
 (with-eval-after-load "ox-latex"
     (add-to-list 'org-latex-logfiles-extensions "tex"))
