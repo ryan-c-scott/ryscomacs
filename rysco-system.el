@@ -16,6 +16,9 @@
 
 (cl-defmacro rysco-add-to-list (list &rest entries)
   `(progn
+     (unless (boundp ',list)
+       (setq ,list nil))
+
      ,@(reverse
         (cl-loop
          for it in entries collect
