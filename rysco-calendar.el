@@ -13,8 +13,7 @@
    :contents-sources
    (cl-loop
     for (id file color) in rysco-gcal-calendars collect
-    (funcall 'cfw:org-create-file-source id file color)))
-  (rysco-calendar-gcal-fetch))
+    (funcall 'cfw:org-create-file-source id file color))))
 
 ;;;###autoload
 (cl-defun rysco-calendar-gcal-fetch ()
