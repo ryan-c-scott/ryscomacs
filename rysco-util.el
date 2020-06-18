@@ -730,7 +730,7 @@ With prefix-arg prompt for type if available with your AG version."
             mod-name
             color-cache
             rand-state))))
-            
+
        else
        do (insert (format "\"%s\";\n" mod)))
 
