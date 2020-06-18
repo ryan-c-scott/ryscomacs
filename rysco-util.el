@@ -675,38 +675,91 @@ With prefix-arg prompt for type if available with your AG version."
 ;;;;;; Graphing utilities
 (require 'graphviz-dot-mode)
 
-(cl-defun rysco-simple-graph (patch &key filename graph-code)
+(cl-defun rysco-simple-graph--generate-color (&optional rand-state)
+  (apply
+   'color-rgb-to-hex
+   `(,@(color-hsl-to-rgb
+        (cl-random 1.0 rand-state)
+        (cl-random 1.0 rand-state)
+        0.5)
+     2)))
+
+(cl-defun rysco-simple-graph--plist-to-settings (data &optional id color-cache rand-state)
+  (loop
+   for k in data by 'cddr
+   as k = (format "%s" k)
+   for v in (cdr data) by 'cddr
+   as v = (pcase v
+            ('RCOL (rysco-simple-graph--generate-color rand-state))
+            ('UCOL
+             (when color-cache
+               (--if-let (gethash id color-cache)
+                   it
+                 (puthash
+                  id
+                  (setq color
+                        (rysco-simple-graph--generate-color rand-state))
+                  color-cache))))
+            (v v))
+
+   when (and k v)
+   concat
+   (format "%s=\"%s\"," (substring k 1) v)))
+
+(cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed)
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
-         (color-cache (make-hash-table :test 'equal)))
+         (color-cache (make-hash-table :test 'equal))
+         (rand-state (cl-make-random-state rand-seed)))
     (with-temp-file temp-path
       (insert "digraph patch {\n"
               (or graph-code "")
               "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
 
+      ;; Insert nodes
       (cl-loop
        for (mod . connections) in patch
+       if (listp mod)
+       do
+       (-let [(mod-name . data) mod]
+         (insert
+          (format
+           "\"%s\" [%s];\n"
+           mod-name
+           (rysco-simple-graph--plist-to-settings
+            data
+            mod-name
+            color-cache
+            rand-state))))
+            
+       else
        do (insert (format "\"%s\";\n" mod)))
 
+      ;; Insert connections
       (cl-loop
+       for entry in patch
+       when (listp entry)
        for (mod . connections) in patch do
        (cl-loop
+        with mod = (if (listp mod)
+                       (car mod)
+                     mod)
         for dest in connections do
         (insert
          (format "\"%s\" -> " mod)
          (pcase dest
-           (`(,dest ,comment)
+           (`(,dest ,comment . ,settings)
             (let ((color (gethash comment color-cache)))
               (unless color
-                (setq color
-                      (apply
-                       'color-rgb-to-hex
-                       `(,@(color-hsl-to-rgb
-                            (cl-random 1.0)
-                            (cl-random 1.0)
-                            0.5)
-                         2)))
+                (setq color (rysco-simple-graph--generate-color rand-state))
                 (puthash comment color color-cache))
-              (format "\"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",]" dest comment color color)))
+              ;; TODO:  Don't insert auto-generated color if settings are specified
+              (format
+               "\"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",%s]" dest comment color color
+               (or
+                (rysco-simple-graph--plist-to-settings
+                 settings comment color-cache rand-state
+                 )
+                ""))))
            (dest
             (format "\"%s\"" dest)))
          ";\n")))
