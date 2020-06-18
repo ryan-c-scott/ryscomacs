@@ -163,7 +163,6 @@
                      bluedot-rest-interval)))
 
     (concat
-     (format "%s completed\n" bluedot--completed-pomodoros)
      (cond
       ((>= resting 1)
        "[Inactive]")
@@ -176,11 +175,10 @@
 
        (t
         (format
-         "[Working] %s remaining"
+         "[Working] %s remaining [%s]"
          (bluedot--format-seconds
-          (* (- 1 working) bluedot-work-interval)))))
-
-     " click to start")))
+          (* (- 1 working) bluedot-work-interval))
+         desc))))))
 
 (defun bluedot--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
