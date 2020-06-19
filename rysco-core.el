@@ -13,9 +13,10 @@
       rysco-file-name-handler-alist file-name-handler-alist
       file-name-handler-alist nil)
 
-;; Enable gcmh as early as possible
+(require 'cl)
 (require 'rysco-system)
 
+;; Enable gcmh as early as possible
 (rysco-packages
  gcmh)
 
