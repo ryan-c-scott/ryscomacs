@@ -114,6 +114,7 @@
 (cl-defmacro rysco-org-agenda-files (&rest forms)
   `(setq org-agenda-files
          ',(apply 'rysco-flat-concat forms)))
+
 (cl-defmacro rysco-configure-gcal (client-id client-secret &rest calendars)
   (cl-loop
    with calendar-list
