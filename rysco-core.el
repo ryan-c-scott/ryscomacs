@@ -169,6 +169,7 @@
 (add-hook 'dired-mode-hook
           (lambda ()
             (require 'dired+)
+            (dired-filter-mode 1)
             (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
             (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
 
