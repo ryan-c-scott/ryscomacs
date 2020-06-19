@@ -672,6 +672,13 @@ With prefix-arg prompt for type if available with your AG version."
             (org-latex-export-to-pdf))))
     (message "No .pdf-master found in directory ancestors.")))
 
+(defun rysco-agenda-revert-files ()
+  (interactive)
+  (org-release-buffers org-agenda-new-buffers)
+  (setq org-agenda-new-buffers nil)
+  (when (derived-mode-p 'org-agenda-mode)
+    (org-agenda-redo-all)))
+
 ;;;;;; Graphing utilities
 (require 'graphviz-dot-mode)
 

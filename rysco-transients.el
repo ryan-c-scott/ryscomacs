@@ -40,6 +40,7 @@
     ("ta" "Agenda" org-agenda)
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
+    ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
     ("tb" "Bluedot" bluedot)]
 
    ["Describe"
