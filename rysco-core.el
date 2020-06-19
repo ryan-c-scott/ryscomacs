@@ -585,12 +585,13 @@
 
   (advice-add 'helm-org-goto-marker :override 'rysco-helm-org-goto-marker)
 
-  (defun rysco-pdf-export-cleanup (out)
-    "Moves the generated pdf file to '"
+  (defun rysco-org-export-cleanup (out)
+    "Moves the generated file to `org-export-directory' and removes some extra byproducts like 'minted' cache directory."
     (when (f-exists? out)
       (let* ((dir (f-dirname out))
              (name (f-base out))
-             (new-out (f-join dir org-export-directory (concat name ".pdf")))
+             (ext (f-ext out))
+             (new-out (f-join dir org-export-directory (concat name "." ext)))
              (minted-dir (f-join dir (concat "_minted-" name))))
 
         (f-move out new-out)
@@ -598,7 +599,8 @@
 
         new-out)))
 
-  (advice-add 'org-latex-export-to-pdf :filter-return 'rysco-pdf-export-cleanup))
+  (advice-add 'org-latex-export-to-pdf :filter-return 'rysco-org-export-cleanup)
+  (advice-add 'org-latex-export-to-latex :filter-return 'rysco-org-export-cleanup))
 
 (with-eval-after-load "ox-latex"
     (add-to-list 'org-latex-logfiles-extensions "tex"))
