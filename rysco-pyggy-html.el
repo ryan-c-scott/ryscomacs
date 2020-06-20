@@ -11,7 +11,7 @@
 
     (shell-command-to-string
      (format "%s -l \"%s\" -f html %s"
-	     pyggy-pygments-path
+	     (executable-find pyggy-pygments-path)
 	     (or (org-element-property :language code)
 		 "")
 	     temp-source-file))))
@@ -28,7 +28,8 @@
          (concat
           "<style type=\"text/css\">"
           (shell-command-to-string
-           (format "%s -S monokai -f html" pyggy-pygments-path))
+           (format "%s -S monokai -f html"
+                   (executable-find pyggy-pygments-path)))
           "pre { border: 1px solid #ccc; box-shadow: 3px 3px 3px #eee; padding: 8pt; font-family: monospace; overflow: auto; margin: 1.2em; background: #030303;}"
           "</style>")))
     (org-export-to-file 'pyggy-html (org-export-output-file-name ".html" subtreep))))
