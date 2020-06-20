@@ -311,6 +311,8 @@
       org-agenda-show-inherited-tags nil
       org-reverse-note-order t
 
+      org-html-html5-fancy t
+
       org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted"))
       org-latex-minted-options '(("breaklines" "true")
