@@ -36,13 +36,14 @@
 
 (defface rysco-org-agenda-status-blocked
   '((t :inherit 'rysco-org-agenda-status-base
-       :foreground "red"))
+       :foreground  "#F92672"))
   ""
   :group 'rysco-org-agenda-faces)
 
 (defface rysco-org-agenda-status-stalled
   '((t :inherit 'rysco-org-agenda-status-base
-       :foreground "#F92672"))
+       :weight bold
+       :foreground "DarkTurquoise"))))
   ""
   :group 'rysco-org-agenda-faces)
 
