@@ -2,6 +2,49 @@
 (require 'helm)
 
 (defvar rysco-org-refile-targets nil)
+(defvar rysco-org-agenda-status-overlay nil)
+
+(defvar rysco-org-agenda-rows 3)
+(defvar rysco-org-agenda-margin-col 2)
+(defvar rysco-org-agenda-margin-left 2)
+
+(defface rysco-org-agenda-status-title
+  '((t :underline "grey20"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-project
+  '((t :inherit 'rysco-org-agenda-status-title
+       :foreground "grey40"
+       :slant italic))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-base
+  '((t :inherit 'rysco-org-agenda-status-title
+       :slant italic
+       :height 0.75
+       :foreground "#54ff9f"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-active
+  '((t :inherit 'rysco-org-agenda-status-base
+       :foreground "gray80"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-blocked
+  '((t :inherit 'rysco-org-agenda-status-base
+       :foreground "red"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-stalled
+  '((t :inherit 'rysco-org-agenda-status-base
+       :foreground "#F92672"))
+  ""
+  :group 'rysco-org-agenda-faces)
 
 (defun helm-rysco-org-agenda-buffer-items (&optional arg)
   (interactive "P")
@@ -44,14 +87,112 @@
      (helm :sources it)
      t)))
 
+(defun rysco-org-agenda-get-projects ()
+  "Return status of all projects, as specified by the org property `projectid' listed in the buffer"
+  (interactive)
+  (--when-let
+      (and (derived-mode-p 'org-agenda-mode)
+           (save-excursion
+             (goto-char (point-min))
+             (org-agenda-forward-block)
+             (forward-line 1)
+
+             (cl-loop
+              with status = (make-hash-table :test 'equal)
+
+              until (eobp)
+              as marker = (org-get-at-bol 'org-marker)
+              when marker do
+              (let* ((project (org-entry-get marker "PROJECTID" t))
+                     (todo (substring-no-properties
+                            (org-get-at-bol 'todo-state)))
+                     (state (gethash project status)))
+
+                (unless (equal state 'ACTIVE)
+                  (puthash
+                   project
+                   (pcase todo
+                     ((or "NOW" "NEXT") 'ACTIVE)
+                     ("WAITING" 'BLOCKED))
+                   status)))
+
+              do (forward-line 1)
+              finally return status)))
+    it))
+
 (defun rysco-org-agenda-goto-first-section ()
   (interactive)
   (goto-char (point-min))
   (org-agenda-next-item 1))
 
+(defun rysco-org-agenda--status-face (status)
+  (pcase status
+    ('ACTIVE 'rysco-org-agenda-status-active)
+    ('BLOCKED 'rysco-org-agenda-status-blocked)
+    (_ 'rysco-org-agenda-status-stalled)))
+
+(defun rysco-org-agenda--status-string (status)
+  (format
+   "%s"
+   (or status "STALLED")))
+
+(defun rysco-org-agenda--status-entry (project status)
+  (concat
+   (propertize (format "%-8s" (rysco-org-agenda--status-string status))
+               'face (rysco-org-agenda--status-face status))
+   (propertize (format "%-12s" project)
+               'face 'rysco-org-agenda-status-project)))
+
+(defun rysco-org-agenda-insert-status (&rest _)
+  (interactive)
+
+  (save-excursion
+    (rysco-org-agenda-goto-first-section)
+    (forward-line -2)
+
+    (when rysco-org-agenda-status-overlay
+      (setq rysco-org-agenda-status-overlay
+            (delete-overlay rysco-org-agenda-status-overlay)))
+
+    (setq rysco-org-agenda-status-overlay
+          (make-overlay (point) (+ (point) 2)))
+
+    (let* ((status (rysco-org-agenda-get-projects))
+           (buffer-read-only nil)
+           (status-overlay rysco-org-agenda-status-overlay)
+           (rows rysco-org-agenda-rows)
+           (margin-col rysco-org-agenda-margin-col)
+           (margin-left rysco-org-agenda-margin-left)
+           (margin-left-str
+            (concat
+             "\n"
+             (make-string margin-left ?\s))))
+
+      (overlay-put rysco-org-agenda-status-overlay 'invisible t)
+      (overlay-put rysco-org-agenda-status-overlay 'display
+                   'rysco-org-agenda-status-title)
+
+      (overlay-put
+       rysco-org-agenda-status-overlay 'before-string
+       (concat
+        margin-left-str
+        (loop
+         for k being the hash-keys of status
+         for i upfrom 1
+         as state = (gethash k status)
+         when k concat
+         (rysco-org-agenda--status-entry k state)
+         if (= (% i rows) 0) concat margin-left-str
+         else concat (make-string margin-col ?\s))
+        "\n")))))
+
 (defun rysco-agenda-refile-wrapper (old &rest args)
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
+
+(advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
+(advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
+(advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 
 (advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
 
