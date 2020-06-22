@@ -43,7 +43,7 @@
 (defface rysco-org-agenda-status-stalled
   '((t :inherit 'rysco-org-agenda-status-base
        :weight bold
-       :foreground "DarkTurquoise"))))
+       :foreground "DarkTurquoise"))
   ""
   :group 'rysco-org-agenda-faces)
 
