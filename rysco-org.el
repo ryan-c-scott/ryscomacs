@@ -164,10 +164,7 @@
            (rows rysco-org-agenda-rows)
            (margin-col rysco-org-agenda-margin-col)
            (margin-left rysco-org-agenda-margin-left)
-           (margin-left-str
-            (concat
-             "\n"
-             (make-string margin-left ?\s))))
+           (margin-left-str (make-string margin-left ?\s)))
 
       (overlay-put rysco-org-agenda-status-overlay 'invisible t)
       (overlay-put rysco-org-agenda-status-overlay 'display
@@ -176,14 +173,16 @@
       (overlay-put
        rysco-org-agenda-status-overlay 'before-string
        (concat
-        margin-left-str
+        "\n"
         (loop
          for k being the hash-keys of status
-         for i upfrom 1
+         for i upfrom 0
          as state = (gethash k status)
+         as new-row = (= (% i rows) 0)
          when k concat
          (rysco-org-agenda--status-entry k state)
-         if (= (% i rows) 0) concat margin-left-str
+         when (and new-row (> i 0)) concat "\n"
+         if new-row concat margin-left-str
          else concat (make-string margin-col ?\s))
         "\n")))))
 
