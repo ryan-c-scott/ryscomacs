@@ -4,7 +4,7 @@
 (defvar rysco-org-refile-targets nil)
 (defvar rysco-org-agenda-status-overlay nil)
 
-(defvar rysco-org-agenda-rows 3)
+(defvar rysco-org-agenda-columns 3)
 (defvar rysco-org-agenda-margin-col 2)
 (defvar rysco-org-agenda-margin-left 2)
 
@@ -161,10 +161,12 @@
     (let* ((status (rysco-org-agenda-get-projects))
            (buffer-read-only nil)
            (status-overlay rysco-org-agenda-status-overlay)
-           (rows rysco-org-agenda-rows)
+           (col-count rysco-org-agenda-columns)
            (margin-col rysco-org-agenda-margin-col)
+           (margin-col-str (make-string margin-col ?\s))
            (margin-left rysco-org-agenda-margin-left)
-           (margin-left-str (make-string margin-left ?\s)))
+           (margin-left-str (concat "\n" (make-string margin-left ?\s)))
+           (margin-right-str ""))
 
       (overlay-put rysco-org-agenda-status-overlay 'invisible t)
       (overlay-put rysco-org-agenda-status-overlay 'display
@@ -173,18 +175,23 @@
       (overlay-put
        rysco-org-agenda-status-overlay 'before-string
        (concat
-        "\n"
         (loop
          for k being the hash-keys of status
          for i upfrom 0
          as state = (gethash k status)
-         as new-row = (= (% i rows) 0)
+         as col = (% i col-count)
+
+         when k concat
+         (if (= col 0)
+             margin-left-str
+           margin-col-str)
+
          when k concat
          (rysco-org-agenda--status-entry k state)
-         when (and new-row (> i 0)) concat "\n"
-         if new-row concat margin-left-str
-         else concat (make-string margin-col ?\s))
-        "\n")))))
+
+         when (= col (1- col-count)) concat margin-right-str)
+
+        "\n\n")))))
 
 (defun rysco-agenda-refile-wrapper (old &rest args)
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
