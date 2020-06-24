@@ -176,10 +176,12 @@
        rysco-org-agenda-status-overlay 'before-string
        (concat
         (loop
+         with i = 0
          for k being the hash-keys of status
-         for i upfrom 0
          as state = (gethash k status)
          as col = (% i col-count)
+
+         when k do (incf i)
 
          when k concat
          (if (= col 0)
