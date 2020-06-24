@@ -520,6 +520,20 @@ With prefix-arg prompt for type if available with your AG version."
                         (insert
                          (format "(all-the-icons-%s \"%s\")\n" family name))))))))))
 
+(defface rysco-common-links-tag
+  '((t :foreground "white"
+       :background "Cyan4"
+       :slant italic
+       :box 1))
+  ""
+  :group 'rysco-common-links)
+
+(defface rysco-common-links-title
+  '((t :foreground "#F92672"
+       :slant italic))
+  ""
+  :group 'rysco-common-links)
+
 (defun helm-rysco-goto-common-links ()
   (interactive)
   (let ((action
@@ -537,8 +551,19 @@ With prefix-arg prompt for type if available with your AG version."
        ,(helm-build-sync-source "Links"
           :candidates
           (loop
-           for (label link) in rysco-common-links collect
-           `(,(format "%s :: %s" label link) . ,link))
+           for (label link . tags) in rysco-common-links
+           as label = (propertize label 'face 'rysco-common-links-title)
+           as tags = (s-join
+                      "\t"
+                      (sort (loop for it in tags collect
+                                  (propertize
+                                   (format
+                                    "%s"
+                                    it)
+                                   'face 'rysco-common-links-tag))
+                            'string<))
+           collect
+           `(,(format "%-25s %s" label tags) . ,link))
           :action action)))))
 
 (defun rysco-load-theme (&optional theme)
