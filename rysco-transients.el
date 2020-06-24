@@ -46,6 +46,7 @@
    ["Describe"
     ("dm" "Mode" describe-mode)
     ("dk" "Key Briefly" describe-key-briefly)
+    ("db" "Binds" helm-descbinds)
     ("dc" "Character" describe-char)]]
 
    [""
