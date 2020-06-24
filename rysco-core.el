@@ -432,6 +432,14 @@
           (lambda ()
             (setq pcomplete-cycle-completions nil)
 
+            (defun rysco-eshell-history-wrapper (f &rest args)
+              (let ((helm-turn-on-show-completion nil))
+                (apply f args)))
+
+            (advice-add 'helm-eshell-history :around 'rysco-eshell-history-wrapper)
+
+            (local-set-key (kbd "M-r") 'helm-eshell-history)
+
             (eshell/alias "d" "dired-other-window $1")
             (eshell/alias "ff" "find-file-other-window $1")
             (eshell/alias "dir" "ls $*")
