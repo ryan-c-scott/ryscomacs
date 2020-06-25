@@ -538,7 +538,11 @@ With prefix-arg prompt for type if available with your AG version."
   (interactive)
   (let ((action
          (lambda (link)
-           (browse-url link))))
+           (cond
+            ((f-directory? link)
+             (dired link))
+            (t
+             (browse-url link))))))
     (helm
      :sources
      `(,(helm-build-sync-source "Calendars"
@@ -552,18 +556,26 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
-           as label = (propertize label 'face 'rysco-common-links-title)
+           as label = (propertize label
+                                  'face 'rysco-common-links-title
+                                  :tag-list tags)
            as tags = (s-join
-                      "\t"
+                      "     "
                       (sort (loop for it in tags collect
                                   (propertize
                                    (format
                                     "%s"
                                     it)
-                                   'face 'rysco-common-links-tag))
+                                   'face 'rysco-common-links-tag
+                                   :tags t))
                             'string<))
            collect
-           `(,(format "%-25s %s" label tags) . ,link))
+           `(,(format "%-25s %s%s%s"
+                      label
+                      tags
+                      (make-string (- 25 (length tags)) ?\s)
+                      link)
+             . ,link))
           :action action)))))
 
 (defun rysco-load-theme (&optional theme)
