@@ -534,6 +534,21 @@ With prefix-arg prompt for type if available with your AG version."
   ""
   :group 'rysco-common-links)
 
+(defun helm-rysco-goto-common-links--pattern (pattern)
+  (replace-regexp-in-string
+   (rx (or line-start whitespace)
+        ?:
+      (group (optional ?^))
+      (group (1+ (not whitespace))))
+   (lambda (m)
+     (let ((expand-start (string-empty-p (match-string 1 m)))
+           (tag (match-string 2 m)))
+       (concat ":"
+               (when expand-start
+                 (rx (0+ (not whitespace))))
+               tag)))
+   pattern))
+
 (defun helm-rysco-goto-common-links ()
   (interactive)
   (let ((action
@@ -554,6 +569,7 @@ With prefix-arg prompt for type if available with your AG version."
           :action action)
 
        ,(helm-build-sync-source "Links"
+          :pattern-transformer 'helm-rysco-goto-common-links--pattern
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
