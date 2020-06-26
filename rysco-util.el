@@ -544,6 +544,7 @@ With prefix-arg prompt for type if available with your AG version."
             (t
              (browse-url link))))))
     (helm
+     :truncate-lines t
      :sources
      `(,(helm-build-sync-source "Calendars"
           :candidates
