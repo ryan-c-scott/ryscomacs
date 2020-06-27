@@ -528,6 +528,14 @@ With prefix-arg prompt for type if available with your AG version."
   ""
   :group 'rysco-common-links)
 
+(defface rysco-common-links-url-type
+  '((t :foreground "Darkslategray4"
+       :underline t
+       :slant italic
+       :box nil))
+  ""
+  :group 'rysco-common-links)
+
 (defface rysco-common-links-title
   '((t :foreground "#F92672"
        :slant italic))
@@ -586,12 +594,19 @@ With prefix-arg prompt for type if available with your AG version."
                                    'face 'rysco-common-links-tag
                                    :tags t))
                             'string<))
+           as url = (url-generic-parse-url link)
+           as location = (or (url-host url) link)
+           as type = (or (url-type url) "dired")
+
            collect
            `(,(format "%-25s %s%s%s"
                       label
                       tags
                       (make-string (- 25 (length tags)) ?\s)
-                      link)
+                      (concat
+                       (propertize type 'face 'rysco-common-links-url-type)
+                       " "
+                       location))
              . ,link))
           :action action)))))
 
