@@ -156,10 +156,15 @@
 
 (defun rysco-calfw-navi-forward-to-title (&rest _)
   (interactive)
-  (when (and (eq (cfw:cp-get-view (cfw:cp-get-component)) 'day)
-             (get-text-property (point) 'cfw:row-count))
-    (forward-word 4)
-    (forward-char 1)))
+  (when (eq (cfw:cp-get-view (cfw:cp-get-component)) 'day)
+    (--if-let (get-text-property (point) 'cfw:row-count)
+        (progn
+          (text-property-search-backward 'cfw:row-count it t t)
+          (forward-word 4)
+          (forward-char 1))
+      (forward-line 1)
+      (forward-char 1)
+      (rysco-calfw-navi-forward-to-title))))
 
 (advice-add 'cfw:org-format-title :override 'rysco-calendar-calfw-org-format-title)
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
@@ -173,7 +178,6 @@
 
 (advice-add 'cfw:navi-next-item-command :after 'rysco-calfw-navi-forward-to-title)
 (advice-add 'cfw:navi-prev-item-command :after 'rysco-calfw-navi-forward-to-title)
-
 
 (add-to-list 'god-exempt-major-modes 'cfw:calendar-mode)
 
