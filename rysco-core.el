@@ -330,7 +330,8 @@
       git-commit-style-convention-checks nil)
 
 ;; Calfw display
-(setq cfw:fchar-junction ?╋
+(setq cfw:event-format-overview "%s%t"
+      cfw:fchar-junction ?╋
       cfw:fchar-vertical-line ?┃
       cfw:fchar-horizontal-line ?━
       cfw:fchar-left-junction ?┣

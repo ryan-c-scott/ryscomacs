@@ -35,6 +35,16 @@
      (save-buffer)
      (kill-buffer))))
 
+(defun rysco-calendar-calfw-org-format-title (file h-obj t-obj h-beg loc)
+  (propertize
+   (concat
+    (org-element-property :title h-obj))
+   'keymap cfw:org-text-keymap
+   'display nil
+   'cfw:org-file file
+   'cfw:org-h-beg h-beg
+   'cfw:org-loc loc))
+
 (defun rysco-calendar-hash-cfw:event (evt)
   (secure-hash
    'md5
@@ -151,6 +161,7 @@
     (forward-word 4)
     (forward-char 1)))
 
+(advice-add 'cfw:org-format-title :override 'rysco-calendar-calfw-org-format-title)
 (advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
 (advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
 (advice-add 'cfw:org-convert-event :filter-return 'rysco-calendar-event-location-detection)
