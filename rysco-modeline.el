@@ -164,6 +164,10 @@
        (format-mode-line (funcall part))
      (format-mode-line part current-face))))
 
+;; HACK:  Including powerline for 'powerline-selected-window
+(require 'powerline)
+;;;;
+
 (cl-defun rysco-modeline--render (&key left center right)
   (let* ((center-face center)
          (is-active (eq powerline-selected-window (selected-window)))
@@ -183,7 +187,7 @@
 
 (defun rysco-modeline ()
   (interactive)
-  (setq
+  (setq-default
    mode-line-format
    `("%e"
      (:eval
