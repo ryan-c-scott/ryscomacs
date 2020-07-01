@@ -738,11 +738,8 @@
       (ocodo-svg-modelines-init)
       (smt/set-theme rysco-fancy-modeline-theme))
 
-  ;; Powerline
-  (require 'powerline)
-  (require 'powerline-rysco-themes)
-  (setq powerline-default-separator 'slant)
-  (powerline-rysco-theme))
+  (require 'rysco-modeline)
+  (rysco-modeline))
 
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
