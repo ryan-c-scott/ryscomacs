@@ -557,6 +557,33 @@ With prefix-arg prompt for type if available with your AG version."
                tag)))
    pattern))
 
+(defun helm-rysco-goto-common-links--title (label tags &optional type location)
+  (let ((tags-list
+         (s-join
+          "     "
+          (sort
+           (loop for it in tags collect
+                 (propertize
+                  (format
+                   "%s"
+                   it)
+                  'face 'rysco-common-links-tag
+                  :tags t))
+           'string<))))
+    (format
+     "%-25s %s%s%s"
+     (propertize
+      label
+      'face 'rysco-common-links-title
+      :tag-list tags-list)
+     tags-list
+     (make-string (- 25 (length tags-list)) ?\s)
+     (concat
+      (when type
+        (propertize type 'face 'rysco-common-links-url-type))
+      " "
+      location))))
+
 (defun helm-rysco-goto-common-links ()
   (interactive)
   (let ((action
@@ -573,15 +600,21 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (id _ _ url) in rysco-gcal-calendars collect
-           `(,id . ,url))
+           `(,(propertize
+               id
+               'face 'rysco-common-links-title) .
+               ,url))
           :action action)
 
        ,(helm-build-sync-source "Bookmarks"
           :candidates
           (when (boundp 'bookmark-alist)
             (loop
-             for (name . data) in bookmark-alist collect
-             `(,name . ,name)))
+             for (name . data) in bookmark-alist
+             as tags = (car (assq 'tags data))
+             collect
+             `(,(helm-rysco-goto-common-links--title name tags) .
+               ,name)))
           :action 'bookmark-jump-other-window)
 
        ,(helm-build-sync-source "Links"
@@ -589,36 +622,14 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
-           as label = (propertize
-                       label
-                       'face 'rysco-common-links-title
-                       :tag-list tags)
-           as tags = (s-join
-                      "     "
-                      (sort
-                       (loop for it in tags collect
-                             (propertize
-                              (format
-                               "%s"
-                               it)
-                              'face 'rysco-common-links-tag
-                              :tags t))
-                       'string<))
            as url = (url-generic-parse-url link)
            as location = (or (url-host url) link)
            as type = (or (url-type url) "dired")
 
            collect
-           `(,(format
-               "%-25s %s%s%s"
-               label
-               tags
-               (make-string (- 25 (length tags)) ?\s)
-               (concat
-                (propertize type 'face 'rysco-common-links-url-type)
-                " "
-                location))
-             . ,link))
+           `(,(helm-rysco-goto-common-links--title
+               label tags type location) .
+               ,link))
           :action action)))))
 
 (defun rysco-load-theme (&optional theme)
