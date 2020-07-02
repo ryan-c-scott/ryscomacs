@@ -98,19 +98,21 @@
   (let ((start-visible (equal (window-start) (point-min)))
         (end-visible (equal (window-end) (point-max))))
     (if (or start-visible end-visible)
-        ;; TODO:  Padding
+        (concat
+         (propertize "  " 'face current-face)
          (all-the-icons-material
           (cond
            ((and start-visible end-visible) "all_inclusive")
            (start-visible "vertical_align_top")
            (end-visible "vertical_align_bottom"))
           :face `(:inherit ,current-face :height 0.8))
-       ;;
-       (propertize
-        (concat
-         (format "%3s" (floor (* 100 (/ (float (window-end)) (point-max)))))
-         "%%")
-        'face current-face))))
+         (propertize " " 'face current-face))
+      ;;
+      (propertize
+       (concat
+        (format "%3s" (floor (* 100 (/ (float (window-end)) (point-max)))))
+        "%%")
+       'face current-face))))
 
 (defsubst rysco-modeline-major-mode ()
   (let ((icon (all-the-icons-icon-for-mode
