@@ -589,6 +589,8 @@ With prefix-arg prompt for type if available with your AG version."
   (let ((action
          (lambda (link)
            (cond
+            ((functionp link)
+             (funcall link))
             ((f-directory? link)
              (dired link))
             (t
@@ -622,9 +624,9 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
-           as url = (url-generic-parse-url link)
-           as location = (or (url-host url) link)
-           as type = (or (url-type url) "dired")
+           as url = (when (stringp link) (url-generic-parse-url link))
+           as location = (when url (or (url-host url) link))
+           as type = (when url (or (url-type url) "dired"))
 
            collect
            `(,(helm-rysco-goto-common-links--title
