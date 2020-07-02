@@ -54,7 +54,8 @@
     ("ui" "IRC" rcirc)
     ("ue" "EShell" eshell)
     ("un" "New EShell" rysco-eshell-new)
-    ("ut" "Themes" rysco-load-theme)]
+    ("ut" "Themes" rysco-load-theme)
+    ("ud" "Default Theme" rysco-load-theme-default)]
 
    ["Packages"
     ("pa" "Pull All" straight-pull-all)
