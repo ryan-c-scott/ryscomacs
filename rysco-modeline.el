@@ -1,27 +1,38 @@
 (defface rysco-modeline-buffer-id
-  '((t
+  '((default
+      (:slant italic
+       :weight normal))
+    (((background dark))
      (:foreground "white"
-      :background "Turquoise4"
-      :weight normal
-      :slant italic
-      :underline "white"
+      :underline "Gray45"
+      :overline "black"))
+    (((background light))
+     (:foreground "black"
+      :underline "Gray45"
       :overline "black")))
   ""
   :group 'rysco-modeline)
 
 (defface rysco-modeline-buffer-id-god
-  '((t
+  '((default
      (:inherit rysco-modeline-buffer-id
-      :foreground "Gray13"
+      :weight bold))
+    (((background dark))
+     (:foreground "Gray13"
       :background "goldenrod"
-      :weight bold
-      :underline "black")))
+      :underline "black"))
+    (((background light))
+     (:foreground "Gray85"
+      :background "Turquoise4"
+      :underline "white")))
   ""
   :group 'rysco-modeline)
 
 (defface rysco-modeline-mode
-  '((t
-     (:foreground "white")))
+  '((((background dark))
+      (:foreground "white"))
+    (((background light))
+     (:foreground "black")))
   ""
   :group 'rysco-modeline)
 
@@ -30,39 +41,29 @@
      (:foreground "black"
       :strike-through t
       :background nil
-      :underline t
-      )))
+      :underline t)))
   ""
   :group 'rysco-modeline)
 
 (defface rysco-modeline-backing-modified
   '((t
      (:inherit rysco-modeline-backing
-      :foreground "gray"
-      )))
+      :foreground "gray")))
   ""
   :group 'rysco-modeline)
 
 (defface rysco-modeline-backing-ro
   '((t
      (:inherit rysco-modeline-backing
-      :foreground "DarkSlateGray"
-      )))
+      :foreground "DarkSlateGray")))
   ""
   :group 'rysco-modeline)
 
 (defface rysco-modeline-right
-  '((t
-     (:background "black"
-      :box nil)))
-  ""
-  :group 'rysco-modeline)
-
-(defface rysco-modeline-bluedot
-  '((t
-     (:inherit rysco-modeline-right
-      :height 0.95
-      :box nil)))
+  '((((background dark))
+      (:background "black"))
+    (((background light))
+      (:background "white")))
   ""
   :group 'rysco-modeline)
 
