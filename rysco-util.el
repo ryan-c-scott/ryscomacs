@@ -576,37 +576,48 @@ With prefix-arg prompt for type if available with your AG version."
            `(,id . ,url))
           :action action)
 
+       ,(helm-build-sync-source "Bookmarks"
+          :candidates
+          (when (boundp 'bookmark-alist)
+            (loop
+             for (name . data) in bookmark-alist collect
+             `(,name . ,name)))
+          :action 'bookmark-jump-other-window)
+
        ,(helm-build-sync-source "Links"
           :pattern-transformer 'helm-rysco-goto-common-links--pattern
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
-           as label = (propertize label
-                                  'face 'rysco-common-links-title
-                                  :tag-list tags)
+           as label = (propertize
+                       label
+                       'face 'rysco-common-links-title
+                       :tag-list tags)
            as tags = (s-join
                       "     "
-                      (sort (loop for it in tags collect
-                                  (propertize
-                                   (format
-                                    "%s"
-                                    it)
-                                   'face 'rysco-common-links-tag
-                                   :tags t))
-                            'string<))
+                      (sort
+                       (loop for it in tags collect
+                             (propertize
+                              (format
+                               "%s"
+                               it)
+                              'face 'rysco-common-links-tag
+                              :tags t))
+                       'string<))
            as url = (url-generic-parse-url link)
            as location = (or (url-host url) link)
            as type = (or (url-type url) "dired")
 
            collect
-           `(,(format "%-25s %s%s%s"
-                      label
-                      tags
-                      (make-string (- 25 (length tags)) ?\s)
-                      (concat
-                       (propertize type 'face 'rysco-common-links-url-type)
-                       " "
-                       location))
+           `(,(format
+               "%-25s %s%s%s"
+               label
+               tags
+               (make-string (- 25 (length tags)) ?\s)
+               (concat
+                (propertize type 'face 'rysco-common-links-url-type)
+                " "
+                location))
              . ,link))
           :action action)))))
 
