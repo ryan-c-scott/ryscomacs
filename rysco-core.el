@@ -857,6 +857,9 @@
  (lambda ()
    (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)))
 
+;; HACK: straight has some issues with magit
+(advice-add #'magit-version :override #'ignore)
+
 ;;
 (defun rysco-post-init-setup ()
   (unless (equal rysco-theme :none)
