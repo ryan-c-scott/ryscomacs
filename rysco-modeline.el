@@ -3,7 +3,7 @@
      (:foreground "white"
       :background "Turquoise4"
       :weight normal
-      :slant normal
+      :slant italic
       :underline "white"
       :overline "black")))
   ""
@@ -14,7 +14,14 @@
      (:inherit rysco-modeline-buffer-id
       :foreground "Gray13"
       :background "goldenrod"
+      :weight bold
       :underline "black")))
+  ""
+  :group 'rysco-modeline)
+
+(defface rysco-modeline-mode
+  '((t
+     (:foreground "white")))
   ""
   :group 'rysco-modeline)
 
@@ -90,7 +97,8 @@
 (defsubst rysco-modeline-pos ()
   (let ((start-visible (equal (window-start) (point-min)))
         (end-visible (equal (window-end) (point-max))))
-     (if (or start-visible end-visible)
+    (if (or start-visible end-visible)
+        ;; TODO:  Padding
          (all-the-icons-material
           (cond
            ((and start-visible end-visible) "all_inclusive")
@@ -100,7 +108,7 @@
        ;;
        (propertize
         (concat
-         (format "%.0f" (* 100 (/ (float (window-end)) (point-max))))
+         (format "%3s" (floor (* 100 (/ (float (window-end)) (point-max)))))
          "%%")
         'face current-face))))
 
@@ -219,8 +227,10 @@
          " %z "
          (:eval (buffer-name (current-buffer))) " "
          (:face nil)
+         (:active rysco-modeline-mode)
          " "
          rysco-modeline-major-mode
+         (:face nil)
          rysco-modeline-narrowed
          rysco-modeline-minor-modes
          rysco-modeline-vc)
