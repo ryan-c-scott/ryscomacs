@@ -141,12 +141,7 @@
 (defun rysco-modeline-center ()
   (propertize
    " "
-   'face (cond
-          ;; TODO:  These faces should be set in the mode spec and not hardcoded here
-          (buffer-read-only 'rysco-modeline-backing-ro)
-          ((buffer-modified-p) 'rysco-modeline-backing-modified)
-          (t 'rysco-modeline-backing))
-
+   'face current-face
    'display `((space
                :align-to
                (- (+ right right-fringe right-margin)
@@ -161,6 +156,8 @@
    for part in segments
 
    as handled = (pcase part
+                  (`(:face ,face)
+                   (setq current-face face))
                   (`(:active ,face)
                    (when is-active
                      (setq current-face face)))
@@ -169,16 +166,24 @@
                      (setq current-face face)))
                   (`(:god ,face)
                    (when is-god
+                     (setq current-face face)))
+                  (`(:modified ,face)
+                   (when is-modified
+                     (setq current-face face)))
+                  (`(:read-only ,face)
+                   (when is-read-only
                      (setq current-face face))))
 
    unless handled collect
-   (if (functionp part)
-       `(:eval ,((lambda ()
-                   (--when-let (funcall part)
-                     (concat
-                      it
-                      (propertize " " 'face current-face))))))
-     (format-mode-line part current-face))))
+   (pcase part
+     ((pred functionp)
+      `(:eval ,((lambda ()
+                  (--when-let (funcall part)
+                    (concat
+                     it
+                     (propertize " " 'face current-face)))))))
+     (_
+      (format-mode-line part current-face)))))
 
 ;; HACK:  Using helpers from doom-modeline
 (require 'doom-modeline-core)
@@ -190,12 +195,15 @@
          (is-active (doom-modeline--active))
          (is-god (and (boundp god-local-mode)
                       god-local-mode))
+         (is-modified (buffer-modified-p))
+         (is-read-only buffer-read-only)
 
          (lhs (rysco-modeline--section left))
-         (rhs (rysco-modeline--section right)))
+         (rhs (rysco-modeline--section right))
+         (center-section (rysco-modeline--section center)))
     
     `(,lhs
-      ,(rysco-modeline-center)
+      ,center-section
       ,rhs)))
 
 (defun rysco-modeline ()
@@ -205,25 +213,28 @@
    `("%e"
      (:eval
       (rysco-modeline--render
-       :center 'rysco-modeline-backing
        :left
        '((:active rysco-modeline-buffer-id)
          (:god rysco-modeline-buffer-id-god)
          " %z "
          (:eval (buffer-name (current-buffer))) " "
-         (:inactive nil)
-         (:active nil)
-         (:god nil)
-         " " rysco-modeline-major-mode
+         (:face nil)
+         " "
+         rysco-modeline-major-mode
          rysco-modeline-narrowed
          rysco-modeline-minor-modes
          rysco-modeline-vc)
 
+       :center
+       '((:face 'rysco-modeline-backing)
+         (:modified 'rysco-modeline-backing-modified)
+         (:read-only 'rysco-modeline-backing-ro)
+         rysco-modeline-center)
+
        :right
        '(rysco-modeline-read-only
-         (:active rysco-modeline-right)
-         (:inactive rysco-modeline-right)
-         (:god rysco-modeline-right)
+         (:face rysco-modeline-right)
+         (:inactive nil)
          "%4l "
          rysco-modeline-pos
          mode-line-misc-info
