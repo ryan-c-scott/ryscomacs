@@ -2,8 +2,8 @@
   '((t
      (:foreground "white"
       :background "Turquoise4"
-      :weight bold
-      :slant italic
+      :weight normal
+      :slant normal
       :underline "white"
       :overline "black")))
   ""
@@ -67,12 +67,11 @@
               "git-commit"
               :face `(:inherit ,current-face :height 0.8))
              'display '(raise 0))
+
             (propertize
-             (concat
-              (replace-regexp-in-string
-               " \\(Hg\\|Git\\)[:-]" ""
-               (substring-no-properties vc-mode))
-              " ")
+             (replace-regexp-in-string
+              " \\(Hg\\|Git\\)[:-]" ""
+              (substring-no-properties vc-mode))
              'face current-face))))
 
 (defsubst rysco-modeline-minor-modes ()
@@ -99,14 +98,19 @@
            (end-visible "vertical_align_bottom"))
           :face `(:inherit ,current-face :height 0.8))
        ;;
-       (propertize "%p%% " 'face current-face))))
+       (propertize
+        (concat
+         (format "%.0f" (* 100 (/ (float (window-end)) (point-max))))
+         "%%")
+        'face current-face))))
 
 (defsubst rysco-modeline-major-mode ()
   (let ((icon (all-the-icons-icon-for-mode
                major-mode
                :face `(:inherit ,current-face :height 0.8))))
     (concat
-     (when icon (propertize icon 'display '(raise 0)))
+     (when icon
+       (propertize icon 'display '(raise 0)))
      (propertize
       (concat
        (when icon " ")
@@ -136,13 +140,21 @@
 
 (defun rysco-modeline-center ()
   (propertize
-   (make-string center-width ?\s)
-   'face
-   (cond
-    ;; TODO:  These faces should be set in the mode spec and not hardcoded here
-    (buffer-read-only 'rysco-modeline-backing-ro)
-    ((buffer-modified-p) 'rysco-modeline-backing-modified)
-    (t 'rysco-modeline-backing))))
+   " "
+   'face (cond
+          ;; TODO:  These faces should be set in the mode spec and not hardcoded here
+          (buffer-read-only 'rysco-modeline-backing-ro)
+          ((buffer-modified-p) 'rysco-modeline-backing-modified)
+          (t 'rysco-modeline-backing))
+
+   'display `((space
+               :align-to
+               (- (+ right right-fringe right-margin)
+                  ,(* (let ((width (doom-modeline--font-width)))
+                        (or (and (= width 1) 1)
+                            (/ width (frame-char-width) 1.0)))
+                      (string-width
+                       (format-mode-line (cons "" rhs)))))))))
 
 (defun rysco-modeline--section (segments)
   (loop
@@ -159,31 +171,32 @@
                    (when is-god
                      (setq current-face face))))
 
-   unless handled concat
+   unless handled collect
    (if (functionp part)
-       (format-mode-line (funcall part))
+       `(:eval ,((lambda ()
+                   (--when-let (funcall part)
+                     (concat
+                      it
+                      (propertize " " 'face current-face))))))
      (format-mode-line part current-face))))
 
-;; HACK:  Including powerline for 'powerline-selected-window
-(require 'powerline)
+;; HACK:  Using helpers from doom-modeline
+(require 'doom-modeline-core)
 ;;;;
 
 (cl-defun rysco-modeline--render (&key left center right)
-  (let* ((center-face center)
-         (is-active (eq powerline-selected-window (selected-window)))
+  (let* (current-face
+         (center-face center)
+         (is-active (doom-modeline--active))
          (is-god (and (boundp god-local-mode)
                       god-local-mode))
 
          (lhs (rysco-modeline--section left))
-         (rhs (rysco-modeline--section right))
-         (lhs-width (string-width lhs))
-         (rhs-width (string-width rhs))
-         (center-width (- (window-width)
-                          (+ lhs-width rhs-width))))
+         (rhs (rysco-modeline--section right)))
     
-    `((:eval ,lhs)
+    `(,lhs
       ,(rysco-modeline-center)
-      (:eval ,rhs))))
+      ,rhs)))
 
 (defun rysco-modeline ()
   (interactive)
@@ -197,32 +210,24 @@
        '((:active rysco-modeline-buffer-id)
          (:god rysco-modeline-buffer-id-god)
          " %z "
-         (:eval (buffer-name (current-buffer)))
-         " "
+         (:eval (buffer-name (current-buffer))) " "
          (:inactive nil)
          (:active nil)
          (:god nil)
-         " "
-         rysco-modeline-major-mode
-         " "
+         " " rysco-modeline-major-mode
          rysco-modeline-narrowed
-         " "
          rysco-modeline-minor-modes
-         " "
          rysco-modeline-vc)
 
        :right
        '(rysco-modeline-read-only
          (:active rysco-modeline-right)
+         (:inactive rysco-modeline-right)
+         (:god rysco-modeline-right)
          "%4l "
          rysco-modeline-pos
-
-         " "
-         (:active rysco-modeline-right)
          mode-line-misc-info
-         "  "
-         ;; mode-line-end-spaces
-         ))))))
+         " "))))))
 
 ;;;;;;;;
 (provide 'rysco-modeline)

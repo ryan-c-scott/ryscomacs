@@ -85,7 +85,7 @@
  multiple-cursors
  ocodo-svg-modelines
  php-mode
- powerline
+ doom-modeline
  projectile
  protobuf-mode
  rust-mode
