@@ -69,10 +69,9 @@
     ("ce" "Edit" rysco-edit-config)]
 
    ["Calendar"
-    ("go" "Open" rysco-calendar-open)
-    ("gf" "Fetch" org-gcal-fetch)
-    ("gs" "Save" rysco-calendar-gcal-save)
-    ("gc" "Clear" rysco-calendar-gcal-clear-files)
+    ("go" "Calendar Open" rysco-calendar-open)
+    ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
+    ("gt" "GCal Token" org-gcal-request-token)
     ("gl" "Links" helm-rysco-goto-common-links)]
 
    ["Help"

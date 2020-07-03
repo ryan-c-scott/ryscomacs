@@ -16,15 +16,21 @@
     (funcall 'cfw:org-create-file-source id file color))))
 
 ;;;###autoload
-(cl-defun rysco-calendar-gcal-fetch ()
-  (interactive)
-  (deferred:watch (org-gcal-sync nil t)
+(cl-defun rysco-calendar-gcal-fetch (&optional update-only)
+  (interactive "P")
+
+  (unless update-only
+    (message "Clearing gcal calendar data")
+    (rysco-calendar-gcal-clear-files))
+
+  (deferred:watch (org-gcal-sync nil t t)
     (lambda ()
-      (message "Gcal fetching completed")
+      (message "Gcal fetched")
       (rysco-calendar-gcal-save)
       (if (derived-mode-p 'cfw:calendar-mode)
           (cfw:refresh-calendar-buffer)
-        (rysco-calendar-open)))))
+        (rysco-calendar-open))
+      (message "Gcal update completed"))))
 
 (cl-defun rysco-calendar-gcal-save ()
   (interactive)
