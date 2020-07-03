@@ -18,8 +18,8 @@
      (:inherit rysco-modeline-buffer-id
       :weight bold))
     (((background dark))
-     (:foreground "Gray13"
-      :background "goldenrod"
+     (:foreground "white"
+      :background "Turquoise3"
       :underline "black"))
     (((background light))
      (:foreground "Gray85"
