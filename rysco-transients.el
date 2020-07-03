@@ -71,6 +71,8 @@
    ["Calendar"
     ("go" "Open" rysco-calendar-open)
     ("gf" "Fetch" org-gcal-fetch)
+    ("gs" "Save" rysco-calendar-gcal-save)
+    ("gc" "Clear" rysco-calendar-gcal-clear-files)
     ("gl" "Links" helm-rysco-goto-common-links)]
 
    ["Help"

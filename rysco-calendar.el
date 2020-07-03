@@ -30,10 +30,20 @@
   (interactive)
   (cl-loop
    for (_ . file) in org-gcal-file-alist do
-   (with-current-buffer (find-file-noselect file)
-     (setq buffer-file-coding-system 'utf-8-unix)
-     (save-buffer)
-     (kill-buffer))))
+   (--when-let (get-buffer (f-filename file))
+     (with-current-buffer it
+       (setq buffer-file-coding-system 'utf-8-unix)
+       (save-buffer)
+       (kill-buffer)))))
+
+(cl-defun rysco-calendar-gcal-clear-files ()
+  (interactive)
+  (org-gcal-sync-tokens-clear)
+  (rysco-calendar-gcal-save)
+  (cl-loop
+   for (_ . file) in org-gcal-file-alist do
+   (when (f-exists? file)
+     (f-move file (concat file ".bak")))))
 
 (defun rysco-calendar-calfw-org-format-title (file h-obj t-obj h-beg loc)
   (propertize
