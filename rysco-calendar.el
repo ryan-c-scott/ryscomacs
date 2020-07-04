@@ -134,7 +134,7 @@
          (event-time (time-add
                       event-date
                       (+ (* (car time-data) 3600)
-                         (cadr time-data)))))
+                         (* (cadr time-data) 60)))))
     (cond
      ((time-less-p event-time nil)
       (propertize output 'face 'rysco-calfw-past-date))
