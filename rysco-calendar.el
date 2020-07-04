@@ -61,6 +61,8 @@
    'cfw:org-h-beg h-beg
    'cfw:org-loc loc))
 
+(advice-add 'cfw:org-format-title :override 'rysco-calendar-calfw-org-format-title)
+
 (defun rysco-calendar-hash-cfw:event (evt)
   (secure-hash
    'md5
@@ -98,6 +100,8 @@
        (puthash evthash t hashes)
        evt)))))
 
+(advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
+
 (defun rysco-calendar-convert-same-day-periods (event-list)
   ;; Note:  Assumes (('periods ...) ...) structure
   (loop
@@ -111,12 +115,16 @@
    collect ev into periods
    finally return `((periods ,periods) ,@events)))
 
+(advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
+
 (defun rysco-calendar-event-location-detection (event)
   (unless (cfw:event-location event)
     (let ((new-loc (car (rysco-calfw--extract-urls (cfw:event-description event)))))
       (setf (cfw:event-title event) (cfw:tp (cfw:event-title event) 'cfw:org-loc new-loc)
             (cfw:event-location event) new-loc)))
   event)
+
+(advice-add 'cfw:org-convert-event :filter-return 'rysco-calendar-event-location-detection)
 
 (defface rysco-calfw-past-date
   '((default
@@ -168,6 +176,11 @@
              ?\s
            padding)))))
 
+(advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
+(advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
+(advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
+(advice-add 'cfw:render-center :filter-args 'rysco-calfw-render-padding-change)
+
 (defun rysco-calfw--extract-urls (s)
   (mapcar
    'car
@@ -210,16 +223,6 @@
       (forward-line 1)
       (forward-char 1)
       (rysco-calfw-navi-forward-to-title))))
-
-(advice-add 'cfw:org-format-title :override 'rysco-calendar-calfw-org-format-title)
-(advice-add 'cfw:contents-merge :filter-return 'rysco-calendar-calfw-unique-events)
-(advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
-(advice-add 'cfw:org-convert-event :filter-return 'rysco-calendar-event-location-detection)
-
-(advice-add 'cfw:render-truncate :override 'rysco-calfw-render-truncate)
-(advice-add 'cfw:render-left :filter-args 'rysco-calfw-render-padding-change)
-(advice-add 'cfw:render-right :filter-args 'rysco-calfw-render-padding-change)
-(advice-add 'cfw:render-center :filter-args 'rysco-calfw-render-padding-change)
 
 (advice-add 'cfw:navi-next-item-command :after 'rysco-calfw-navi-forward-to-title)
 (advice-add 'cfw:navi-prev-item-command :after 'rysco-calfw-navi-forward-to-title)
