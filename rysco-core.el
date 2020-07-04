@@ -37,7 +37,6 @@
 (defvar rysco-writing-font "Georgia")
 (defvar rysco-common-links nil)
 (defvar-local org-export-directory "org-export")
-(defvar-local rysco-modeline-extras nil)
 
 ;; Setup the rysco versions file for straight
 ;; NOTE:  This overwrites whatever is currently in the users folder
