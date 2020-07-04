@@ -118,6 +118,35 @@
             (cfw:event-location event) new-loc)))
   event)
 
+(defface rysco-calfw-past-date
+  '((default
+      (:foreground "gray")))
+  "Face for past events in Calfw"
+  :group 'calfw)
+
+(defun rysco-calfw-dimmed-past (fun event format-string)
+  (let* ((output (funcall fun event format-string))
+         (event-date (cfw:calendar-to-emacs
+                      (or (cfw:event-end-date event)
+                          (cfw:event-start-date event))))
+         (time-data (or (cfw:event-end-time event)
+                        (cfw:event-start-time event)))
+         (event-time (time-add
+                      event-date
+                      (+ (* (car time-data) 3600)
+                         (cadr time-data)))))
+    (cond
+     ((time-less-p event-time nil)
+      (propertize output 'face 'rysco-calfw-past-date))
+     (t
+      output))))
+
+(advice-add 'cfw:event-format :around 'rysco-calfw-dimmed-past)
+
+(defun rysco-calfw-today-overlay (dest)
+  nil)
+(advice-add 'cfw:dest-ol-today-set :override 'rysco-calfw-today-overlay)
+
 (defun rysco-calfw-render-truncate (org limit-width &optional ellipsis)
   (let ((new (substring org 0 (s-index-of "\n" org)))
         (ellipsis (when ellipsis "…")))
