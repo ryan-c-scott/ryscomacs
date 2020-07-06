@@ -195,10 +195,11 @@
 (put 'bluedot--current-bar 'risky-local-variable t)
 
 ;; adding to mode-line
-(add-to-list 'mode-line-misc-info
-             '(:eval (when bluedot-mode
+(defun bluedot-add-to-misc-mode-line-info ()
+  (add-to-list 'mode-line-misc-info
+               '(:eval (when bluedot-mode
                          bluedot--current-bar))
-             t)
+               t))
 
 (defun bluedot--load (file)
   "Use FILE to load DATA."
