@@ -869,7 +869,8 @@
    0.25 nil
    (lambda ()
      (server-start)
-     (bluedot-resume))))
+     (bluedot-resume)
+     (rysco-add-hunspell-dictionaries))))
 
 ;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
 ;; .https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly
