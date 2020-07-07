@@ -99,15 +99,17 @@
   (let ((start-visible (equal (window-start) (point-min)))
         (end-visible (equal (window-end) (point-max))))
     (if (or start-visible end-visible)
-        (concat
-         (propertize "  " 'face current-face)
-         (all-the-icons-material
-          (cond
-           ((and start-visible end-visible) "all_inclusive")
-           (start-visible "vertical_align_top")
-           (end-visible "vertical_align_bottom"))
-          :face `(:inherit ,current-face :height 0.8))
-         (propertize " " 'face current-face))
+        (progn
+          (incf width-adjustment 0.65)
+          (concat
+           (propertize "  " 'face current-face)
+           (all-the-icons-material
+            (cond
+             ((and start-visible end-visible) "all_inclusive")
+             (start-visible "vertical_align_top")
+             (end-visible "vertical_align_bottom"))
+            :face `(:inherit ,current-face :height 0.8))
+           (propertize " " 'face current-face)))
       ;;
       (propertize
        (concat
@@ -138,11 +140,13 @@
 
 (defsubst rysco-modeline-bluedot ()
   (when bluedot-mode
+    (incf width-adjustment 0.1)
     (format-mode-line
-     (propertize bluedot--current-bar 'face current-face))))
+     bluedot--current-bar current-face)))
 
 (defsubst rysco-modeline-read-only ()
   (when buffer-read-only
+    (incf width-adjustment 0.65)
     (propertize
      (all-the-icons-material
       "error_outline"
@@ -159,8 +163,9 @@
                   ,(* (let ((width (doom-modeline--font-width)))
                         (or (and (= width 1) 1)
                             (/ width (frame-char-width) 1.0)))
-                      (string-width
-                       (format-mode-line (cons "" rhs)))))))))
+                      (+ (string-width
+                          (format-mode-line (cons "" rhs)))
+                         width-adjustment)))))))
 
 (defun rysco-modeline--section (segments)
   (loop
@@ -183,7 +188,9 @@
                      (setq current-face face)))
                   (`(:read-only ,face)
                    (when is-read-only
-                     (setq current-face face))))
+                     (setq current-face face)))
+                  (`(:width ,amount)
+                   (incf width-adjustment amount)))
 
    unless handled collect
    (pcase part
@@ -209,8 +216,13 @@
          (is-modified (buffer-modified-p))
          (is-read-only buffer-read-only)
 
+         (width-adjustment 0)
          (lhs (rysco-modeline--section left))
+
+         (width-adjustment 0)
          (rhs (rysco-modeline--section right))
+         (rhs-width-adjustment width-adjustment)
+
          (center-section (rysco-modeline--section center)))
     
     `(,lhs
@@ -245,13 +257,15 @@
          rysco-modeline-center)
 
        :right
-       '(rysco-modeline-read-only
+       '(mode-line-misc-info
+         rysco-modeline-read-only
          (:face rysco-modeline-right)
          (:inactive nil)
          "%4l "
          rysco-modeline-pos
-         mode-line-misc-info
-         " "))))))
+         rysco-modeline-bluedot
+         ;; HACK: Needed to adjust everything over by a character
+         (:width 1)))))))
 
 ;;;;;;;;
 (provide 'rysco-modeline)
