@@ -890,6 +890,19 @@ With prefix-arg prompt for type if available with your AG version."
         (rename-file out-path filename t)
         filename))))
 
+(defun rysco-add-hunspell-dictionaries ()
+  (interactive)
+  (let ((dictionary-dir (f-join user-emacs-directory "dictionaries")))
+    (when (and (eq system-type 'windows-nt)
+               (f-exists? dictionary-dir))
+      (unless (boundp 'ispell-hunspell-dict-paths-alist)
+        (setq ispell-hunspell-dict-paths-alist nil))
+      (loop
+       for path in (f-entries dictionary-dir)
+       if (f-ext? path "aff") do
+       (add-to-list 'ispell-hunspell-dict-paths-alist
+                    `(,(f-base path) ,path))))))
+
 (defun rysco-download-hunspell-dictionaries ()
   (interactive)
   (when (eq system-type 'windows-nt)
@@ -897,16 +910,14 @@ With prefix-arg prompt for type if available with your AG version."
           (dictionaries
            '(("en_US.aff" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f")
              ("en_US.dic" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f"))))
-      (f-mkdir base-dir)
+
       (loop
-       for (file url) in dictionaries
-       as path = (expand-file-name file base-dir)
-       as dic = (f-base file)
-       do
-       (when (and (url-copy-file url path t)
-                  (f-ext? path "aff"))
-         (add-to-list 'ispell-hunspell-dict-paths-alist
-                      `(,dic ,path)))))))
+       initially do
+       (f-mkdir base-dir)
+
+       for (file url) in dictionaries do
+       (url-copy-file
+        url (expand-file-name file base-dir) t)))))
 
 ;;
 (provide 'rysco-util)
