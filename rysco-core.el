@@ -369,6 +369,7 @@
       pcomplete-cycle-completions nil
       eshell-prompt-function 'rysco-eshell-prompt
       dired-recursive-deletes 'always
+      dired-subtree-use-backgrounds nil
       uniquify-buffer-name-style 'reverse
       uniquify-separator "|"
       uniquify-after-kill-buffer-p t
