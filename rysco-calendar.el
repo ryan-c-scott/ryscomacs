@@ -132,20 +132,39 @@
   "Face for past events in Calfw"
   :group 'calfw)
 
+(defface rysco-calfw-current-date
+  '((default
+      (:slant italic
+       :weight bold
+       :underline t)))
+  "Face for currently occurring events in Calfw"
+  :group 'calfw)
+
+(defun rysco-calfw--convert-date-and-time (date time)
+  (time-add (cfw:calendar-to-emacs date)
+            (+ (* (car time) 3600)
+               (* (cadr time) 60))))
+
 (defun rysco-calfw-dimmed-past (fun event format-string)
   (let* ((output (funcall fun event format-string))
-         (event-date (cfw:calendar-to-emacs
-                      (or (cfw:event-end-date event)
-                          (cfw:event-start-date event))))
-         (time-data (or (cfw:event-end-time event)
-                        (cfw:event-start-time event)))
-         (event-time (time-add
-                      event-date
-                      (+ (* (car time-data) 3600)
-                         (* (cadr time-data) 60)))))
+         (now (current-time))
+         (event-start
+          (rysco-calfw--convert-date-and-time
+           (cfw:event-start-date event)
+           (cfw:event-start-time event)))
+         (event-end
+          (rysco-calfw--convert-date-and-time
+           (or (cfw:event-end-date event)
+               (cfw:event-start-date event))
+           (or (cfw:event-end-time event)
+               (cfw:event-start-time event))))
+         (started (time-less-p event-start now))
+         (ended (time-less-p event-end now)))
     (cond
-     ((time-less-p event-time nil)
+     ((and started ended)
       (propertize output 'face 'rysco-calfw-past-date))
+     (started
+      (propertize output 'face 'rysco-calfw-current-date))
      (t
       output))))
 
