@@ -209,7 +209,6 @@
 
 (cl-defun rysco-modeline--render (&key left center right)
   (let* (current-face
-         (center-face center)
          (is-active (doom-modeline--active))
          (is-god (and (boundp god-local-mode)
                       god-local-mode))
@@ -251,9 +250,9 @@
          rysco-modeline-vc)
 
        :center
-       '((:face 'rysco-modeline-backing)
-         (:modified 'rysco-modeline-backing-modified)
-         (:read-only 'rysco-modeline-backing-ro)
+       '((:face rysco-modeline-backing)
+         (:modified rysco-modeline-backing-modified)
+         (:read-only rysco-modeline-backing-ro)
          rysco-modeline-center)
 
        :right
