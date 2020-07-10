@@ -162,7 +162,7 @@
          (ended (time-less-p event-end now)))
     (cond
      ((and started ended)
-      (propertize output 'face 'rysco-calfw-past-date))
+      (propertize output 'face 'rysco-calfw-past-date 'cfw:old t))
      (started
       (propertize output 'face 'rysco-calfw-current-date))
      (t
@@ -240,8 +240,34 @@
           (forward-word 4)
           (forward-char 1))
       (forward-line 1)
-      (forward-char 1)
-      (rysco-calfw-navi-forward-to-title))))
+      (if (get-text-property (point) 'cfw:row-count)
+          (progn
+            (forward-char 1)
+            (rysco-calfw-navi-forward-to-title))
+        (forward-line -1)
+        (forward-char 1)))))
+
+(defun rysco-calfw-goto-current-entry (&rest _)
+  (unless (get-text-property (point) 'cfw:row-count)
+    (cfw:navi-next-item-command))
+
+  (loop
+   with last-row
+   as row = (get-text-property (point) 'cfw:row-count)
+   as old = (get-text-property (point) 'cfw:old)
+   while (and row old)
+   while (or (not last-row) (> row last-row)) do
+   (progn
+     (setq last-row row)
+     (cfw:navi-next-item-command))))
+
+(advice-add 'cfw:refresh-calendar-buffer :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:navi-goto-today-command :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:navi-goto-date-command :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:change-view-month :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:change-view-week :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:change-view-two-weeks :after 'rysco-calfw-goto-current-entry)
+(advice-add 'cfw:change-view-day :after 'rysco-calfw-goto-current-entry)
 
 (advice-add 'cfw:navi-next-item-command :after 'rysco-calfw-navi-forward-to-title)
 (advice-add 'cfw:navi-prev-item-command :after 'rysco-calfw-navi-forward-to-title)
