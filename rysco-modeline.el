@@ -122,7 +122,7 @@
                major-mode
                :face `(:inherit ,current-face :height 0.8))))
     (concat
-     (when icon
+     (when (not (eq icon major-mode))
        (propertize icon 'display '(raise 0)))
      (propertize
       (concat
@@ -172,7 +172,7 @@
    for part in segments
 
    as handled = (pcase part
-                  (`(:face ,face)
+                   (`(:face ,face)
                    (setq current-face face))
                   (`(:active ,face)
                    (when is-active
