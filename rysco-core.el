@@ -428,6 +428,10 @@
 (defun eshell/w32-explorer-path ()
   (s-replace "/" "\\" (eshell/pwd)))
 
+(add-hook 'eshell-hist-mode-hook
+          (lambda ()
+            (define-key eshell-hist-mode-map (kbd "M-r") 'helm-eshell-history)))
+
 (add-hook 'eshell-mode-hook
           (lambda ()
             (setq pcomplete-cycle-completions nil)
@@ -437,9 +441,6 @@
                 (apply f args)))
 
             (advice-add 'helm-eshell-history :around 'rysco-eshell-history-wrapper)
-            (eshell-hist-mode -1)
-            (local-set-key (kbd "M-r") 'helm-eshell-history)
-
             (eshell/alias "d" "dired-other-window $1")
             (eshell/alias "ff" "find-file-other-window $1")
             (eshell/alias "dir" "ls $*")
