@@ -895,13 +895,18 @@ With prefix-arg prompt for type if available with your AG version."
   (let ((dictionary-dir (f-join user-emacs-directory "dictionaries")))
     (when (and (eq system-type 'windows-nt)
                (f-exists? dictionary-dir))
+
+      (setenv "DICPATH" (s-replace "/" "\\" dictionary-dir))
+
       (unless (boundp 'ispell-hunspell-dict-paths-alist)
         (setq ispell-hunspell-dict-paths-alist nil))
+
       (loop
        for path in (f-entries dictionary-dir)
        if (f-ext? path "aff") do
        (add-to-list 'ispell-hunspell-dict-paths-alist
                     `(,(f-base path) ,path))))))
+
 
 (defun rysco-download-hunspell-dictionaries ()
   (interactive)
