@@ -437,7 +437,7 @@
                 (apply f args)))
 
             (advice-add 'helm-eshell-history :around 'rysco-eshell-history-wrapper)
-
+            (eshell-hist-mode -1)
             (local-set-key (kbd "M-r") 'helm-eshell-history)
 
             (eshell/alias "d" "dired-other-window $1")
