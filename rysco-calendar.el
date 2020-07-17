@@ -142,8 +142,10 @@
 
 (defun rysco-calfw--convert-date-and-time (date time)
   (time-add (cfw:calendar-to-emacs date)
-            (+ (* (car time) 3600)
-               (* (cadr time) 60))))
+            (if time
+                (+ (* (car time) 3600)
+                   (* (cadr time) 60))
+              0)))
 
 (defun rysco-calfw-dimmed-past (fun event format-string)
   (let* ((output (funcall fun event format-string))
