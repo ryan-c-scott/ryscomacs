@@ -648,6 +648,11 @@ With prefix-arg prompt for type if available with your AG version."
   (interactive)
   (rysco-load-theme rysco-theme))
 
+(defun rysco-insert-current-theme-name ()
+  (interactive)
+  (--when-let (car custom-enabled-themes)
+    (insert (format "'%s" it))))
+
 (cl-defun rysco-eshell-new ()
  "Open a new instance of eshell."
   (interactive)
