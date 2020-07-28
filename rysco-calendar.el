@@ -42,6 +42,10 @@
        (save-buffer)
        (kill-buffer)))))
 
+(defun rysco-calendar-gcal-refresh-token ()
+  (interactive)
+  (org-gcal--refresh-token))
+
 (cl-defun rysco-calendar-gcal-clear-files ()
   (interactive)
   (org-gcal-sync-tokens-clear)

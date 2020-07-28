@@ -72,6 +72,7 @@
     ("go" "Calendar Open" rysco-calendar-open)
     ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
     ("gt" "GCal Token" org-gcal-request-token)
+    ("gr" "GCal Refresh" rysco-calendar-gcal-refresh-token)
     ("gl" "Links" helm-rysco-goto-common-links)]
 
    ["Help"
