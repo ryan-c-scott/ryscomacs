@@ -653,6 +653,14 @@ With prefix-arg prompt for type if available with your AG version."
   (--when-let (car custom-enabled-themes)
     (insert (format "'%s" it))))
 
+(defun rysco-system-open-current-dir ()
+  (interactive)
+  (-when-let* ((path (buffer-file-name))
+             (dir (f-dirname path)))
+      (if (eq system-type 'windows-nt)
+          (w32-shell-execute "open" (convert-standard-filename dir))
+        (start-process "open" nil "open" dir))))
+
 (cl-defun rysco-eshell-new ()
  "Open a new instance of eshell."
   (interactive)

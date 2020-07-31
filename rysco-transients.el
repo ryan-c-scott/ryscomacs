@@ -55,7 +55,8 @@
     ("ue" "EShell" eshell)
     ("un" "New EShell" rysco-eshell-new)
     ("ut" "Themes" rysco-load-theme)
-    ("ud" "Default Theme" rysco-load-theme-default)]
+    ("ud" "Default Theme" rysco-load-theme-default)
+    ("us" "Open Current Directory (OS)" rysco-system-open-current-dir)]
 
    ["Packages"
     ("pa" "Pull All" straight-pull-all)
