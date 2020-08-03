@@ -655,11 +655,18 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-system-open-current-dir ()
   (interactive)
-  (-when-let* ((path (buffer-file-name))
-             (dir (f-dirname path)))
-      (if (eq system-type 'windows-nt)
-          (w32-shell-execute "open" (convert-standard-filename dir))
-        (start-process "open" nil "open" dir))))
+  (--when-let
+   (cond
+    ((derived-mode-p 'dired-mode)
+     dired-directory)
+    (t
+     (let ((path (buffer-file-name)))
+       (when path
+         (f-dirname path)))))
+
+   (if (eq system-type 'windows-nt)
+       (w32-shell-execute "open" (convert-standard-filename it))
+     (start-process "open" nil "open" (expand-file-name it)))))
 
 (cl-defun rysco-eshell-new ()
  "Open a new instance of eshell."
