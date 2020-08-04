@@ -570,6 +570,14 @@ With prefix-arg prompt for type if available with your AG version."
                   'face 'rysco-common-links-tag
                   :tags t))
            'string<))))
+
+    (when (equal type 'org)
+      (setq location
+            (cadr
+             (s-match
+              (rx "[[" (zero-or-more anything) "][" (group (zero-or-more anything)) "]]")
+              location))))
+
     (format
      "%-25s %s%s%s"
      (propertize
@@ -580,21 +588,39 @@ With prefix-arg prompt for type if available with your AG version."
      (make-string (- 25 (length tags-list)) ?\s)
      (concat
       (when type
-        (propertize type 'face 'rysco-common-links-url-type))
+        ;; TODO:  Expand 'url types
+        (propertize (format "%s" type) 'face 'rysco-common-links-url-type))
       " "
       location))))
 
+(defun rysco-goto-common-links--type (link)
+  (cond
+   ((functionp link)
+    'func)
+   ((f-directory? link)
+    'dired)
+   ((listp link)
+    ;; TODO: Allow for multiple links
+    )
+   ((s-starts-with? "[[" link)
+    'org)
+   ((f-exists? link)
+    'file)
+   (t
+    'url)))
+
+(defun rysco-goto-common-links--execute (link)
+  (let ((type (rysco-goto-common-links--type link)))
+    (pcase type
+      ('func (funcall link))
+      ('dired (dired link))
+      ('org (org-link-open-from-string link))
+      ('file (find-file link))
+      ('url (browse-url link)))))
+
 (defun helm-rysco-goto-common-links ()
   (interactive)
-  (let ((action
-         (lambda (link)
-           (cond
-            ((functionp link)
-             (funcall link))
-            ((f-directory? link)
-             (dired link))
-            (t
-             (browse-url link))))))
+  (let ((action 'rysco-goto-common-links--execute))
     (helm
      :truncate-lines t
      :sources
@@ -624,9 +650,9 @@ With prefix-arg prompt for type if available with your AG version."
           :candidates
           (loop
            for (label link . tags) in rysco-common-links
+           as type = (rysco-goto-common-links--type link)
            as url = (when (stringp link) (url-generic-parse-url link))
            as location = (when url (or (url-host url) link))
-           as type = (when url (or (url-type url) "dired"))
 
            collect
            `(,(helm-rysco-goto-common-links--title
