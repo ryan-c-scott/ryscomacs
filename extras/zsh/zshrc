@@ -19,15 +19,15 @@ bindkey ';5C' emacs-forward-word
 
 setopt prompt_subst
 
-source ~/ryscomacs/extras/zsh/zsh-colors.sh
+if [[ -f ~/.zsh-options ]]; then
+    source ~/.zsh-options
+fi
+
+source $RYSCOMACS_DIR/extras/zsh/zsh-colors.sh
 
 # Replace dark blue because it's obnoxious on black
 if [[ "$OSTYPE" == cygwin ]]; then
     printf %b '\e]4;4;#64'
-fi
-
-if [[ -f ~/.zsh-options ]]; then
-    source ~/.zsh-options
 fi
 
 function SystemBlock
@@ -80,11 +80,11 @@ fi
 
 #
 if [ -z $NO_HIGHLIGHT ]; then
-    source ~/ryscomacs/extras/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    source $RYSCOMACS_DIR/extras/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
 if [ -z $NO_AUTOSUGGESTIONS ]; then
-    source ~/ryscomacs/extras/zsh/zsh-autosuggestions.zsh
+    source $RYSCOMACS_DIR/extras/zsh/zsh-autosuggestions.zsh
 fi
 
 # SSH Setup
