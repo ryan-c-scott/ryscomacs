@@ -33,14 +33,6 @@ Fonts can be set in your `ryscomacs/config.el` by setting `rysco-font` and `rysc
 (setq rysco-font-size "12.0")
 ```
 
-If you would like to use a fancy SVG modeline instead of `powerline`:
-``` emacs-lisp
-(setq rysco-fancy-modeline t)
-(setq rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
-```
-
-Changing `rysco-fancy-modeline-theme` as appropriate.
-
 ## Lead Key
 Ryscomacs is designed to utilize a lead key for doing window splitting and other frequently used commands.  This can help to disambiguate special ryscomacs functionality from modes or emacs in general.
 

@@ -19,6 +19,8 @@ bindkey ';5C' emacs-forward-word
 
 setopt prompt_subst
 
+RYSCOMACS_DIR=~/.emacs.d/straight/repos/ryscomacs
+
 if [[ -f ~/.zsh-options ]]; then
     source ~/.zsh-options
 fi

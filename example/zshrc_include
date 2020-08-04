@@ -1,1 +1,1 @@
-source ~/ryscomacs/extras/zsh/zshrc
+source ~/.emacs.d/straight/repos/ryscomacs/extras/zsh/zshrc
