@@ -618,9 +618,14 @@ With prefix-arg prompt for type if available with your AG version."
       ('file (find-file link))
       ('url (browse-url link)))))
 
+(defun helm-rysco-goto-common-links-default-action (candidate)
+  (--if-let (helm-marked-candidates)
+      (loop for link in it do (rysco-goto-common-links--execute link))
+    (rysco-goto-common-links--execute candidate)))
+
 (defun helm-rysco-goto-common-links ()
   (interactive)
-  (let ((action 'rysco-goto-common-links--execute))
+  (let ((action 'helm-rysco-goto-common-links-default-action))
     (helm
      :truncate-lines t
      :sources
