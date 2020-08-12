@@ -23,7 +23,7 @@
     (message "Clearing gcal calendar data")
     (rysco-calendar-gcal-clear-files))
 
-  (deferred:watch (org-gcal-sync nil t t)
+  (deferred:watch (org-gcal-sync t t)
     (lambda ()
       (message "Gcal fetched")
       (rysco-calendar-gcal-save)
