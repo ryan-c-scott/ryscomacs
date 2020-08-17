@@ -560,7 +560,7 @@ With prefix-arg prompt for type if available with your AG version."
 (defun helm-rysco-goto-common-links--title (label tags &optional type location)
   (let ((tags-list
          (s-join
-          "     "
+          " "
           (sort
            (loop for it in tags collect
                  (propertize
