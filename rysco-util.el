@@ -585,7 +585,11 @@ With prefix-arg prompt for type if available with your AG version."
       'face 'rysco-common-links-title
       :tag-list tags-list)
      tags-list
-     (make-string (- 25 (length tags-list)) ?\s)
+     (make-string (--when-let (- 25 (length tags-list))
+                    (if (> it 0)
+                        it
+                      1))
+                  ?\s)
      (concat
       (when type
         ;; TODO:  Expand 'url types
