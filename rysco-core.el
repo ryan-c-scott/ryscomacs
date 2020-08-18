@@ -248,7 +248,8 @@
 (setq helm-completing-read-handlers-alist
       (append '((find-file . ido)
                 (dired . ido))
-              helm-completing-read-handlers-alist))
+              helm-completing-read-handlers-alist)
+      helm-mode-no-completion-in-region-in-modes '(eshell-mode))
 (add-to-list 'helm-boring-file-regexp-list "\\.org_archive$")
 
 (projectile-mode +1)
