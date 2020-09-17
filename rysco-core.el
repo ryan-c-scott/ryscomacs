@@ -243,7 +243,8 @@
     (tool-bar-mode -1))
 (setq make-backup-files nil)
 
-(setq helm-split-window-default-side 'other)
+(setq helm-split-window-default-side 'other
+      helm-allow-mouse t)
 (helm-mode 1)
 (setq helm-completing-read-handlers-alist
       (append '((find-file . ido)
