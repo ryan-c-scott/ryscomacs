@@ -261,6 +261,7 @@
       (forward-line -1)
       (org-table-align))))
 
+;;;###autoload
 (defun bluedot-history-report (&optional days)
   (interactive "P")
   (let ((buf (get-buffer-create "*Bluedot History*")))
