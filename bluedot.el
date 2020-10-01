@@ -261,6 +261,32 @@
       (forward-line -1)
       (org-table-align))))
 
+(defun bluedot-history-report (&optional days)
+  (interactive "P")
+  (let ((buf (get-buffer-create "*Bluedot History*")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (loop
+       with history = (--group-by
+                       (car it)
+                       (bluedot--format-history :format "%Y-%m-%d"))
+
+       for (day . entries) in (reverse (-take-last (or days 2) history))
+       do
+       (insert (format "* %s\n" day))
+       (loop
+        for work in (-uniq
+                     (--map
+                      (-last-item it)
+                      entries))
+        do
+        (insert (format "  - %s\n" work)))
+       do (insert "\n"))
+      (org-mode)
+      (org-show-all)
+      (local-set-key "q" 'kill-this-buffer))
+    (switch-to-buffer buf)))
+
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
 
