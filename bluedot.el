@@ -272,7 +272,11 @@
                        (car it)
                        (bluedot--format-history :format "%Y-%m-%d"))
 
-       for (day . entries) in (reverse (-take-last (or days 2) history))
+       with days = (if days
+                       (prefix-numeric-value days)
+                     2)
+
+       for (day . entries) in (reverse (-take-last days history))
        do
        (insert (format "* %s\n" day))
        (loop
