@@ -172,7 +172,8 @@
             (dired-filter-mode 1)
 
             (local-set-key (kbd "C-c i") 'dired-subtree-toggle)
-            (local-set-key (kbd "<tab>") 'dired-subtree-toggle)))
+            (local-set-key (kbd "<tab>") 'dired-subtree-toggle)
+            (local-set-key [C-M-return] 'rysco-dired-os-open-dir)))
 
 (setq dired-filter-group-saved-groups
       `(("default"

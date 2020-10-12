@@ -207,6 +207,10 @@
   (kill-all-matching (lambda (buffer)
 		       (eq 'dired-mode (buffer-local-value 'major-mode buffer)))))
 
+(defun rysco-dired-os-open-dir ()
+  (interactive)
+  (run-associated-program default-directory))
+
 (defun kill-rcirc-buffers ()
   (interactive)
   (kill-all-matching (lambda (buffer)
