@@ -212,7 +212,7 @@
    (s-match-strings-all
     (rx
      word-start (one-or-more word) "://"
-     (+ (not (any blank control "," ""))))
+     (+ (not (any blank control "\"" "," ""))))
     (substring-no-properties s))))
 
 (defun rysco-calfw-goto-loc-at-point ()
