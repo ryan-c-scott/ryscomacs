@@ -243,8 +243,13 @@
     (--if-let (get-text-property (point) 'cfw:row-count)
         (progn
           (text-property-search-backward 'cfw:row-count it t t)
-          (forward-word 4)
-          (forward-char 1))
+          (pcase (char-after)
+            (?\s ;; If the line starts with a space assume it's a period entry
+             (forward-word 6)
+             (forward-char 3))
+            (_
+             (forward-word 4)
+             (forward-char 1))))
       (forward-line 1)
       (if (get-text-property (point) 'cfw:row-count)
           (progn
