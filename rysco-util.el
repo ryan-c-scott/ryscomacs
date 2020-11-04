@@ -335,7 +335,8 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
 
 (defun rysco-make-buffer-utf8 (&optional buf)
   "Tidy up a buffer by replacing all special Unicode characters
-   (smart quotes, etc.) with their more sane cousins"
+   (smart quotes, etc.) with their more sane cousins.
+If region is active, narrow to the region boundaries first."
   (interactive)
  
   (let ((unicode-map '(("[\u2018\|\u2019\|\u201A\|\uFFFD]" . "'")
@@ -346,11 +347,19 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
                        ("\u00AE" . "(r)")
                        ("\u2122" . "TM")
                        ("[\u02DC\|\u00A0]" . " "))))
- 
-    (save-excursion
-      (cl-loop for (key . value) in unicode-map do
-            (goto-char (point-min))
-            (replace-regexp key value)))))
+
+    (with-current-buffer (or buf (current-buffer))
+      (save-restriction
+        (when (region-active-p)
+          (narrow-to-region (region-beginning) (region-end)))
+
+        (save-excursion
+          (cl-loop
+           with content = (buffer-string)
+           for (key . value) in unicode-map do
+           (goto-char (point-min))
+           (cl-loop while (re-search-forward key nil t) do
+                    (replace-match value))))))))
 
 (defun rysco-repo-status (&optional dir)
   "Run either `monky-status' or `magit-status' for hg or git repositories respectively"
