@@ -261,6 +261,10 @@
       (forward-line -1)
       (org-table-align))))
 
+(defun bluedot-history-report-kill ()
+  (interactive)
+  (kill-buffer (current-buffer)))
+
 ;;;###autoload
 (defun bluedot-history-report (&optional days)
   (interactive "P")
@@ -289,7 +293,8 @@
        do (insert "\n"))
       (org-mode)
       (org-show-all)
-      (local-set-key "q" 'kill-this-buffer))
+      (read-only-mode)
+      (local-set-key "q" 'bluedot-history-report-kill))
     (switch-to-buffer buf)))
 
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
