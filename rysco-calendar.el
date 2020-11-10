@@ -5,6 +5,7 @@
 (require 'request-deferred)
 
 (defvar rysco-gcal-calendars nil)
+(defvar rysco-calfw-upcoming-threshold 600)
 
 ;;;###autoload
 (defun rysco-calendar-open ()
@@ -136,6 +137,16 @@
   "Face for past events in Calfw"
   :group 'calfw)
 
+(defface rysco-calfw-upcoming-date
+  '((default
+      (:slant italic
+       :weight bold
+       :underline t
+       :foreground "white"
+       :background "cyan4")))
+  "Face for upcoming events in Calfw"
+  :group 'calfw)
+
 (defface rysco-calfw-current-date
   '((default
       (:slant italic
@@ -165,12 +176,19 @@
            (or (cfw:event-end-time event)
                (cfw:event-start-time event))))
          (started (time-less-p event-start now))
-         (ended (time-less-p event-end now)))
+         (ended (time-less-p event-end now))
+         (starting-soon (time-less-p
+                         (time-subtract
+                          event-start
+                          (seconds-to-time rysco-calfw-upcoming-threshold))
+                         now)))
     (cond
      ((and started ended)
       (propertize output 'face 'rysco-calfw-past-date 'cfw:old t))
      (started
       (propertize output 'face 'rysco-calfw-current-date))
+     (starting-soon
+      (propertize output 'face 'rysco-calfw-upcoming-date))
      (t
       output))))
 
