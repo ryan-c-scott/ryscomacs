@@ -249,7 +249,8 @@
 (helm-mode 1)
 (setq helm-completing-read-handlers-alist
       (append '((find-file . ido)
-                (dired . ido))
+                (dired . ido)
+                (org-attach-attach . ido))
               helm-completing-read-handlers-alist)
       helm-mode-no-completion-in-region-in-modes '(eshell-mode))
 (add-to-list 'helm-boring-file-regexp-list "\\.org_archive$")
