@@ -332,6 +332,8 @@
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
 
+(push '(note . "%t") org-log-note-headings)
+
 ;; Calfw display
 (setq cfw:event-format-overview "%s%t"
       cfw:fchar-junction ?╋
