@@ -332,8 +332,6 @@
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
 
-(push '(note . "%t") org-log-note-headings)
-
 ;; Calfw display
 (setq cfw:event-format-overview "%s%t"
       cfw:fchar-junction ?╋
@@ -588,9 +586,10 @@
   (electric-indent-local-mode -1)
   (setq org-adapt-indentation nil))
 
-;; HACK:  I don't like way that this function would call org-show-entry at the end.
 (with-eval-after-load "org"
   (require 'org-refile)
+
+  (push '(note . "%t") org-log-note-headings)
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -599,6 +598,7 @@
              (latex . t)
              (dot . t))))
 
+  ;; HACK:  I don't like way that this function would call org-show-entry at the end.
   (defun rysco-helm-org-goto-marker (marker)
     (switch-to-buffer (marker-buffer marker))
     (goto-char (marker-position marker))
