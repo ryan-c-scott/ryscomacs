@@ -7,6 +7,7 @@
 (defvar rysco-org-agenda-columns 3)
 (defvar rysco-org-agenda-margin-col 2)
 (defvar rysco-org-agenda-margin-left 2)
+(defvar rysco-org-agenda-excess-threshold 4)
 
 (defface rysco-org-agenda-status-title
   '((t :underline "grey20"))
@@ -31,6 +32,12 @@
 (defface rysco-org-agenda-status-active
   '((t :inherit 'rysco-org-agenda-status-base
        :foreground "gray80"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
+(defface rysco-org-agenda-status-excess
+  '((t :inherit 'rysco-org-agenda-status-base
+       :foreground "yellow"))
   ""
   :group 'rysco-org-agenda-faces)
 
@@ -100,6 +107,7 @@
 
              (cl-loop
               with status = (make-hash-table :test 'equal)
+              with next-count = (make-hash-table :test 'equal)
 
               until (eobp)
               as marker = (org-get-at-bol 'org-marker)
@@ -107,15 +115,28 @@
               (let* ((project (org-entry-get marker "PROJECTID" t))
                      (todo (substring-no-properties
                             (org-get-at-bol 'todo-state)))
-                     (state (gethash project status)))
+                     (state (gethash project status))
+                     (count (or (gethash project next-count) 0)))
 
-                (unless (equal state 'ACTIVE)
-                  (puthash
-                   project
-                   (pcase todo
-                     ((or "NOW" "NEXT") 'ACTIVE)
-                     ("WAITING" 'BLOCKED))
-                   status)))
+                (unless (or (equal state 'ACTIVE)
+                            (equal state 'EXCESS))
+                  (setq state
+                        (puthash
+                         project
+                         (pcase todo
+                           ((or "NOW" "NEXT") 'ACTIVE)
+                           ("WAITING" 'BLOCKED))
+                         status)))
+
+                (when (and (equal state 'ACTIVE)
+                           (or (equal todo "NOW")
+                               (equal todo "NEXT")))
+
+                  (incf count)
+                  (puthash project count next-count)
+
+                  (when (> count rysco-org-agenda-excess-threshold)
+                    (puthash project 'EXCESS status))))
 
               do (forward-line 1)
               finally return status)))
@@ -130,6 +151,7 @@
   (pcase status
     ('ACTIVE 'rysco-org-agenda-status-active)
     ('BLOCKED 'rysco-org-agenda-status-blocked)
+    ('EXCESS 'rysco-org-agenda-status-excess)
     (_ 'rysco-org-agenda-status-stalled)))
 
 (defun rysco-org-agenda--status-string (status)
