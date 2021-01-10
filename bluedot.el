@@ -216,17 +216,19 @@
                    while entry
                    collect entry))))))
 
-(defun bluedot--add-history ()
+(defun bluedot--add-history (&optional cancel)
   "Adding current-pomodoro info to history file."
   (--when-let bluedot-history-file
     (with-current-buffer (find-file it)
       (save-excursion
         (goto-char (point-max))
         (insert (prin1-to-string
-                 (list bluedot--pomodoro-started-at
-                       bluedot-work-interval
-                       bluedot-rest-interval
-                       bluedot--pomodoro-description))
+                 (if cancel
+                     'CANCEL
+                   (list bluedot--pomodoro-started-at
+                         bluedot-work-interval
+                         bluedot-rest-interval
+                         bluedot--pomodoro-description)))
                 "\n")
         (save-buffer)
         (kill-buffer (current-buffer))))))
@@ -383,8 +385,11 @@
                       (seq-take
                        (delete-dups
                         (reverse
-                         (cl-loop for (time work rest label) in (bluedot--retrieve-history)
-                                  collect label)))
+                         (cl-loop
+                          for entry in (bluedot--retrieve-history)
+                          unless (equal entry 'CANCEL) collect
+                          (-let [(time work rest label) entry]
+                            label))))
                        20)))
                  ,(helm-build-dummy-source "New Label")))
 
@@ -397,27 +402,48 @@
     (bluedot--update-current-bar bluedot--bars)))
 
 ;;;###autoload
+(defun bluedot-cancel (&optional no-record)
+  (interactive)
+  (when (and bluedot--timer
+             (y-or-n-p
+              (format
+               "Cancel '%s'?"
+               bluedot--pomodoro-description)))
+
+    (cancel-timer bluedot--timer)
+    (setq bluedot--timer nil)
+    (bluedot-mode 0)
+
+    (unless no-record
+      (bluedot--add-history t))))
+
+;;;###autoload
 (defun bluedot-resume ()
   "Detects and resumes any currently active timer in the history"
   (interactive)
   (--when-let (bluedot--retrieve-history)
-    (let* ((entry (car (last it)))
-           (time (current-time))
-           (last-time (car entry))
-           (description (car (last entry))))
-      (when (< (- (time-to-seconds time) (time-to-seconds last-time))
-               (+ (nth 1 entry) (nth 2 entry)))
+    (let ((entry (car (last it))))
+      (if (equal entry 'CANCEL)
+          (bluedot-cancel t)
 
-        (bluedot-mode t)
+        ;;
+        (let* ((time (current-time))
+               (last-time (car entry))
+               (description (car (last entry))))
 
-        (when bluedot--timer
-          (cancel-timer bluedot--timer))
+          (when (< (- (time-to-seconds time) (time-to-seconds last-time))
+                    (+ (nth 1 entry) (nth 2 entry)))
 
-        (setq bluedot--pomodoro-started-at last-time
-              bluedot--pomodoro-description description
-              bluedot--notified-done nil)
-        
-        (bluedot--update-current-bar bluedot--bars)))))
+             (bluedot-mode t)
+
+             (when bluedot--timer
+               (cancel-timer bluedot--timer))
+
+             (setq bluedot--pomodoro-started-at last-time
+                   bluedot--pomodoro-description description
+                   bluedot--notified-done nil)
+
+             (bluedot--update-current-bar bluedot--bars)))))))
 
 ;;;;;;;;
 (provide 'bluedot)
