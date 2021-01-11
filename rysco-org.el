@@ -180,7 +180,8 @@
     (setq rysco-org-agenda-status-overlay
           (make-overlay (point) (+ (point) 2)))
 
-    (let* ((status (rysco-org-agenda-get-projects))
+    (let* ((show-status (= (get-char-property 1 'org-last-args) 0))
+           (status (and show-status (rysco-org-agenda-get-projects)))
            (buffer-read-only nil)
            (status-overlay rysco-org-agenda-status-overlay)
            (col-count rysco-org-agenda-columns)
@@ -196,26 +197,27 @@
 
       (overlay-put
        rysco-org-agenda-status-overlay 'before-string
-       (concat
-        (loop
-         with i = 0
-         for k being the hash-keys of status
-         as state = (gethash k status)
-         as col = (% i col-count)
+         (concat
+          (when show-status
+            (loop
+             with i = 0
+             for k being the hash-keys of status
+             as state = (gethash k status)
+             as col = (% i col-count)
 
-         when k do (incf i)
+             when k do (incf i)
 
-         when k concat
-         (if (= col 0)
-             margin-left-str
-           margin-col-str)
+             when k concat
+             (if (= col 0)
+                 margin-left-str
+               margin-col-str)
 
-         when k concat
-         (rysco-org-agenda--status-entry k state)
+             when k concat
+             (rysco-org-agenda--status-entry k state)
 
-         when (= col (1- col-count)) concat margin-right-str)
+             when (= col (1- col-count)) concat margin-right-str))
 
-        "\n\n")))))
+          "\n\n")))))
 
 (defun rysco-agenda-refile-wrapper (old &rest args)
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
