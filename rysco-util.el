@@ -333,6 +333,31 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     (save-buffer)
     (kill-buffer)))
 
+(defun rysco-private-browsing-p ()
+  (and
+   (equal browse-url-chrome-program rysco-private-browser-program)
+   (equal browse-url-chrome-arguments rysco-private-browser-arguments)
+   (equal browse-url-browser-function 'rysco-browse-url-private)))
+
+(defun rysco-browse-url-private (url &rest args)
+  (cond
+   ((or (not rysco-private-browser-program)
+        (not rysco-private-browser-arguments))
+    (error "Rysco private browsing not configured correctly"))
+
+   ((not (rysco-private-browsing-p))
+    (error "Private browsing not enabled.  See `rysco-private-browsing"))
+
+   (t
+    (apply 'browse-url-chrome url args))))
+
+(defun rysco-private-browsing ()
+  (interactive)
+  "Makes overrides global browsing settings with local values that will use configured private browsing"
+  (set (make-local-variable 'browse-url-chrome-program) rysco-private-browser-program)
+  (set (make-local-variable 'browse-url-chrome-arguments) rysco-private-browser-arguments)
+  (set (make-local-variable 'browse-url-browser-function) 'rysco-browse-url-private))
+
 (defun rysco-make-buffer-utf8 (&optional buf)
   "Tidy up a buffer by replacing all special Unicode characters
    (smart quotes, etc.) with their more sane cousins.

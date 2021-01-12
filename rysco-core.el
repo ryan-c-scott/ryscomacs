@@ -36,6 +36,8 @@
 (defvar rysco-font-size "15.0")
 (defvar rysco-writing-font "Georgia")
 (defvar rysco-common-links nil)
+(defvar rysco-private-browser-program nil)
+(defvar rysco-private-browser-arguments nil)
 (defvar-local org-export-directory "org-export")
 
 ;; Setup the rysco versions file for straight
