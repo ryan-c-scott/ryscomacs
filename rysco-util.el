@@ -216,13 +216,35 @@
   (kill-all-matching (lambda (buffer)
 		       (eq 'rcirc-mode (buffer-local-value 'major-mode buffer)))))
 
-(defun rysco-revert-buffer ()
+(defun rysco-file-name-to-sudo (&optional filename)
+  (let ((filename (or filename buffer-file-name)))
+    (if (tramp-tramp-file-p filename)
+        (with-parsed-tramp-file-name filename this
+          (concat
+           (substring filename 0 (1- (* -1 (length this-localname))))
+           "|sudo::"
+           this-localname))
+      ;;
+      (concat "/sudo::" filename))))
+
+(defun rysco-revert-buffer (&optional arg)
     "Revert buffer, prompting if it has been modified."
-    (interactive)
-    (--when-let (buffer-file-name)
-      (let ((current-pos (point)))
-        (when (find-alternate-file it)
-          (goto-char current-pos)))))
+    (interactive "P")
+    (let ((filename (buffer-file-name))
+          (current-pos (point)))
+
+      (cond
+       ((equal major-mode 'dired-mode)
+        (if arg
+            (dired (rysco-file-name-to-sudo default-directory))
+          (revert-buffer)))
+
+       (filename
+        (when (find-alternate-file
+               (if arg
+                   (rysco-file-name-to-sudo filename)
+                 filename))
+          (goto-char current-pos))))))
 
 (defun markdown-toc ()
   (interactive)
