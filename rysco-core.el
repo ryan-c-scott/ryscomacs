@@ -313,6 +313,7 @@
       '((org-agenda-files . (:tag . "refile_target")))
 
       org-agenda-show-inherited-tags nil
+      org-agenda-window-setup 'current-window
       org-reverse-note-order t
 
       org-html-html5-fancy t
