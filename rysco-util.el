@@ -580,6 +580,8 @@ With prefix-arg prompt for type if available with your AG version."
   ""
   :group 'rysco-common-links)
 
+(defvar rysco-common-links-link-converter 'identity)
+
 (defun helm-rysco-goto-common-links--pattern (pattern)
   (replace-regexp-in-string
    (rx (or line-start whitespace)
@@ -635,10 +637,12 @@ With prefix-arg prompt for type if available with your AG version."
       " "
       location))))
 
-(defun rysco-goto-common-links--type (link)
+(defun rysco-goto-common-links--type (link &optional allow-remote)
   (cond
    ((functionp link)
     'func)
+   ((and (tramp-tramp-file-p link) (not allow-remote))
+    'tramp)
    ((f-directory? link)
     'dired)
    ((listp link)
@@ -652,7 +656,8 @@ With prefix-arg prompt for type if available with your AG version."
     'url)))
 
 (defun rysco-goto-common-links--execute (link)
-  (let ((type (rysco-goto-common-links--type link)))
+  (let* ((link (funcall rysco-common-links-link-converter link))
+         (type (rysco-goto-common-links--type link t)))
     (pcase type
       ('func (funcall link))
       ('dired (dired link))
