@@ -930,6 +930,33 @@ With prefix-arg prompt for type if available with your AG version."
    concat
    (format "%s=\"%s\"," (substring k 1) v)))
 
+(cl-defun rysco-simple-graph--nodes (patch &key subgraph properties rand-state color-cache)
+  (when subgraph
+    (insert (format "subgraph cluster_%s {\n" subgraph)))
+
+  (loop
+   for entry in patch do
+   (pcase entry
+     (`(:group ,(and (pred stringp) name) . ,group-data)
+      (rysco-simple-graph--nodes group-data :subgraph name))
+
+     (`(,(and (or (pred stringp) (pred symbolp)) mod) . ,rest)
+      (insert (format "\"%s\";\n" mod)))
+
+     (`(,mod-name . data)
+      (insert
+       (format
+        "\"%s\" [%s];\n"
+        mod-name
+        (rysco-simple-graph--plist-to-settings
+         data
+         mod-name
+         color-cache
+         rand-state))))))
+
+  (when subgraph
+    (insert (format "}\n"))))
+
 (cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed)
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
          (color-cache (make-hash-table :test 'equal))
@@ -940,28 +967,16 @@ With prefix-arg prompt for type if available with your AG version."
               "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
 
       ;; Insert nodes
-      (cl-loop
-       for (mod . connections) in patch
-       if (listp mod)
-       do
-       (-let [(mod-name . data) mod]
-         (insert
-          (format
-           "\"%s\" [%s];\n"
-           mod-name
-           (rysco-simple-graph--plist-to-settings
-            data
-            mod-name
-            color-cache
-            rand-state))))
-
-       else
-       do (insert (format "\"%s\";\n" mod)))
+      (rysco-simple-graph--nodes
+       patch
+       :color-cache color-cache
+       :rand-state rand-state)
 
       ;; Insert connections
       (cl-loop
        for entry in patch
-       when (listp entry)
+       when (and (listp entry)
+                 (not (equal (car entry) :group)))
        for (mod . connections) in patch do
        (cl-loop
         with mod = (if (listp mod)
