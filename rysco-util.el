@@ -967,13 +967,66 @@ With prefix-arg prompt for type if available with your AG version."
     (insert (format "}\n"))))
 
 (cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed)
+  "Calls Graphviz and generates a graph from the provided, simplified graph format.
+
+Nodes and connections can be specified as (node connection1 connection2 ... connection3)
+Connections can be a symbol, a string, or a list in the form of (name label . PROPERTIES)
+PROPERTIES is an optional plist of keys/values that are set for the connection entry in the resultant dot output.
+
+Nodes can be grouped into subgraphs using an entry (:group name ...)
+
+Dot settings for the current graph can be specified using an entry (:properties key1 value1 ... keyN valueN)
+
+  (rysco-simple-graph
+   '(
+     (:properties
+      label \"Graph Title\"
+      labeljust l
+      labelloc t
+      rankdir LR
+      size 13
+      concentrate true)
+
+     (other)
+     (a)
+     (b)
+     (:group \"platform\"
+             (:properties
+              label \"Platform Label\"
+              style filled
+              penwidth 0
+              fillcolor \"#B0e0e6\")
+
+             (tc)
+             (server))
+
+     (other
+      (a \"tc\")
+      (b \"tc\"))
+
+     (a
+      (tc \"label\"))
+
+     (tc
+      (b \"other label\"))
+
+     (b
+      (server \"3rd label\"))
+
+     (server
+      (b \"Denied\"))))
+
+
+More Graphviz Dot formatting information here: https://graphviz.org/doc/info/attrs.html"
+
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
          (color-cache (make-hash-table :test 'equal))
          (rand-state (cl-make-random-state rand-seed)))
     (with-temp-file temp-path
       (insert "digraph patch {\n"
+              "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n"
               (or graph-code "")
-              "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n")
+              "\n")
 
       ;; Insert nodes
       (rysco-simple-graph--nodes
