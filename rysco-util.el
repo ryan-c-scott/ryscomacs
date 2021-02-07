@@ -943,7 +943,7 @@ With prefix-arg prompt for type if available with your AG version."
   (loop
    for entry in patch do
    (pcase entry
-     (`(:group ,(and (pred stringp) name) . ,group-data)
+     (`(:group ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
       (rysco-simple-graph--nodes group-data :subgraph name))
 
      (`(:properties . ,property-data)
