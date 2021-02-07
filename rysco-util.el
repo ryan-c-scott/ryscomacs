@@ -986,15 +986,15 @@ RAND-SEED is the random seed used for color generation.  Specifying this will ca
 
 PATCH is the graph data in the following form.
 
-Nodes and connections can be specified as (node connection1 connection2 ... connection3)
-Nodes can be a symbol, string, or a list of the form (id key1 value1 ... keyN valueN)
+Nodes and connections can be specified as (node CONNECTION1 CONNECTION2 ... CONNECTION3)
+Nodes can be a symbol, string, or a list of the form (ID KEY1 VALUE1 ... KEYN VALUEN)
 Node data is specified as a plist.
-Connections can be a symbol, a string, or a list of form (dest label . PROPERTIES)
+Connections can be a symbol, a string, or a list of form (DEST LABEL . PROPERTIES)
 PROPERTIES is an optional plist of keys/values that are set for the connection entry in the resultant dot output.
 
-Nodes can be grouped into subgraphs using an entry (:group name ...)
+Nodes can be grouped into subgraphs using an entry (:group NAME ...)
 
-Dot settings for the current graph can be specified using an entry (:properties key1 value1 ... keyN valueN)
+Dot settings for the current graph can be specified using an entry (:properties KEY1 VALUE1 ... KEYN VALUEN)
 
 Some common properties:
           rankdir=LR
