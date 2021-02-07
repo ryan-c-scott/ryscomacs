@@ -936,21 +936,26 @@ With prefix-arg prompt for type if available with your AG version."
    (insert
     (format "%s=%s\n" k (prin1-to-string v)))))
 
-(cl-defun rysco-simple-graph--nodes (patch &key subgraph properties rand-state color-cache)
+(cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache)
   (when subgraph
     (insert (format "subgraph cluster_%s {\n" subgraph)))
 
   (loop
    for entry in patch do
    (pcase entry
-     (`(:group ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
-      (rysco-simple-graph--nodes group-data :subgraph name))
+     (`(,(and (or :group :cluster) type) ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
+      (rysco-simple-graph--nodes group-data :subgraph name :prefix (eq type :cluster)))
 
      (`(:properties . ,property-data)
       (rysco-simple-graph--properties property-data))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod) . ,rest)
-      (insert (format "\"%s\";\n" mod)))
+      (insert (format
+               "\"%s%s\";\n"
+               (if prefix
+                   (format "%s_" subgraph)
+                 "")
+               mod)))
 
      (`(,mod-name . data)
       (insert
@@ -1062,7 +1067,7 @@ Example:
       (cl-loop
        for entry in patch
        when (and (listp entry)
-                 (not (memq (car entry) '(:group :properties))))
+                 (not (memq (car entry) '(:group :cluster :properties))))
        for (mod . connections) in patch do
        (cl-loop
         with mod = (if (listp mod)
