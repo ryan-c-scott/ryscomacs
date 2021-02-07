@@ -986,6 +986,23 @@ Nodes can be grouped into subgraphs using an entry (:group name ...)
 
 Dot settings for the current graph can be specified using an entry (:properties key1 value1 ... keyN valueN)
 
+Some common properties:
+          rankdir=LR
+          rank=source
+          concentrate=true
+          size = \"13\"
+          label = \"Test Label\"
+          fontname = \"Arial\"
+          fontsize = 30.0
+          fontcolor = \"#3b3b3b\"
+          color = \"#aaaaaa\"
+          fillcolor = \"#B0e0e6\"
+          style = filled
+          style = bold
+          penwidth = 0
+          weight = 100
+
+
 Example:
   (rysco-simple-graph
    '(
