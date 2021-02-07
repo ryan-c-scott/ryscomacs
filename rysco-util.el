@@ -949,18 +949,21 @@ With prefix-arg prompt for type if available with your AG version."
      (`(:properties . ,property-data)
       (rysco-simple-graph--properties property-data))
 
-     (`(,(and (or (pred stringp) (pred symbolp)) mod) . ,rest)
+     (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
       (insert (format
                "\"%s%s\";\n"
                (if prefix
                    (format "%s_" subgraph)
                  "")
-               mod)))
+               mod-name)))
 
-     (`(,mod-name . data)
+     (`((,(and (or (pred stringp) (pred symbolp)) mod-name) . ,data) . ,_)
       (insert
        (format
-        "\"%s\" [%s];\n"
+        "\"%s%s\" [%s];\n"
+        (if prefix
+            (format "%s_" subgraph)
+          "")
         mod-name
         (rysco-simple-graph--plist-to-settings
          data
