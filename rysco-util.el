@@ -930,6 +930,12 @@ With prefix-arg prompt for type if available with your AG version."
    concat
    (format "%s=\"%s\"," (substring k 1) v)))
 
+(defun rysco-simple-graph--properties (data)
+  (loop
+   for (k v) on data by 'cddr do
+   (insert
+    (format "%s=%s\n" k (prin1-to-string v)))))
+
 (cl-defun rysco-simple-graph--nodes (patch &key subgraph properties rand-state color-cache)
   (when subgraph
     (insert (format "subgraph cluster_%s {\n" subgraph)))
@@ -939,6 +945,9 @@ With prefix-arg prompt for type if available with your AG version."
    (pcase entry
      (`(:group ,(and (pred stringp) name) . ,group-data)
       (rysco-simple-graph--nodes group-data :subgraph name))
+
+     (`(:properties . ,property-data)
+      (rysco-simple-graph--properties property-data))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod) . ,rest)
       (insert (format "\"%s\";\n" mod)))
@@ -976,7 +985,7 @@ With prefix-arg prompt for type if available with your AG version."
       (cl-loop
        for entry in patch
        when (and (listp entry)
-                 (not (equal (car entry) :group)))
+                 (not (memq (car entry) '(:group :properties))))
        for (mod . connections) in patch do
        (cl-loop
         with mod = (if (listp mod)
