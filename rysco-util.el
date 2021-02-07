@@ -969,6 +969,15 @@ With prefix-arg prompt for type if available with your AG version."
 (cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed)
   "Calls Graphviz and generates a graph from the provided, simplified graph format.
 
+More Graphviz Dot formatting information at URL `https://graphviz.org/doc/info/attrs.html'
+
+FILENAME will be used to set the output filename and return that as a string.
+GRAPH-CODE is a string that will be inserted verbatim into the generated Graphviz Dot code after the default values.
+
+RAND-SEED is the random seed used for color generation.  Specifying this will cause the colors used for any stable graph to be the same.
+
+PATCH is the graph data in the following form.
+
 Nodes and connections can be specified as (node connection1 connection2 ... connection3)
 Connections can be a symbol, a string, or a list in the form of (name label . PROPERTIES)
 PROPERTIES is an optional plist of keys/values that are set for the connection entry in the resultant dot output.
@@ -977,6 +986,7 @@ Nodes can be grouped into subgraphs using an entry (:group name ...)
 
 Dot settings for the current graph can be specified using an entry (:properties key1 value1 ... keyN valueN)
 
+Example:
   (rysco-simple-graph
    '(
      (:properties
@@ -1014,10 +1024,7 @@ Dot settings for the current graph can be specified using an entry (:properties 
       (server \"3rd label\"))
 
      (server
-      (b \"Denied\"))))
-
-
-More Graphviz Dot formatting information here: https://graphviz.org/doc/info/attrs.html"
+      (b \"Denied\"))))"
 
   (-let ((temp-path (make-temp-file "patch" nil ".dot"))
          (color-cache (make-hash-table :test 'equal))
