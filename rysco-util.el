@@ -924,7 +924,7 @@ With prefix-arg prompt for type if available with your AG version."
                   (setq color
                         (rysco-simple-graph--generate-color rand-state))
                   color-cache))))
-            (v v))
+            (_ v))
 
    when (and k v)
    concat
