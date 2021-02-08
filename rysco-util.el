@@ -934,7 +934,7 @@ With prefix-arg prompt for type if available with your AG version."
   (loop
    for (k v) on data by 'cddr do
    (insert
-    (format "%s=%s\n" k (prin1-to-string v)))))
+    (format "%s=%s;\n" k (prin1-to-string v)))))
 
 (cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache)
   (when subgraph
