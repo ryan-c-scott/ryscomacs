@@ -789,7 +789,7 @@ With prefix-arg prompt for type if available with your AG version."
                        ,(format-time-string "%H:%M ")
                        (,(eshell/whoami) . (:inherit ,default-face :foreground "darkgoldenrod1" :slant italic :weight bold))
                        "@"
-                       ,(system-name)
+                       ,rysco-system-name
                        "]"
                        (" " . ,dir-face)
                        (,(--when-let vc-backend
