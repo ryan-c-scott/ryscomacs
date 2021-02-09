@@ -1038,6 +1038,13 @@ Nodes can be grouped into subgraphs using an entry (:group NAME ...)
 
 Dot settings for the current graph can be specified using an entry (:properties KEY1 VALUE1 ... KEYN VALUEN)
 
+Object layers can be set using (... :layer NAME) where NAME is a symbol, string, or number.
+NAME can also specify multiple layers as a string with layer names separated by `?:'.
+When LAYERS is provided, any objects not specified as being on at least one of the active layers will be drawn transparently such that it is not seen, but the graph layout is stable.
+
+If LAYERS is omitted all layers are drawn.
+Objects with no layer specified are always drawn.
+
 Some common properties:
           rankdir=LR
           rank=source
@@ -1099,9 +1106,11 @@ Example:
           (color-cache (make-hash-table :test 'equal))
           (rand-state (cl-make-random-state rand-seed))
           (layers (when layers
-                    (if (listp layers)
-                        layers
-                      `(,layers)))))
+                    (--map
+                     (format "%s" it)
+                     (if (listp layers)
+                         layers
+                       `(,layers))))))
 
     (with-temp-file temp-path
       (insert "digraph patch {\n"
