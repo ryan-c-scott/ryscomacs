@@ -932,7 +932,12 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-simple-graph--properties (data)
   (loop
-   for (k v) on data by 'cddr do
+   for (k v) on data by 'cddr
+   as k = (format "%s" k)
+   as k = (if (equal (substring k 0 1) ":")
+              (substring k 1)
+            k)
+   do
    (insert
     (format "%s=%s;\n" k (prin1-to-string v)))))
 
