@@ -937,9 +937,8 @@ With prefix-arg prompt for type if available with your AG version."
    as k = (if (equal (substring k 0 1) ":")
               (substring k 1)
             k)
-   do
-   (insert
-    (format "%s=%s;\n" k (prin1-to-string v)))))
+   concat
+   (format "%s=%s;\n" k (prin1-to-string v))))
 
 (cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache)
   (when subgraph
@@ -952,7 +951,8 @@ With prefix-arg prompt for type if available with your AG version."
       (rysco-simple-graph--nodes group-data :subgraph name :prefix (eq type :cluster)))
 
      (`(:properties . ,property-data)
-      (rysco-simple-graph--properties property-data))
+      (insert
+       (rysco-simple-graph--properties property-data)))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
       (insert (format
