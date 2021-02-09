@@ -1016,6 +1016,16 @@ With prefix-arg prompt for type if available with your AG version."
   (when subgraph
     (insert (format "}\n"))))
 
+(cl-defun rysco-simple-graph--guess-filename (&optional ext)
+  (when (boundp 'out)
+    out)
+  (when (equal major-mode 'org-mode)
+    (concat
+     (replace-regexp-in-string
+      "[/\\:]" "-"
+      (s-join "-" (org-get-outline-path t)))
+     (or ext ".png"))))
+
 (cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed layers)
   "Calls Graphviz and generates a graph from the provided, simplified graph format.
 
@@ -1106,11 +1116,12 @@ Example:
           (color-cache (make-hash-table :test 'equal))
           (rand-state (cl-make-random-state rand-seed))
           (layers (when layers
+                    (-flatten
                     (--map
-                     (format "%s" it)
+                     (split-string (format "%s" it) "[:]" t "[ ]+")
                      (if (listp layers)
                          layers
-                       `(,layers))))))
+                       `(,layers)))))))
 
     (with-temp-file temp-path
       (insert "digraph patch {\n"
@@ -1157,14 +1168,7 @@ Example:
       (insert "\n}\n"))
 
     (-let ((filename (or filename
-                         (when (boundp 'out)
-                           out)
-                         (when (equal major-mode 'org-mode)
-                           (concat
-                            (replace-regexp-in-string
-                             "[/\\:]" "-"
-                             (s-join "-" (org-get-outline-path t)))
-                            ".png"))))
+                         (rysco-simple-graph--guess-filename)))
            (out-path (format "%s.png" (file-name-sans-extension temp-path)))
            (command-result (string-trim
                             (shell-command-to-string
@@ -1172,9 +1176,54 @@ Example:
       (if (string-prefix-p "Error:" command-result)
           (message command-result)
 
-        ;; Delete temp file?
+        (delete-file temp-path)
+
         (rename-file out-path filename t)
         filename))))
+
+(cl-defun rysco-simple-graph-animated (patch frames &key filename graph-code rand-seed delay loop debug)
+  "Generates an animated gif from the provided graph.
+See `rysco-simple-graph' for more information.
+
+FRAMES is a list of all layers to render in order.
+DELAY is the delay between frames (passed to Imagemagick).
+LOOP is the number of loop cycles (passed to Imagemagick).
+DEBUG set to non-nil will create a single frame gif with all of the specified layers present.  Useful for seeing all of the objects at once.
+"
+  (loop
+   with filename = (or filename (rysco-simple-graph--guess-filename ".gif"))
+   with delay = (or delay 100)
+   with loop = (or loop 0)
+   with frames = (if debug
+                     (list (s-join ":" (--map (format "%s" it) frames)))
+                   frames)
+
+   with frame-list
+
+   for layer in frames
+   as frame-name = (make-temp-file "patch" nil ".png")
+
+   collect
+   (rysco-simple-graph patch
+                       :filename frame-name
+                       :graph-code graph-code
+                       :rand-seed rand-seed
+                       :layers layer)
+   into frame-list
+
+   finally return
+   (let* ((cmd (format
+                "%s -delay %s -loop %s %s \"%s\""
+                rysco-imagemagick-executable delay loop
+                (apply 'concat (--map (format "\"%s\" " it) frame-list))
+                filename))
+
+          (command-result (string-trim (shell-command-to-string cmd))))
+
+     (loop for temp in frame-list do
+           (delete-file temp))
+
+     filename)))
 
 (defun rysco-add-hunspell-dictionaries ()
   (interactive)
