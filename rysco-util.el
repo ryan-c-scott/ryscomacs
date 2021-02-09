@@ -908,8 +908,22 @@ With prefix-arg prompt for type if available with your AG version."
         0.5)
      2)))
 
-(cl-defun rysco-simple-graph--plist-to-settings (data &optional id color-cache rand-state)
+(defun rysco-simple-graph--layer-visible (all-layers obj-layer)
+  (or (or (eq all-layers nil)
+          (eq obj-layer nil))
+      (-let [current-layers (split-string
+                             (format "%s" obj-layer)
+                             "[:]"
+                             t
+                             "[ ]+")]
+        (--any? (cl-member it all-layers :test 'string-equal) current-layers))))
+
+(cl-defun rysco-simple-graph--plist-to-settings (data &optional id color-cache rand-state layers)
   (loop
+   with out
+   with obj-layer = (plist-get data :layer)
+   with visible = (rysco-simple-graph--layer-visible layers obj-layer)
+
    for k in data by 'cddr
    as k = (format "%s" k)
    for v in (cdr data) by 'cddr
@@ -928,19 +942,37 @@ With prefix-arg prompt for type if available with your AG version."
 
    when (and k v)
    concat
-   (format "%s=\"%s\"," (substring k 1) v)))
+   (format "%s=\"%s\"," (substring k 1) v)
+   into out
 
-(defun rysco-simple-graph--properties (data)
+   finally return
+   (concat
+    out
+    (when (not visible)
+      "fontcolor=\"#FF000000\", bgcolor=\"#FF000000\", color=\"#FF000000\""))))
+
+(defun rysco-simple-graph--properties (data &optional layers)
   (loop
+   with out
+   with obj-layer = (plist-get data :layer)
+   with visible = (rysco-simple-graph--layer-visible layers obj-layer)
+
    for (k v) on data by 'cddr
    as k = (format "%s" k)
    as k = (if (equal (substring k 0 1) ":")
               (substring k 1)
             k)
    concat
-   (format "%s=%s;\n" k (prin1-to-string v))))
+   (format "%s=%s;\n" k (prin1-to-string v))
+   into out
 
-(cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache)
+   finally return
+   (concat
+    out
+    (when (not visible)
+      "fontcolor=\"#FF000000\"; bgcolor=\"#FF000000\"; color=\"#FF000000\";\n"))))
+
+(cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache layers)
   (when subgraph
     (insert (format "subgraph cluster_%s {\n" subgraph)))
 
@@ -948,11 +980,15 @@ With prefix-arg prompt for type if available with your AG version."
    for entry in patch do
    (pcase entry
      (`(,(and (or :group :cluster) type) ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
-      (rysco-simple-graph--nodes group-data :subgraph name :prefix (eq type :cluster)))
+      (rysco-simple-graph--nodes
+       group-data
+       :subgraph name
+       :prefix (eq type :cluster)
+       :layers layers))
 
      (`(:properties . ,property-data)
       (insert
-       (rysco-simple-graph--properties property-data)))
+       (rysco-simple-graph--properties property-data layers)))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
       (insert (format
@@ -974,12 +1010,13 @@ With prefix-arg prompt for type if available with your AG version."
          data
          mod-name
          color-cache
-         rand-state))))))
+         rand-state
+         layers))))))
 
   (when subgraph
     (insert (format "}\n"))))
 
-(cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed)
+(cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed layers)
   "Calls Graphviz and generates a graph from the provided, simplified graph format.
 
 More Graphviz Dot formatting information at URL `https://graphviz.org/doc/info/attrs.html'
@@ -1058,9 +1095,14 @@ Example:
      (server
       (b \"Denied\"))))"
 
-  (-let ((temp-path (make-temp-file "patch" nil ".dot"))
-         (color-cache (make-hash-table :test 'equal))
-         (rand-state (cl-make-random-state rand-seed)))
+  (-let* ((temp-path (make-temp-file "patch" nil ".dot"))
+          (color-cache (make-hash-table :test 'equal))
+          (rand-state (cl-make-random-state rand-seed))
+          (layers (when layers
+                    (if (listp layers)
+                        layers
+                      `(,layers)))))
+
     (with-temp-file temp-path
       (insert "digraph patch {\n"
               "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n"
@@ -1071,7 +1113,8 @@ Example:
       (rysco-simple-graph--nodes
        patch
        :color-cache color-cache
-       :rand-state rand-state)
+       :rand-state rand-state
+       :layers layers)
 
       ;; Insert connections
       (cl-loop
@@ -1092,13 +1135,11 @@ Example:
               (unless color
                 (setq color (rysco-simple-graph--generate-color rand-state))
                 (puthash comment color color-cache))
-              ;; TODO:  Don't insert auto-generated color if settings are specified
               (format
                "\"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",%s]" dest comment color color
                (or
                 (rysco-simple-graph--plist-to-settings
-                 settings comment color-cache rand-state
-                 )
+                 settings comment color-cache rand-state layers)
                 ""))))
            (dest
             (format "\"%s\"" dest)))
