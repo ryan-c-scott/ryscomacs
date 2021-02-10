@@ -451,6 +451,15 @@
                 (apply f args)))
 
             (advice-add 'helm-eshell-history :around 'rysco-eshell-history-wrapper)
+
+            ;; HACK: Eshell has some completion quirks
+            ;; .This addresses funkiness in situations where completion of directories would go haywire and search the entire system path for candidates.
+            ;; .Entirely possible this doesn't work in all cases, but serves my purposes
+            (defun rysco-eshell-completion-hack (&rest _)
+              (setq completion-in-region--data nil))
+
+            (advice-add 'eshell-send-input :before 'rysco-eshell-completion-hack)
+
             (eshell/alias "d" "dired-other-window $1")
             (eshell/alias "ff" "find-file-other-window $1")
             (eshell/alias "dir" "ls $*")
