@@ -49,8 +49,6 @@
     (mkdir straight-versions t)
     (copy-file repo-versions straight-versions t)))
 
-(setq rysco-system-name (system-name))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 (rysco-packages
