@@ -1141,28 +1141,38 @@ Example:
        for entry in patch
        when (and (listp entry)
                  (not (memq (car entry) '(:group :cluster :properties))))
-       for (mod . connections) in patch do
+       for (mod . connections) in patch
+       as forward = t
+       as mod = (if (listp mod)
+                    (car mod)
+                  mod)
+
+       do
        (cl-loop
-        with mod = (if (listp mod)
-                       (car mod)
-                     mod)
         for dest in connections do
         (insert
-         (format "\"%s\" -> " mod)
          (pcase dest
+           ('> (setq forward t) "#")
+           ('< (setq forward nil) "#")
            (`(,dest ,comment . ,settings)
             (let ((color (gethash comment color-cache)))
               (unless color
                 (setq color (rysco-simple-graph--generate-color rand-state))
                 (puthash comment color color-cache))
               (format
-               "\"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",%s]" dest comment color color
+               "\"%s\" -> \"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",%s]"
+               (if forward mod dest)
+               (if forward dest mod)
+               comment color color
                (or
                 (rysco-simple-graph--plist-to-settings
                  settings comment color-cache rand-state layers)
                 ""))))
            (dest
-            (format "\"%s\"" dest)))
+            (format
+             "\"%s\" -> \"%s\""
+             (if forward mod dest)
+             (if forward dest mod))))
          ";\n")))
 
       (insert "\n}\n"))
