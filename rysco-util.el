@@ -1157,7 +1157,9 @@ Example:
            (`(,dest ,comment . ,settings)
             (let ((color (gethash comment color-cache)))
               (unless color
-                (setq color (rysco-simple-graph--generate-color rand-state))
+                (setq color
+                      (or (plist-get settings :color)
+                          (rysco-simple-graph--generate-color rand-state)))
                 (puthash comment color color-cache))
               (format
                "\"%s\" -> \"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\",%s]"
