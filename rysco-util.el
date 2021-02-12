@@ -972,49 +972,46 @@ With prefix-arg prompt for type if available with your AG version."
     (when (not visible)
       "fontcolor=\"#FF000000\"; bgcolor=\"#FF000000\"; color=\"#FF000000\";\n"))))
 
-(cl-defun rysco-simple-graph--nodes (patch &key subgraph prefix properties rand-state color-cache layers)
-  (when subgraph
-    (insert (format "subgraph cluster_%s {\n" subgraph)))
-
+(cl-defun rysco-simple-graph--nodes (patch &key path name subgraph prefix properties rand-state color-cache layers)
   (loop
+   with entry-prefix = (if path (format "%s_" path) "")
+
    for entry in patch do
    (pcase entry
      (`(,(and (or :group :cluster) type) ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
+      (insert (format "subgraph cluster_%s%s {\n" entry-prefix name))
+
       (rysco-simple-graph--nodes
        group-data
-       :subgraph name
+       :name name
+       :path (if (eq type :cluster)
+                 (if path (format "%s_%s" path name) name)
+               path)
+       :subgraph t
        :prefix (eq type :cluster)
-       :layers layers))
+       :layers layers)
+
+      (insert (format "}\n")))
 
      (`(:properties . ,property-data)
       (insert
        (rysco-simple-graph--properties property-data layers)))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
-      (insert (format
-               "\"%s%s\";\n"
-               (if prefix
-                   (format "%s_" subgraph)
-                 "")
-               mod-name)))
+      (insert (format "\"%s%s\";\n" entry-prefix mod-name)))
 
      (`((,(and (or (pred stringp) (pred symbolp)) mod-name) . ,data) . ,_)
       (insert
        (format
         "\"%s%s\" [%s];\n"
-        (if prefix
-            (format "%s_" subgraph)
-          "")
+        entry-prefix
         mod-name
         (rysco-simple-graph--plist-to-settings
          data
          mod-name
          color-cache
          rand-state
-         layers))))))
-
-  (when subgraph
-    (insert (format "}\n"))))
+         layers)))))))
 
 (cl-defun rysco-simple-graph--guess-filename (&optional ext)
   (when (boundp 'out)
