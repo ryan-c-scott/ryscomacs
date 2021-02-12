@@ -223,11 +223,22 @@
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
+(defun rysco-org-src-execute (&rest _)
+  (interactive)
+  (let ((block-point org-src--beg-marker))
+    (with-current-buffer (org-src-source-buffer)
+      (save-excursion
+        (goto-char block-point)
+        (call-interactively 'org-ctrl-c-ctrl-c)))))
+
+
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 
 (advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
+
+(advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
 
 ;;
 (provide 'rysco-org)
