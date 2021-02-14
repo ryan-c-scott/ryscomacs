@@ -355,6 +355,21 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
     (save-buffer)
     (kill-buffer)))
 
+(defun rysco-web-query (query)
+  "Visits a search engine using `browse-url'.
+The URL is created by calling `format' with the provided QUERY, using the format string `rysco-web-search-engine-string'."
+  (interactive (-let [initial (or
+                               (if(region-active-p)
+                                   (buffer-substring-no-properties (region-beginning) (region-end))
+                                 (thing-at-point 'symbol))
+                               "")]
+                 `(,(read-string
+                     "Query: "
+                     (s-trim
+                      (s-replace-regexp "[()]+" "" initial))))))
+  (browse-url
+   (format rysco-web-search-engine-string (url-encode-url query))))
+
 (defun rysco-private-browsing-p ()
   (and
    (equal browse-url-chrome-program rysco-private-browser-program)

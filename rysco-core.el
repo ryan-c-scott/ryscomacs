@@ -38,6 +38,7 @@
 (defvar rysco-common-links nil)
 (defvar rysco-private-browser-program nil)
 (defvar rysco-private-browser-arguments nil)
+(defvar rysco-web-search-engine-string "https://duckduckgo.com/?q=%s")
 (defvar rysco-imagemagick-executable nil)
 (defvar-local org-export-directory "org-export")
 
