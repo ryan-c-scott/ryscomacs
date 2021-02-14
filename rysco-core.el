@@ -78,6 +78,7 @@
  (helm-org :type git :host github :repo "emacs-helm/helm-org")
  helm-projectile
  helm-descbinds
+ helm-unicode
  json-mode
  rjsx-mode
  lua-mode
@@ -286,6 +287,7 @@
                            "CANCELLED(c@)"))
       org-use-fast-todo-selection 'expert
       org-log-into-drawer t
+      org-ellipsis " ➟"
 
       org-super-agenda-groups
       '((:name "Unfiled"
