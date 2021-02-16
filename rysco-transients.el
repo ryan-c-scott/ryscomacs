@@ -27,6 +27,8 @@
     ("dm" "Load" desktop+-load)]
 
    ["Windows"
+    ("wn" "Name Frame" set-frame-name)
+    ("wp" "Name Frame [Project]" rysco-name-frame-project)
     ("wc" "Clone & Narrow" rysco-clone-and-narrow)
     ("wf" "Buffer Font" rysco-set-buffer-local-font)]
 
