@@ -392,8 +392,14 @@
 (require 'rysco-transients)
 
 ;; Local config
-(define-transient-command rysco-personal-transient ()
-  "Personal" [])
+(defvar rysco-personal-transient-header
+  (concat
+   (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
+   (propertize " Personal" 'face 'rysco-main-transient-title)))
+
+(transient-define-prefix rysco-personal-transient ()
+  [:description (lambda () rysco-personal-transient-header) ""]
+  [("<SPC>" "Main ➠" rysco-main-transient :transient nil)])
 
 (defun rysco--rememoize-mode-icons ()
   (interactive)
@@ -411,12 +417,7 @@
   (when rysco-personal-transients
     (transient-replace-suffix 'rysco-personal-transient '(0)
       (vconcat
-       [:description
-        (lambda ()
-          (concat
-           (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
-           (propertize " Personal" 'face 'rysco-main-transient-title)
-           "\n"))]
+       (vector (concat rysco-personal-transient-header "\n"))
        (cl-loop for item in rysco-personal-transients vconcat (list item)))))
 
   (unless init

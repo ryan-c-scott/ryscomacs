@@ -14,7 +14,7 @@
   "Face for Ryscomacs title in main transient"
   :group 'ryscomacs-faces)
 
-(define-transient-command rysco-main-transient ()
+(transient-define-prefix rysco-main-transient ()
   "Miscellany"
   [:description
    (lambda ()
@@ -83,7 +83,8 @@
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info-info)
     ("he" "Elisp" helm-info-elisp)
-    ("hc" "CL" helm-info-cl)]])
+    ("hc" "CL" helm-info-cl)]]
+   [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
 
 ;; Magit intergation
 (define-transient-command rysco-magit-transient ()
