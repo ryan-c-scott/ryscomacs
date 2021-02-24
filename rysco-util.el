@@ -518,7 +518,10 @@ With prefix-arg prompt for type if available with your AG version."
   (interactive)
   (let ((name (projectile-project-name)))
     (if (string= name "-")
-        (--when-let (read-string "Name: ")
+        (--when-let
+            (pcase major-mode
+              ('org-agenda-mode "AGENDA")
+              (_ (read-string "Name: ")))
           (set-frame-name it))
       (set-frame-name (format "[ %s ]" (upcase name))))))
 
