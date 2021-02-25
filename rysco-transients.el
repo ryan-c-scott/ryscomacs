@@ -72,12 +72,12 @@
     ("cr" "Reload" rysco-load-local-config)
     ("ce" "Edit" rysco-edit-config)]
 
-   ["Calendar"
+   ["Internet"
     ("go" "Calendar Open" rysco-calendar-open)
     ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
-    ("gt" "GCal Token" org-gcal-request-token)
     ("gr" "GCal Refresh" rysco-calendar-gcal-refresh-token)
-    ("gl" "Links" helm-rysco-goto-common-links)]
+    ("gl" "Links" helm-rysco-goto-common-links)
+    ("gs" "Web Search" rysco-web-query)]
 
    ["Help"
     ("hl" "Lossage" view-lossage)
