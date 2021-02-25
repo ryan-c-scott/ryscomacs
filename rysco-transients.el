@@ -23,8 +23,8 @@
       (propertize " Miscellany" 'face 'rysco-main-transient-title)
       "\n"))
    ["Desktops"
-    ("db" "Create" rysco-desktop+-create)
-    ("dm" "Load" desktop+-load)]
+    ("wb" "Create" rysco-desktop+-create)
+    ("wm" "Load" desktop+-load)]
 
    ["Windows"
     ("wn" "Name Frame" set-frame-name)
