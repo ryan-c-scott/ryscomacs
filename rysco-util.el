@@ -477,6 +477,15 @@ If region is active, narrow to the region boundaries first."
         (make-string (max 0 (- (or pad out-length) out-length)) (string-to-char unset-char))
         (reverse out))))))
 
+(defun rysco-parse-command-string (args)
+  "Returns a list of arguments from ARGS following elisp syntax.
+All items are converted to strings.
+Quoted strings are returned as a single element."
+  (loop
+   for (a . pos) = (ignore-errors (read-from-string args pos))
+   while a
+   collect (format "%s" a)))
+
 (defun pivot-table-columns (data &optional add-hlines)
   (let ((result
          (cl-loop
