@@ -81,9 +81,8 @@
 
    ["Help"
     ("hl" "Lossage" view-lossage)
-    ("hi" "Info" helm-info-info)
-    ("he" "Elisp" helm-info-elisp)
-    ("hc" "CL" helm-info-cl)]]
+    ("hi" "Info" helm-info)]]
+
    [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
 
 ;; Magit intergation
