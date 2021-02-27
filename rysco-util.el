@@ -486,6 +486,76 @@ Quoted strings are returned as a single element."
    while a
    collect (format "%s" a)))
 
+(defun rysco-json-pretty-string (text)
+  (with-temp-buffer
+    (rysco-json-pretty-insert text)
+    (json-mode)
+    (font-lock-default-function 'json-mode)
+    (font-lock-default-fontify-region
+     (point-min)
+     (point-max)
+     nil)
+    (rysco-fontify-using-faces (buffer-string))))
+
+(defun rysco-json-pretty-insert (text)
+  (loop
+   with text = (s-replace "\n" "" text)
+   with array = 0
+   with obj = 0
+   with last
+   with capture
+
+   for c across text
+   as before = nil
+   as after = nil
+   as skip = nil
+
+   do
+   (pcase c
+     (?\"
+      (unless (equal last ?\\)
+        (setq capture (not capture)))))
+
+   do
+   (pcase c
+     ((or ?\s ?\t)
+      (unless (or capture (equal last ?\:))
+        (setq skip t)))
+
+     (?\n
+      )
+
+     (?\,
+      (setq after t))
+
+     (?\{
+      (incf obj)
+      (setq after t))
+
+     (?\}
+      (decf obj)
+      (setq after t before t))
+
+     (?\[
+      (incf array)
+      (setq after t))
+
+     (?\]
+      (decf array)
+      (setq before t after t))
+     )
+
+   as depth = (make-string (* (+ array obj) 2) ?\s)
+
+   if before do (insert depth "\n" depth)
+
+   unless skip do (insert-char c)
+
+   if after do (insert depth "\n" depth)
+
+   do (setq last c)
+))
+
 (defun rysco-fontify-using-faces (text)
   (let ((pos 0))
     (while (setq next (next-single-property-change pos 'face text))
