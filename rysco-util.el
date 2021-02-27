@@ -486,6 +486,14 @@ Quoted strings are returned as a single element."
    while a
    collect (format "%s" a)))
 
+(defun rysco-fontify-using-faces (text)
+  (let ((pos 0))
+    (while (setq next (next-single-property-change pos 'face text))
+      (put-text-property pos next 'font-lock-face (get-text-property pos 'face text) text)
+      (setq pos next))
+    (add-text-properties 0 (length text) '(fontified t) text)
+    text))
+
 (defun pivot-table-columns (data &optional add-hlines)
   (let ((result
          (cl-loop
