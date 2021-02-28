@@ -13,6 +13,8 @@
 (defvar-local mongoer-results-fringe-face
   'mongoer-results-fringe-default-face)
 
+(defvar mongoer-directory-converter 'identity)
+
 (defun mongoer--preoutput-filter (text)
   (unless (string-empty-p text)
     (pcase (aref text 0)
@@ -67,7 +69,9 @@
 ;;;###autoload
 (cl-defun mongoer-connect (&key prog args title dir fringe)
   (interactive)
-  (let* ((default-directory (or dir default-directory))
+  (let* ((default-directory (if dir
+                                (funcall mongoer-directory-converter dir)
+                              default-directory))
          (prog (or prog "mongo"))
          (args (when args (rysco-parse-command-string args)))
          (title (concat "*" (or title "MONGOER") "*"))
