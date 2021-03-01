@@ -1374,12 +1374,12 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
    with anchor = anchor
    with connection-properties
 
-   for it in data
+   for entry in data
    as out = nil
-   do (pcase it
+   do (pcase entry
         (:back (pop anchor))
         (:break (setq anchor nil))
-        ((pred vectorp) (setq connection-properties (append it nil)))
+        ((pred vectorp) (setq connection-properties (append entry nil)))
         (`(:fan . ,rest)
          (-let [(top . conns) (rysco-graph--fan rest (car anchor) connection-properties)]
            (push top anchor)
@@ -1390,10 +1390,10 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
                    (loop
                     for a in (car anchor) collect
                     `(,a ,(if connection-properties
-                              (cons it connection-properties)
-                            it)))
+                              (cons entry connection-properties)
+                            entry)))
                    connection-properties nil))
-           (push `(,it) anchor)))
+           (push `(,entry) anchor)))
 
    if out append out))
 
