@@ -1346,7 +1346,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
      filename)))
 
-(cl-defun rysco-graph--fan (anchor data)
+(cl-defun rysco-graph--fan (data anchor connection-properties)
   (loop
    with connections
    with heads
@@ -1355,30 +1355,38 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
    append (loop
            for a in anchor collect
-           `(,a ,it))
+           `(,a ,(if connection-properties
+                     (cons it connection-properties)
+                   it)))
    into connections
 
    finally return
    (cons heads connections)))
 
 (cl-defun rysco-graph--chain (data &optional anchor)
-  ;; TODO:  Support groups of anchors in a stack
   (loop
    with anchor = anchor
+   with connection-properties
+
    for it in data
    as out = nil
    do (pcase it
         (:back (pop anchor))
         (:break (setq anchor nil))
+        ((pred vectorp) (setq connection-properties (append it nil)))
         (`(:fan . ,rest)
-         (-let [(top . conns) (rysco-graph--fan (car anchor) rest)]
+         (-let [(top . conns) (rysco-graph--fan rest (car anchor) connection-properties)]
            (push top anchor)
-           (setq out conns)))
+           (setq out conns
+                 connection-properties nil)))
         (_ (when anchor
              (setq out
                    (loop
                     for a in (car anchor) collect
-                    `(,a ,it))))
+                    `(,a ,(if connection-properties
+                              (cons it connection-properties)
+                            it)))
+                   connection-properties nil))
            (push `(,it) anchor)))
 
    if out append out))
