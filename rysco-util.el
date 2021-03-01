@@ -1226,7 +1226,8 @@ Example:
                        `(,layers))))))
           (filename (or filename
                         (rysco-simple-graph--guess-filename)))
-          (out-path (format "%s.png" (file-name-sans-extension temp-path))))
+          (out-path (format "%s.png" (file-name-sans-extension temp-path)))
+          out-code)
 
     (with-temp-buffer
       (insert "digraph patch {\n"
@@ -1285,19 +1286,21 @@ Example:
       (insert "\n}\n")
 
       (if as-code
-          (buffer-string)
-        (write-file temp-path)
+          (setq out-code (buffer-string))
+        (write-file temp-path)))
 
-        (-let ((command-result (string-trim
-                                (shell-command-to-string
-                                 (graphviz-compile-command temp-path)))))
-          (if (string-prefix-p "Error:" command-result)
-              (message command-result)
+    (if as-code
+        out-code
+      (-let ((command-result (string-trim
+                              (shell-command-to-string
+                               (graphviz-compile-command temp-path)))))
+        (if (string-prefix-p "Error:" command-result)
+            (message command-result)
 
-            (delete-file temp-path)
+          (delete-file temp-path)
 
-            (rename-file out-path filename t)
-            filename))))))
+          (rename-file out-path filename t)
+          filename)))))
 
 (cl-defun rysco-simple-graph-animated (patch frames &key filename graph-code rand-seed delay loop debug)
   "Generates an animated gif from the provided graph.
