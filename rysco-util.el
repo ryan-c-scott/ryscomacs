@@ -1245,14 +1245,14 @@ Example:
       ;; Insert connections
       (cl-loop
        for entry in patch
-       when (and (listp entry)
-                 (not (memq (car entry) '(:group :cluster :properties))))
        for (mod . connections) in patch
        as forward = t
        as mod = (if (listp mod)
                     (car mod)
                   mod)
 
+       when (and (listp entry)
+                 (not (memq (car entry) '(:group :cluster :properties))))
        do
        (cl-loop
         for dest in connections do
