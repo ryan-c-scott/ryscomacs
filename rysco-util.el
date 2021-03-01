@@ -1346,6 +1346,61 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
      filename)))
 
+(cl-defun rysco-graph--fan (anchor data)
+  (loop
+   with connections
+   with heads
+   for it in data
+   collect it into heads
+
+   append (loop
+           for a in anchor collect
+           `(,a ,it))
+   into connections
+
+   finally return
+   (cons heads connections)))
+
+(cl-defun rysco-graph--chain (data &optional anchor)
+  ;; TODO:  Support groups of anchors in a stack
+  (loop
+   with anchor = anchor
+   for it in data
+   as out = nil
+   do (pcase it
+        (:back (pop anchor))
+        (:break (setq anchor nil))
+        (`(:fan . ,rest)
+         (-let [(top . conns) (rysco-graph--fan (car anchor) rest)]
+           (push top anchor)
+           (setq out conns)))
+        (_ (when anchor
+             (setq out
+                   (loop
+                    for a in (car anchor) collect
+                    `(,a ,it))))
+           (push `(,it) anchor)))
+
+   if out append out))
+
+(cl-defun rysco-graph--process (forms)
+  "Returns a plist of data from processing graph data in FORMS"
+  (loop
+    for f in forms append
+    (pcase f
+      (`(:chain . ,rest) (rysco-graph--chain rest))
+      (_ `(,f)))))
+
+(cl-defmacro rysco-graph (args &rest forms)
+  "Macro that provides a more structured syntax on top of 'rysco-simple-graph.
+ARGS is a plist that will be passed to 'rysco-simple-graph as &key parameters.
+FORMS is a list of graphing specifications."
+
+  `(rysco-simple-graph
+    '
+    ,(rysco-graph--process forms)
+    ,@args))
+
 (defun rysco-add-hunspell-dictionaries ()
   (interactive)
   (let ((dictionary-dir (f-join user-emacs-directory "dictionaries")))
