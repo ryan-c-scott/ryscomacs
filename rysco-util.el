@@ -1350,14 +1350,20 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
   (loop
    with connections
    with heads
-   for it in data
-   collect it into heads
+   for entry in data
+   as skip = (pcase entry
+               ((pred vectorp)
+                (setq connection-properties (append entry nil))))
 
+   unless skip
+   collect entry into heads
+
+   unless skip
    append (loop
            for a in anchor collect
            `(,a ,(if connection-properties
-                     (cons it connection-properties)
-                   it)))
+                     (cons entry connection-properties)
+                   entry)))
    into connections
 
    finally return
