@@ -1128,7 +1128,7 @@ With prefix-arg prompt for type if available with your AG version."
       (s-join "-" (org-get-outline-path t)))
      (or ext ".png"))))
 
-(cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed layers)
+(cl-defun rysco-simple-graph (patch &key filename graph-code rand-seed layers as-code)
   "Calls Graphviz and generates a graph from the provided, simplified graph format.
 
 More Graphviz Dot formatting information at URL `https://graphviz.org/doc/info/attrs.html'
@@ -1223,9 +1223,12 @@ Example:
                      (split-string (format "%s" it) "[:]" t "[ ]+")
                      (if (listp layers)
                          layers
-                       `(,layers)))))))
+                       `(,layers))))))
+          (filename (or filename
+                        (rysco-simple-graph--guess-filename)))
+          (out-path (format "%s.png" (file-name-sans-extension temp-path))))
 
-    (with-temp-file temp-path
+    (with-temp-buffer
       (insert "digraph patch {\n"
               "\nnode  [style=\"rounded,filled,bold\", shape=box, fixedsize=true, width=1.3, fontname=\"Arial\"];\n"
               (or graph-code "")
@@ -1279,21 +1282,22 @@ Example:
              (if forward dest mod))))
          ";\n")))
 
-      (insert "\n}\n"))
+      (insert "\n}\n")
 
-    (-let ((filename (or filename
-                         (rysco-simple-graph--guess-filename)))
-           (out-path (format "%s.png" (file-name-sans-extension temp-path)))
-           (command-result (string-trim
-                            (shell-command-to-string
-                             (graphviz-compile-command temp-path)))))
-      (if (string-prefix-p "Error:" command-result)
-          (message command-result)
+      (if as-code
+          (buffer-string)
+        (write-file temp-path)
 
-        (delete-file temp-path)
+        (-let ((command-result (string-trim
+                                (shell-command-to-string
+                                 (graphviz-compile-command temp-path)))))
+          (if (string-prefix-p "Error:" command-result)
+              (message command-result)
 
-        (rename-file out-path filename t)
-        filename))))
+            (delete-file temp-path)
+
+            (rename-file out-path filename t)
+            filename))))))
 
 (cl-defun rysco-simple-graph-animated (patch frames &key filename graph-code rand-seed delay loop debug)
   "Generates an animated gif from the provided graph.
