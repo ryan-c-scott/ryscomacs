@@ -80,6 +80,7 @@
  helm-projectile
  helm-descbinds
  helm-unicode
+ hl-todo
  json-mode
  rjsx-mode
  lua-mode
@@ -503,6 +504,10 @@
 
 ;; Do not use tabs
 (setq-default indent-tabs-mode nil)
+
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (hl-todo-mode)))
 
 (add-hook 'c-mode-common-hook
 	  '(lambda () (c-set-style "stroustrup")
