@@ -20,7 +20,7 @@
   `(,(vc-find-root "." ".git")))
 
 (defun rysco-desktop+-magit-restore (name &rest args)
-  (magit-status-internal (car args)))
+  (magit-status-setup-buffer (car args)))
 
 (defun rysco-desktop+-disable-auto-save (&rest args)
   (desktop-save-mode-off))
