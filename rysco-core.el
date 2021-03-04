@@ -127,6 +127,7 @@
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
 (require 'rysco-util)
+(require 'rysco-desktop+)
 
 (require 'doom-themes)
 (doom-themes-org-config)
