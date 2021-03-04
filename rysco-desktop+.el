@@ -64,6 +64,15 @@
 
  do (add-to-list 'desktop+-special-buffer-handlers mode))
 
+;; calfw
+(desktop+-add-handler
+    'cfw:calendar-mode
+  (lambda () (eq major-mode 'cfw:calendar-mode))
+  (lambda () '())
+  (lambda (&rest _) (rysco-calendar-open)))
+
+(add-to-list 'desktop+-special-buffer-handlers 'cfw:calendar-mode)
+
 ;; Preserve frame titles
 (push '(name . nil) frameset-filter-alist)
 
