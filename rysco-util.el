@@ -839,6 +839,14 @@ With prefix-arg prompt for type if available with your AG version."
                ,link))
           :action action)))))
 
+;;;###autoload
+(defun rysco-insert-autoload-header ()
+  (interactive)
+  (save-excursion
+    (end-of-line)
+    (beginning-of-defun)
+    (insert generate-autoload-cookie "\n")))
+
 (defun rysco-load-theme (&optional theme)
   (interactive)
   (let ((current (cl-copy-list custom-enabled-themes)))
