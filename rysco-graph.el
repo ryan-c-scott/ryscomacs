@@ -403,22 +403,21 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
          node)))
    node))
 
-(cl-defun rysco-graph--process (from connection-properties &rest forms)
-  (loop
-   for f in forms append
-   (pcase f
-     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
-     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
-     (_ (rysco-graph--node from connection-properties f)))))
+(cl-defun rysco-graph--process (from connection-properties form)
+  (pcase form
+    (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
+    (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
+    (_ (rysco-graph--node from connection-properties form))))
 
 (cl-defun rysco-graph--extract-tails (connections)
   (cdr connections))
 
 ;;;###autoload
 (cl-defmacro rysco-graph (args &rest forms)
-  `(rysco-graph--process nil ,@forms))
-
-
+  `(append
+    ,@(loop
+       for f in forms collect
+       `(car (rysco-graph--process nil nil ',f)))))
 
 ;;
 (provide 'rysco-graph)
