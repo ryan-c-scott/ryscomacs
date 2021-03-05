@@ -350,26 +350,25 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
 (cl-defun rysco-graph--fan (from connection-properties data)
   (loop
-   with connections
-   with heads
+   with results
+   with anchors
+   with connection-properties
+
    for entry in data
-   as skip = (pcase entry
-               ((pred vectorp)
-                (setq connection-properties (append entry nil))))
+   as out = nil
+   do (pcase entry
+        ((pred vectorp) (setq connection-properties (append entry nil)))
+        (_
+         (let* ((these (rysco-graph--process from connection-properties entry))
+                (tails (rysco-graph--extract-tails these)))
+           (setq
+            out (car these)
+            anchors (append anchors tails)
+            connection-properties nil))))
 
-   unless skip
-   collect entry into heads
-
-   unless skip
-   append (loop
-           for a in from collect
-           `(,a ,(if connection-properties
-                     (cons entry connection-properties)
-                   entry)))
-   into connections
-
+   when out append out into results
    finally return
-   (cons connections heads)))
+   (cons results anchors)))
 
 (cl-defun rysco-graph--chain (from connection-properties data)
   (loop
@@ -398,7 +397,10 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
   (list
    (loop
     for anchor in from collect
-    `(,anchor ,node))
+    `(,anchor
+      ,(if connection-properties
+           `(,node ,connection-properties)
+         node)))
    node))
 
 (cl-defun rysco-graph--process (from connection-properties &rest forms)
