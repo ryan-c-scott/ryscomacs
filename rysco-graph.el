@@ -348,75 +348,83 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
      filename)))
 
-(cl-defun rysco-graph--fan (data anchor connection-properties)
+;; (cl-defun rysco-graph--fan (data anchor connection-properties)
+;;   (loop
+;;    with connections
+;;    with heads
+;;    for entry in data
+;;    as skip = (pcase entry
+;;                ((pred vectorp)
+;;                 (setq connection-properties (append entry nil))))
+
+;;    unless skip
+;;    collect entry into heads
+
+;;    unless skip
+;;    append (loop
+;;            for a in anchor collect
+;;            `(,a ,(if connection-properties
+;;                      (cons entry connection-properties)
+;;                    entry)))
+;;    into connections
+
+;;    finally return
+;;    (cons heads connections)))
+
+(cl-defun rysco-graph--chain (from data)
   (loop
-   with connections
-   with heads
-   for entry in data
-   as skip = (pcase entry
-               ((pred vectorp)
-                (setq connection-properties (append entry nil))))
-
-   unless skip
-   collect entry into heads
-
-   unless skip
-   append (loop
-           for a in anchor collect
-           `(,a ,(if connection-properties
-                     (cons entry connection-properties)
-                   entry)))
-   into connections
-
-   finally return
-   (cons heads connections)))
-
-(cl-defun rysco-graph--chain (data &optional anchor)
-  (loop
-   with anchor = anchor
+   with results
+   with anchors = from
    with connection-properties
 
    for entry in data
    as out = nil
    do (pcase entry
-        (:back (pop anchor))
-        (:break (setq anchor nil))
+        (:break (setq anchors nil))
         ((pred vectorp) (setq connection-properties (append entry nil)))
-        (`(:fan . ,rest)
-         (-let [(top . conns) (rysco-graph--fan rest (car anchor) connection-properties)]
-           (push top anchor)
-           (setq out conns
-                 connection-properties nil)))
-        (_ (when anchor
-             (setq out
-                   (loop
-                    for a in (car anchor) collect
-                    `(,a ,(if connection-properties
-                              (cons entry connection-properties)
-                            entry)))
-                   connection-properties nil))
-           (push `(,entry) anchor)))
+        ((or `(:chain . ,_)
+             `(:fan . ,_))
+         (let* ((these (rysco-graph--process anchors entry))
+                (tails (rysco-graph--extract-tails these)))
+           (setq
+            out these
+            anchors tails)))
 
-   if out append out))
+        (_
+         (when anchors
+           (setq
+            out
+            (loop
+             for a in anchors collect
+             `(,a ,(if connection-properties
+                       (cons entry connection-properties)
+                     entry)))
+            connection-properties nil))
+         (setq anchors `(,entry))))
 
-(cl-defun rysco-graph--process (forms)
-  "Returns a plist of data from processing graph data in FORMS"
+   when out append out))
+
+(cl-defun rysco-graph--process (from &rest forms)
   (loop
-    for f in forms append
-    (pcase f
-      (`(:chain . ,rest) (rysco-graph--chain rest))
-      (_ `(,f)))))
+   for f in forms append
+   (pcase f
+     (`(:chain . ,rest) (rysco-graph--chain from rest))
+     (`(:fan . ,rest) (rysco-graph--fan from rest))
+     ;; (`(:tail . ,rest) f)
+     (_ `((,f))))))
+
+(cl-defun rysco-graph--extract-nodes (connections)
+  (-map 'car connections))
+
+(cl-defun rysco-graph--extract-tails (connections)
+  (let ((last-entry (last connections)))
+    (or (cdar last-entry)
+        (caar last-entry))))
 
 ;;;###autoload
 (cl-defmacro rysco-graph (args &rest forms)
-  "Macro that provides a more structured syntax on top of 'rysco-simple-graph.
-ARGS is a plist that will be passed to 'rysco-simple-graph as &key parameters.
-FORMS is a list of graphing specifications."
+  `(rysco-graph--process nil ,@forms))
 
-  `(rysco-simple-graph
-    '
-    ,(rysco-graph--process forms)
-    ,@args))
 
 
 ;;
