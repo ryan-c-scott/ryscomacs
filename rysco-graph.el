@@ -348,30 +348,30 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
      filename)))
 
-;; (cl-defun rysco-graph--fan (data anchor connection-properties)
-;;   (loop
-;;    with connections
-;;    with heads
-;;    for entry in data
-;;    as skip = (pcase entry
-;;                ((pred vectorp)
-;;                 (setq connection-properties (append entry nil))))
+(cl-defun rysco-graph--fan (from connection-properties data)
+  (loop
+   with connections
+   with heads
+   for entry in data
+   as skip = (pcase entry
+               ((pred vectorp)
+                (setq connection-properties (append entry nil))))
 
-;;    unless skip
-;;    collect entry into heads
+   unless skip
+   collect entry into heads
 
-;;    unless skip
-;;    append (loop
-;;            for a in anchor collect
-;;            `(,a ,(if connection-properties
-;;                      (cons entry connection-properties)
-;;                    entry)))
-;;    into connections
+   unless skip
+   append (loop
+           for a in from collect
+           `(,a ,(if connection-properties
+                     (cons entry connection-properties)
+                   entry)))
+   into connections
 
-;;    finally return
-;;    (cons heads connections)))
+   finally return
+   (cons connections heads)))
 
-(cl-defun rysco-graph--chain (from data)
+(cl-defun rysco-graph--chain (from connection-properties data)
   (loop
    with results
    with anchors = from
@@ -384,11 +384,12 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
         ((pred vectorp) (setq connection-properties (append entry nil)))
         ((or `(:chain . ,_)
              `(:fan . ,_))
-         (let* ((these (rysco-graph--process anchors entry))
+         (let* ((these (rysco-graph--process anchors connection-properties entry))
                 (tails (rysco-graph--extract-tails these)))
            (setq
-            out these
-            anchors tails)))
+            out (car these)
+            anchors tails
+            connection-properties nil)))
 
         (_
          (when anchors
@@ -402,24 +403,21 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
             connection-properties nil))
          (setq anchors `(,entry))))
 
-   when out append out))
+   when out append out into results
+   finally return
+   (cons results anchors)))
 
-(cl-defun rysco-graph--process (from &rest forms)
+(cl-defun rysco-graph--process (from connection-properties &rest forms)
   (loop
    for f in forms append
    (pcase f
-     (`(:chain . ,rest) (rysco-graph--chain from rest))
-     (`(:fan . ,rest) (rysco-graph--fan from rest))
-     ;; (`(:tail . ,rest) f)
+     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
+     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
+     ;; TODO:  Does this need to support the tail list?
      (_ `((,f))))))
 
-(cl-defun rysco-graph--extract-nodes (connections)
-  (-map 'car connections))
-
 (cl-defun rysco-graph--extract-tails (connections)
-  (let ((last-entry (last connections)))
-    (or (cdar last-entry)
-        (caar last-entry))))
+  (cdr connections))
 
 ;;;###autoload
 (cl-defmacro rysco-graph (args &rest forms)
