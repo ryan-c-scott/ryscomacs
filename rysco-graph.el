@@ -382,30 +382,24 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
    do (pcase entry
         (:break (setq anchors nil))
         ((pred vectorp) (setq connection-properties (append entry nil)))
-        ((or `(:chain . ,_)
-             `(:fan . ,_))
+        (_
          (let* ((these (rysco-graph--process anchors connection-properties entry))
                 (tails (rysco-graph--extract-tails these)))
            (setq
             out (car these)
             anchors tails
-            connection-properties nil)))
-
-        (_
-         (when anchors
-           (setq
-            out
-            (loop
-             for a in anchors collect
-             `(,a ,(if connection-properties
-                       (cons entry connection-properties)
-                     entry)))
-            connection-properties nil))
-         (setq anchors `(,entry))))
+            connection-properties nil))))
 
    when out append out into results
    finally return
    (cons results anchors)))
+
+(cl-defun rysco-graph--node (from connection-properties node)
+  (list
+   (loop
+    for anchor in from collect
+    `(,anchor ,node))
+   node))
 
 (cl-defun rysco-graph--process (from connection-properties &rest forms)
   (loop
@@ -413,8 +407,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
    (pcase f
      (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
      (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
-     ;; TODO:  Does this need to support the tail list?
-     (_ `((,f))))))
+     (_ (rysco-graph--node from connection-properties f)))))
 
 (cl-defun rysco-graph--extract-tails (connections)
   (cdr connections))
