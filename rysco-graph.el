@@ -402,12 +402,24 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
          node)))
    node))
 
+(cl-defun rysco-graph--convert-group (data)
+  (-let [(type name . rest) data]
+    `(((,type
+        ,name
+        ,@(loop
+           for entry in rest collect
+           (pcase entry
+             (`(:properties . ,_) entry)
+             (_ `(,entry)))))))))
+
 (cl-defun rysco-graph--process (from connection-properties form)
   (pcase form
     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
-    (`(,(and (or :group :cluster :properties) type) . ,rest)
-     `(((,type . ,rest))))
+    (`(,(or :group :cluster) . ,_)
+     (rysco-graph--convert-group form))
+    (`(:properties . ,_)
+     `((,form)))
     (_ (rysco-graph--node from connection-properties form))))
 
 (cl-defun rysco-graph--extract-tails (connections)
