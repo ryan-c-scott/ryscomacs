@@ -407,6 +407,8 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
   (pcase form
     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
+    (`(,(and (or :group :cluster :properties) type) . ,rest)
+     `(((,type . ,rest))))
     (_ (rysco-graph--node from connection-properties form))))
 
 (cl-defun rysco-graph--extract-tails (connections)
@@ -414,10 +416,12 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
 ;;;###autoload
 (cl-defmacro rysco-graph (args &rest forms)
-  `(append
-    ,@(loop
-       for f in forms collect
-       `(car (rysco-graph--process nil nil ',f)))))
+  `(rysco-simple-graph
+    (append
+     ,@(loop
+        for f in forms collect
+        `(car (rysco-graph--process nil nil ',f))))
+    ,@args))
 
 ;;
 (provide 'rysco-graph)
