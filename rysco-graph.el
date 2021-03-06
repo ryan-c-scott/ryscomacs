@@ -363,8 +363,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
                 (tails (rysco-graph--extract-tails these)))
            (setq
             out (car these)
-            anchors (append anchors tails)
-            connection-properties nil))))
+            anchors (append anchors tails)))))
 
    when out append out into results
    finally return
