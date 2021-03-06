@@ -352,7 +352,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
   (loop
    with results
    with anchors
-   with connection-properties
+   with connection-properties = connection-properties
 
    for entry in data
    as out = nil
@@ -399,7 +399,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
     for anchor in from collect
     `(,anchor
       ,(if connection-properties
-           `(,node ,connection-properties)
+           `(,node ,@connection-properties)
          node)))
    node))
 
