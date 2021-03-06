@@ -373,7 +373,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
   (loop
    with results
    with anchors = from
-   with connection-properties
+   with connection-properties = connection-properties
 
    for entry in data
    as out = nil
