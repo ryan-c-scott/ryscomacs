@@ -244,6 +244,7 @@
    as out = nil
    do (pcase entry
         ((pred vectorp) (setq connection-properties (append entry nil)))
+        (:break (setq anchors (butlast anchors)))
         (_
          (let* ((these (rysco-graph--process from connection-properties entry))
                 (tails (rysco-graph--extract-tails these)))
