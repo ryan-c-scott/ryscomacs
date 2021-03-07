@@ -138,6 +138,11 @@
                 rand-state
                 layers))))
 
+     (`(:labels . ,data)
+      (loop
+       for (k v) on data by 'cddr do
+       (puthash k (format "%s" v ) color-cache)))
+
      (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
       (insert (format "\"%s%s\";\n" entry-prefix mod-name)))
 
@@ -305,10 +310,12 @@
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
     (`(,(or :group :cluster) . ,_)
      (rysco-graph--convert-group form))
-    (`(:properties . ,_)
-     `((,form)))
     (`(:node . ,properties)
      `((:group _ ((_ ,@properties)))))
+
+    ;; Pass-through for any :* style key
+    (`(,(app (lambda (f) (aref (prin1-to-string f) 0)) ?\:) . ,_)
+     `((,form)))
     (_ (rysco-graph--node from connection-properties form))))
 
 (cl-defun rysco-graph--extract-tails (connections)
