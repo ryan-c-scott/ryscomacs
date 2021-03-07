@@ -138,6 +138,17 @@
                 rand-state
                 layers))))
 
+     (`(:rank ,type . ,nodes)
+      (insert
+       (format
+        "{rank=%s; %s}\n"
+        type
+        (loop
+         with prefix
+         for n in nodes
+         concat (format "%s%s" (or prefix "") n)
+         do (setq prefix ", ")))))
+
      (`(:labels . ,data)
       (loop
        for (k v) on data by 'cddr do
