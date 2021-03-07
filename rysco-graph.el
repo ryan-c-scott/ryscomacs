@@ -239,7 +239,7 @@
           filename)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(cl-defun rysco-graph--fan (from connection-properties data)
+(cl-defun rysco-graph--fan (from connection-properties data &optional reverse)
   (loop
    with results
    with anchors
@@ -250,8 +250,10 @@
    do (pcase entry
         ((pred vectorp) (setq connection-properties (append entry nil)))
         (:break (setq anchors (butlast anchors)))
+        ('> (setq reverse nil))
+        ('< (setq reverse t))
         (_
-         (let* ((these (rysco-graph--process from connection-properties entry))
+         (let* ((these (rysco-graph--process from connection-properties entry reverse))
                 (tails (rysco-graph--extract-tails these)))
            (setq
             out (car these)
@@ -261,7 +263,7 @@
    finally return
    (cons results anchors)))
 
-(cl-defun rysco-graph--chain (from connection-properties data)
+(cl-defun rysco-graph--chain (from connection-properties data &optional reverse)
   (loop
    with results
    with anchors = from
@@ -271,9 +273,11 @@
    as out = nil
    do (pcase entry
         (:break (setq anchors nil))
+        ('> (setq reverse nil))
+        ('< (setq reverse t))
         ((pred vectorp) (setq connection-properties (append entry nil)))
         (_
-         (let* ((these (rysco-graph--process anchors connection-properties entry))
+         (let* ((these (rysco-graph--process anchors connection-properties entry reverse))
                 (tails (rysco-graph--extract-tails these)))
            (setq
             out (car these)
@@ -284,14 +288,17 @@
    finally return
    (cons results anchors)))
 
-(cl-defun rysco-graph--node (from connection-properties node)
+(cl-defun rysco-graph--node (from connection-properties node &optional reverse)
   (list
    (loop
-    for anchor in from collect
-    `(,anchor
+    for anchor in from
+    as start = (if reverse node anchor)
+    as end = (if reverse anchor node)
+    collect
+    `(,start
       ,(if connection-properties
-           `(,node ,@connection-properties)
-         node)))
+           `(,end ,@connection-properties)
+         end)))
    node))
 
 (cl-defun rysco-graph--convert-group (data)
@@ -304,10 +311,10 @@
              (`(:properties . ,_) entry)
              (_ `(,entry)))))))))
 
-(cl-defun rysco-graph--process (from connection-properties form)
+(cl-defun rysco-graph--process (from connection-properties form &optional reverse)
   (pcase form
-    (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest))
-    (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest))
+    (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest reverse))
+    (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest reverse))
     (`(,(or :group :cluster) . ,_)
      (rysco-graph--convert-group form))
     (`(:node . ,properties)
@@ -316,7 +323,7 @@
     ;; Pass-through for any :* style key
     (`(,(app (lambda (f) (aref (prin1-to-string f) 0)) ?\:) . ,_)
      `((,form)))
-    (_ (rysco-graph--node from connection-properties form))))
+    (_ (rysco-graph--node from connection-properties form reverse))))
 
 (cl-defun rysco-graph--extract-tails (connections)
   (cdr connections))
