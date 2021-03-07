@@ -95,19 +95,22 @@
    for entry in patch do
    (pcase entry
      (`(,(and (or :group :cluster) type) ,(and (or (pred stringp) (pred symbolp)) name) . ,group-data)
-      (insert (format "subgraph cluster_%s%s {\n" entry-prefix name))
+      (let ((global (equal name '_)))
+        (unless global
+          (insert (format "subgraph cluster_%s%s {\n" entry-prefix name)))
 
-      (rysco-graph--render-nodes
-       group-data
-       :name name
-       :path (if (eq type :cluster)
-                 (if path (format "%s_%s" path name) name)
-               path)
-       :subgraph t
-       :prefix (eq type :cluster)
-       :layers layers)
+        (rysco-graph--render-nodes
+         group-data
+         :name name
+         :path (if (eq type :cluster)
+                   (if path (format "%s_%s" path name) name)
+                 path)
+         :subgraph t
+         :prefix (eq type :cluster)
+         :layers layers)
 
-      (insert (format "}\n")))
+        (unless global
+          (insert (format "}\n")))))
 
      (`(:properties . ,property-data)
       (insert
