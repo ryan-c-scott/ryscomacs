@@ -307,6 +307,8 @@
      (rysco-graph--convert-group form))
     (`(:properties . ,_)
      `((,form)))
+    (`(:node . ,properties)
+     `((:group _ ((_ ,@properties)))))
     (_ (rysco-graph--node from connection-properties form))))
 
 (cl-defun rysco-graph--extract-tails (connections)
