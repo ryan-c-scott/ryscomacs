@@ -143,9 +143,6 @@
        for (k v) on data by 'cddr do
        (puthash k (format "%s" v ) color-cache)))
 
-     (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
-      (insert (format "\"%s%s\";\n" entry-prefix mod-name)))
-
      (`((,(and (or (pred stringp) (pred symbolp)) mod-name) . ,data) . ,_)
       (insert
        (format
@@ -165,6 +162,11 @@
    do
    (pcase entry
      (`(,(or :properties :group :cluster) . ,_))
+     (`(:edge . ,props)
+      (insert
+       (format "edge [%s];\n"
+               (rysco-graph--render-plist-to-settings
+                   props nil color-cache rand-state layers))))
      (`(,from (,to ,label . ,props))
       (let ((color (gethash label color-cache)))
         (unless color
