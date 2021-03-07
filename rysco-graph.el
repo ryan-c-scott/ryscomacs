@@ -54,6 +54,10 @@
                   (setq color
                         (rysco-graph--render-generate-color rand-state))
                   color-cache))))
+            ((pred listp)
+             (s-join
+              ","
+              (--map (format "%s" it) v)))
             (_ v))
 
    when (and k v)
@@ -79,7 +83,15 @@
               (substring k 1)
             k)
    concat
-   (format "%s=%s;\n" k (prin1-to-string v))
+   (format
+    "%s=%s;\n"
+    k
+    (pcase v
+      ((pred listp)
+       (s-join
+        ","
+        (--map (format "%s" it) v)))
+      (_ (prin1-to-string v))))
    into out
 
    finally return
@@ -115,6 +127,16 @@
      (`(:properties . ,property-data)
       (insert
        (rysco-graph--render-properties property-data layers)))
+
+     (`((_ . ,properties))
+      (insert
+       (format "node [%s];\n"
+               (rysco-graph--render-plist-to-settings
+                properties
+                '_
+                color-cache
+                rand-state
+                layers))))
 
      (`(,(and (or (pred stringp) (pred symbolp)) mod-name) . ,_)
       (insert (format "\"%s%s\";\n" entry-prefix mod-name)))
