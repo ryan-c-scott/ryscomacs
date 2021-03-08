@@ -365,7 +365,11 @@
                            :arrowtail
                          :arrowhead)
 
-                      ,(if at-end arrowtail-style 'none)
+                      ,(if at-start arrowtail-style 'none)
+
+                      ,@(if at-end
+                            `(:label ,conn)
+                          '())
 
                       :arrowsize 0.5
                       :dir both))
