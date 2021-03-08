@@ -330,6 +330,7 @@
           (spans (cl-make-hash-table :test 'equal))
           (default-node-style '(:shape point :width 0))
           (default-conn-style '(:style invis))
+          (active-conn-style '(:arrowsize 0.5 :color black :dir both))
           (arrowhead-style 'halfopen)
           (arrowtail-style 'odot)
           (node-style '())
@@ -352,28 +353,24 @@
       do
       (puthash
        id
-       (cons `(:shape point :width 0)
-             `(:color black
-                      ;;
-                      ,(if backward
-                           :arrowtail
-                         :arrowhead)
+       (append
+        active-conn-style
+       `(,(if backward
+              :arrowtail
+            :arrowhead)
 
-                      ,(if at-end arrowhead-style 'none)
+         ,(if at-end arrowhead-style 'none)
 
-                      ;;
-                      ,(if (not backward)
-                           :arrowtail
-                         :arrowhead)
+         ;;
+         ,(if (not backward)
+              :arrowtail
+            :arrowhead)
 
-                      ,(if at-start arrowtail-style 'none)
+         ,(if at-start arrowtail-style 'none)
 
-                      ,@(if at-end
-                            `(:label ,conn)
-                          '())
-
-                      :arrowsize 0.5
-                      :dir both))
+         ,@(if at-end
+               `(:label ,conn)
+             '())))
 
        spans)))
 
@@ -394,7 +391,7 @@
            as above = (format "n%s_%s" x lasty)
            as id = (format "n%s_%s" x y)
            as cell-contents = (gethash id spans)
-           as left-cell-contents = (cdr (gethash left spans))
+           as left-cell-contents = (gethash left spans)
 
            do (push id rank-group)
 
