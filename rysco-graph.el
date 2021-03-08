@@ -332,7 +332,8 @@
           (default-conn-style '(:style invis))
           (arrowhead-style 'halfopen)
           (arrowtail-style 'odot)
-          (node-style '()))
+          (node-style '())
+          (header-style '(:shape box :style filled :fillcolor white)))
 
     (loop
      for (from conn to) in entries
@@ -381,6 +382,8 @@
           for y from 0 below (+ (length entries) 2) ; +Header & Footer
           as lasty = (when (> y 0) (1- y))
           as rank-group = nil
+          as at-header = (= y 0)
+          as at-footer = (= y (1+ (length entries)))
 
           append
           (loop
@@ -403,14 +406,15 @@
              (,id "" ,@(or left-cell-contents
                            default-conn-style)))
 
+           ;; Nodes
            do
            (push
             (cons
              id
              (append
-              (if cell-contents
-                  (car cell-contents)
-                default-node-style)
+              (if (or at-header at-footer)
+                  header-style
+                '(:shape point :width 0))
               `(:group ,x)))
             node-style))
 
