@@ -326,7 +326,7 @@
    node))
 
 (cl-defun rysco-graph--sequence (from connection-properties data &rest rest)
-  (-let* (((columns . entries) data)
+  (-let* (((name columns . entries) data)
           (spans (cl-make-hash-table :test 'equal))
           (default-node-style '(:shape point :width 0))
           (default-conn-style '(:style invis))
@@ -346,7 +346,7 @@
      do
      (loop
       for i from (min start end) below (max start end)
-      as id = (format "n%s_%s" i y)
+      as id = (format "%s_%s_%s" name i y)
       as at-end = (= i (- end (if backward 0 1)))
       as at-start = (= i (- start (if backward 1 0)))
 
@@ -387,9 +387,9 @@
            for x from 0 below (length columns)
            as lastx = (when (> x 0) (1- x))
 
-           as left = (format "n%s_%s" lastx y)
-           as above = (format "n%s_%s" x lasty)
-           as id = (format "n%s_%s" x y)
+           as left = (format "%s_%s_%s" name lastx y)
+           as above = (format "%s_%s_%s" name x lasty)
+           as id = (format "%s_%s_%s" name x y)
            as cell-contents = (gethash id spans)
            as left-cell-contents = (gethash left spans)
 
@@ -420,7 +420,7 @@
 
        ;;
        (:group
-        sequence
+        ,name
         ,@(loop
            for (node . node-props) in node-style collect
            `((,node ,@node-props))))))))
