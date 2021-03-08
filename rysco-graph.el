@@ -355,6 +355,7 @@
        id
        (append
         active-conn-style
+        conn-props
        `(,(if backward
               :arrowtail
             :arrowhead)
