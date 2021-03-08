@@ -328,19 +328,40 @@
 (cl-defun rysco-graph--sequence (from connection-properties data &rest rest)
   (-let* (((name columns . entries) data)
           (spans (cl-make-hash-table :test 'equal))
+          (headers (cl-make-hash-table :test 'equal))
           (default-node-style '(:shape point :width 0))
           (default-conn-style '(:style invis))
           (active-conn-style '(:arrowsize 0.5 :color black :dir both))
           (arrowhead-style 'halfopen)
           (arrowtail-style 'odot)
           (node-style '())
-          (header-style '(:shape box :style filled :fillcolor white)))
+          (header-style '(:shape box :style filled :fillcolor white))
+          (header-index (lambda (el)
+                          (--find-index
+                           (equal el
+                                  (if (listp it)
+                                      (car it)
+                                    it))
+                           columns))))
+
+    (loop
+     for head in columns
+     for i from 0
+     do
+     (puthash
+      i
+      (pcase head
+        (`(,id ,label . ,props)
+         `(:label ,label ,@props))
+        (_
+         `(:label ,(upcase (format "%s" head)))))
+      headers))
 
     (loop
      for (from to conn . conn-props) in entries
      for y from 1
-     as start = (-elem-index from columns)
-     as end = (-elem-index to columns)
+     as start = (funcall header-index from)
+     as end = (funcall header-index to)
      as backward = (> start end)
 
      do
@@ -411,7 +432,7 @@
              id
              (append
               (if (or at-header at-footer)
-                  header-style
+                  (append header-style (gethash x headers))
                 '(:shape point :width 0))
               `(:group ,x)))
             node-style))
