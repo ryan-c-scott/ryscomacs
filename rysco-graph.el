@@ -327,21 +327,23 @@
 
 (cl-defun rysco-graph--convert-group (data)
   (-let [(type name . rest) data]
-    `(((,type
-        ,name
-        ,@(loop
-           for entry in rest collect
-           (pcase entry
-             (`(:properties . ,_) entry)
-             ((pred nlistp) `((,entry)))
-             (_ `(,entry)))))))))
+    `(,type
+      ,name
+      ,@(loop
+         for entry in rest collect
+         (pcase entry
+           (`(,(or :group :cluster) . ,_)
+            (rysco-graph--convert-group entry))
+           (`(:properties . ,_) entry)
+           ((pred nlistp) `((,entry)))
+           (_ `(,entry)))))))
 
 (cl-defun rysco-graph--process (from connection-properties form &optional reverse)
   (pcase form
     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest reverse))
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest reverse))
     (`(,(or :group :cluster) . ,_)
-     (rysco-graph--convert-group form))
+     `((,(rysco-graph--convert-group form))))
     (`(:node . ,properties)
      `((:group _ ((_ ,@properties)))))
 
