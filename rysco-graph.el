@@ -325,6 +325,102 @@
          end)))
    node))
 
+(cl-defun rysco-graph--sequence (from connection-properties data &rest rest)
+  (-let* (((columns . entries) data)
+          (spans (cl-make-hash-table :test 'equal))
+          (default-node-style '(:shape point :width 0))
+          (default-conn-style '(:style invis))
+          (arrowhead-style 'halfopen)
+          (arrowtail-style 'none)
+          (node-style '()))
+
+    (loop
+     for (from conn to) in entries
+     for y from 0
+     as start = (-elem-index from columns)
+     as end = (-elem-index to columns)
+     as backward = (> start end)
+
+     do
+     (loop
+      for i from (min start end) below (max start end)
+      as id = (format "n%s_%s" i y)
+      as at-end = (= i (- end (if backward 0 1)))
+      as at-start = (= i (- start (if backward 1 0)))
+
+      do
+      (puthash
+       id
+       (cons `(:shape point :width 0)
+             `(:color magenta
+                      ;;
+                      ,(if backward
+                           :arrowtail
+                         :arrowhead)
+
+                      ,(if at-end arrowhead-style 'none)
+
+                      ;;
+                      ,(if (not backward)
+                           :arrowtail
+                         :arrowhead)
+
+                      ,(if at-end arrowtail-style 'none)
+
+                      :arrowsize 0.5
+                      :dir both))
+
+       spans)))
+
+    ;; Actual matrix
+    `((,@(loop
+          for y from 0 below (length entries)
+          as lasty = (when (> y 0) (1- y))
+          as rank-group = nil
+
+          append
+          (loop
+           for x from 0 below (length columns)
+           as lastx = (when (> x 0) (1- x))
+
+           as left = (format "n%s_%s" lastx y)
+           as above = (format "n%s_%s" x lasty)
+           as id = (format "n%s_%s" x y)
+           as cell-contents = (gethash id spans)
+           as left-cell-contents = (cdr (gethash left spans))
+
+           do (push id rank-group)
+
+           ;; Connections
+           when lasty collect `(,above (,id "" :color gray :arrowhead none))
+
+           when lastx collect
+           `(,left
+             (,id "" ,@(or left-cell-contents
+                           default-conn-style)))
+
+           do
+           (push
+            (cons
+             id
+             (append
+              (if cell-contents
+                  (car cell-contents)
+                default-node-style)
+              `(:group ,x)))
+            node-style))
+
+          ;;
+          collect `(:rank same ,@rank-group))
+
+       ;;
+       (:group
+        sequence
+        ,@(loop
+           for (node . node-props) in node-style collect
+           `((,node ,@node-props))))
+       ))))
+
 (cl-defun rysco-graph--convert-group (data)
   (-let [(type name . rest) data]
     `(,type
@@ -342,6 +438,7 @@
   (pcase form
     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest reverse))
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest reverse))
+    (`(:sequence . ,rest) (rysco-graph--sequence from connection-properties rest reverse))
     (`(,(or :group :cluster) . ,_)
      `((,(rysco-graph--convert-group form))))
     (`(:node . ,properties)
