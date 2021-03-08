@@ -337,7 +337,7 @@
           (header-style '(:shape box :style filled :fillcolor white)))
 
     (loop
-     for (from conn to) in entries
+     for (from to conn . conn-props) in entries
      for y from 1
      as start = (-elem-index from columns)
      as end = (-elem-index to columns)
