@@ -333,6 +333,7 @@
            for entry in rest collect
            (pcase entry
              (`(:properties . ,_) entry)
+             ((pred nlistp) `((,entry)))
              (_ `(,entry)))))))))
 
 (cl-defun rysco-graph--process (from connection-properties form &optional reverse)
