@@ -331,7 +331,7 @@
           (default-node-style '(:shape point :width 0))
           (default-conn-style '(:style invis))
           (arrowhead-style 'halfopen)
-          (arrowtail-style 'none)
+          (arrowtail-style 'odot)
           (node-style '()))
 
     (loop
