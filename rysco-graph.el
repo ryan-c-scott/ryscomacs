@@ -336,7 +336,7 @@
 
     (loop
      for (from conn to) in entries
-     for y from 0
+     for y from 1
      as start = (-elem-index from columns)
      as end = (-elem-index to columns)
      as backward = (> start end)
@@ -352,7 +352,7 @@
       (puthash
        id
        (cons `(:shape point :width 0)
-             `(:color magenta
+             `(:color black
                       ;;
                       ,(if backward
                            :arrowtail
@@ -378,7 +378,7 @@
 
     ;; Actual matrix
     `((,@(loop
-          for y from 0 below (length entries)
+          for y from 0 below (+ (length entries) 2) ; +Header & Footer
           as lasty = (when (> y 0) (1- y))
           as rank-group = nil
 
@@ -422,8 +422,7 @@
         sequence
         ,@(loop
            for (node . node-props) in node-style collect
-           `((,node ,@node-props))))
-       ))))
+           `((,node ,@node-props))))))))
 
 (cl-defun rysco-graph--convert-group (data)
   (-let [(type name . rest) data]
