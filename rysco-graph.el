@@ -186,15 +186,26 @@
                     (rysco-graph--render-generate-color rand-state)))
           (puthash label color color-cache))
         (insert
-         (format "\"%s\" -> \"%s\" [label=\"%s\", color=\"%s\", fontcolor=\"%s\", %s];\n"
-                 from to label
+         (format "%s -> %s [label=\"%s\", color=\"%s\", fontcolor=\"%s\", %s];\n"
+                 (rysco-graph--render-node-name from)
+                 (rysco-graph--render-node-name to)
+                 label
                  color color
                  (or
                   (rysco-graph--render-plist-to-settings
                    props label color-cache rand-state layers)
                   "")))))
      (`(,from ,to)
-      (insert (format "\"%s\" -> \"%s\";\n" from to))))))
+      (insert (format "%s -> %s;\n"
+                      (rysco-graph--render-node-name from)
+                      (rysco-graph--render-node-name to)))))))
+
+(cl-defun rysco-graph--render-node-name (name)
+  (let* ((name (format "%s" name))
+         (split (s-index-of ":" name))
+         (node (if split (substring name 0 split) name))
+         (port (if split (substring name split) "")))
+    (format "\"%s\"%s" node port)))
 
 (cl-defun rysco-graph--render (patch &key filename graph-code rand-seed layers as-code)
   (-let* ((temp-path (make-temp-file "patch" nil ".dot"))
