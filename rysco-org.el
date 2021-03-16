@@ -223,6 +223,16 @@
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
+(defun rysco-org-get-path-string ()
+  (s-replace
+   "\n" ""
+   (base64-encode-string
+    (org-format-outline-path (org-get-outline-path t t) nil nil "-"))))
+
+(defun rysco-org-insert-path-string ()
+  (interactive)
+  (insert (rysco-org-get-path-string)))
+
 (defun rysco-org-src-execute (&rest _)
   (interactive)
   (let ((block-point org-src--beg-marker))
