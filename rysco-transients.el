@@ -44,6 +44,7 @@
     ("tt" "Agenda Tasks" org-todo-list)
     ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
     ("tb" "Bluedot" bluedot)
+    ("tc" "Bluedot Cancel" bluedot-cancel)
     ("th" "Bluedot History" bluedot-history-report)]
 
    ["Describe"
