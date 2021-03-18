@@ -426,7 +426,6 @@
     (rysco--rememoize-mode-icons)))
 
 (rysco-load-local-config t)
-(rysco--rememoize-mode-icons)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
