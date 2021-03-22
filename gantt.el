@@ -15,6 +15,7 @@
        (+ days time))
      (if accum 0 days))))
 
+;;;###autoload
 (cl-defun gantt-generate (data)
   (--sort
    (-let (((_ _ it-start it-end) it)
@@ -29,6 +30,7 @@
     collect
     `(,key ,name ,start ,(+ start days) ,@misc))))
 
+;;;###autoload
 (cl-defun gantt-to-latex (data &optional title)
   (s-join
    "\n"
