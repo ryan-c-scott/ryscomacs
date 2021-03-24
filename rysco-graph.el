@@ -479,13 +479,13 @@
   (cdr connections))
 
 ;;;###autoload
-(cl-defmacro rysco-graph (args &rest forms)
-  `(rysco-graph--render
-    (append
-     ,@(loop
-        for f in forms collect
-        `(car (rysco-graph--process nil nil ',f))))
-    ,@args))
+(cl-defun rysco-graph (args forms)
+  (apply
+   'rysco-graph--render
+   (loop
+    for f in forms append
+    (car (rysco-graph--process nil nil f)))
+   args))
 
 ;;
 (provide 'rysco-graph)
