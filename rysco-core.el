@@ -63,7 +63,9 @@
  dired-hacks
  dired-hacks-utils
  dired+
+ diff-hl
  eimp
+ eros
  async
  request
  molokai-theme
@@ -368,6 +370,7 @@
 (transient-mark-mode t)
 (global-font-lock-mode t)
 (jit-lock-mode t)
+(eros-mode 1)
 (normal-erase-is-backspace-mode 1)
 (show-paren-mode t)
 (menu-bar-mode -1)
