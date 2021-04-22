@@ -6,6 +6,7 @@
 
 (defvar rysco-gcal-calendars nil)
 (defvar rysco-calfw-upcoming-threshold 600)
+(defvar rysco-calendar-preferred-meeting-links '())
 
 ;;;###autoload
 (defun rysco-calendar-open ()
@@ -122,9 +123,19 @@
 
 (advice-add 'cfw:org-convert-org-to-calfw :filter-return 'rysco-calendar-convert-same-day-periods)
 
+(defun rysco-calendar--preferred-event-link (urls)
+  (--first
+   (let ((host (url-host (url-generic-parse-url it))))
+     (--first (s-matches? it host) rysco-calendar-preferred-meeting-links))
+   urls))
+
 (defun rysco-calendar-event-location-detection (event)
   (unless (cfw:event-location event)
-    (let ((new-loc (car (rysco-calfw--extract-urls (cfw:event-description event)))))
+    (let* ((urls (rysco-calfw--extract-urls (cfw:event-description event)))
+           (new-loc
+            (or
+             (rysco-calendar--preferred-event-link urls)
+             (car urls))))
       (setf (cfw:event-title event) (cfw:tp (cfw:event-title event) 'cfw:org-loc new-loc)
             (cfw:event-location event) new-loc)))
   event)
