@@ -721,6 +721,10 @@
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
+(with-eval-after-load 'calfw
+  (define-key cfw:calendar-mode-map "g" 'cfw:refresh-calendar-buffer)
+  (define-key cfw:calendar-mode-map "r" nil))
+
 (defun markdown-unset-move-keys ()
   ""
   (interactive)
