@@ -91,9 +91,22 @@
      for (beg end evt) in data
      as evthash = (rysco-calendar-hash-cfw:event evt)
      unless (gethash evthash hashes) collect
-     (progn
+     (let ((start-time (cfw:event-start-time evt))
+           (end-time (cfw:event-end-time evt)))
        (puthash evthash t hashes)
-       `(,beg ,end ,evt))))
+       `(,beg
+         ,(if (or (and (not start-time) (not end-time))
+                  (= (car start-time) (cadr start-time)
+                     (car end-time) (cadr end-time)
+                     0))
+              ;; Day boundary, so cheat the end back to the previous day 23:59
+              (progn
+                (setf (cfw:event-end-time evt) '(23 59))
+                (cfw:date-before end 1))
+
+            ;; Otherwise use the existing end time
+            end)
+         ,evt))))
 
    else collect
    (cons
