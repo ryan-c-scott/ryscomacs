@@ -3,6 +3,7 @@
 
 (defvar rysco-org-refile-targets nil)
 (defvar rysco-org-agenda-status-overlay nil)
+(defvar rysco-org-agenda-status-count-code-base #x278a) ; ➊
 
 (defvar rysco-org-agenda-columns 3)
 (defvar rysco-org-agenda-margin-col 2)
@@ -162,7 +163,7 @@
   (if status
       (format
        "%s %s"
-       (make-string 1 (+ #x2776 (1- count)))
+       (make-string 1 (+ rysco-org-agenda-status-count-code-base (1- count)))
        status)
     "STALLED"))
 
