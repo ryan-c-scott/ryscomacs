@@ -139,7 +139,11 @@
                     (puthash project 'EXCESS status))))
 
               do (forward-line 1)
-              finally return status)))
+              finally return
+              (loop
+               for k being the hash-keys of status
+               collect
+               `(,k ,(gethash k status) ,(or (gethash k next-count) 0))))))
     it))
 
 (defun rysco-org-agenda-goto-first-section ()
@@ -154,14 +158,18 @@
     ('EXCESS 'rysco-org-agenda-status-excess)
     (_ 'rysco-org-agenda-status-stalled)))
 
-(defun rysco-org-agenda--status-string (status)
-  (format
-   "%s"
-   (or status "STALLED")))
+(defun rysco-org-agenda--status-string (status count)
+  (if status
+      (format
+       "%s %s"
+       (make-string 1 (+ #x2776 (1- count)))
+       status)
+    "STALLED"))
 
-(defun rysco-org-agenda--status-entry (project status)
+(defun rysco-org-agenda--status-entry (project status count)
   (concat
-   (propertize (format "%-8s" (rysco-org-agenda--status-string status))
+   (propertize (format "%-10s"
+                       (rysco-org-agenda--status-string status count))
                'face (rysco-org-agenda--status-face status))
    (propertize (format "%-12s" project)
                'face 'rysco-org-agenda-status-project)))
@@ -201,8 +209,7 @@
           (when show-status
             (loop
              with i = 0
-             for k being the hash-keys of status
-             as state = (gethash k status)
+             for (k state count) in status
              as col = (% i col-count)
 
              when k do (incf i)
@@ -213,7 +220,7 @@
                margin-col-str)
 
              when k concat
-             (rysco-org-agenda--status-entry k state)
+             (rysco-org-agenda--status-entry k state count)
 
              when (= col (1- col-count)) concat margin-right-str))
 
