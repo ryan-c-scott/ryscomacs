@@ -60,7 +60,8 @@
     ("un" "New EShell" rysco-eshell-new)
     ("ut" "Themes" rysco-load-theme)
     ("ud" "Default Theme" rysco-load-theme-default)
-    ("us" "Open Current Directory (OS)" rysco-system-open-current-dir)]
+    ("us" "Open Current Directory (OS)" rysco-system-open-current-dir)
+    ("ur" "Agenda Rifle" helm-org-rifle-agenda-files)]
 
    ["Packages"
     ("pa" "Pull All" straight-pull-all)

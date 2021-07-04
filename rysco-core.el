@@ -82,6 +82,7 @@
  helm-projectile
  helm-descbinds
  helm-unicode
+ helm-org-rifle
  hl-todo
  json-mode
  rjsx-mode
