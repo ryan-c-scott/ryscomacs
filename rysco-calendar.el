@@ -21,9 +21,10 @@
 (cl-defun rysco-calendar-gcal-fetch (&optional update-only)
   (interactive "P")
 
-  (unless update-only
-    (message "Clearing gcal calendar data")
-    (rysco-calendar-gcal-clear-files))
+  ;; TODO: HACK:  Unsure why this doesn't function correctly, but for the time being disabling it seems to solve the problem with calendar files being left modified
+  ;; (unless update-only
+  ;;   (message "Clearing gcal calendar data")
+  ;;   (rysco-calendar-gcal-clear-files))
 
   (deferred:watch (org-gcal-sync t t)
     (lambda ()
