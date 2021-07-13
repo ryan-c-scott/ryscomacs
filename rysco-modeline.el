@@ -67,19 +67,33 @@
   ""
   :group 'rysco-modeline)
 
+(defface rysco-modeline-vc
+  '((default
+     (:weight bold))
+    (((background dark))
+     (:foreground "dimgray"
+      :underline nil))
+    (((background light))
+     (:foreground "dimgray"
+      :underline nil)))
+  ""
+  :group 'rysco-modeline)
+
 (defsubst rysco-modeline-vc ()
   (when (and (buffer-file-name (current-buffer)) vc-mode)
     (format "%s%s"
             (propertize
              (all-the-icons-octicon
-              "git-commit"
+              "git-branch"
               :face `(:inherit ,current-face :height 0.8))
              'display '(raise 0))
 
             (propertize
-             (replace-regexp-in-string
-              " \\(Hg\\|Git\\)[:-]" ""
-              (substring-no-properties vc-mode))
+             (concat
+              " "
+              (replace-regexp-in-string
+               " \\(Hg\\|Git\\)[:-]" ""
+               (substring-no-properties vc-mode)))
              'face current-face))))
 
 (defsubst rysco-modeline-minor-modes ()
@@ -247,6 +261,7 @@
          (:face nil)
          rysco-modeline-narrowed
          rysco-modeline-minor-modes
+         (:active rysco-modeline-vc)
          rysco-modeline-vc)
 
        :center
