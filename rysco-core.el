@@ -910,11 +910,16 @@
  'calendar-mode-hook
  (lambda () (define-key calendar-mode-map (kbd "RET") 'rysco-calendar-exit-and-insert-date)))
 
-;; Magit keys
+;; Magit
+(defun rysco-magit-status-additions ()
+  (magit-insert-local-branches)
+  (magit-insert-tags))
+
 (add-hook
  'magit-mode-hook
  (lambda ()
-   (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)))
+   (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)
+   (add-hook 'magit-status-sections-hook 'rysco-magit-status-additions 100)))
 
 ;; HACK: straight has some issues with magit
 (advice-add #'magit-version :override #'ignore)
