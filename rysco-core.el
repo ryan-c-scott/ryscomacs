@@ -793,6 +793,13 @@
   (require 'rysco-modeline)
   (rysco-modeline))
 
+;; Suppress colors being saved/restored with desktops
+(push '(background-color . :never) frameset-filter-alist)
+(push '(foreground-color . :never) frameset-filter-alist)
+(push '(mouse-color . :never) frameset-filter-alist)
+(push '(cursor-color . :never) frameset-filter-alist)
+(push '(border-color . :never) frameset-filter-alist)
+
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
 (require 'ido) 
