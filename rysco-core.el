@@ -912,7 +912,7 @@
 
 ;; Magit
 (defun rysco-magit-status-additions ()
-  (magit-insert-local-branches)
+  (magit-section-hide (magit-insert-local-branches))
   (magit-insert-tags))
 
 (add-hook
