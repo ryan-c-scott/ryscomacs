@@ -967,7 +967,11 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-magit-pull-request ()
   (interactive)
-  (rysco-magit-goto-compare (magit-get-current-branch)))
+  (if (magit-get-push-branch nil t)
+      (progn
+        (magit-run-git "push" "-v" "origin")
+        (rysco-magit-goto-compare (magit-get-current-branch)))
+    (magit-push)))
 
 (defun rysco-magit-goto-branch ()
   (interactive)
