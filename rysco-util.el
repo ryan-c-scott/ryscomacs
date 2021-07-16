@@ -951,7 +951,7 @@ With prefix-arg prompt for type if available with your AG version."
   (let* ((origin (rysco-magit-get-origin))
          (url (rysco-magit-origin-url origin))
          (source
-          `(,(helm-build-sync-source "Comman Branches"
+          `(,(helm-build-sync-source "Common Branches"
                :candidates '("master"))
             ,(helm-build-sync-source "Other Branches"
                :candidates
