@@ -238,12 +238,20 @@
 
 (cl-defun bluedot--format-history (&key history format)
   (cl-loop
-   for (time work rest desc) in (or history (bluedot--retrieve-history)) collect
-   (list
-    (format-time-string (or format "%Y-%m-%d-%H:%M") time)
-    (/ work 60)
-    (/ rest 60)
-    desc)))
+   with results
+   for entry in (or history (bluedot--retrieve-history)) do
+   (pcase entry
+     ('CANCEL
+      (pop results))
+     (`(,time ,work ,rest ,desc)
+      (push
+       (list
+        (format-time-string (or format "%Y-%m-%d-%H:%M") time)
+        (/ work 60)
+        (/ rest 60)
+        desc)
+       results)))
+   finally return results))
 
 (cl-defun bluedot-org-insert-history (&optional block)
   (interactive "P")
@@ -280,9 +288,9 @@
 
        with days = (if days
                        (prefix-numeric-value days)
-                     2)
+                     7)
 
-       for (day . entries) in (reverse (-take-last days history))
+       for (day . entries) in (-take days history)
        do
        (insert (format "* %s\n" day))
        (loop
