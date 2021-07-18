@@ -912,8 +912,11 @@
 
 ;; Magit
 (defun rysco-magit-status-additions ()
-  (magit-section-hide (magit-insert-local-branches))
-  (magit-section-hide(magit-insert-tags)))
+  (--when-let (magit-insert-local-branches)
+    (magit-section-hide it))
+
+  (--when-let (magit-insert-tags)
+      (magit-section-hide it)))
 
 (add-hook
  'magit-mode-hook
