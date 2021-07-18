@@ -301,10 +301,12 @@
                :order 0)
         (:name "NOW"
                :todo "NOW"
+               :transformer rysco-agenda-project-header
                :order 0)
         (:name "NEXT/WAITING"
                :todo "NEXT"
                :todo "WAITING"
+               :transformer rysco-agenda-project-header
                :order 0)
         (:name "Important"
                :priority "A"

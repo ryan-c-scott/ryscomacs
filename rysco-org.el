@@ -227,6 +227,15 @@
 
           "\n\n")))))
 
+(defun rysco-agenda-project-header (str)
+  (-if-let* ((marker (get-text-property 0 'org-marker str))
+             (face-name (org-entry-get marker "projectface" t))
+             (face (intern face-name))
+             (header-width (length (car (s-match "^.*:\s+" str)))))
+      (prog1 str
+        (add-text-properties 0 (1- header-width) `(face ,face) str))
+    str))
+
 (defun rysco-agenda-refile-wrapper (old &rest args)
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
