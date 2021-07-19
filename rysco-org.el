@@ -227,6 +227,7 @@
 
           "\n\n")))))
 
+;;;###autoload
 (defun rysco-agenda-project-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (face-name (org-entry-get marker "projectface" t))
