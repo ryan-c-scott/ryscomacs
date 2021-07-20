@@ -78,6 +78,7 @@
     ("go" "Calendar Open" rysco-calendar-open)
     ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
     ("gr" "GCal Refresh" rysco-calendar-gcal-refresh-token)
+    ("gc" "GCal Clear" rysco-calendar-gcal-clear-files)
     ("gl" "Links" helm-rysco-goto-common-links)
     ("gs" "Web Search" rysco-web-query)]
 
