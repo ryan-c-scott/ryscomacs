@@ -34,7 +34,7 @@
                              "[ ]+")]
         (--any? (cl-member it all-layers :test 'string-equal) current-layers))))
 
-(cl-defun rysco-graph--render-plist-to-settings (data &optional id color-cache rand-state layers)
+(cl-defun rysco-graph--render-plist-to-settings (data &optional id color-cache rand-state layers ignore)
   (loop
    with out
    with obj-layer = (plist-get data :layer)
@@ -60,7 +60,7 @@
               (--map (format "%s" it) v)))
             (_ v))
 
-   when (and k v)
+   when (and k v (not (cl-member k ignore :test 'string-equal)))
    concat
    (format "%s=\"%s\"," (substring k 1) v)
    into out
@@ -100,7 +100,7 @@
     (when (not visible)
       "fontcolor=\"#FF000000\"; bgcolor=\"#FF000000\"; color=\"#FF000000\";\n"))))
 
-(cl-defun rysco-graph--render-nodes (patch &key path name subgraph prefix properties rand-state color-cache layers)
+(cl-defun rysco-graph--render-nodes (patch &key path name subgraph prefix properties rand-state color-cache layers ignore)
   (loop
    with entry-prefix = (if path (format "%s_" path) "")
 
@@ -119,7 +119,8 @@
                  path)
          :subgraph t
          :prefix (eq type :cluster)
-         :layers layers)
+         :layers layers
+         :ignore ignore)
 
         (unless global
           (insert (format "}\n")))))
@@ -165,7 +166,8 @@
          mod-name
          color-cache
          rand-state
-         layers)))))))
+         layers
+         ignore)))))))
 
 (cl-defun rysco-graph--render-connections (patch &key path name subgraph prefix properties rand-state color-cache layers)
   (cl-loop
@@ -207,7 +209,7 @@
          (port (if split (substring name split) "")))
     (format "\"%s\"%s" node port)))
 
-(cl-defun rysco-graph--render (patch &key filename graph-code rand-seed layers as-code)
+(cl-defun rysco-graph--render (patch &key filename graph-code rand-seed layers as-code ignore)
   (-let* ((temp-path (make-temp-file "patch" nil ".dot"))
           (color-cache (make-hash-table :test 'equal))
           (rand-state (cl-make-random-state rand-seed))
@@ -234,7 +236,8 @@
        patch
        :color-cache color-cache
        :rand-state rand-state
-       :layers layers)
+       :layers layers
+       :ignore ignore)
 
       ;; Insert connections
       (rysco-graph--render-connections
