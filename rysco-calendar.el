@@ -190,10 +190,11 @@
 (defun rysco-calfw-dimmed-past (fun event format-string)
   (let* ((output (funcall fun event format-string))
          (now (current-time))
+         (event-start-time (cfw:event-start-time event))
          (event-start
           (rysco-calfw--convert-date-and-time
            (cfw:event-start-date event)
-           (cfw:event-start-time event)))
+           event-start-time))
          (event-end
           (rysco-calfw--convert-date-and-time
            (or (cfw:event-end-date event)
@@ -208,7 +209,8 @@
                           (seconds-to-time rysco-calfw-upcoming-threshold))
                          now)))
     (cond
-     ((and started ended)
+     ((or (not event-start-time)
+          (and started ended))
       (propertize output 'face 'rysco-calfw-past-date 'cfw:old t))
      (started
       (propertize output 'face 'rysco-calfw-current-date))
