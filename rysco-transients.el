@@ -35,8 +35,7 @@
    ["Buffer Killing"
     ("kc" "Clones" rysco-kill-all-clones)
     ("ka" "All" killall)
-    ("kp" "Projectile" projectile-kill-buffers)
-    ("ki" "IRC" kill-rcirc-buffers)]
+    ("kp" "Projectile" projectile-kill-buffers)]
 
    ["Time Management"
     ("ta" "Agenda" org-agenda)
@@ -55,7 +54,7 @@
 
    [""
     ["Utility"
-    ("ui" "IRC" rcirc)
+    ("up" "Magit Repositories" magit-list-repositories)
     ("ue" "EShell" eshell)
     ("un" "New EShell" rysco-eshell-new)
     ("ut" "Themes" rysco-load-theme)
