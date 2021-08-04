@@ -992,6 +992,12 @@ With prefix-arg prompt for type if available with your AG version."
    (rysco-magit-origin-url
     (rysco-magit-get-origin))))
 
+(cl-defmacro rysco-magit-set-repos (&rest forms)
+  `(setq magit-repository-directories
+         (--map
+          (cons it 0)
+          ',(apply 'rysco-flat-concat forms))))
+
 (defun rysco-export-org-to-pdf ()
   "Searches for a file named `.pdf-master' in ancestor directories and uses the file name specified inside of that file as the file to open and export using `org-latex-export-to-pdf'"
   (interactive)
