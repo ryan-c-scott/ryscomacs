@@ -15,12 +15,14 @@
   :group 'ryscomacs-faces)
 
 (defun rysco-transient--wrap-command (name)
-  (let* ((wrapped (intern (format "%s--suffix" name)))
-         (func (lambda ()
-                 (interactive)
-                 (funcall name))))
-    (fset wrapped func)
-    wrapped))
+  (if (s-ends-with? "--suffix" (format "%s" name))
+      name
+    (let* ((wrapped (intern (format "%s--suffix" name)))
+           (func (lambda ()
+                   (interactive)
+                   (call-interactively name))))
+      (fset wrapped func)
+      wrapped)))
 
 (defun rysco-transient--wrap-children (children)
   (loop
