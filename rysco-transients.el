@@ -14,7 +14,22 @@
   "Face for Ryscomacs title in main transient"
   :group 'ryscomacs-faces)
 
-(define-transient-command rysco-main-transient ()
+(defun rysco-transient--wrap-command (name)
+  (let* ((wrapped (intern (format "%s--suffix" name)))
+         (func (lambda ()
+                 (interactive)
+                 (funcall name))))
+    (fset wrapped func)
+    wrapped))
+
+(defun rysco-transient--wrap-children (children)
+  (loop
+   for (id type data) in children
+   as cmd = (rysco-transient--wrap-command (plist-get data :command))
+   collect
+   `(,id ,type ,(plist-put data :command cmd))))
+
+(transient-define-prefix rysco-main-transient ()
   "Miscellany"
   [:description
    (lambda ()
@@ -23,21 +38,25 @@
       (propertize " Miscellany" 'face 'rysco-main-transient-title)
       "\n"))
    ["Desktops"
+    :setup-children rysco-transient--wrap-children
     ("wb" "Create" rysco-desktop+-create)
     ("wm" "Load" desktop+-load)]
 
    ["Windows"
+    :setup-children rysco-transient--wrap-children
     ("wn" "Name Frame" set-frame-name)
     ("wp" "Name Frame [Project]" rysco-name-frame-project)
     ("wc" "Clone & Narrow" rysco-clone-and-narrow)
     ("wf" "Buffer Font" rysco-set-buffer-local-font)]
 
    ["Buffer Killing"
+    :setup-children rysco-transient--wrap-children
     ("kc" "Clones" rysco-kill-all-clones)
     ("ka" "All" killall)
     ("kp" "Projectile" projectile-kill-buffers)]
 
    ["Time Management"
+    :setup-children rysco-transient--wrap-children
     ("ta" "Agenda" org-agenda)
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
@@ -47,13 +66,15 @@
     ("th" "Bluedot History" bluedot-history-report)]
 
    ["Describe"
+    :setup-children rysco-transient--wrap-children
     ("dm" "Mode" describe-mode)
     ("dk" "Key Briefly" describe-key-briefly)
     ("db" "Binds" helm-descbinds)
     ("dc" "Character" describe-char)]]
 
-   [""
-    ["Utility"
+  [""
+   ["Utility"
+    :setup-children rysco-transient--wrap-children
     ("up" "Magit Repositories" magit-list-repositories)
     ("ue" "EShell" eshell)
     ("un" "New EShell" rysco-eshell-new)
@@ -63,6 +84,7 @@
     ("ur" "Agenda Rifle" helm-org-rifle-agenda-files)]
 
    ["Packages"
+    :setup-children rysco-transient--wrap-children
     ("pa" "Pull All" straight-pull-all)
     ("pr" "Rebuild All" straight-rebuild-all)
     ("pp" "Pull Package" straight-pull-package)
@@ -70,10 +92,12 @@
     ("pt" "Reset to Locked" straight-thaw-versions)]
 
    ["Config"
+    :setup-children rysco-transient--wrap-children
     ("cr" "Reload" rysco-load-local-config)
     ("ce" "Edit" rysco-edit-config)]
 
    ["Internet"
+    :setup-children rysco-transient--wrap-children
     ("go" "Calendar Open" rysco-calendar-open)
     ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
     ("gr" "GCal Refresh" rysco-calendar-gcal-refresh-token)
@@ -82,10 +106,11 @@
     ("gs" "Web Search" rysco-web-query)]
 
    ["Help"
+    :setup-children rysco-transient--wrap-children
     ("hl" "Lossage" view-lossage)
     ("hi" "Info" helm-info)]]
 
-   [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
+  [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
 
 ;; Magit intergation
 (define-transient-command rysco-magit-transient ()
