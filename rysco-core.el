@@ -338,6 +338,19 @@
         "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "%latex -shell-escape -interaction nonstopmode -output-directory %o %f")
 
+      ;;
+      org-clock-persist t
+      org-clock-in-resume t
+      org-clock-persist-query-resume nil
+      org-clock-in-switch-to-state "NOW"
+      org-clock-out-switch-to-state "NEXT"
+      org-clock-into-drawer t
+      org-clock-out-remove-zero-time-clocks t
+      org-clock-out-when-done t
+      org-clock-auto-clock-resolution 'when-no-clock-is-running
+      org-clock-report-include-clocking-task t
+      org-pretty-entities t
+
       markdown-asymmetric-header t
       markdown-header-scaling t
       markdown-command "pandoc --smart -r markdown_github -w html"
@@ -957,6 +970,7 @@
    (lambda ()
      (server-start)
      (bluedot-enable t)
+     (org-clock-persistence-insinuate)
      (rysco-add-hunspell-dictionaries))))
 
 ;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
