@@ -956,7 +956,7 @@
    0.25 nil
    (lambda ()
      (server-start)
-     (bluedot-resume)
+     (bluedot-enable t)
      (rysco-add-hunspell-dictionaries))))
 
 ;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
