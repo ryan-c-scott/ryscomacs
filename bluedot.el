@@ -4,7 +4,7 @@
 
 ;; Author: Ryon C. Scott
 ;; URL: 
-;; Version: 0.1
+;; Version: 1.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: calendar
 
@@ -35,10 +35,7 @@
 
 ;;; Commentary:
 
-;; This package provides a little pomodoro timer in the mode-line.
-;;
-;; After importing, it shows a little red tick (✓) in the mode-line.
-;; When you click on it, it starts a pomodoro timer.
+;; This package provides a little pomodoro timer in the mode-line based on the currently clocked in org task.
 ;;
 ;; This is a heavily modified fork of redtick by F. Febles (http://github.com/ferfebles/redtick)
 ;;; Code:
@@ -52,24 +49,26 @@
   :prefix "bluedot-")
 
 ;; pomodoro work & rest intervals in seconds
-(defcustom bluedot-work-interval (* 60 25)
+(defcustom bluedot-work-interval 5 ;(* 60 25)
   "Interval of time you will be working, in seconds."
   :type 'number)
-(defcustom bluedot-rest-interval (* 60 5)
+
+(defcustom bluedot-rest-interval 5 ;(* 60 5)
   "Interval of time you will be resting, in seconds."
   :type 'number)
-(defcustom bluedot-history-file (expand-file-name "bluedot-history.txt"  user-emacs-directory)
-  "File to store all the completed pomodoros."
-  :type 'string)
+
 (defcustom bluedot-popup-header '(format "Working with '%s'" (current-buffer))
   "Header used in popup."
   :type 'sexp)
+
 (defcustom bluedot-play-sound t
   "Play sounds when true."
   :type 'boolean)
+
 (defcustom bluedot-show-notification t
   "Sends system notifications when true."
   :type 'boolean)
+
 (defcustom bluedot-sound-volume "0.3"
   "Sound volume as numeric string (low < 1.0 < high)."
   :type 'string)
@@ -89,12 +88,6 @@
 
 ;; stores the number of completed pomodoros
 (defvar bluedot--completed-pomodoros 0)
-
-;; pomodoro start time
-(defvar bluedot--pomodoro-started-at (current-time))
-
-;; current pomodoro description
-(defvar bluedot--pomodoro-description "Start your first pomodoro now!!!")
 
 ;; intervals, bars & colours
 (defvar bluedot--bars)
@@ -135,7 +128,7 @@
   (when bluedot-play-sound
     (bluedot--ding))
   (when bluedot-show-notification
-    (bluedot--notify "Time to Rest" bluedot--pomodoro-description)))
+    (bluedot--notify "Time to Rest" org-clock-current-task)))
 
 (defun bluedot--notify-rest-done ()
   (message "rest done")
@@ -184,8 +177,8 @@
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
               'face `(:inherit ,bluedot-modeline-face :foreground ,bar-color :height 0.95)
-              'help-echo '(bluedot--popup-message bluedot--pomodoro-started-at
-                                                  bluedot--pomodoro-description)
+              'help-echo '(bluedot--popup-message org-clock-start-time
+                                                  org-clock-current-task)
               'pointer 'hand
               'local-map (make-mode-line-mouse-map 'mouse-1 'bluedot)))
 
@@ -201,116 +194,11 @@
                          bluedot--current-bar))
                t))
 
-(defun bluedot--load (file)
-  "Use FILE to load DATA."
-  (ignore-errors
-    (with-temp-buffer
-      (insert-file-contents file)
-      (goto-char (point-min))
-
-      (let ((buffer (current-buffer)))
-        (save-excursion
-          (goto-char (point-min))
-          (cl-loop with entry
-                   do (setq entry (ignore-errors (read buffer)))
-                   while entry
-                   collect entry))))))
-
-(defun bluedot--add-history (&optional cancel)
-  "Adding current-pomodoro info to history file."
-  (--when-let bluedot-history-file
-    (with-current-buffer (find-file it)
-      (save-excursion
-        (goto-char (point-max))
-        (insert (prin1-to-string
-                 (if cancel
-                     'CANCEL
-                   (list bluedot--pomodoro-started-at
-                         bluedot-work-interval
-                         bluedot-rest-interval
-                         bluedot--pomodoro-description)))
-                "\n")
-        (save-buffer)
-        (kill-buffer (current-buffer))))))
-
-(defun bluedot--retrieve-history (&optional file)
-  (bluedot--load (or file bluedot-history-file)))
-
-(cl-defun bluedot--format-history (&key history format)
-  (cl-loop
-   with results
-   for entry in (or history (bluedot--retrieve-history)) do
-   (pcase entry
-     ('CANCEL
-      (pop results))
-     (`(,time ,work ,rest ,desc)
-      (push
-       (list
-        (format-time-string (or format "%Y-%m-%d-%H:%M") time)
-        (/ work 60)
-        (/ rest 60)
-        desc)
-       results)))
-   finally return results))
-
-(cl-defun bluedot-org-insert-history (&optional block)
-  (interactive "P")
-  (save-excursion
-    (if block
-        (progn
-          (insert "#+begin_src elisp\n(bluedot--format-history)\n#+end_src\n")
-          (forward-line -1)
-          (let ((org-confirm-babel-evaluate nil))
-            (org-babel-execute-src-block)))
-      ;;
-      (insert
-       (cl-loop for entry in (bluedot--format-history)
-                concat "|"
-                concat (s-join "|" (mapcar (lambda (el) (format "%s" el)) entry))
-                concat "|\n"))
-      (forward-line -1)
-      (org-table-align))))
-
-(defun bluedot-history-report-kill ()
-  (interactive)
-  (kill-buffer (current-buffer)))
-
 ;;;###autoload
-(defun bluedot-history-report (&optional days)
-  (interactive "P")
-  (let ((buf (get-buffer-create "*Bluedot History*")))
-    (with-current-buffer buf
-      (erase-buffer)
-      (loop
-       with history = (--group-by
-                       (car it)
-                       (bluedot--format-history :format "%Y-%m-%d"))
-
-       with days = (if days
-                       (prefix-numeric-value days)
-                     7)
-
-       for (day . entries) in (-take days history)
-       do
-       (insert (format "* %s\n" day))
-       (loop
-        for work in (-uniq
-                     (--map
-                      (-last-item it)
-                      entries))
-        do
-        (insert (format "  - %s\n" work)))
-       do (insert "\n"))
-      (org-mode)
-      (org-show-all)
-      (read-only-mode)
-      (local-set-key "q" 'bluedot-history-report-kill))
-    (switch-to-buffer buf)))
-
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
 
-  (let* ((elapsed (float (bluedot--seconds-since bluedot--pomodoro-started-at)))
+  (let* ((elapsed (float (bluedot--seconds-since org-clock-start-time)))
          (working (min 1 (/ elapsed bluedot-work-interval)))
          (resting (/ (max 0 (- elapsed bluedot-work-interval))
                      bluedot-rest-interval)))
@@ -345,113 +233,42 @@
 ;; Hooks
 (add-hook 'bluedot-after-work-hook #'bluedot--notify-work-done)
 (add-hook 'bluedot-after-rest-hook #'bluedot--notify-rest-done)
-(add-hook 'bluedot-before-work-hook #'bluedot--add-history)
 
 ;;;###autoload
 (define-minor-mode bluedot-mode
   "Little pomodoro timer in the mode-line."
   :global t)
 
+(defun bluedot-org-clock-in ()
+  (bluedot-mode 1))
+
+(defun bluedot-org-clock-out ()
+  (org-clock-out nil t))
+
+(defun bluedot-org-clock-cancel ()
+  (bluedot-mode 0))
+
+;;;###autoload
+(defun bluedot-enable (enable)
+  (if enable
+      (progn
+        (add-hook 'org-clock-in-hook 'bluedot-org-clock-in)
+        (add-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
+        (add-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
+        (add-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
+        (advice-add 'org-clock-update-mode-line :after 'bluedot--update-current-bar))
+
+    (remove-hook 'org-clock-in-hook 'bluedot-org-clock-in)
+    (remove-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
+    (remove-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
+    (remove-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
+    (advice-remove 'org-clock-update-mode-line 'bluedot--update-current-bar)))
+
 (defun bluedot--default-desc ()
   "Default pomodoro description: Working with 'current-buffer'..."
   (concat (eval bluedot-popup-header)
           (cond ((which-function)
                  (format ":'%s'" (which-function))))))
-
-(defun bluedot-get-heading-from-agenda ()
-  (interactive)
-  (when (derived-mode-p 'org-agenda-mode)
-    (--when-let (org-get-at-bol 'org-marker)
-      (let* ((marker it)
-	     (buffer (marker-buffer marker))
-	     (pos (marker-position marker)))
-        (with-current-buffer buffer
-          ;; TODO: Save the narrowing somehow
-          (widen)
-          (push-mark)
-          (goto-char pos)
-          (org-get-heading t t t t))))))
-
-;;;###autoload
-(defun bluedot ()
-  "Ask for DESCRIPTION, enable minor-mode, and start the pomodoro."
-  (interactive)
-
-  (--when-let (helm
-               :sources
-               `(,(when (or (derived-mode-p 'org-mode)
-                            (derived-mode-p 'org-agenda-mode))
-                    (helm-build-sync-source "Org Heading"
-                      :candidates
-                      (-non-nil
-                       `(,(when (derived-mode-p 'org-mode)
-                            (org-get-heading t t t t))
-                         ,(bluedot-get-heading-from-agenda)))))
-                 ,(helm-build-sync-source "Previous Labels"
-                    :candidates
-                    (lambda ()
-                      (seq-take
-                       (delete-dups
-                        (reverse
-                         (cl-loop
-                          for entry in (bluedot--retrieve-history)
-                          unless (equal entry 'CANCEL) collect
-                          (-let [(time work rest label) entry]
-                            label))))
-                       20)))
-                 ,(helm-build-dummy-source "New Label")))
-
-    (bluedot-mode t)
-    (if bluedot--timer (cancel-timer bluedot--timer))
-    (setq bluedot--pomodoro-started-at (current-time)
-          bluedot--pomodoro-description it
-          bluedot--notified-done nil)
-    (run-hooks 'bluedot-before-work-hook)
-    (bluedot--update-current-bar bluedot--bars)))
-
-;;;###autoload
-(defun bluedot-cancel (&optional no-record)
-  (interactive)
-  (when (and bluedot--timer
-             (y-or-n-p
-              (format
-               "Cancel '%s'?"
-               bluedot--pomodoro-description)))
-
-    (cancel-timer bluedot--timer)
-    (setq bluedot--timer nil)
-    (bluedot-mode 0)
-
-    (unless no-record
-      (bluedot--add-history t))))
-
-;;;###autoload
-(defun bluedot-resume ()
-  "Detects and resumes any currently active timer in the history"
-  (interactive)
-  (--when-let (bluedot--retrieve-history)
-    (let ((entry (car (last it))))
-      (if (equal entry 'CANCEL)
-          (bluedot-cancel t)
-
-        ;;
-        (let* ((time (current-time))
-               (last-time (car entry))
-               (description (car (last entry))))
-
-          (when (< (- (time-to-seconds time) (time-to-seconds last-time))
-                    (+ (nth 1 entry) (nth 2 entry)))
-
-             (bluedot-mode t)
-
-             (when bluedot--timer
-               (cancel-timer bluedot--timer))
-
-             (setq bluedot--pomodoro-started-at last-time
-                   bluedot--pomodoro-description description
-                   bluedot--notified-done nil)
-
-             (bluedot--update-current-bar bluedot--bars)))))))
 
 ;;;;;;;;
 (provide 'bluedot)
