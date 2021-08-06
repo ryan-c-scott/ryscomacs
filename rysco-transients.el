@@ -63,9 +63,8 @@
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
     ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
-    ("tb" "Bluedot" bluedot)
-    ("tc" "Bluedot Cancel" bluedot-cancel)
-    ("th" "Bluedot History" bluedot-history-report)]
+    ("tr" "Clock in Last" bluedot-org-clock-in-last)
+    ("tj" "Jump to Clock" bluedot-org-jump-to-clock)]
 
    ["Describe"
     :setup-children rysco-transient--wrap-children

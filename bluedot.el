@@ -248,6 +248,16 @@
 (defun bluedot-org-clock-cancel ()
   (bluedot-mode 0))
 
+(defun bluedot-org-jump-to-clock ()
+  (interactive)
+  (when (org-clocking-p)
+    (org-clock-jump-to-current-clock)))
+
+(defun bluedot-org-clock-in-last ()
+  (interactive)
+  (unless (org-clocking-p)
+    (org-clock-in-last 1)))
+
 ;;;###autoload
 (defun bluedot-enable (enable)
   (if enable
