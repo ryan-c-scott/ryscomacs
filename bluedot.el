@@ -49,11 +49,11 @@
   :prefix "bluedot-")
 
 ;; pomodoro work & rest intervals in seconds
-(defcustom bluedot-work-interval 5 ;(* 60 25)
+(defcustom bluedot-work-interval (* 60 25)
   "Interval of time you will be working, in seconds."
   :type 'number)
 
-(defcustom bluedot-rest-interval 5 ;(* 60 5)
+(defcustom bluedot-rest-interval (* 60 5)
   "Interval of time you will be resting, in seconds."
   :type 'number)
 
