@@ -301,6 +301,12 @@
    finally return
    (cons results anchors)))
 
+(cl-defun rysco-graph--scope (from connection-properties root data &optional reverse)
+  (let ((old-root rysco-graph--scope))
+    (setq rysco-graph--scope root)
+    (prog1 (rysco-graph--process from connection-properties data reverse)
+      (setq rysco-graph--scope old-root))))
+
 (cl-defun rysco-graph--chain (from connection-properties data &optional reverse)
   (loop
    with results
@@ -326,18 +332,29 @@
    finally return
    (cons results anchors)))
 
+(defvar rysco-graph--scope nil)
+
+(cl-defun rysco-graph--scope-node (node)
+  (let* ((node (format "%s" node))
+         (escaped (s-starts-with? "^" node))
+         (node (intern (if escaped (substring node 1) node))))
+    (if (and rysco-graph--scope (not escaped))
+        (intern (format "%s_%s" rysco-graph--scope node))
+      node)))
+
 (cl-defun rysco-graph--node (from connection-properties node &optional reverse)
-  (list
-   (loop
-    for anchor in from
-    as start = (if reverse node anchor)
-    as end = (if reverse anchor node)
-    collect
-    `(,start
-      ,(if connection-properties
-           `(,end ,@connection-properties)
-         end)))
-   node))
+  (let ((scoped-node (rysco-graph--scope-node node)))
+    (list
+     (loop
+      for anchor in from
+      as start = (if reverse scoped-node anchor)
+      as end = (if reverse anchor scoped-node)
+      collect
+      `(,start
+        ,(if connection-properties
+             `(,end ,@connection-properties)
+           end)))
+     scoped-node)))
 
 (cl-defun rysco-graph--sequence (from connection-properties data &rest rest)
   (-let* (((name columns . entries) data)
@@ -476,6 +493,7 @@
 
 (cl-defun rysco-graph--process (from connection-properties form &optional reverse)
   (pcase form
+    (`(:scope ,root . ,rest) (rysco-graph--scope from connection-properties root rest reverse))
     (`(:chain . ,rest) (rysco-graph--chain from connection-properties rest reverse))
     (`(:fan . ,rest) (rysco-graph--fan from connection-properties rest reverse))
     (`(:sequence . ,rest) (rysco-graph--sequence from connection-properties rest reverse))
