@@ -259,7 +259,6 @@
         (goto-char block-point)
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
-
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
@@ -267,6 +266,13 @@
 (advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
 
 (advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
+
+(defun rysco-org-clock-heading ()
+  (or
+   (org-entry-get (point) "PROJECTID" t)
+   ""))
+
+(setq org-clock-heading-function 'rysco-org-clock-heading)
 
 ;;
 (provide 'rysco-org)
