@@ -261,6 +261,7 @@
 
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
+(advice-add #'org-agenda-todo :after 'org-agenda-redo-all)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 
 (advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
