@@ -259,9 +259,15 @@
         (goto-char block-point)
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
+(defun rysco-org-agenda-post-clock-in (&optional _)
+  (org-agenda-redo-all)
+  (rysco-org-agenda-goto-first-section))
+
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-todo :after 'org-agenda-redo-all)
+(advice-add #'org-agenda-clock-in :after 'rysco-org-agenda-post-clock-in)
+(advice-add #'org-agenda-clock-out :after 'org-agenda-redo-all)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 
 (advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
