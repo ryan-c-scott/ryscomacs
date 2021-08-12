@@ -305,13 +305,22 @@
                :todo "NOW"
                :transformer rysco-agenda-project-header
                :order 0)
-        (:name "NEXT/WAITING"
-               :todo "NEXT"
-               :todo "WAITING"
+        (:name "Due Today"
+               :deadline today
+               :transformer rysco-agenda-project-header
+               :order 0)
+        (:name "Due Soon"
+               :deadline t
                :transformer rysco-agenda-project-header
                :order 0)
         (:name "Important"
                :priority "A"
+               :transformer rysco-agenda-project-header
+               :order 0)
+        (:name "NEXT/WAITING"
+               :todo "NEXT"
+               :todo "WAITING"
+               :transformer rysco-agenda-project-header
                :order 0)
         (:todo "INACTIVE"
                :order 8)
