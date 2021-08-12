@@ -69,10 +69,6 @@
   "Sends system notifications when true."
   :type 'boolean)
 
-(defcustom bluedot-sound-volume "0.3"
-  "Sound volume as numeric string (low < 1.0 < high)."
-  :type 'string)
-
 (defcustom bluedot-modeline-face nil
   "Face to serve as the base for modeline display"
   :type 'face)
@@ -83,7 +79,6 @@
 
 ;; stores bluedot timer, to be cancelled if restarted
 (defvar bluedot--timer nil)
-(defvar bluedot--notification nil)
 (defvar bluedot--notified-done nil)
 
 ;; stores the number of completed pomodoros
@@ -115,27 +110,23 @@
   (let ((ring-bell-function nil))
     (ding t)))
 
-(defun bluedot--notify (title msg)
+(defun bluedot--notify (title msg &optional sound)
   (when (eq system-type 'windows-nt)
-    (w32-notification-close bluedot--notification)
-    
-    (--when-let (w32-notification-notify :tip title :title title :body msg)
-      (setq bluedot--notification it)
-      (run-at-time 2 nil #'w32-notification-close it))))
+    (alert-toast-notify `(:title ,title :message ,msg :data (:audio ,(or sound 'default))))))
 
 (defun bluedot--notify-work-done ()
   (message "work done")
   (when bluedot-play-sound
     (bluedot--ding))
   (when bluedot-show-notification
-    (bluedot--notify "Time to Rest" org-clock-current-task)))
+    (bluedot--notify "Time to Rest" org-clock-current-task 'im)))
 
 (defun bluedot--notify-rest-done ()
   (message "rest done")
   (when bluedot-play-sound
     (bluedot--ding))
   (when bluedot-show-notification
-    (bluedot--notify "Back to Work" "Get to it")))
+    (bluedot--notify "Back to Work" "Get to it" 'reminder)))
 
 (defun bluedot--seconds-since (time)
   "Seconds since TIME."

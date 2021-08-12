@@ -56,6 +56,8 @@
  org
  use-package
  transient
+ alert
+ (alert-toast :type git :host github :repo "gkowzan/alert-toast")
  autothemer
  csharp-mode
  csv-mode
