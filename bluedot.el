@@ -212,6 +212,9 @@
                      it
                    (nth 16 bluedot--bars))))
 
+    (when (< working 1)
+      (setq bluedot--notified-done nil))
+
     (when (and (>= working 1)
                (not bluedot--notified-done))
       (run-hooks 'bluedot-after-work-hook
@@ -220,9 +223,12 @@
 
     (if (< resting 1)
         (setq bluedot--timer
-              (run-at-time
-               (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
-               nil #'bluedot--update-current-bar))
+              (progn
+                (when bluedot--timer
+                  (cancel-timer bluedot--timer))
+                (run-at-time
+                 (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
+                 nil #'bluedot--update-current-bar)))
       ;;
       (run-hooks 'bluedot-after-rest-hook)
       (setq bluedot--completed-pomodoros
