@@ -55,6 +55,8 @@
   ""
   :group 'rysco-org-agenda-faces)
 
+(set-face-attribute 'org-agenda-clocking nil :box "cyan4")
+
 (defun helm-rysco-org-agenda-buffer-items (&optional arg)
   (interactive "P")
   (--when-let
