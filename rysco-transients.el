@@ -55,7 +55,8 @@
     :setup-children rysco-transient--wrap-children
     ("kc" "Clones" rysco-kill-all-clones)
     ("ka" "All" killall)
-    ("kp" "Projectile" projectile-kill-buffers)]
+    ("kp" "Projectile" projectile-kill-buffers)
+    ("kb" "Buffer & Frame" rysco-kill-buffer-and-frame)]
 
    ["Time Management"
     :setup-children rysco-transient--wrap-children

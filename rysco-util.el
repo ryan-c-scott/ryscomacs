@@ -91,6 +91,11 @@
       for buf in kill-list do
       (kill-buffer buf)))))
 
+(cl-defun rysco-kill-buffer-and-frame ()
+  (interactive)
+  (kill-buffer (current-buffer))
+  (delete-frame))
+
 (defun rysco-comment-dwim (arg)
   ""
   (interactive "*P")
