@@ -362,6 +362,19 @@
       org-clock-report-include-clocking-task t
       org-pretty-entities t
 
+      whitespace-display-mappings
+      '((space-mark 32
+                    [183]
+                    [46])
+        (space-mark 160
+                    [164]
+                    [95])
+        (newline-mark 10
+                      [8629 10])
+        (tab-mark 9
+                  [9655 9]
+                  [92 9]))
+
       markdown-asymmetric-header t
       markdown-header-scaling t
       markdown-command "pandoc --smart -r markdown_github -w html"
@@ -747,6 +760,12 @@
   (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
+
+(with-eval-after-load 'whitespace-mode
+    (let ((color "Gray20"))
+      (set-face-attribute 'whitespace-indentation nil :strike-through t :foreground color)
+      (set-face-attribute 'whitespace-space nil :box nil :foreground color)
+      (set-face-attribute 'whitespace-newline nil :foreground color)))
 
 (with-eval-after-load 'calfw
   (define-key cfw:calendar-mode-map "g" 'cfw:refresh-calendar-buffer)
