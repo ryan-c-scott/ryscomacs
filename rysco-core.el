@@ -362,6 +362,21 @@
       org-clock-report-include-clocking-task t
       org-pretty-entities t
 
+      whitespace-line-column nil
+      whitespace-style
+      '(face
+        tabs
+        spaces
+        trailing
+        space-before-tab
+        newline
+        indentation
+        empty
+        space-after-tab
+        space-mark
+        tab-mark
+        newline-mark)
+
       whitespace-display-mappings
       '((space-mark 32
                     [183]
