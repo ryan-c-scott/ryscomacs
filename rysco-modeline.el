@@ -237,7 +237,7 @@
          (rhs-width-adjustment width-adjustment)
 
          (center-section (rysco-modeline--section center)))
-    
+
     `(,lhs
       ,center-section
       ,rhs)))

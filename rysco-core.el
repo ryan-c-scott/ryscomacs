@@ -518,13 +518,13 @@
             (require 'vc)
             (defun vc-deduce-backend ()
               (cond ((derived-mode-p 'vc-dir-mode)   vc-dir-backend)
-	            ((derived-mode-p 'log-view-mode) log-view-vc-backend)
-	            ((derived-mode-p 'log-edit-mode) log-edit-vc-backend)
-	            ((derived-mode-p 'diff-mode)     diff-vc-backend)
+                    ((derived-mode-p 'log-view-mode) log-view-vc-backend)
+                    ((derived-mode-p 'log-edit-mode) log-edit-vc-backend)
+                    ((derived-mode-p 'diff-mode)     diff-vc-backend)
                     ;; Maybe we could even use comint-mode rather than shell-mode?
-	            ((derived-mode-p 'dired-mode 'shell-mode 'compilation-mode 'eshell-mode)
-	             (ignore-errors (vc-responsible-backend default-directory)))
-	            (vc-mode (vc-backend buffer-file-name))))))
+                    ((derived-mode-p 'dired-mode 'shell-mode 'compilation-mode 'eshell-mode)
+                     (ignore-errors (vc-responsible-backend default-directory)))
+                    (vc-mode (vc-backend buffer-file-name))))))
 
 ;; Disables auto-fill in commit message buffers
 (add-hook 'git-commit-setup-hook 'turn-off-auto-fill t)
@@ -538,7 +538,7 @@
 
   (custom-set-variables '(flycheck-command-wrapper-function 'rysco-fix-flycheck-cmd)))
 
-;; Font 
+;; Font
 (let ((font (concat rysco-font "-" rysco-font-size)))
   (add-to-list 'default-frame-alist `(font . ,font))
   (set-face-attribute 'default t :font font))
@@ -553,37 +553,37 @@
             (hl-todo-mode)))
 
 (add-hook 'c-mode-common-hook
-	  '(lambda () (c-set-style "stroustrup")
+          '(lambda () (c-set-style "stroustrup")
              (rysco-semantic-mode t)
-	     (setq tab-width 4
-	           indent-tabs-mode nil)
+             (setq tab-width 4
+                   indent-tabs-mode nil)
              (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
              (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'csharp-mode-hook
-	  '(lambda ()
-	     ;; for hide/show support
-	     ;; (hs-minor-mode 1)
-	     ;; (setq hs-isearch-open t)
+          '(lambda ()
+             ;; for hide/show support
+             ;; (hs-minor-mode 1)
+             ;; (setq hs-isearch-open t)
              (rysco-semantic-mode t)
-	     (c-set-style "c#")
-	     (setq indent-tabs-mode nil
-	           tab-width 4)
-             
+             (c-set-style "c#")
+             (setq indent-tabs-mode nil
+                   tab-width 4)
+
              ;; No idea why this isn't the default, but here we are...
              (local-set-key "{" 'c-electric-brace)
              (local-set-key "}" 'c-electric-brace)
 
              ;; with point inside the block, use these keys to hide/show
-	     (local-set-key "\C-c>"  'hs-hide-block)
-	     (local-set-key "\C-c<"  'hs-show-block)
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+             (local-set-key "\C-c>"  'hs-hide-block)
+             (local-set-key "\C-c<"  'hs-show-block)
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
              (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'python-mode-hook
-	  '(lambda ()
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
+          '(lambda ()
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
              (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'lua-mode-hook
@@ -604,8 +604,8 @@
   (advice-add #'lua-point-is-after-left-shifter-p :override #'rysco-lua-no-left-shifting))
 
 (add-hook 'js-mode-hook
-	  '(lambda ()
-	     (setq indent-tabs-mode nil
+          '(lambda ()
+             (setq indent-tabs-mode nil
                    tab-width 4
                    js-indent-level 2)
              (local-set-key (kbd "M-.") 'find-tag)
@@ -617,8 +617,8 @@
              (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'json-mode-hook
-	  '(lambda ()
-	     (setq-default indent-tabs-mode nil)
+          '(lambda ()
+             (setq-default indent-tabs-mode nil)
              (setq js-indent-level 2)))
 
 (add-hook 'emacs-lisp-mode-hook
@@ -630,14 +630,14 @@
             (toggle-truncate-lines t)))
 
 (add-hook 'screenwriter-mode-hook
-	  '(lambda ()
+          '(lambda ()
              (helm-screenwriter-init)
-	     (require 'fill-column-indicator)
-	     (fci-mode)))
+             (require 'fill-column-indicator)
+             (fci-mode)))
 
 (add-hook 'graphviz-dot-mode-hook
-	  '(lambda ()
-	     (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+          '(lambda ()
+             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (defun rysco-org-hook ()
   ""
@@ -791,7 +791,7 @@
             (markdown-update-header-faces markdown-header-scaling)
             (visual-line-mode t)
             ;;(writegood-mode t)
-            
+
             (when (not (eq system-type 'windows-nt))
               (flyspell-mode t))
             (require 'hugo)))
@@ -847,9 +847,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;
 ; IDO buffer switching crap
-(require 'ido) 
+(require 'ido)
 
-(setq 
+(setq
   ido-save-directory-list-file nil ;"~/.emacs.d/ido.last"
   ido-work-directory-list '("~/" "~/Desktop" "~/Documents" "~/src")
   ido-case-fold  t                 ; be case-insensitive
@@ -892,7 +892,7 @@
  ("y" 'helm-show-kill-ring)
  ("v" 'rysco-revert-buffer)
  ("p" 'rysco-repo-status)
- 
+
  ;;Windows
  ("<right>" 'split-window-right)
  ("<down>" 'split-window-below)

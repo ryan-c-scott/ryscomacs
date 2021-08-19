@@ -91,7 +91,7 @@
   :group 'screenwriter)
 
 (defcustom screenwriter-left-margin 0
-  "Left margin for scene headings and action blocks" 
+  "Left margin for scene headings and action blocks"
   :type 'integer
   :group 'screenwriter)
 
@@ -138,9 +138,9 @@
 (defun screenwriter-read-slugline ()
   "Get scene heading.
 Returns scene heading in upper-case format."
-  (let ((scene-heading 
+  (let ((scene-heading
          (let ((prompt "Enter scene heading: "))
-           (read-from-minibuffer prompt 
+           (read-from-minibuffer prompt
                                  nil           ;initial-contents
                                  nil           ;keymap
                                  nil           ;read
@@ -234,9 +234,9 @@ action block element."
 (defun screenwriter-read-transition ()
   "Get transition.
 Returns transition in upper-case format."
-  (let ((trans-name 
+  (let ((trans-name
          (let ((prompt "Enter transition: "))
-           (read-from-minibuffer prompt 
+           (read-from-minibuffer prompt
                                  nil           ;initial-contents
                                  nil           ;keymap
                                  nil           ;read

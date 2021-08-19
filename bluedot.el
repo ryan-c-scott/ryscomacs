@@ -224,7 +224,7 @@
       (run-hooks 'bluedot-after-rest-hook)
       (setq bluedot--completed-pomodoros
             (1+ bluedot--completed-pomodoros)))
-    
+
     (force-mode-line-update t)))
 
 ;; Hooks
