@@ -72,7 +72,8 @@
     ("dm" "Mode" describe-mode)
     ("dk" "Key Briefly" describe-key-briefly)
     ("db" "Binds" helm-descbinds)
-    ("dc" "Character" describe-char)]]
+    ("dc" "Character" describe-char)
+    ("df" "Find Function" find-function)]]
 
   [""
    ["Utility"
