@@ -24,6 +24,11 @@
          for it in entries collect
          `(add-to-list ',list ',it)))))
 
+(cl-defmacro rysco-set-list (list &rest entries)
+  `(progn
+     (setq ,list nil)
+     (rysco-add-to-list ,list ,@entries)))
+
 (cl-defmacro rysco-add-to-loadpath (&rest pathlist)
   `(progn
      ,@(reverse
