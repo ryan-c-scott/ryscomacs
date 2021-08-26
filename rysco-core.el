@@ -4,7 +4,9 @@
 
 ;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
 (let ((straight-current-profile 'rysco))
-  (straight-use-package 'org)
+  ;; (straight-use-package 'org)
+  ;; TEMP: Pointing org at my fork while this feature goes through the patch process
+  (straight-use-package '(org :type git :host github :repo "git@github.com:ryan-c-scott/org-mode.git" :branch " org-babel-attach-results"))
   (straight-use-package 'org-contrib))
 
 ;; Disable some features for setup duration
