@@ -670,6 +670,7 @@
 
 (with-eval-after-load "org"
   (require 'org-refile)
+  (require 'org-attach)
 
   (push '(note . "%t") org-log-note-headings)
 
