@@ -585,6 +585,18 @@ Quoted strings are returned as a single element."
     ,@(cdr tbl)
     hline))
 
+(cl-defun rysco-rolling-average (period &aux
+    (sum 0) (count 0) (values (make-list period 0)) (pointer values))
+  (setf (rest (last values)) values)  ; construct circularity
+  (lambda (n)
+    (when (first pointer)
+      (decf sum (first pointer)))     ; subtract old value
+    (incf sum n)                      ; add new value
+    (incf count)
+    (setf (first pointer) n)
+    (setf pointer (rest pointer))     ; advance pointer
+    (/ sum (min count period))))
+
 (defun rysco-ido-fix ()
   (interactive)
   "Enable ido-mode with 'files option.
