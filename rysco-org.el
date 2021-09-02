@@ -261,6 +261,33 @@
         (goto-char block-point)
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
+(defun rysco-org-process-date-log (data &rest windows)
+  (cl-loop
+   with rolling = (--map (rysco-rolling-average it) windows)
+
+   with data = (mapcar 'car data)
+   with today-stamp = (format-time-string "%Y-%m-%d")
+   with last-stamp = (if (string= today-stamp (-last-item data))
+                         today-stamp
+                       (format-time-string
+                        "%Y-%m-%d"
+                        (org-read-date nil t "--1" nil)))
+   with first = (org-read-date nil t (car data))
+   with last = (org-read-date nil t "++1" nil
+                              (org-read-date
+                               nil t
+                               last-stamp))
+
+   for i from 0
+   as this-date = (org-read-date nil t (format "++%s" i) nil first)
+   as this-date-string = (format-time-string "%Y-%m-%d" this-date)
+   while (time-less-p this-date last)
+   as this-value = (if (-contains? data this-date-string) 1.0 0)
+   collect
+   `(,this-date-string
+     ,this-value
+     ,@(--map (funcall it this-value) rolling))))
+
 (defun rysco-org-agenda-post-clock-in (&optional _)
   (org-agenda-redo-all)
   (rysco-org-agenda-goto-first-section))
