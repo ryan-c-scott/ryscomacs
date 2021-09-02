@@ -190,6 +190,21 @@
           (delete-file temp-path))
         filename)))))
 
+(cl-defun rysco-plot--process-date-log (&key title data col map start end)
+  `((:set :title ,title)
+    (:set :xdata time)
+    (:set :timefmt "%Y-%m-%d")
+    (:set :format x "%m/%y")
+    (:set :xrange [,(or start '*) *])
+    (:set :yrange [* 1.1])
+
+    (:plot
+     ,@(loop
+        for period-title in map
+        for i from (or col 3)
+        collect
+        `(:lines :data ,data :using [1 ,i] :title ,period-title)))))
+
 (cl-defun rysco-plot--process (form &key type)
   "Expand all special commands and inject default forms for the conversion to gnuplot."
   (append `((:set :terminal
@@ -201,7 +216,12 @@
                   font "helvetica,12" fontscale 1.0
                   size (800 700)
                   background rgb "#ffffff00"))
-          form))
+          (loop
+           for el in form append
+           (pcase el
+             (`(:plot-date-log . ,rest)
+              (apply 'rysco-plot--process-date-log rest))
+             (_ `(,el))))))
 
 ;;;###autoload
 (cl-defun rysco-plot (form &key filename as-code type)
