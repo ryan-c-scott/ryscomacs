@@ -48,10 +48,11 @@
    "["
    (s-join
     " : "
-    (--map
-     (format
-      "%s"
-      (rysco-plot--render-functions it))
+    (mapcar
+     (lambda (it)
+       (format
+        "%s"
+        (rysco-plot--render-functions it)))
      (append range nil)))
    "]"))
 
@@ -64,10 +65,11 @@
       (insert
        (s-join
         ", "
-        (--map
-         (format
-          "%s"
-          (rysco-plot--render-functions it))
+        (mapcar
+         (lambda (it)
+           (format
+            "%s"
+            (rysco-plot--render-functions it)))
          el))))
 
      ((pred stringp)
@@ -125,10 +127,11 @@
            "using "
            (s-join
             ":"
-            (--map
-             (format
-              "%s"
-              (rysco-plot--render-functions it))
+            (mapcar
+             (lambda (it)
+               (format
+                "%s"
+                (rysco-plot--render-functions it)))
              (append v nil)))
            " "))
 

@@ -261,6 +261,7 @@
         (goto-char block-point)
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
+;;;###autoload
 (defun rysco-org-process-date-log (data &rest windows)
   (cl-loop
    with rolling = (--map (rysco-rolling-average it) windows)
