@@ -78,6 +78,7 @@
  expand-region
  f
  fill-column-indicator
+ font-lock-plus
  glsl-mode
  go-mode
  graphviz-dot-mode
@@ -169,7 +170,6 @@
 (require 'uniquify)
 (require 'windmove)
 (require 'rotate)
-(require 'font-lock+)
 
 (require 'run-assoc)
 (setq associated-program-alist
