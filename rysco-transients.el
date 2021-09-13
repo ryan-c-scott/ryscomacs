@@ -103,6 +103,7 @@
     :setup-children rysco-transient--wrap-children
     ("go" "Calendar Open" rysco-calendar-open)
     ("gf" "GCal Fetch" rysco-calendar-gcal-fetch)
+    ("gh" "GCal HACK" rysco-calendar-gcal-save)
     ("gr" "GCal Refresh" rysco-calendar-gcal-refresh-token)
     ("gc" "GCal Clear" rysco-calendar-gcal-clear-files)
     ("gl" "Links" helm-rysco-goto-common-links)
