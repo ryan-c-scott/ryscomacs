@@ -262,32 +262,39 @@
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
 ;;;###autoload
-(defun rysco-org-process-date-log (data &rest windows)
+(cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
   (cl-loop
    with rolling = (--map (rysco-rolling-average it) windows)
 
-   with data = (mapcar 'car data)
+   with dates = (mapcar 'car data)
    with today-stamp = (format-time-string "%Y-%m-%d")
-   with last-stamp = (if (string= today-stamp (-last-item data))
+   with last-stamp = (if (string= today-stamp (-last-item dates))
                          today-stamp
                        (format-time-string
                         "%Y-%m-%d"
                         (org-read-date nil t "--1" nil)))
-   with first = (org-read-date nil t (car data))
+   with first = (org-read-date nil t (car dates))
    with last = (org-read-date nil t "++1" nil
                               (org-read-date
                                nil t
                                last-stamp))
 
+   with carried = 0
+
    for i from 0
    as this-date = (org-read-date nil t (format "++%s" i) nil first)
    as this-date-string = (format-time-string "%Y-%m-%d" this-date)
    while (time-less-p this-date last)
-   as this-value = (if (-contains? data this-date-string) 1.0 0)
+   as this-value = (or (if value-column
+                           (nth value-column (assoc this-date-string data))
+                         (when (-contains? dates this-date-string) 1.0))
+                       carried)
    collect
    `(,this-date-string
      ,this-value
-     ,@(--map (funcall it this-value) rolling))))
+     ,@(--map (funcall it this-value) rolling))
+   do (when degrade
+        (setf carried (max 0 (* this-value (- 1 degrade)))))))
 
 (defun rysco-org-agenda-post-clock-in (&optional _)
   (org-agenda-redo-all)
