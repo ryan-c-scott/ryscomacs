@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
 (require 'dash)
-(require 'org-attach)
 
 ;;;;;; Graphing utilities
 (require 'graphviz-dot-mode)
@@ -15,13 +14,6 @@
       "[/\\:]" "-"
       (s-join "-" (org-get-outline-path t)))
      (or ext ".png"))))
-
-(cl-defun rysco-graph--render-org-attach-dir ()
-  (when (equal major-mode 'org-mode)
-    (concat
-     (file-relative-name
-      (org-attach-dir t))
-     "/")))
 
 (cl-defun rysco-graph--render-generate-color (&optional rand-state)
   (apply
@@ -217,7 +209,7 @@
          (port (if split (substring name split) "")))
     (format "\"%s\"%s" node port)))
 
-(cl-defun rysco-graph--render (patch &key filename no-org-attach graph-code rand-seed layers as-code ignore)
+(cl-defun rysco-graph--render (patch &key filename graph-code rand-seed layers as-code ignore)
   (-let* ((temp-path (make-temp-file "patch" nil ".dot"))
           (color-cache (make-hash-table :test 'equal))
           (rand-state (cl-make-random-state rand-seed))
@@ -228,11 +220,8 @@
                      (if (listp layers)
                          layers
                        `(,layers))))))
-          (filename (concat
-                     (unless no-org-attach
-                       (rysco-graph--render-org-attach-dir))
-                     (or filename
-                         (rysco-graph--render-guess-filename))))
+          (filename (or filename
+                        (rysco-graph--render-guess-filename)))
           (out-path (format "%s.png" (file-name-sans-extension temp-path)))
           out-code)
 
