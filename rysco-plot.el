@@ -190,13 +190,13 @@
           (delete-file temp-path))
         filename)))))
 
-(cl-defun rysco-plot--process-date-log (&key title data col map start end)
+(cl-defun rysco-plot--process-date-log (&key title data col map start end miny maxy)
   `((:set :title ,title)
     (:set :xdata time)
     (:set :timefmt "%Y-%m-%d")
     (:set :format x "%m/%y")
-    (:set :xrange [,(or start '*) *])
-    (:set :yrange [* 1.1])
+    (:set :xrange [,(or start '*) ,(or end '*)])
+    (:set :yrange [,(or miny '*) ,(or maxy '*)])
 
     (:plot
      ,@(loop
