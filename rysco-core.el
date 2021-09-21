@@ -910,6 +910,7 @@
  ("<RET>" 'helm-mini)
  ("s" 'helm-rysco-occur-or-resume)
  ("w" 'helm-rysco-project-ag)
+ ("M-w" 'helm-do-grep-ag)
  ("y" 'helm-show-kill-ring)
  ("v" 'rysco-revert-buffer)
  ("p" 'rysco-repo-status)
