@@ -6,7 +6,7 @@
 (let ((straight-current-profile 'rysco))
   ;; (straight-use-package 'org)
   ;; TEMP: Pointing org at my fork while this feature goes through the patch process
-  (straight-use-package '(org :type git :host github :repo "git@github.com:ryan-c-scott/org-mode.git" :branch " org-babel-attach-results"))
+  (straight-use-package '(org :type git :repo "git@github.com:ryan-c-scott/org-mode" :branch "babel-attach-dir"))
   (straight-use-package 'org-contrib))
 
 ;; Disable some features for setup duration
