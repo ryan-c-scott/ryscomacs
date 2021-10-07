@@ -961,9 +961,7 @@
 
 ;; Multiple-Cursors
 (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+(global-set-key (kbd "C->") 'rysco-mc-transient)
 
 ;; Helpers for things that have a lot of muscle memory
 (global-set-key (kbd "<escape>d") 'kill-word)

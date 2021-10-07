@@ -116,7 +116,7 @@
 
   [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
 
-;; Magit intergation
+;; Magit integration
 (define-transient-command rysco-magit-transient ()
   "GitHub/Bitbucket helper transient for Magit"
   ["Goto"
@@ -133,5 +133,33 @@
               "%"
               '(">" "Goto GH/BB" rysco-magit-transient))))
 
+;; MC
+(with-eval-after-load 'multiple-cursors-core
+  (add-to-list 'mc/cmds-to-run-once 'transient-quit-all))
 
+(transient-define-prefix rysco-mc-transient ()
+  "MC"
+  :transient-suffix 'transient--do-stay
+  :transient-non-suffix 'transient--do-warn
+  [["General"
+    ("n" "Next" mc/skip-to-next-like-this)
+    ("m" "Mark" mc/mark-next-like-this)
+    ("p" "Previous" mc/unmark-next-like-this)]
+   ["Exit"
+    ("<return>" "Exit" transient-quit-all)]]
+
+  (interactive)
+  (transient-setup 'rysco-mc-transient)
+  (with-current-buffer transient--original-buffer
+    (call-interactively 'mc/mark-next-like-this)))
+
+(defun rysco-mc-error-guard (func rest)
+  (interactive "P")
+  (ignore-errors
+    (apply func rest)))
+
+(advice-add 'mc/unmark-next-like-this :around 'rysco-mc-error-guard)
+(advice-add 'mc/skip-to-next-like-this :around 'rysco-mc-error-guard)
+
+;;;;;;;;;;;;;;
 (provide 'rysco-transients)
