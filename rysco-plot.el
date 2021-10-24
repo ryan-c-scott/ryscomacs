@@ -205,7 +205,7 @@
         collect
         `(:lines :data ,data :using [1 ,i] :title ,period-title)))))
 
-(cl-defun rysco-plot--process (form &key type)
+(cl-defun rysco-plot--process (form &key type dimensions)
   "Expand all special commands and inject default forms for the conversion to gnuplot."
   (append `((:set :terminal
                   ,(pcase type
@@ -214,7 +214,7 @@
                      (_ type))
                   enhanced
                   font "helvetica,12" fontscale 1.0
-                  size (800 700)
+                  size ,(or dimensions '(800 700))
                   background rgb "#ffffff00"))
           (loop
            for el in form append
@@ -224,9 +224,9 @@
              (_ `(,el))))))
 
 ;;;###autoload
-(cl-defun rysco-plot (form &key filename as-code type)
+(cl-defun rysco-plot (form &key filename as-code type dimensions)
   (rysco-plot--render
-   (rysco-plot--process form :type type)
+   (rysco-plot--process form :type type :dimensions dimensions)
    :filename (or filename (rysco-plot--guess-filename type))
    :as-code as-code))
 
