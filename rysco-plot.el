@@ -8,7 +8,7 @@
      (replace-regexp-in-string
       "[/\\:]" "-"
       (s-join "-" (org-get-outline-path t)))
-     (or ext ".svg"))))
+     (concat "." (or ext "svg")))))
 
 (cl-defun rysco-plot--render-functions (form)
   (pcase form
@@ -227,7 +227,7 @@
 (cl-defun rysco-plot (form &key filename as-code type dimensions)
   (rysco-plot--render
    (rysco-plot--process form :type type :dimensions dimensions)
-   :filename (or filename (rysco-plot--guess-filename type))
+   :filename (or filename (rysco-plot--guess-filename (and type (format "%s" type))))
    :as-code as-code))
 
 ;;

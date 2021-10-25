@@ -13,7 +13,7 @@
      (replace-regexp-in-string
       "[/\\:]" "-"
       (s-join "-" (org-get-outline-path t)))
-     (or ext ".png"))))
+     (or ext ".svg"))))
 
 (cl-defun rysco-graph--render-generate-color (&optional rand-state)
   (apply
@@ -222,7 +222,7 @@
                        `(,layers))))))
           (filename (or filename
                         (rysco-graph--render-guess-filename)))
-          (out-path (format "%s.png" (file-name-sans-extension temp-path)))
+          (out-path (format "%s.svg" (file-name-sans-extension temp-path)))
           out-code)
 
     (with-temp-buffer
@@ -254,9 +254,10 @@
 
     (if as-code
         out-code
-      (-let ((command-result (string-trim
-                              (shell-command-to-string
-                               (graphviz-compile-command temp-path)))))
+      (-let* ((graphviz-dot-preview-extension "svg")
+              (command-result (string-trim
+                               (shell-command-to-string
+                                (graphviz-compile-command temp-path)))))
         (if (string-prefix-p "Error:" command-result)
             (message command-result)
 
