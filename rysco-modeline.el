@@ -144,6 +144,9 @@
        (format-mode-line mode-name))
       'face `(:inherit ,current-face)))))
 
+(defsubst rysco-modeline-process ()
+  mode-line-process)
+
 (defsubst rysco-modeline-narrowed ()
   (when (buffer-narrowed-p)
     (--when-let (all-the-icons-faicon
@@ -259,6 +262,7 @@
          " "
          rysco-modeline-major-mode
          (:face nil)
+         rysco-modeline-process
          rysco-modeline-narrowed
          rysco-modeline-minor-modes
          (:active rysco-modeline-vc)
