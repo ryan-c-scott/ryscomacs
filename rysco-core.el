@@ -129,7 +129,9 @@
  docker-compose-mode
  dockerfile-mode
  docker
- nginx-mode)
+ nginx-mode
+ tree-sitter
+ tree-sitter-langs)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -548,9 +550,6 @@
                      (ignore-errors (vc-responsible-backend default-directory)))
                     (vc-mode (vc-backend buffer-file-name))))))
 
-;; Disables auto-fill in commit message buffers
-(add-hook 'git-commit-setup-hook 'turn-off-auto-fill t)
-
 ;; flycheck
 (when (eq system-type 'windows-nt)
   (defun rysco-fix-flycheck-cmd (cmd)
@@ -569,6 +568,11 @@
 
 ;; Do not use tabs
 (setq-default indent-tabs-mode nil)
+
+(require 'tree-sitter)
+(require 'tree-sitter-langs)
+(global-tree-sitter-mode)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
 (add-hook 'prog-mode-hook
           (lambda ()
