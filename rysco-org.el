@@ -121,6 +121,12 @@
                      (state (gethash project status))
                      (count (or (gethash project next-count) 0)))
 
+
+                (when (or (equal todo "NOW")
+                          (equal todo "NEXT"))
+                  (incf count)
+                  (puthash project count next-count))
+
                 (unless (or (equal state 'ACTIVE)
                             (equal state 'EXCESS))
                   (setq state
@@ -134,9 +140,6 @@
                 (when (and (equal state 'ACTIVE)
                            (or (equal todo "NOW")
                                (equal todo "NEXT")))
-
-                  (incf count)
-                  (puthash project count next-count)
 
                   (when (> count rysco-org-agenda-excess-threshold)
                     (puthash project 'EXCESS status))))
