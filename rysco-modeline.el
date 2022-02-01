@@ -109,6 +109,12 @@
       m)))
    'face current-face))
 
+(defsubst rysco-modeline-column ()
+  (when column-number-mode
+    (propertize
+     ":%C"
+     'face current-face)))
+
 (defsubst rysco-modeline-pos ()
   (let ((start-visible (equal (window-start) (point-min)))
         (end-visible (equal (window-end) (point-max))))
@@ -279,7 +285,9 @@
          rysco-modeline-read-only
          (:face rysco-modeline-right)
          (:inactive nil)
-         "%4l "
+         "%4l"
+         rysco-modeline-column
+         " "
          rysco-modeline-pos
          rysco-modeline-bluedot
          ;; HACK: Needed to adjust everything over by a character
