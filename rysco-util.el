@@ -1,5 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
+(require 'cl)
 (require 'dash)
 
 (defun rysco-semantic-mode (&optional state)
@@ -257,7 +258,7 @@
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward "^#\\(#*\\) \\(.*\\)$" nil t)
-        (add-to-list 'res `(,(match-string 1) ,(match-string 2)))))
+        (cl-pushnew 'res `(,(match-string 1) ,(match-string 2)))))
 
     (dolist (elt (reverse res))
       (setq depth (replace-regexp-in-string (regexp-quote "#") (car elt) "\t" nil 'literal))

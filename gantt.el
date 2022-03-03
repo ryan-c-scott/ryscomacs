@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
 (require 'dash)
+(require 'cl)
 
 (cl-defun gantt-get-start-time (key data &optional accum)
   (-let (((_ _ days _ depencies) (assoc key data))

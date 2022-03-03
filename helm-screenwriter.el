@@ -65,7 +65,7 @@
 					;.Split multiple characters separated by '/'
 	(while (re-search-forward helm-screenwriter-regex-actor nil t)
 	  (let ((character (match-string 1)))
-	    (add-to-list 'res character))))
+	    (cl-pushnew 'res character))))
       res)))
 
 (defun helm-screenwriter-get-transitions ()
@@ -75,7 +75,7 @@
 	(goto-char (point-min))
 	(while (re-search-forward helm-screenwriter-regex-transition nil t)
 	  (let ((transition (match-string 1)))
-	    (add-to-list 'res transition))))
+	    (cl-pushnew 'res transition))))
       res)))
 
 (defun helm-screenwriter-get-sluglines ()
@@ -85,7 +85,7 @@
 	(goto-char (point-min))
 	(while (re-search-forward helm-screenwriter-regex-slugline nil t)
 	  (let ((slug (match-string 0)))
-	    (add-to-list 'res slug))))
+	    (cl-pushnew 'res slug))))
       res)))
 
 
