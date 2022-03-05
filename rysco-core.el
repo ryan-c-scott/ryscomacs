@@ -122,6 +122,9 @@
  pkg-info
  org-super-agenda
  org-gcal
+ org-sidebar
+ org-ql
+ helm-org-ql
  calfw
  calfw-ical
  calfw-org
@@ -288,6 +291,7 @@
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 
 (setq org-export-allow-bind-keywords t
+      org-id-link-to-org-use-id t
       org-log-done 'time
       org-enforce-todo-dependencies t
       org-todo-keywords '((sequence
@@ -680,6 +684,8 @@
 (with-eval-after-load "org"
   (require 'org-refile)
   (require 'org-attach)
+  (require 'rysco-org-store)
+  (rysco-org-store-load-templates)
 
   (push '(note . "%t") org-log-note-headings)
 
