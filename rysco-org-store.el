@@ -76,11 +76,11 @@
    for candidate in (helm-marked-candidates :all-sources t) do
      (insert (rysco-org-store-get-marker-link candidate) "\n")))
 
-(defun rysco-org-store-get-marker-link (marker)
+(defun rysco-org-store-get-marker-link (marker &optional link-text)
   (rysco-org-store--with-buffer-at-marker marker
     (org-link-make-string
      (format "id:%s" (org-id-get-create))
-     (org-display-outline-path nil t nil t))))
+     (or link-text (org-display-outline-path nil t nil t)))))
 
 (defun rysco-org-store-capture-create-id ()
   (when (org-capture-get :create-id)
