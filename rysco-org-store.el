@@ -72,9 +72,20 @@
                             :name "Knowledge Store Query"))))
 
 (defun helm-rysco-org-store--insert-candidates (&optional _)
-  (loop
-   for candidate in (helm-marked-candidates :all-sources t) do
-     (insert (rysco-org-store-get-marker-link candidate) "\n")))
+  (let* ((all-candidates (helm-marked-candidates :all-sources t))
+         (count (length all-candidates))
+         (replacing (org-region-active-p))
+         (sep (cond
+               ((and replacing (= count 1))
+                "")
+               (t "\n"))))
+
+    (when replacing
+      (delete-region (region-beginning) (region-end)))
+
+    (loop
+     for candidate in (helm-marked-candidates :all-sources t) do
+     (insert (rysco-org-store-get-marker-link candidate) sep))))
 
 (defun rysco-org-store-get-marker-link (marker &optional link-text)
   (rysco-org-store--with-buffer-at-marker marker
