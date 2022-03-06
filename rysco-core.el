@@ -684,8 +684,8 @@
 (with-eval-after-load "org"
   (require 'org-refile)
   (require 'org-attach)
-  (require 'rysco-org-store)
-  (rysco-org-store-load-templates)
+
+  (rysco-store-load-templates)
 
   (push '(note . "%t") org-log-note-headings)
 

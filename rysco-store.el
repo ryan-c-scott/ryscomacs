@@ -1,28 +1,31 @@
-(defvar rysco-org-store-last-entry-name "")
-(defvar rysco-org-store-templates nil)
-(defvar rysco-org-store-templates--processed nil)
-(defvar rysco-org-store-directory (concat org-directory "store"))
+(require 'helm-org-ql)
 
-(defvar-local rysco-org-store-insert-after-capture nil)
+(defvar rysco-store-last-entry-name "")
+(defvar rysco-store-templates nil)
+(defvar rysco-store-templates--processed nil)
+(defvar rysco-store-directory (concat org-directory "store"))
 
-(defun rysco-org-store-load-templates (&optional dir)
+(defvar-local rysco-store-insert-after-capture nil)
+
+;;;###autoload
+(defun rysco-store-load-templates (&optional dir)
   (interactive)
-  (let ((dir (or dir (expand-file-name (concat rysco-org-store-directory "/templates")))))
+  (let ((dir (or dir (expand-file-name (concat rysco-store-directory "/templates")))))
     (cl-loop
-     for (key nice-name template) in rysco-org-store-templates
+     for (key nice-name template) in rysco-store-templates
      as capture-template = `(,key ,(concat "[store] " nice-name)
                                   entry
-                                  (function rysco-org-store-location)
+                                  (function rysco-store-location)
                                   (file ,(expand-file-name template dir))
                                   :create-id t)
      do
      (add-to-list 'org-capture-templates capture-template)
-     (add-to-list 'rysco-org-store-templates--processed capture-template))))
+     (add-to-list 'rysco-store-templates--processed capture-template))))
 
-(defun rysco-org-store-location ()
+(defun rysco-store-location ()
   (let* (existing-node
          (title (funcall-interactively
-                 'helm-rysco-org-store-ql
+                 'helm-rysco-store-ql
                  :name "Knowledge Store Query"
                  :actions `(("Use Existing" . ,(lambda (marker)
                                                  (setq existing-node t)
@@ -39,18 +42,18 @@
            title
          (expand-file-name
           (format "%s/%s-%s.org"
-                  rysco-org-store-directory
+                  rysco-store-directory
                   (format-time-string "%Y%m%d")
                   (s-replace "/" "-"
-                             (setq rysco-org-store-last-entry-name
+                             (setq rysco-store-last-entry-name
                                    (read-string "Confirm: " title))))))))))
 
 (defmacro with-store-directory (&rest forms)
-  "Lexically binds `org-directory' to `rysco-org-store-directory' and executes FORMS"
-  `(let ((org-directory rysco-org-store-directory))
+  "Lexically binds `org-directory' to `rysco-store-directory' and executes FORMS"
+  `(let ((org-directory rysco-store-directory))
      ,@forms))
 
-(defmacro rysco-org-store--with-buffer-at-marker (marker &rest body)
+(defmacro rysco-store--with-buffer-at-marker (marker &rest body)
   (declare (indent defun) (debug (form body)))
   `(progn
      (with-current-buffer (marker-buffer ,marker)
@@ -58,31 +61,34 @@
          (goto-char ,marker)
          ,@body))))
 
-(defun rysco-org-store-backlinks ()
+;;;###autoload
+(defun rysco-store-backlinks ()
   (interactive)
   (with-store-directory
    (funcall-interactively 'org-sidebar-backlinks)))
 
-(defun rysco-org-store-query ()
+(defun rysco-store-query ()
   (interactive)
   (with-store-directory
    (funcall-interactively 'org-sidebar-ql)))
 
-(defun rysco-org-store-create-and-insert ()
+;;;###autoload
+(defun rysco-store-create-and-insert ()
   (interactive)
-  (setq rysco-org-store-insert-after-capture t)
-  (let ((org-capture-templates rysco-org-store-templates--processed))
+  (setq rysco-store-insert-after-capture t)
+  (let ((org-capture-templates rysco-store-templates--processed))
     (org-capture)))
 
-(defun helm-rysco-org-store-query ()
+;;;###autoload
+(defun helm-rysco-store-query ()
   (interactive)
   (funcall-interactively
-   'helm-rysco-org-store-ql
+   'helm-rysco-store-ql
    :name "Knowledge Store Query"
    :actions `(,@helm-org-ql-actions
-              ("Insert as link" . helm-rysco-org-store--insert-candidates))))
+              ("Insert as link" . helm-rysco-store--insert-candidates))))
 
-(cl-defun helm-rysco-org-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
+(cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
   (interactive (list (current-buffer)))
   (with-store-directory
@@ -95,10 +101,10 @@
            :sources `(,@sources
                       ,(helm-org-ql-source buffers-files :name name))))))
 
-(defun helm-rysco-org-store--insert-candidates (&optional _)
-  (rysco-org-store--insert-links (helm-marked-candidates :all-sources t)))
+(defun helm-rysco-store--insert-candidates (&optional _)
+  (rysco-store--insert-links (helm-marked-candidates :all-sources t)))
 
-(defun rysco-org-store--insert-links (markers)
+(defun rysco-store--insert-links (markers)
   (let* ((count (length markers))
          (replacing (org-region-active-p))
          (sep (cond
@@ -111,24 +117,24 @@
 
     (loop
      for this-link in markers do
-     (insert (rysco-org-store-get-marker-link this-link) sep))))
+     (insert (rysco-store-get-marker-link this-link) sep))))
 
-(defun rysco-org-store-get-marker-link (marker &optional link-text)
-  (rysco-org-store--with-buffer-at-marker marker
+(defun rysco-store-get-marker-link (marker &optional link-text)
+  (rysco-store--with-buffer-at-marker marker
     (org-link-make-string
      (format "id:%s" (org-id-get-create))
      (or link-text (org-display-outline-path nil t nil t)))))
 
-(defun rysco-org-store-capture-create-id ()
+(defun rysco-store-capture-create-id ()
   (when (org-capture-get :create-id)
     (org-id-get-create)))
 
-(defun rysco-org-store-post-capture ()
-  (when (and rysco-org-store-insert-after-capture (not org-note-abort))
-    (setq rysco-org-store-insert-after-capture nil)
-    (rysco-org-store--insert-links `(,org-capture-last-stored-marker))))
+(defun rysco-store-post-capture ()
+  (when (and rysco-store-insert-after-capture (not org-note-abort))
+    (setq rysco-store-insert-after-capture nil)
+    (rysco-store--insert-links `(,org-capture-last-stored-marker))))
 
-(add-hook 'org-capture-mode-hook #'rysco-org-store-capture-create-id)
-(add-hook 'org-capture-after-finalize-hook 'rysco-org-store-post-capture)
+(add-hook 'org-capture-mode-hook #'rysco-store-capture-create-id)
+(add-hook 'org-capture-after-finalize-hook 'rysco-store-post-capture)
 
 (provide 'rysco-org-store)
