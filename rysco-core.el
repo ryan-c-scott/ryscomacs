@@ -678,6 +678,7 @@
   (local-unset-key (kbd "<S-right>"))
   (local-unset-key (kbd "<S-up>"))
   (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings)
+  (local-set-key (kbd "C-c i") 'rysco-store-create-and-insert)
   (electric-indent-local-mode -1)
   (setq org-adapt-indentation nil))
 
@@ -908,6 +909,7 @@
 (global-set-key (kbd "<C-tab>") 'complete-tag)
 (global-set-key "\C-c\C-c" 'rysco-comment-dwim)
 (global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-cs" 'helm-rysco-store-query)
 (global-set-key "\C-cj" 'pop-to-mark-command)
 (global-set-key (kbd (concat "<f1> " rysco-lead-key)) 'helm-apropos)
 
