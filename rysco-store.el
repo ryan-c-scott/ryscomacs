@@ -154,6 +154,17 @@
                    `(,id ,title ,author)))
      when book collect book)))
 
+(defun rysco-store-kindle-get-vocab-list (location)
+  (let ((default-directory location))
+    (--group-by
+     (upcase (substring it 0 1))
+     (s-split
+      "\n"
+      (with-temp-buffer
+        (shell-command "sqlite3 -readonly vocab.db \"select word from words order by word;\"" t nil)
+        (buffer-string))
+      t))))
+
 (defun rysco-store-kindle-get-books-author-profiles (location)
   (loop
    for f in (directory-files-recursively location "AuthorProfile.profile.*.asc$")
@@ -242,6 +253,25 @@
      for (id title author highlights) in books
      as highlights = (or highlights (gethash title clippings))
      collect `(,id ,title ,author ,highlights))))
+
+(defun rysco-store-insert-vocab-kindle (location)
+  (interactive "D")
+  (with-store-directory
+   (with-current-buffer (find-file (expand-file-name "kindle-vocab.org" org-directory))
+     (erase-buffer)
+     (insert
+      (org-element-interpret-data
+       `((headline
+          (:level 1 :title "Kindle Vocab" :tags ("vocab")))
+
+         ,@(loop
+            with vocab = (rysco-store-kindle-get-vocab-list (concat location "/system/vocabulary"))
+            for (group . words) in vocab collect
+            `((headline (:level 2 :title ,group))
+               ,@(loop
+                  for word in words collect
+                  `("  - "  ,word "\n"))
+               "\n"))))))))
 
 (defun rysco-store-insert-books-kindle (books)
   (loop
