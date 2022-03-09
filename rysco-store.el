@@ -22,6 +22,14 @@
      (add-to-list 'org-capture-templates capture-template)
      (add-to-list 'rysco-store-templates--processed capture-template))))
 
+(defun rysco-store-create-file-name (title)
+  (convert-standard-filename
+   (expand-file-name
+    (format "%s/%s-%s.org"
+            rysco-store-directory
+            (format-time-string "%Y%m%d")
+            (s-replace "/" "-" title)))))
+
 (defun rysco-store-location ()
   (let* (existing-node
          (title (funcall-interactively
@@ -40,13 +48,9 @@
       (find-file
        (if existing-node
            title
-         (expand-file-name
-          (format "%s/%s-%s.org"
-                  rysco-store-directory
-                  (format-time-string "%Y%m%d")
-                  (s-replace "/" "-"
-                             (setq rysco-store-last-entry-name
-                                   (read-string "Confirm: " title))))))))))
+         (rysco-store-create-file-name
+          (setq rysco-store-last-entry-name
+                (read-string "Confirm: " title))))))))
 
 (defmacro with-store-directory (&rest forms)
   "Lexically binds `org-directory' to `rysco-store-directory' and executes FORMS"
@@ -55,11 +59,10 @@
 
 (defmacro rysco-store--with-buffer-at-marker (marker &rest body)
   (declare (indent defun) (debug (form body)))
-  `(progn
-     (with-current-buffer (marker-buffer ,marker)
-       (save-excursion
-         (goto-char ,marker)
-         ,@body))))
+  `(with-current-buffer (marker-buffer ,marker)
+     (save-excursion
+       (goto-char ,marker)
+       ,@body)))
 
 ;;;###autoload
 (defun rysco-store-backlinks ()
