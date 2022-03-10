@@ -140,6 +140,21 @@
 (add-hook 'org-capture-mode-hook #'rysco-store-capture-create-id)
 (add-hook 'org-capture-after-finalize-hook 'rysco-store-post-capture)
 
+(defun helm-rysco-store--heading (window-width)
+  ""
+  (font-lock-ensure (point-at-bol) (point-at-eol))
+  (let* ((heading (org-get-heading t))
+         (path (-> (org-get-outline-path)
+                   (org-format-outline-path window-width nil "")
+                 (org-split-string "")))
+         (path (if helm-org-ql-reverse-paths
+                   (concat heading "\\" (s-join "\\" (nreverse path)))
+                 (concat (s-join "/" path) "/" heading))))
+    (cons path (point-marker))))
+
+(eval-after-load 'helm-org-ql
+  (advice-add 'helm-org-ql--heading :override 'helm-rysco-store--heading))
+
 ;;;;;;;;;;;;;;;;;;;
 (defun rysco-store-kindle-get-books-vocab (location)
   (with-temp-buffer
