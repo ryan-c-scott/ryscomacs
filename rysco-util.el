@@ -143,6 +143,26 @@
       (seq-let (month day year) (org-get-date-from-calendar)
         (insert (format "%d-%02d-%02d" year month day))))))
 
+(defvar rysco-document-collections nil)
+(cl-defun helm-rysco-open-pdf ()
+  (interactive)
+  (helm
+   :sources
+   (loop
+    for (dir strip ext) in rysco-document-collections
+    as ext = (format "\\.%s$" (or ext "pdf"))
+    collect
+    (helm-build-sync-source (upcase-initials (f-base dir))
+      :candidates
+      `(lambda ()
+         (--map (cons
+                 (s-join
+                  " | "
+                  (nthcdr ,strip (f-split (f-no-ext it))))
+                 it)
+                (directory-files-recursively ,dir ,ext)))
+      :action '(("Open" . run-associated-program))))))
+
 (cl-defun helm-rysco-rotate-windows ()
   (interactive)
   (helm
@@ -251,27 +271,6 @@
                    (rysco-file-name-to-sudo filename)
                  filename))
           (goto-char current-pos))))))
-
-(defun markdown-toc ()
-  (interactive)
-  (let (res depth title)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "^#\\(#*\\) \\(.*\\)$" nil t)
-        (cl-pushnew 'res `(,(match-string 1) ,(match-string 2)))))
-
-    (dolist (elt (reverse res))
-      (setq depth (replace-regexp-in-string (regexp-quote "#") (car elt) "\t" nil 'literal))
-      (setq title (cadr elt))
-
-      (insert (format "%s1. [%s]" depth title))
-      (setq title (replace-regexp-in-string "\s+" "-" title))
-      (setq title (replace-regexp-in-string "[:*]" "" title))
-      (insert (format "(#%s)\n" (downcase title))))))
-
-(defun markdown-insert-youtube (id &optional label)
-  (interactive "sID: \nsLabel: ")
-  (insert (format "[![%s](http://img.youtube.com/vi/%s/0.jpg)](http://www.youtube.com/watch?v=%s)" label id id)))
 
 (defun org-archive-all-done-item ()
   "Archive all item that have with prefix DONE."
