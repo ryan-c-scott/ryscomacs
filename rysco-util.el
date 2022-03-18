@@ -635,6 +635,33 @@ With prefix-arg prompt for type if available with your AG version."
       (call-interactively 'rysco-name-frame-project arg)
     (call-interactively 'select-frame-by-name)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(cl-defun rysco-frames-layout--process (layout &optional splitter)
+  (loop
+   with window-size = (pcase splitter
+                        (:horizontal (window-width))
+                        (:vertical (window-height)))
+
+   for f in layout do
+   (pcase f
+     (`(,(and (or :horizontal :vertical) type) . ,data)
+      (rysco-frames-layout--process f type))
+     (`(:next ,num) (other-window num))
+     (`(:prev ,num) (other-window (- num)))
+     (`(:buffer . ,data))
+     (`(:split . ,props)
+      (funcall (pcase splitter
+                 (:horizontal 'split-window-horizontally)
+                 (:vertical 'split-window-vertically))
+               (let ((size (plist-get props :size)))
+                 (floor (* size window-size))))
+      (other-window 1)))))
+
+(cl-defun rysco-frames-layout (layout)
+  (delete-other-windows)
+  (rysco-frames-layout--process layout))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun helm-rysco-semantic-or-imenu (arg)
   (interactive "P")
   (if arg
