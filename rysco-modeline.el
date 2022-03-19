@@ -1,3 +1,6 @@
+(defvar rysco-modeline-mode-blacklist
+  '("" "Helm" "Projectile[-]" "Projectile" "ElDoc" "God" "WK" "ARev" "GCMH"))
+
 (defface rysco-modeline-buffer-id
   '((default
       (:slant italic
@@ -102,7 +105,7 @@
     "•"
     (cl-loop
      for m in (s-split " " (format-mode-line minor-mode-alist))
-     if (not (member m '("" "Helm" "Projectile[-]" "Projectile" "ElDoc" "God" "ARev" "GCMH"))) collect
+     if (not (member m rysco-modeline-mode-blacklist)) collect
      (s-replace-regexp
       "Projectile\\[\\(.*\\):.*\\]"
       "[\\1]"

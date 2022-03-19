@@ -134,7 +134,8 @@
  docker
  nginx-mode
  tree-sitter
- tree-sitter-langs)
+ tree-sitter-langs
+ which-key)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -1034,6 +1035,7 @@
    0.25 nil
    (lambda ()
      (server-start)
+     (which-key-mode)
      (bluedot-enable t)
      (org-clock-persistence-insinuate)
      (rysco-add-hunspell-dictionaries))))
