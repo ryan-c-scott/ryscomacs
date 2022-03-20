@@ -636,30 +636,33 @@ With prefix-arg prompt for type if available with your AG version."
     (call-interactively 'select-frame-by-name)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(cl-defun rysco-frames-layout--process (layout &optional splitter)
-  (loop
-   with window-size = (pcase splitter
-                        (:horizontal (window-width))
-                        (:vertical (window-height)))
+(cl-defmacro rysco-frames-layout--process (layout &optional splitter)
+  `(let ((window-size ,(pcase splitter
+                         (:horizontal '(window-width))
+                         (:vertical '(window-height)))))
+     ,@(loop
+        for f in layout collect
+        (pcase f
+          (`(,(and (or :horizontal :vertical) type) . ,data)
+           `(rysco-frames-layout--process ,f ,type))
+          (`(:next ,num) `(other-window ,num))
+          (`(:prev ,num) `(other-window ,(- num)))
+          (`(:buffer ,data) `(switch-to-buffer ,data))
+          (`(:file ,data) `(find-file ,data))
+          (`(:split . ,props)
+           `(progn
+              (,(pcase splitter
+                  (:horizontal 'split-window-horizontally)
+                  (:vertical 'split-window-vertically))
+               ,(let ((size (plist-get props :size)))
+                  `(floor (* ,size window-size))))
+              (other-window 1)))
+          (_ f)))))
 
-   for f in layout do
-   (pcase f
-     (`(,(and (or :horizontal :vertical) type) . ,data)
-      (rysco-frames-layout--process f type))
-     (`(:next ,num) (other-window num))
-     (`(:prev ,num) (other-window (- num)))
-     (`(:buffer . ,data))
-     (`(:split . ,props)
-      (funcall (pcase splitter
-                 (:horizontal 'split-window-horizontally)
-                 (:vertical 'split-window-vertically))
-               (let ((size (plist-get props :size)))
-                 (floor (* size window-size))))
-      (other-window 1)))))
-
-(cl-defun rysco-frames-layout (layout)
-  (delete-other-windows)
-  (rysco-frames-layout--process layout))
+(cl-defmacro rysco-frames-layout (layout)
+  `(progn
+     (delete-other-windows)
+     (rysco-frames-layout--process ,layout)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun helm-rysco-semantic-or-imenu (arg)
