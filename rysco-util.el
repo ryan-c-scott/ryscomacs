@@ -643,6 +643,13 @@ With prefix-arg prompt for type if available with your AG version."
      ,@(loop
         for f in layout collect
         (pcase f
+          (:clear (delete-other-frames))
+          (`(:frame-name ,data)
+           `(set-frame-name ,data))
+          (`(:frame . ,data)
+           `(make-frame))
+          (`(:frame-next ,num) `(other-frame ,num))
+          (`(:frame-prev ,num) `(other-frame ,(- num)))
           (`(,(and (or :horizontal :vertical) type) . ,data)
            `(rysco-frames-layout--process ,f ,type))
           (`(:next ,num) `(other-window ,num))
