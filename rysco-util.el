@@ -651,6 +651,7 @@ With prefix-arg prompt for type if available with your AG version."
               (rysco-frames-layout--process ,forms)))
           (`(:frame-next ,num) `(other-frame ,num))
           (`(:frame-prev ,num) `(other-frame ,(- num)))
+          (`(:frame-select ,name) `(select-frame-by-name ,name))
           (`(,(and (or :horizontal :vertical) type) . ,data)
            `(rysco-frames-layout--process ,data ,type))
           (`(:next ,num) `(other-window ,num))
