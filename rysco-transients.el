@@ -126,12 +126,11 @@
   ["Pull Request"
    ("p" "Create" rysco-magit-pull-request)])
 
-(add-hook 'magit-mode-hook
-          (lambda ()
-            (define-key magit-mode-map ">" 'rysco-magit-transient)
-            (transient-append-suffix 'magit-dispatch
-              "%"
-              '(">" "Goto GH/BB" rysco-magit-transient))))
+(with-eval-after-load 'magit
+  (define-key magit-mode-map ">" 'rysco-magit-transient)
+  (transient-append-suffix 'magit-dispatch
+    "H"
+    '(">" "Goto GH/BB" rysco-magit-transient)))
 
 ;; MC
 (with-eval-after-load 'multiple-cursors-core
