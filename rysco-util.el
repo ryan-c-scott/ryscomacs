@@ -163,18 +163,14 @@
                 (directory-files-recursively ,dir ,ext)))
       :action '(("Open" . run-associated-program))))))
 
-(cl-defun helm-rysco-rotate-windows ()
+(defvar rysco-frame-layouts nil)
+(cl-defun helm-rysco-frame-layouts ()
   (interactive)
   (helm
    :sources
    (helm-build-sync-source "Layouts"
      :candidates
-     '(("even-horizontal" . rotate:even-horizontal)
-       ("even-vertical" . rotate:even-vertical)
-       ("main-horizontal" . rotate:main-horizontal)
-       ("main-vertical" . rotate:main-vertical)
-       ("tiled" . rotate:tiled)
-       ("*next*" . rotate:layout))
+     rysco-frame-layouts
      :action
      (lambda (func)
        (funcall-interactively func)))))

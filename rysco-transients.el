@@ -39,13 +39,10 @@
       (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
       (propertize " Miscellany" 'face 'rysco-main-transient-title)
       "\n"))
-   ["Desktops"
-    :setup-children rysco-transient--wrap-children
-    ("wb" "Create" rysco-desktop+-create)
-    ("wm" "Load" desktop+-load)]
 
    ["Windows"
     :setup-children rysco-transient--wrap-children
+    ("wl" "Layouts" helm-rysco-frame-layouts)
     ("wn" "Name Frame" set-frame-name)
     ("wp" "Name Frame [Project]" rysco-name-frame-project)
     ("wc" "Clone & Narrow" rysco-clone-and-narrow)

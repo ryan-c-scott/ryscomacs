@@ -58,11 +58,7 @@
  ("/" 'make-frame)
  ("=" 'delete-frame)
  ("\\" 'other-frame)
- ("-" 'rysco-frame-by-name)
-
- ;; Desktops
- ("b" 'rysco-desktop+-create)
- ("m" 'desktop+-load))
+ ("-" 'rysco-frame-by-name))
 
 (define-key god-local-mode-map (kbd "i") 'god-mode-all)
 (define-key god-local-mode-map (kbd ".") 'repeat)
