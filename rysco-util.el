@@ -669,7 +669,7 @@ With prefix-arg prompt for type if available with your AG version."
           (_ f)))))
 
 (cl-defmacro rysco-frames-layout (&rest layout)
-  `(progn
+  `(lambda ()
      (delete-other-windows)
      (rysco-frames-layout--process ,layout)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
