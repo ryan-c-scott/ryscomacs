@@ -91,9 +91,3 @@ Slate can be used to provide some convenient keyboard driven tools for moving wi
 
 ## Win32
 On Windows machines, Emacs provides a configuration option for disabling the OS's default handling of CAPSLOCK.  However, on any other OS it must be mapped to F12 at the OS level and the variable 'rysco-capslock-mapped' set in your localconfig.
-
-## zsh
-As an added bonus, the most _extra_ of _extras_, included is my Zshell setup.
-It has been tested on windows/cygwin, OSX, and Linux.
-
-Link/copy zshrc to ~/.zshrc and away you go.
