@@ -186,6 +186,11 @@
                          bluedot--current-bar))
                t))
 
+(defun bluedot--cancel-timer ()
+  (when bluedot--timer
+    (cancel-timer bluedot--timer))
+  (setq bluedot--timer nil))
+
 ;;;###autoload
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
@@ -216,8 +221,7 @@
     (if (< resting 1)
         (setq bluedot--timer
               (progn
-                (when bluedot--timer
-                  (cancel-timer bluedot--timer))
+                (bluedot--cancel-timer)
                 (run-at-time
                  (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
                  nil #'bluedot--update-current-bar)))
@@ -244,6 +248,7 @@
   (org-clock-out nil t))
 
 (defun bluedot-org-clock-cancel ()
+  (bluedot--cancel-timer)
   (bluedot-mode 0))
 
 (defun bluedot-org-jump-to-clock ()
