@@ -984,19 +984,33 @@ With prefix-arg prompt for type if available with your AG version."
 
 (cl-defstruct rysco-magit-origin host host-type path url)
 
+(defun rysco-magit-host-type (host)
+  (pcase host
+    ("github.com" 'gh)
+    ("bitbucket.org" 'bb)))
+
 (defun rysco-magit-get-origin (&optional origin-url)
-  (let* ((origin-url (or origin-url (magit-get "remote" "origin" "url")))
-         (parts (cdr (s-match "\\([^@]+\\)@\\([^:]+\\):\\(.*\\).git" origin-url)))
-         (user (first parts))
-         (host (nth 1 parts))
-         (path (nth 2 parts)))
-    (make-rysco-magit-origin
-     :host host
-     :host-type (pcase host
-                  ("github.com" 'gh)
-                  ("bitbucket.org" 'bb))
-     :path path
-     :url (format "https://%s/%s" host path))))
+  (let ((origin-url (or origin-url (magit-get "remote" "origin" "url"))))
+    (pcase origin-url
+      ((rx bol (or "http" "https") "://")
+       (let ((url (url-generic-parse-url origin-url)))
+         (make-rysco-magit-origin
+          :host (url-host url)
+          :host-type (rysco-magit-host-type (url-host url))
+          :path (url-filename url)
+          :url (f-no-ext origin-url))))
+
+      ((rx bol
+           (let user (*? (not ?@))) "@"
+           (let host (*? (not ?:)))
+           ":"
+           (let path (*? any))
+           ".git")
+       (make-rysco-magit-origin
+        :host host
+        :host-type (rysco-magit-host-type host)
+        :path path
+        :url (format "https://%s/%s" host path))))))
 
 (defun rysco-magit-goto-compare (&optional head base)
   (interactive)
