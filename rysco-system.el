@@ -124,6 +124,13 @@
 
    finally return (nreverse results)))
 
+(cl-defmacro with-try-switch-existing-buffer (buffer &rest body)
+  (declare (indent defun) (debug (form body)))
+  `(let ((existing (get-buffer ,buffer)))
+     (if existing
+         (switch-to-buffer existing)
+       ,@body)))
+
 (cl-defmacro rysco-org-agenda-files (&rest forms)
   `(setq org-agenda-files
          ',(apply 'rysco-flat-concat forms)))
