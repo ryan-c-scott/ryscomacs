@@ -57,7 +57,7 @@
 
    ["Time Management"
     :setup-children rysco-transient--wrap-children
-    ("ta" "Agenda" org-agenda)
+    ("ta" "Agenda" rysco-org-agenda)
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
     ("tr" "Agenda Reload Files" rysco-agenda-revert-files)

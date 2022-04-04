@@ -98,6 +98,11 @@
      (helm :sources it)
      t)))
 
+(defun rysco-org-agenda ()
+  (interactive)
+  (with-try-switch-existing-buffer "*Org Agenda*"
+    (org-agenda)))
+
 (defun rysco-org-agenda-get-projects ()
   "Return status of all projects, as specified by the org property `projectid' listed in the buffer"
   (interactive)

@@ -1,3 +1,4 @@
+(require 'rysco-system)
 (require 'calfw)
 (require 'calfw-ical)
 (require 'calfw-org)
@@ -11,11 +12,12 @@
 ;;;###autoload
 (defun rysco-calendar-open ()
   (interactive)
-  (cfw:open-calendar-buffer
-   :contents-sources
-   (cl-loop
-    for (id file color) in rysco-gcal-calendars collect
-    (funcall 'cfw:org-create-file-source id file color))))
+  (with-try-switch-existing-buffer "*cfw-calendar*"
+    (cfw:open-calendar-buffer
+     :contents-sources
+     (cl-loop
+      for (id file color) in rysco-gcal-calendars collect
+      (funcall 'cfw:org-create-file-source id file color)))))
 
 ;;;###autoload
 (cl-defun rysco-calendar-gcal-fetch (&optional update-only)

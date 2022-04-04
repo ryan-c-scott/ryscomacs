@@ -436,9 +436,15 @@ If region is active, narrow to the region boundaries first."
              ((--when-let (vc-find-root dir ".hg")
                 (monky-status it)))
              ((--when-let (vc-find-root dir ".git")
-                (magit-status it)))
+                (rysco-magit-status it)))
              (t
               (message "Not a git or hg repository")))))))
+
+(defun rysco-magit-status (&optional dir cache)
+  "Like `magit-status', but attempts to switch to any existing buffer for the requested directory prior to calling `magit-status' directly"
+  (interactive)
+  (with-try-switch-existing-buffer (format "magit: %s" (f-base dir))
+    (magit-status dir)))
 
 (defun color-invert (color)
   (cl-loop for el in (if (stringp color) (color-name-to-rgb color) color)
