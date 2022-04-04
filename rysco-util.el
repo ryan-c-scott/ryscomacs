@@ -639,7 +639,7 @@ With prefix-arg prompt for type if available with your AG version."
      ,@(loop
         for f in layout collect
         (pcase f
-          (:clear (delete-other-frames))
+          (:clear '(delete-other-frames))
           (`(:frame-name ,data)
            `(set-frame-name ,data))
           (`(:frame . ,forms)
