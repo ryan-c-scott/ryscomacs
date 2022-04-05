@@ -11,13 +11,14 @@ C languages are set to use the stroustrup style for code formatting
 .h files are always loaded in c++-mode
 
 ## Installation
-If you are bootstrapping a truly empty Emacs setup, you can copy `example/dotEmacs.el` to `~/.emacs` and you're all set.  That file also has the `straight.el` and accompanying `org-mode` hacks that all the kids are raving about these days.
+If you are bootstrapping a truly empty Emacs setup, you can copy `example/init.el` into `~/.emacs.d/` and you're all set.  That file also has the `straight.el` and accompanying `org-mode` hacks that all the kids are raving about these days.
 
 The following snippet will pull down the latest and get you setup
 
 ``` shell
-cd ~
-wget -O .emacs https://bitbucket.org/scott105/ryscomacs/raw/master/example/dotEmacs.el
+mkdir ~/.emacs.d
+cd ~/.emacs.d
+wget -O .emacs https://bitbucket.org/scott105/ryscomacs/raw/master/example/init.el
 ```
 
 If you are integrating into an existing emacs configuration
@@ -32,6 +33,10 @@ Fonts can be set in your `ryscomacs/config.el` by setting `rysco-font` and `rysc
 (setq rysco-font "Source Code Pro")
 (setq rysco-font-size "12.0")
 ```
+
+Additionally, in Emacs >= 27, you can add `.emacs.d/early-init.el` which will run prior to the GUI being loaded. This can be used to stop the visual artifacts of the stock Emacs window showing up prior to everything that is configured in `.emacs.d/init.el`.
+
+An example file is in `example/early-init.el`.
 
 ## Lead Key
 Ryscomacs is designed to utilize a lead key for doing window splitting and other frequently used commands.  This can help to disambiguate special ryscomacs functionality from modes or emacs in general.
