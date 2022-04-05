@@ -131,7 +131,7 @@
  with-editor
  docker-compose-mode
  dockerfile-mode
- (docker :type git :repo "git@github.com:ryan-c-scott/docker.el.git")
+ (docker :protocol ssh :repo "ryan-c-scott/docker.el")
  nginx-mode
  tree-sitter
  tree-sitter-langs
