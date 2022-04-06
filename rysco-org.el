@@ -261,6 +261,12 @@
   (interactive)
   (insert (rysco-org-get-path-string)))
 
+(defun rysco-org-element-value-to-kill-ring ()
+  (interactive)
+  (--when-let (and (derived-mode-p 'org-mode)
+                   (org-element-property :value (org-element-at-point)))
+    (kill-new it)))
+
 (defun rysco-org-src-execute (&rest _)
   (interactive)
   (let ((block-point org-src--beg-marker))

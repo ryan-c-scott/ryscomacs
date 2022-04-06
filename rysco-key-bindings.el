@@ -16,6 +16,7 @@
 (global-set-key "\C-c\C-c" 'rysco-comment-dwim)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c h") 'rysco-org-element-value-to-kill)
 (global-set-key "\C-cs" 'helm-rysco-store-query)
 (global-set-key "\C-cj" 'pop-to-mark-command)
 (global-set-key (kbd (concat "<f1> " rysco-lead-key)) 'helm-apropos)
