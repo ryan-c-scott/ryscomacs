@@ -623,13 +623,11 @@ With prefix-arg prompt for type if available with your AG version."
 (defun rysco-name-frame-project ()
   (interactive)
   (let ((name (projectile-project-name)))
-    (if (string= name "-")
-        (--when-let
-            (pcase major-mode
-              ('org-agenda-mode "AGENDA")
-              (_ (read-string "Name: ")))
-          (set-frame-name it))
-      (set-frame-name (format "[ %s ]" (upcase name))))))
+    (set-frame-name
+     (cond
+      ((derived-mode-p 'org-agenda-mode) "AGENDA")
+      ((string= name "-") (read-string "Name: "))
+      (t (format "[ %s ]" (upcase name)))))))
 
 (defun rysco-frame-by-name (arg)
   (interactive "P")
