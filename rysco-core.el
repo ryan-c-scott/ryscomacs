@@ -131,7 +131,7 @@
  with-editor
  docker-compose-mode
  dockerfile-mode
- (docker :protocol ssh :repo "ryan-c-scott/docker.el")
+ (docker :protocol ssh :repo "ryan-c-scott/docker.el" :branch "ryscomacs-master")
  nginx-mode
  tree-sitter
  tree-sitter-langs
