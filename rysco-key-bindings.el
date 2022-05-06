@@ -142,8 +142,10 @@
 
 (add-hook 'magit-mode-hook
           (lambda ()
-            (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)
-            (add-hook 'magit-status-sections-hook 'rysco-magit-status-additions 100)))
+            (define-key magit-mode-map (kbd "C-o") 'magit-diff-visit-file-other-window)))
+
+(with-eval-after-load 'magit
+  (add-hook 'magit-status-sections-hook 'rysco-magit-status-additions 100))
 
 (add-hook 'dired-mode-hook
           (lambda ()

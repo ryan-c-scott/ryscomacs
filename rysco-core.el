@@ -64,6 +64,7 @@
  csharp-mode
  csv-mode
  dash
+ dash-functional
  dired-hacks
  dired-hacks-utils
  dired+
@@ -143,7 +144,7 @@
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
 (require 'rysco-util)
-(require 'rysco-desktop+)
+(require 'tramp)
 
 (require 'doom-themes)
 (doom-themes-org-config)
@@ -493,6 +494,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
+(require 'dash-functional)
 (eval-after-load 'dash '(dash-enable-font-lock))
 
 (defun eshell/w32-explorer-path ()
