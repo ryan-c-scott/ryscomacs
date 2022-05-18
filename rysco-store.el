@@ -91,6 +91,13 @@
    :actions `(,@helm-org-ql-actions
               ("Insert as link" . helm-rysco-store--insert-candidates))))
 
+;;;###autoload
+(defun rysco-store-rebuild-links ()
+  "Helper function to rebuild org ID database using `org-id-update-id-locations'"
+  (interactive)
+  (org-id-update-id-locations
+   (directory-files-recursively rysco-store-directory ".org")))
+
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
   (interactive (list (current-buffer)))
