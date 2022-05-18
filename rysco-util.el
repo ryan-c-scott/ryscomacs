@@ -1036,7 +1036,7 @@ With prefix-arg prompt for type if available with your AG version."
          ('gh (format "%s/compare/%s...%s?expand=1" url base head))
          ('bb (format "%s/branches/compare/%s..%s" url base head)))))))
 
-(defun rysco-magit-pull-request ()
+(defun rysco-magit-pull-request (&optional base)
   (interactive)
   (if (magit-get-push-branch nil t)
       (let ((branch (magit-get-current-branch)))
@@ -1044,8 +1044,12 @@ With prefix-arg prompt for type if available with your AG version."
                        (format
                         "refs/heads/%s:refs/heads/%s"
                         branch branch))
-        (rysco-magit-goto-compare (magit-get-current-branch)))
+        (rysco-magit-goto-compare (magit-get-current-branch) base))
     (magit-push)))
+
+(defun rysco-magit-pull-request-master ()
+  (interactive)
+  (rysco-magit-pull-request "master"))
 
 (defun rysco-magit-goto-branch ()
   (interactive)

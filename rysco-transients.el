@@ -121,7 +121,8 @@
    ("b" "Branch" rysco-magit-goto-branch)
    ("c" "Compare" rysco-magit-goto-compare)]
   ["Pull Request"
-   ("p" "Create" rysco-magit-pull-request)])
+   ("p" "Create" rysco-magit-pull-request)
+   ("m" "Create to master" rysco-magit-pull-request-master)])
 
 (with-eval-after-load 'magit
   (define-key magit-mode-map ">" 'rysco-magit-transient)
