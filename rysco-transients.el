@@ -64,6 +64,12 @@
     ("tr" "Clock in Last" bluedot-org-clock-in-last)
     ("tj" "Jump to Clock" bluedot-org-jump-to-clock)]
 
+   ["Data Store"
+    :setup-children rysco-transient--wrap-children
+    ("sq" "Query" helm-rysco-store-query)
+    ("sd" "Dired" rysco-store-directory-dired)
+    ("sh" "HACK: Load Store" rysco-store-get-books)]
+
    ["Describe"
     :setup-children rysco-transient--wrap-children
     ("dm" "Mode" describe-mode)

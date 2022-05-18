@@ -22,6 +22,11 @@
      (add-to-list 'org-capture-templates capture-template)
      (add-to-list 'rysco-store-templates--processed capture-template))))
 
+;;;###autoload
+(defun rysco-store-directory-dired ()
+  (interactive)
+  (dired rysco-store-directory))
+
 (defun rysco-store-create-file-name (title)
   (convert-standard-filename
    (expand-file-name
