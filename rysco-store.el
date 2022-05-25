@@ -103,6 +103,15 @@
   (org-id-update-id-locations
    (directory-files-recursively rysco-store-directory ".org")))
 
+;;;###autoload
+(defun rysco-store-load ()
+  "Helper function to force loading of store for org-ql based querying.
+This function is only useful for when things go wrong and org-ql queries are failing and will eventually
+not be needed"
+  (interactive)
+  ;; HACK: Executing this query seems to resolve issues with loading
+  (rysco-store-get-books))
+
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
   (interactive (list (current-buffer)))

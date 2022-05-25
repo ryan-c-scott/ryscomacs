@@ -68,7 +68,8 @@
     :setup-children rysco-transient--wrap-children
     ("sq" "Query" helm-rysco-store-query)
     ("sd" "Dired" rysco-store-directory-dired)
-    ("sh" "HACK: Load Store" rysco-store-get-books)]
+    ("sl" "HACK: Load Store" rysco-store-load)
+    ("sr" "HACK: Rebuild links" rysco-store-rebuild-links)]
 
    ["Describe"
     :setup-children rysco-transient--wrap-children
