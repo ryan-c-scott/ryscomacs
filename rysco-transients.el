@@ -134,7 +134,7 @@
 (with-eval-after-load 'magit
   (define-key magit-mode-map ">" 'rysco-magit-transient)
   (transient-append-suffix 'magit-dispatch
-    "H"
+    "%"
     '(">" "Goto GH/BB" rysco-magit-transient)))
 
 ;; MC
