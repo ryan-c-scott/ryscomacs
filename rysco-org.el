@@ -242,9 +242,11 @@
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (face-name (org-entry-get marker "projectface" t))
              (face (intern face-name))
-             (header-width (length (car (s-match "^.*:\s+" str)))))
+             (header-width (-if-let (header-text (car (s-match "^.*:\s+" str)))
+                               (1- (length header-text))
+                             (+ 3 (length (format "%s" (get-text-property 0 'org-category str)))))))
       (prog1 str
-        (add-text-properties 0 (1- header-width) `(face ,face) str))
+        (add-text-properties 0 header-width `(face ,face) str))
     str))
 
 (defun rysco-agenda-refile-wrapper (old &rest args)
