@@ -18,7 +18,7 @@ The following snippet will pull down the latest and get you setup
 ``` shell
 mkdir ~/.emacs.d
 cd ~/.emacs.d
-wget -O .emacs https://bitbucket.org/scott105/ryscomacs/raw/master/example/init.el
+wget -O init.el https://bitbucket.org/scott105/ryscomacs/raw/master/example/init.el
 ```
 
 If you are integrating into an existing emacs configuration
