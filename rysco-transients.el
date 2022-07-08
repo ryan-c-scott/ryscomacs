@@ -152,10 +152,11 @@
    ["Exit"
     ("<return>" "Exit" transient-quit-all)]]
 
-  (interactive)
-  (transient-setup 'rysco-mc-transient)
-  (with-current-buffer transient--original-buffer
-    (call-interactively 'mc/mark-next-like-this)))
+  (lambda ()
+    (interactive)
+    (transient-setup 'rysco-mc-transient)
+    (with-current-buffer transient--original-buffer
+      (call-interactively 'mc/mark-next-like-this))))
 
 (defun rysco-mc-error-guard (func rest)
   (interactive "P")
