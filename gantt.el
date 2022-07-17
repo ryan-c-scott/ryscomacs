@@ -3,35 +3,133 @@
 (require 'dash)
 (require 'cl)
 
-(cl-defun gantt-get-start-time (key data &optional accum)
-  (-let (((_ _ days _ depencies) (assoc key data))
-         (time (or accum 0)))
-    (-
-     (if depencies
-         (cl-loop
-          with latest = 0
-          for d in depencies do
-          (setq latest
-                (max latest
-                     (gantt-get-start-time d data (+ time days))))
-          finally return latest)
-       (+ days time))
-     (if accum 0 days))))
+(cl-defstruct gantt-project
+  ""
+  id
+  name
+  work
+  confidence
+  dependencies
+  resources
+  user-data
+
+  ;; Simulation data
+  work-remaining
+  started
+  ended
+  )
 
 ;;;###autoload
 (cl-defun gantt-generate (data)
-  (--sort
-   (-let (((_ _ it-start it-end) it)
-          ((_ _ other-start other-end) other))
-     (if (= it-start other-start)
-         (< it-end other-end)
-       (< it-start other-start)))
+  ;; Convert to table
+  (loop
+   for proj in data collect
+   `(,(gantt-project-id proj)
+     ,(gantt-project-name proj)
+     ,(gantt-project-started proj)
+     ,(gantt-project-ended proj)
+     ,(gantt-project-confidence proj)
+     ,(gantt-project-dependencies proj)
+     ,(gantt-project-resources proj)
+     ,@(gantt-project-user-data proj))))
 
-   (cl-loop
-    for (key name days . misc) in data
-    as start = (gantt-get-start-time key data)
-    collect
-    `(,key ,name ,start ,(+ start days) ,@misc))))
+;;;###autoload
+(cl-defun gantt-simulate (projects &optional resource-data)
+  (loop
+   with projects-remaining = (length projects)
+   with active-resources = (make-hash-table :test 'equal)
+   with projects-completed
+
+   for day upfrom 0 to 100
+
+   while (> projects-remaining 0) do
+   (loop
+    for proj in projects
+
+    as id = (gantt-project-id proj)
+    as started = (gantt-project-started proj)
+    as ended = (gantt-project-ended proj)
+
+    as resources = (gantt-project-resources proj)
+    as available-resources = (--remove (gethash it active-resources) resources)
+
+    as dependencies = (gantt-project-dependencies proj)
+    as dependencies-met = (or (not dependencies)
+                              (--all? (member it projects-completed) dependencies))
+
+    ;; Handle starting based on resources
+    when (and (not started)
+              (or (not resources)
+                  (> (length available-resources) 0)))
+    do
+    (loop
+     for res in available-resources do
+     (puthash res id active-resources)
+     finally do
+     (setf (gantt-project-started proj) day))
+
+    when (and started (not ended) dependencies-met) do
+    (let* ((remaining (gantt-project-work-remaining proj))
+           (devs (--filter (equal (gethash it active-resources) id) resources))
+           (dev-power (gantt-calculate-resource-power resource-data devs))
+           (new-remaining (- remaining dev-power)))
+
+      (setf (gantt-project-work-remaining proj) new-remaining)
+      (when (<= new-remaining 0)
+        ;; Free resources
+        (loop
+         for res in resources
+         as on-project = (equal (gethash res active-resources) id)
+
+         when on-project do
+         (puthash res nil active-resources))
+
+        (decf projects-remaining)
+        (push id projects-completed)
+        (setf (gantt-project-ended proj) day))))
+
+   finally return
+   (--sort
+    (let ((it-start (gantt-project-started it))
+          (it-end (gantt-project-ended it))
+          (other-start (gantt-project-started other))
+          (other-end (gantt-project-ended other)))
+      (if (= it-start other-start)
+          (< it-end other-end)
+        (< it-start other-start)))
+    projects)))
+
+(cl-defun gantt-calculate-resource-power (resource-data devs)
+  (loop
+   for d in devs
+   as commitment = (cadr (assoc d resource-data))
+   sum (or commitment 1)))
+
+(cl-defun gantt-table-to-simulation (data)
+  (cl-loop
+   with data = (cdr data)
+   for (key name days confidence deps resources . rest) in data
+   as dependencies = (s-split "" deps t)
+   as resources = (s-split " " resources t)
+   unless (s-match "[!^_$#*/]" key)
+   collect
+   (make-gantt-project
+    :id key
+    :name name
+    :work days
+    :confidence confidence
+    :dependencies dependencies
+    :resources resources
+    :user-data rest
+
+    :work-remaining days)))
+
+;;;###autoload
+(cl-defun gantt-generate-from-table (data &optional resources)
+  (gantt-generate
+   (gantt-simulate
+    (gantt-table-to-simulation data)
+    (cdr resources))))
 
 ;;;###autoload
 (cl-defun gantt-to-latex (data &optional title)
@@ -73,3 +171,58 @@
       ,@out
 
       "\\end{ganttchart}"))))
+
+;;;###autoload
+(cl-defun gantt-to-table (data)
+  (loop
+   for (_ name start end confidence deps resources) in data
+   as start = (floor (or start 0))
+   as end = (ceiling (or end 0))
+   collect
+   `(,name
+     ,(s-join " " resources)
+     ,(concat
+       (make-string start ?\_)
+       (make-string (- end start) ?#)))))
+
+;;;###autoload
+(cl-defun gantt-reorganize-table ()
+  (interactive)
+  (let* ((begin (org-table-begin))
+         (end (org-table-end))
+         (raw (-split-at 3 (org-table-to-lisp)))
+         (header (car raw))
+         (data (cadr raw))
+         (mapping (loop
+                   with new-id = ?A
+                   for entry in data
+                   as map = (pcase entry
+                              (`(,id . ,_)
+                               (cons id (char-to-string new-id)))
+                              (_ t))
+                   when map collect map
+                   do (incf new-id))))
+
+    (save-excursion
+      (delete-region begin end)
+      (insert
+       (format
+        "%s\n"
+        (orgtbl-to-orgtbl
+         (append
+          header
+          (loop
+           for map in mapping
+           for entry in data collect
+
+           (pcase entry
+             (`(,_ ,name ,days ,confidence ,deps ,resources)
+              `(,(cdr map) ,name ,days ,confidence
+                ,(loop
+                  for d in (s-split "" deps t) concat
+                  (cdr (assoc d mapping)))
+                ,resources))
+
+             (_ entry)
+             )))
+         nil))))))
