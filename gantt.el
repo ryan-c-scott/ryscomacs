@@ -17,6 +17,7 @@
   work-remaining
   started
   ended
+  resource-log
   )
 
 ;;;###autoload
@@ -63,17 +64,30 @@
                   (> (length available-resources) 0)))
     do
     (loop
+     with resource-log
      for res in available-resources do
      (puthash res id active-resources)
+
+     collect `(,res . ,day) into resource-log
+
      finally do
-     (setf (gantt-project-started proj) day))
+     (setf (gantt-project-started proj) day
+           (gantt-project-resource-log proj) resource-log))
 
     when (and started (not ended) dependencies-met) do
     (let* ((remaining (gantt-project-work-remaining proj))
-           (devs (--filter (equal (gethash it active-resources) id) resources))
+           (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
            (dev-power (gantt-calculate-resource-power resource-data devs))
            (new-remaining (- remaining dev-power)))
 
+      ;; Detect and log added resources
+      (loop
+       for res in devs
+       as log = (gantt-project-resource-log proj)
+       unless (assoc res log 'equal) do
+       (setf (gantt-project-resource-log proj) (append log `((,res . ,day)))))
+
+      ;; Decrement remaining work
       (setf (gantt-project-work-remaining proj) new-remaining)
       (when (<= new-remaining 0)
         ;; Free resources
@@ -122,7 +136,10 @@
     :resources resources
     :user-data rest
 
-    :work-remaining days)))
+    :work-remaining days
+    :resource-log nil
+    )))
+
 ;;;###autoload
 (cl-defun gantt-simulate-from-table (data &optional resources)
   (gantt-simulate
