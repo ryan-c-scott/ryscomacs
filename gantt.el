@@ -34,6 +34,17 @@
      ,(gantt-project-resources proj)
      ,@(gantt-project-user-data proj))))
 
+(cl-defun gantt-generate-resource-log (data)
+  (--group-by
+   (car it)
+   (loop for proj in data
+         as id = (gantt-project-id proj)
+         as ended = (gantt-project-ended proj)
+         as resource-log = (gantt-project-resource-log proj)
+         append
+         (loop for (res . start) in resource-log collect
+               `(,res ,proj ,start ,ended)))))
+
 ;;;###autoload
 (cl-defun gantt-simulate (projects &optional resource-data)
   (loop
@@ -204,6 +215,19 @@
      ,(concat
        (make-string start ?\_)
        (make-string (- end start) ?#)))))
+
+;;;###autoload
+(cl-defun gantt-resource-log-to-table (data)
+  (loop
+   for (res . log) in data collect
+   `(,res
+     ,(loop
+       with last = 0
+       for (_ proj start end) in log
+       as id = (gantt-project-id proj)
+       concat (make-string (- start last) ?\s)
+       concat (make-string (- end start) (aref id 0))
+       do (setq last end)))))
 
 ;;;###autoload
 (cl-defun gantt-reorganize-table ()
