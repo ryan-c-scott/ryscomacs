@@ -123,13 +123,16 @@
     :user-data rest
 
     :work-remaining days)))
+;;;###autoload
+(cl-defun gantt-simulate-from-table (data &optional resources)
+  (gantt-simulate
+   (gantt-table-to-simulation data)
+   (cdr resources)))
 
 ;;;###autoload
 (cl-defun gantt-generate-from-table (data &optional resources)
   (gantt-generate
-   (gantt-simulate
-    (gantt-table-to-simulation data)
-    (cdr resources))))
+   (gantt-simulate-from-table data resources)))
 
 ;;;###autoload
 (cl-defun gantt-to-latex (data &optional title)
@@ -173,7 +176,7 @@
       "\\end{ganttchart}"))))
 
 ;;;###autoload
-(cl-defun gantt-to-table (data)
+(cl-defun gantt-simulation-to-table (data)
   (loop
    for (_ name start end confidence deps resources) in data
    as start = (floor (or start 0))
