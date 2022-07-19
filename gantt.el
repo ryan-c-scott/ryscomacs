@@ -12,6 +12,7 @@
   dependencies
   resources
   user-data
+  blockers
 
   ;; Simulation data
   work-remaining
@@ -23,6 +24,7 @@
   ""
   projects
   resources
+  externals
   start-date)
 
 ;;;###autoload
@@ -83,11 +85,12 @@
                `(,res ,proj ,start ,ended)))))
 
 ;;;###autoload
-(cl-defun gantt-simulate (projects &optional resource-data start-date)
-  (make-gantt-simulation
-   :start-date start-date
-   :projects
+(cl-defun gantt-simulate (simulation)
+  (setf
+   (gantt-simulation-projects simulation)
    (loop
+    with projects = (gantt-simulation-projects simulation)
+    with resource-data = (gantt-simulation-resources simulation)
     with projects-remaining = (length projects)
     with active-resources = (make-hash-table :test 'equal)
     with projects-completed
@@ -164,9 +167,8 @@
        (if (= it-start other-start)
            (< it-end other-end)
          (< it-start other-start)))
-     projects))
-
-   :resources resources))
+     projects)))
+  simulation)
 
 (cl-defun gantt-calculate-resource-power (resource-data devs)
   (loop
@@ -174,40 +176,50 @@
    as commitment = (cadr (assoc d resource-data))
    sum (or commitment 1)))
 
-(cl-defun gantt-table-to-simulation (data)
-  (cl-loop
-   with data = (cdr data)
-   for (key name days confidence deps resources . rest) in data
-   as dependencies = (s-split "" deps t)
-   as resources = (s-split " " resources t)
-   unless (s-match "[!^_$#*/]" key)
-   collect
-   (make-gantt-project
-    :id key
-    :name name
-    :work days
-    :confidence confidence
-    :dependencies dependencies
-    :resources resources
-    :user-data rest
+(cl-defun gantt-table-to-simulation (&key projects resources externals start-date)
+  (make-gantt-simulation
+   :resources (cdr resources)
+   :externals (cdr externals)
+   :start-date start-date
 
-    :work-remaining days
-    :resource-log nil
-    )))
+   :projects
+   (cl-loop
+    with data = (cdr projects)
+    for (key name days confidence actual deps resources blockers . rest) in data
+    as dependencies = (s-split "" deps t)
+    as resources = (s-split " " resources t)
+    unless (s-match "[!^_$#*/]" key)
+    collect
+    (make-gantt-project
+     :id key
+     :name name
+     :work days
+     :confidence confidence
+     :dependencies dependencies
+     :resources resources
+     :blockers blockers
+     :user-data rest
+
+     :work-remaining days
+     :resource-log nil))))
 
 ;;;###autoload
-(cl-defun gantt-simulate-from-table (data &optional resources start-date)
+(cl-defun gantt-simulate-from-table (data &key resources externals start-date)
   (gantt-simulate
-   (gantt-table-to-simulation data)
-   (cdr resources)
-   start-date))
+   (gantt-table-to-simulation
+    :projects data
+    :resources resources
+    :externals externals
+    :start-date start-date)))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-table (simulation)
   (loop
-   for proj in (gantt-simulation-projects data)
+   for proj in (gantt-simulation-projects simulation)
    as start = (floor (or (gantt-project-started proj) 0))
-   as end = (ceiling (or (gantt-project-ended 0)))
+   as end = (ceiling (or (gantt-project-ended proj) 0))
+   as resources = (gantt-project-resources proj)
+
    collect
    `(,(gantt-project-name proj)
      ,(s-join " " resources)
