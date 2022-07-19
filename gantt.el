@@ -244,7 +244,7 @@
            :textcolor "white")
 
      (:set lmargin ,(*
-                     2 ;; HACK: Magic number to create space for the larger xtics
+                     3 ;; HACK: Magic number to create space for the larger xtics
                      (loop
                       for (id name _ _ _ resources . rest) in projects maximize
                       (length (format "%s: %s" name resources)))))
