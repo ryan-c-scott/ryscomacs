@@ -17,8 +17,13 @@
   work-remaining
   started
   ended
-  resource-log
-  )
+  resource-log)
+
+(cl-defstruct gantt-simulation
+  ""
+  projects
+  resources
+  start-date)
 
 ;;;###autoload
 (cl-defun gantt-create-palette (size)
@@ -40,24 +45,22 @@
          0.6)
       2))))
 
-;;;###autoload
-(cl-defun gantt-generate (data)
-  ;; Convert to table
-  (loop
-   for proj in data collect
-   `(,(gantt-project-id proj)
-     ,(gantt-project-name proj)
-     ,(gantt-project-started proj)
-     ,(gantt-project-ended proj)
-     ,(gantt-project-confidence proj)
-     ,(gantt-project-dependencies proj)
-     ,(gantt-project-resources proj)
-     ,@(gantt-project-user-data proj))))
+(cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
+  (when start-date
+    (loop
+     with start = (org-read-date nil t start-date)
+     for i from 0 to sprints
+     as irl-offset = (* i 4)
+     collect
+     `(,(format-time-string
+         (or format-string "%m/%d")
+         (org-read-date nil t (format "++%s" (+ i irl-offset)) nil start))
+       ,(* i 10)))))
 
-(cl-defun gantt-generate-resource-log (data)
+(cl-defun gantt-generate-resource-log (simulation)
   (--group-by
    (car it)
-   (loop for proj in data
+   (loop for proj in (gantt-simulation-projects simulation)
          as id = (gantt-project-id proj)
          as ended = (gantt-project-ended proj)
          as resource-log = (gantt-project-resource-log proj)
@@ -66,85 +69,90 @@
                `(,res ,proj ,start ,ended)))))
 
 ;;;###autoload
-(cl-defun gantt-simulate (projects &optional resource-data)
-  (loop
-   with projects-remaining = (length projects)
-   with active-resources = (make-hash-table :test 'equal)
-   with projects-completed
-
-   for day upfrom 0 to 100
-
-   while (> projects-remaining 0) do
+(cl-defun gantt-simulate (projects &optional resource-data start-date)
+  (make-gantt-simulation
+   :start-date start-date
+   :projects
    (loop
-    for proj in projects
+    with projects-remaining = (length projects)
+    with active-resources = (make-hash-table :test 'equal)
+    with projects-completed
 
-    as id = (gantt-project-id proj)
-    as started = (gantt-project-started proj)
-    as ended = (gantt-project-ended proj)
+    for day upfrom 0 to 100
 
-    as resources = (gantt-project-resources proj)
-    as available-resources = (--remove (gethash it active-resources) resources)
-
-    as dependencies = (gantt-project-dependencies proj)
-    as dependencies-met = (or (not dependencies)
-                              (--all? (member it projects-completed) dependencies))
-
-    ;; Handle starting based on resources
-    when (and (not started)
-              (or (not resources)
-                  (> (length available-resources) 0)))
-    do
+    while (> projects-remaining 0) do
     (loop
-     with resource-log
-     for res in available-resources do
-     (puthash res id active-resources)
+     for proj in projects
 
-     collect `(,res . ,day) into resource-log
+     as id = (gantt-project-id proj)
+     as started = (gantt-project-started proj)
+     as ended = (gantt-project-ended proj)
 
-     finally do
-     (setf (gantt-project-started proj) day
-           (gantt-project-resource-log proj) resource-log))
+     as resources = (gantt-project-resources proj)
+     as available-resources = (--remove (gethash it active-resources) resources)
 
-    when (and started (not ended) dependencies-met) do
-    (let* ((remaining (gantt-project-work-remaining proj))
-           (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
-           (dev-power (gantt-calculate-resource-power resource-data devs))
-           (new-remaining (- remaining dev-power)))
+     as dependencies = (gantt-project-dependencies proj)
+     as dependencies-met = (or (not dependencies)
+                               (--all? (member it projects-completed) dependencies))
 
-      ;; Detect and log added resources
-      (loop
-       for res in devs
-       as log = (gantt-project-resource-log proj)
-       unless (assoc res log 'equal) do
-       (progn
-         (puthash res id active-resources)
-         (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
+     ;; Handle starting based on resources
+     when (and (not started)
+               (or (not resources)
+                   (> (length available-resources) 0)))
+     do
+     (loop
+      with resource-log
+      for res in available-resources do
+      (puthash res id active-resources)
 
-      ;; Decrement remaining work
-      (setf (gantt-project-work-remaining proj) new-remaining)
-      (when (<= new-remaining 0)
-        ;; Free resources
-        (loop
-         for res in resources
-         as on-project = (equal (gethash res active-resources) id)
+      collect `(,res . ,day) into resource-log
 
-         when on-project do
-         (puthash res nil active-resources))
+      finally do
+      (setf (gantt-project-started proj) day
+            (gantt-project-resource-log proj) resource-log))
 
-        (decf projects-remaining)
-        (push id projects-completed)
-        (setf (gantt-project-ended proj) day))))
+     when (and started (not ended) dependencies-met) do
+     (let* ((remaining (gantt-project-work-remaining proj))
+            (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
+            (dev-power (gantt-calculate-resource-power resource-data devs))
+            (new-remaining (- remaining dev-power)))
 
-   finally return
-   (--sort
-    (let ((it-start (gantt-project-started it))
-          (it-end (gantt-project-ended it))
-          (other-start (gantt-project-started other))
-          (other-end (gantt-project-ended other)))
-      (if (= it-start other-start)
-          (< it-end other-end)
-        (< it-start other-start)))
-    projects)))
+       ;; Detect and log added resources
+       (loop
+        for res in devs
+        as log = (gantt-project-resource-log proj)
+        unless (assoc res log 'equal) do
+        (progn
+          (puthash res id active-resources)
+          (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
+
+       ;; Decrement remaining work
+       (setf (gantt-project-work-remaining proj) new-remaining)
+       (when (<= new-remaining 0)
+         ;; Free resources
+         (loop
+          for res in resources
+          as on-project = (equal (gethash res active-resources) id)
+
+          when on-project do
+          (puthash res nil active-resources))
+
+         (decf projects-remaining)
+         (push id projects-completed)
+         (setf (gantt-project-ended proj) day))))
+
+    finally return
+    (--sort
+     (let ((it-start (gantt-project-started it))
+           (it-end (gantt-project-ended it))
+           (other-start (gantt-project-started other))
+           (other-end (gantt-project-ended other)))
+       (if (= it-start other-start)
+           (< it-end other-end)
+         (< it-start other-start)))
+     projects))
+
+   :resources resources))
 
 (cl-defun gantt-calculate-resource-power (resource-data devs)
   (loop
@@ -174,69 +182,147 @@
     )))
 
 ;;;###autoload
-(cl-defun gantt-simulate-from-table (data &optional resources)
+(cl-defun gantt-simulate-from-table (data &optional resources start-date)
   (gantt-simulate
    (gantt-table-to-simulation data)
-   (cdr resources)))
+   (cdr resources)
+   start-date))
 
 ;;;###autoload
-(cl-defun gantt-generate-from-table (data &optional resources)
-  (gantt-generate
-   (gantt-simulate-from-table data resources)))
-
-;;;###autoload
-(cl-defun gantt-to-latex (data &optional title)
-  (s-join
-   "\n"
-   (cl-loop
-    with out
-    with project-end = 0
-    for (_ name start end confidence) in data
-    do (setq project-end (max project-end end))
-    collect
-    (format "\\ganttbar[progress=%s, progress label text={%s\\%%}]{%s}{%s}{%s} \\\\"
-            confidence
-            confidence
-            name
-            (1+ start)
-            end)
-    into out
-    finally do
-    (setq project-end (+ project-end
-                         (- 10 (mod project-end 10))))
-    finally return
-    `("\\begin{ganttchart}["
-      "expand chart=\\textwidth,"
-      "y unit title=0.7cm,"
-      "vgrid, hgrid,"
-      "bar/.append style={fill=green!25},"
-      "y unit chart=0.6cm]"
-      ,(format "{1}{%s}," project-end)
-
-      ,(when title
-         (format
-          "\\gantttitle{%s}{%s} \\\\"
-          title
-          project-end))
-
-      ,(format "\\gantttitlelist{1,...,%s}{10} \\\\" (/ project-end 10))
-
-      ,@out
-
-      "\\end{ganttchart}"))))
-
-;;;###autoload
-(cl-defun gantt-simulation-to-table (data)
+(cl-defun gantt-simulation-to-table (simulation)
   (loop
-   for (_ name start end confidence deps resources) in data
-   as start = (floor (or start 0))
-   as end = (ceiling (or end 0))
+   for proj in (gantt-simulation-projects data)
+   as start = (floor (or (gantt-project-started proj) 0))
+   as end = (ceiling (or (gantt-project-ended 0)))
    collect
-   `(,name
+   `(,(gantt-project-name proj)
      ,(s-join " " resources)
      ,(concat
        (make-string start ?\_)
        (make-string (- end start) ?#)))))
+
+;;;###autoload
+(cl-defun gantt-simulation-to-plot (simulation &rest options)
+  (apply
+   'rysco-plot
+   `((:unset key)
+     (:data gantt ,@(loop
+                     for i upfrom 1
+                     for proj in (gantt-simulation-projects simulation) collect
+                     (pcase-let (((cl-struct gantt-project id name started ended resources) proj))
+                       `(,started ,i ,(- (or ended 0) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))))
+
+     (:set :border lc "white")
+
+     (:set style line 1 lc "yellow")
+
+     (:set style arrow 1 nohead lw 3 lc "#Eedd82")
+     (:set style arrow 2 nohead lw 20 lc "#8deeee")
+
+     (:set arrow 1 from (60 0) to (60 ,(length projects)) as 1)
+
+     (:set yrange [,(length projects) 0])
+     (:set grid x y)
+
+     (:set ytics
+           :out
+           :font ",28"
+           :textcolor "white")
+
+     (:set lmargin ,(*
+                     2 ;; HACK: Magic number to create space for the larger xtics
+                     (loop
+                      for (id name _ _ _ resources . rest) in projects maximize
+                      (length (format "%s: %s" name resources)))))
+
+     (:tics x
+            :options (:out
+                      :font ",25"
+                      :rotate by 45 right
+                      :textcolor "white")
+            :data
+            ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
+
+     (:set rmargin 5)
+     (:set bmargin 5)
+
+     (:plot [* *]
+            (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2)))
+     )
+   options))
+
+;;;###autoload
+(cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
+  (let* ((data (gantt-generate-resource-log simulation))
+         (height (1+ (length data)))
+        project-count)
+    (apply
+     'rysco-plot
+     `((:unset key)
+
+       (:data gantt ,@(loop
+                       with project-colors = (make-hash-table :test 'equal)
+                       with next-project-id = 3
+
+                       for i upfrom 1
+                       for (res . log) in data append
+                       (loop for (_ proj start end) in log
+                             as project-id = (gantt-project-name proj)
+                             as project-name = (gantt-project-name proj)
+                             as style-id = (gethash project-id project-colors)
+
+                             unless style-id do
+                             (setq style-id (puthash project-id next-project-id project-colors)
+                                   next-project-id (1+ next-project-id))
+
+                             collect
+                             `(,start ,i ,(- end start) 0 ,project-name ,res ,style-id))
+                       finally do (setq project-count (hash-table-count project-colors))))
+
+       (:set :border lc "white")
+
+       (:set style line 1 lc "yellow")
+
+       (:set style arrow 1 nohead lw 3 lc "#Eedd82")
+       (:set style arrow 2 nohead lw 20 lc "#8deeee")
+
+       ,@(loop
+          for i upfrom 0
+          for color in (gantt-create-palette project-count)
+          collect
+          `(:set style arrow ,(+ i 3) nohead lw 30 lc ,color))
+
+       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+
+       (:set yrange [,height 0])
+       (:set grid x y)
+
+       (:set ytics
+             :out
+             :font ",28"
+             :textcolor "white")
+
+       (:tics x
+              :options (:out
+                        :font ",25"
+                        :rotate by 45 right
+                        :textcolor "white")
+              :data
+              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
+
+       (:set lmargin ,(*
+                       1 ;; HACK: Magic number to create space for the larger xtics
+                       (loop
+                        for (id name _ _ _ resources . rest) in projects maximize
+                        (length (format "%s: %s" name resources)))))
+       (:set rmargin 5)
+       (:set bmargin 5)
+
+       (:plot [* *]
+              (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
+              (:labels :data gantt :using [1 2 5] :options (:left :font ",20")))
+       )
+     options)))
 
 ;;;###autoload
 (cl-defun gantt-resource-log-to-table (data)
