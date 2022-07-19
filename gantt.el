@@ -21,6 +21,26 @@
   )
 
 ;;;###autoload
+(cl-defun gantt-create-palette (size)
+  (loop
+   for i upfrom 0 to size
+   as rotations = (/ i 1.0)
+
+   collect
+   (apply
+    'color-rgb-to-hex
+    `(,@(color-hsl-to-rgb
+         (mod
+          (+
+           (* i 0.3) ;; Primary rotation
+           (* rotations 0.01) ;; Increased offset for each full rotation
+           )
+          1.0)
+         (min 0.9 (+ 0.5 (* rotations 0.2)))
+         0.6)
+      2))))
+
+;;;###autoload
 (cl-defun gantt-generate (data)
   ;; Convert to table
   (loop
