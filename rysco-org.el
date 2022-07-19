@@ -283,12 +283,12 @@
    with rolling = (--map (rysco-rolling-average it) windows)
 
    with dates = (--map (cons (format-time-string
-                              "%Y-%m-%d" (org-read-date nil t (car it))) (cdr it)) data)
-   with today-stamp = (format-time-string "%Y-%m-%d")
+                              "%F" (org-read-date nil t (car it))) (cdr it)) data)
+   with today-stamp = (format-time-string "%F")
    with last-stamp = (if (string= today-stamp (car (-last-item dates)))
                          today-stamp
                        (format-time-string
-                        "%Y-%m-%d"
+                        "%F"
                         (org-read-date nil t "--1" nil)))
    with first = (org-read-date nil t (caar dates))
    with last = (org-read-date nil t "++1" nil
@@ -300,7 +300,7 @@
 
    for i from 0
    as this-date = (org-read-date nil t (format "++%s" i) nil first)
-   as this-date-string = (format-time-string "%Y-%m-%d" this-date)
+   as this-date-string = (format-time-string "%F" this-date)
 
    while (time-less-p this-date last)
    as entry-data = (cl-assoc this-date-string dates :test 'string=)
