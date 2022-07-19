@@ -45,17 +45,30 @@
          0.6)
       2))))
 
+(cl-defun gantt-date-to-day (start-date date)
+  "Convert from real date to day number based on 5 working days per week."
+  (let* ((start (org-read-date nil t start-date))
+         (date (org-read-date nil t date))
+         (days (/ (time-subtract date start) 60 60 24))
+         (weeks (/ days 7)))
+    (- days (* weeks 2))))
+
+(cl-defun gantt-day-to-date (start-date day)
+  "Convert from working day to real date, assuming 5 working days per week."
+  (let* ((week (/ day 5))
+         (start (org-read-date nil t start-date))
+         (irl-offset (* week 2)))
+
+    (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
+
 (cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
   (when start-date
     (loop
-     with start = (org-read-date nil t start-date)
-     for i from 0 to sprints
-     as irl-offset = (* i 4)
-     as dev-day = (* i 10)
+     for dev-day from 0 to (* sprints 10) by 10
      collect
      `(,(format-time-string
          (or format-string "%m/%d")
-         (org-read-date nil t (format "++%s" (+ dev-day irl-offset)) nil start))
+         (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
 (cl-defun gantt-generate-resource-log (simulation)
