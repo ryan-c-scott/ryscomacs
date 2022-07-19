@@ -96,7 +96,9 @@
        for res in devs
        as log = (gantt-project-resource-log proj)
        unless (assoc res log 'equal) do
-       (setf (gantt-project-resource-log proj) (append log `((,res . ,day)))))
+       (progn
+         (puthash res id active-resources)
+         (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
 
       ;; Decrement remaining work
       (setf (gantt-project-work-remaining proj) new-remaining)
