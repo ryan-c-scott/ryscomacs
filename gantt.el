@@ -51,11 +51,12 @@
      with start = (org-read-date nil t start-date)
      for i from 0 to sprints
      as irl-offset = (* i 4)
+     as dev-day = (* i 10)
      collect
      `(,(format-time-string
          (or format-string "%m/%d")
-         (org-read-date nil t (format "++%s" (+ i irl-offset)) nil start))
-       ,(* i 10)))))
+         (org-read-date nil t (format "++%s" (+ dev-day irl-offset)) nil start))
+       ,dev-day))))
 
 (cl-defun gantt-generate-resource-log (simulation)
   (--group-by
