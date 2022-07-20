@@ -16,6 +16,7 @@
 
   ;; Simulation data
   work-remaining
+  start-blocker
   started
   ended
   resource-log)
@@ -73,6 +74,22 @@
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
+(cl-defun gantt-calculate-blocker (blockers externals start-date)
+  (loop
+   with latest-blocker
+
+   for b in blockers
+   as date = (cadr (assoc b externals 'string=))
+   as day = (and date (gantt-date-to-day start-date date))
+
+   when (and day
+             (or (not latest-blocker)
+                 (> day (cdr latest-blocker))))
+   do
+   (setq latest-blocker `(,b . ,day))
+
+   finally return latest-blocker))
+
 (cl-defun gantt-generate-resource-log (simulation)
   (--group-by
    (car it)
@@ -84,8 +101,22 @@
          (loop for (res . start) in resource-log collect
                `(,res ,proj ,start ,ended)))))
 
+(cl-defun gantt-simulation--calculate-blockers (simulation)
+  (loop
+   with externals = (gantt-simulation-externals simulation)
+   with start-date = (gantt-simulation-start-date simulation)
+
+   for proj in (gantt-simulation-projects simulation)do
+   (setf (gantt-project-start-blocker proj)
+         (gantt-calculate-blocker
+          (gantt-project-blockers proj)
+          externals
+          start-date))))
+
 ;;;###autoload
 (cl-defun gantt-simulate (simulation)
+  (gantt-simulation--calculate-blockers simulation)
+
   (setf
    (gantt-simulation-projects simulation)
    (loop
@@ -111,9 +142,13 @@
      as dependencies = (gantt-project-dependencies proj)
      as dependencies-met = (or (not dependencies)
                                (--all? (member it projects-completed) dependencies))
+     as start-blocker = (gantt-project-start-blocker proj)
+     as blocked-externally = (and start-blocker
+                                  (< day (cdr start-blocker)))
 
      ;; Handle starting based on resources
      when (and (not started)
+               (not blocked-externally)
                (or (not resources)
                    (> (length available-resources) 0)))
      do
@@ -188,6 +223,8 @@
     for (key name days confidence actual deps resources blockers . rest) in data
     as dependencies = (s-split "" deps t)
     as resources = (s-split " " resources t)
+    as blockers = (s-split " " blockers)
+
     unless (s-match "[!^_$#*/]" key)
     collect
     (make-gantt-project
@@ -229,53 +266,61 @@
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
-  (apply
-   'rysco-plot
-   `((:unset key)
-     (:data gantt ,@(loop
-                     for i upfrom 1
-                     for proj in (gantt-simulation-projects simulation) collect
-                     (pcase-let (((cl-struct gantt-project id name started ended resources) proj))
-                       `(,started ,i ,(- (or ended 0) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))))
+  (let (blockers)
+    (apply
+     'rysco-plot
+     `((:unset key)
+       (:data gantt ,@(loop
+                       for i upfrom 1
+                       for proj in (gantt-simulation-projects simulation) collect
+                       (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
+                         (when start-blocker
+                           (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
+                         `(,started ,i ,(- (or ended 0) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))))
 
-     (:set :border lc "white")
+       (:data blockers ,@blockers)
 
-     (:set style line 1 lc "yellow")
+       (:set :border lc "white")
 
-     (:set style arrow 1 nohead lw 3 lc "#Eedd82")
-     (:set style arrow 2 nohead lw 20 lc "#8deeee")
+       (:set style line 1 lc "yellow")
 
-     (:set arrow 1 from (60 0) to (60 ,(length projects)) as 1)
+       (:set style arrow 1 nohead lw 3 lc "#Eedd82")
+       (:set style arrow 2 nohead lw 20 lc "#8deeee")
+       (:set style arrow 3 lw 3 lc "#8b008b")
 
-     (:set yrange [,(length projects) 0])
-     (:set grid x y)
+       (:set arrow 1 from (60 0) to (60 ,(length projects)) as 1)
 
-     (:set ytics
-           :out
-           :font ",28"
-           :textcolor "white")
+       (:set yrange [,(length projects) 0])
+       (:set grid x y)
 
-     (:set lmargin ,(*
-                     3 ;; HACK: Magic number to create space for the larger xtics
-                     (loop
-                      for (id name _ _ _ resources . rest) in projects maximize
-                      (length (format "%s: %s" name resources)))))
+       (:set ytics
+             :out
+             :font ",28"
+             :textcolor "white")
 
-     (:tics x
-            :options (:out
-                      :font ",25"
-                      :rotate by 45 right
-                      :textcolor "white")
-            :data
-            ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
+       (:set lmargin ,(*
+                       3 ;; HACK: Magic number to create space for the larger xtics
+                       (loop
+                        for (id name _ _ _ resources . rest) in projects maximize
+                        (length (format "%s: %s" name resources)))))
 
-     (:set rmargin 5)
-     (:set bmargin 5)
+       (:tics x
+              :options (:out
+                        :font ",25"
+                        :rotate by 45 right
+                        :textcolor "white")
+              :data
+              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
 
-     (:plot [* *]
-            (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2)))
-     )
-   options))
+       (:set rmargin 5)
+       (:set bmargin 5)
+
+       (:plot [* *]
+              (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
+              (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
+              (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front)))
+       )
+     options)))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
