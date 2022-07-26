@@ -500,56 +500,88 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
      options)))
 
 ;;;###autoload
-(cl-defun gantt-resource-log-to-table (data)
-  (loop
-   for (res . log) in data collect
-   `(,res
-     ,(loop
-       with last = 0
-       for (_ proj start end) in log
-       as id = (gantt-project-id proj)
-       concat (make-string (- start last) ?\s)
-       concat (make-string (- end start) (aref id 0))
-       do (setq last end)))))
+(cl-defun gantt--find-table (name)
+  (org-element-map (org-element-parse-buffer) 'table
+    (lambda (tbl)
+      (when (string= name (org-element-property :name tbl))
+        tbl))
+    nil t))
+
+(cl-defun gantt--goto-and-delete-table (tbl)
+  (-when-let* ((start (org-element-property :post-affiliated tbl))
+               (end (org-element-property :end tbl)))
+      (goto-char start)
+      (delete-region start end)))
+
+(cl-defun gantt--find-and-replace-table (name header data)
+  (-when-let* ((tbl (gantt--find-table name))
+               (post-blank (org-element-property :post-blank tbl)))
+    (gantt--goto-and-delete-table tbl)
+    (insert
+     (orgtbl-to-orgtbl
+      (append header data)
+      nil)
+     (make-string (1+ post-blank) ?\n))))
 
 ;;;###autoload
-(cl-defun gantt-reorganize-table ()
-  (interactive)
-  (let* ((begin (org-table-begin))
-         (end (org-table-end))
-         (raw (-split-at 3 (org-table-to-lisp)))
-         (header (car raw))
-         (data (cadr raw))
-         (mapping (loop
-                   with new-id = ?A
-                   for entry in data
-                   as map = (pcase entry
-                              (`(,id . ,_)
-                               (cons id (char-to-string new-id)))
-                              (_ t))
-                   when map collect map
-                   do (incf new-id))))
+(cl-defun gantt-reorganize-tables (projects-name work-log-name)
+  ;; TODO: Undo if error
 
-    (save-excursion
-      (delete-region begin end)
-      (insert
-       (format
-        "%s\n"
-        (orgtbl-to-orgtbl
-         (append
-          header
-          (loop
-           for map in mapping
-           for entry in data collect
+  (let ((projects (gantt--find-table projects-name))
+        (work-log (gantt--find-table work-log-name)))
 
-           (pcase entry
-             (`(,_ ,name ,days ,confidence ,deps ,resources)
-              `(,(cdr map) ,name ,days ,confidence
-                ,(loop
-                  for d in (s-split "" deps t) concat
-                  (cdr (assoc d mapping)))
-                ,resources))
+    (when (not (and projects work-log))
+      (error "Tables missing or malformed"))
 
-             (_ entry)
-             )))
-         nil))))))
+    ;; Generate map and fix tables
+    (let* ((projects-begin (org-element-property :post-affiliated projects))
+           (projects-end (org-element-property :end projects))
+           (projects-raw (-split-at 3 (org-table-to-lisp (buffer-substring-no-properties projects-begin projects-end))))
+           (projects-header (car projects-raw))
+           (projects-data (cadr projects-raw))
+
+           (mapping (loop
+                     with new-id = ?A
+                     for entry in projects-data
+                     as map = (pcase entry
+                                (`(,id . ,_)
+                                 (cons id (char-to-string new-id)))
+                                (_))
+                     when map collect map
+                     when map do (incf new-id)))
+
+           (work-log-begin (org-element-property :post-affiliated work-log))
+           (work-log-end (org-element-property :end work-log))
+           (work-log-raw (-split-at 3 (org-table-to-lisp (buffer-substring-no-properties work-log-begin work-log-end))))
+           (work-log-header (car work-log-raw))
+           (work-log-data (cadr work-log-raw))
+
+           (projects-fixed
+            (loop
+             with project-mappings = mapping
+
+             for entry in projects-data collect
+             (pcase entry
+               (`(,_ ,name ,days ,confidence ,adjust ,deps . ,rest)
+                (let ((map (pop project-mappings)))
+                  `(,(cdr map) ,name ,days ,confidence ,adjust
+                    ,(loop
+                      for d in (s-split "" deps t) concat
+                      (cdr (assoc d mapping)))
+                    ,@rest)))
+               (_ entry))))
+
+           (work-log-fixed
+            (loop
+             for entry in work-log-data collect
+             (pcase entry
+               (`(,id . ,rest)
+                `(,(cdr (assoc id mapping)) ,@rest))
+               (_ entry)))))
+
+      (save-excursion
+        (gantt--find-and-replace-table work-log-name work-log-header work-log-fixed)
+        (gantt--find-and-replace-table projects-name projects-header projects-fixed)))))
+
+;;;;
+(provide 'gantt)
