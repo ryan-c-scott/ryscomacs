@@ -9,10 +9,13 @@
   name
   work
   confidence
+  adjustment
   dependencies
   resources
   user-data
   blockers
+  actual-started
+  actual-ended
 
   ;; Simulation data
   work-remaining
@@ -26,7 +29,9 @@
   projects
   resources
   externals
-  start-date)
+  start-date
+  simulation-start
+  work-log)
 
 ;;;###autoload
 (cl-defun gantt-create-palette (size)
@@ -91,15 +96,44 @@
    finally return latest-blocker))
 
 (cl-defun gantt-generate-resource-log (simulation)
-  (--group-by
-   (car it)
-   (loop for proj in (gantt-simulation-projects simulation)
-         as id = (gantt-project-id proj)
-         as ended = (gantt-project-ended proj)
-         as resource-log = (gantt-project-resource-log proj)
-         append
-         (loop for (res . start) in resource-log collect
-               `(,res ,proj ,start ,ended)))))
+  (let ((projects (--map (cons (gantt-project-id it) it)
+                         (gantt-simulation-projects simulation))))
+
+    (--group-by
+     (car it)
+     (append
+      (loop for proj in (gantt-simulation-projects simulation)
+            as id = (gantt-project-id proj)
+            as ended = (gantt-project-ended proj)
+            as resource-log = (gantt-project-resource-log proj)
+            append
+            (loop for (res . start) in resource-log collect
+                  `(,res ,proj ,start ,ended)))
+
+      (loop for (id res start end effort) in (gantt-simulation-work-log simulation)
+            as proj = (cdr (assoc id projects))
+            collect
+            `(,res
+              ,(or proj (make-gantt-project :name id :id id))
+              ,start
+              ,end))))))
+
+(cl-defun gantt-simulation-actual-work (simulation &optional start-date current-date)
+  (loop
+   with end-day = (gantt-date-to-day start-date current-date)
+   with resource-data = (gantt-simulation-resources simulation)
+
+   for proj in (gantt-simulation-projects simulation)
+   as proj-end = (or (gantt-project-ended proj) end-day)
+   as id = (gantt-project-id proj)
+
+   append
+   (loop
+    for (res . start) in (gantt-project-resource-log proj)
+    as res-power = (or (cadr (assoc res resource-data)) 1)
+
+    when (< start end-day) collect
+    `(,id ,res ,start ,(min proj-end end-day) ,res-power))))
 
 (cl-defun gantt-simulation--calculate-blockers (simulation)
   (loop
@@ -113,97 +147,141 @@
           externals
           start-date))))
 
+(cl-defun gantt-simulation--calculate-historic-work (simulation &optional simulation-start)
+  "Generate a lookup table of `(ID . HOURS) from a simulation's historic data.
+SIMULATION-START is day of simulation start and historic work will be clamped appropriately."
+  (loop
+   with simulation-start = (or simulation-start 0)
+   for (id . entries) in (--group-by
+                          (car it)
+                          (gantt-simulation-work-log simulation))
+   collect `(,id . ,(loop
+                     for (_ _ start end effort) in entries
+                     as end = (min end simulation-start)
+                     as effort = (pcase effort
+                                   ("" 1)
+                                   (_ effort))
+
+                     when (< start simulation-start) sum
+                     (* (- end start) (or effort 1))))))
+
 ;;;###autoload
 (cl-defun gantt-simulate (simulation)
-  (gantt-simulation--calculate-blockers simulation)
+  (let ((projects (gantt-simulation-projects simulation))
+        (resource-data (gantt-simulation-resources simulation))
+        (simulation-start-day (or (gantt-simulation-simulation-start simulation) 0))
+        projects-completed)
 
-  (setf
-   (gantt-simulation-projects simulation)
-   (loop
-    with projects = (gantt-simulation-projects simulation)
-    with resource-data = (gantt-simulation-resources simulation)
-    with projects-remaining = (length projects)
-    with active-resources = (make-hash-table :test 'equal)
-    with projects-completed
+    (gantt-simulation--calculate-blockers simulation)
 
-    for day upfrom 0 to 100
-
-    while (> projects-remaining 0) do
+    ;; Reduce all projects days by any historical efforts
     (loop
+     with historic-work = (gantt-simulation--calculate-historic-work simulation simulation-start-day)
+
      for proj in projects
-
      as id = (gantt-project-id proj)
-     as started = (gantt-project-started proj)
-     as ended = (gantt-project-ended proj)
+     as previous-effort = (cdr (assoc id historic-work))
 
-     as resources = (gantt-project-resources proj)
-     as available-resources = (--remove (gethash it active-resources) resources)
+     when previous-effort do
+     (decf (gantt-project-work-remaining proj) previous-effort)
 
-     as dependencies = (gantt-project-dependencies proj)
-     as dependencies-met = (or (not dependencies)
-                               (--all? (member it projects-completed) dependencies))
-     as start-blocker = (gantt-project-start-blocker proj)
-     as blocked-externally = (and start-blocker
-                                  (< day (cdr start-blocker)))
+     when (<= (gantt-project-work-remaining proj) 0) do
+     (progn
+       (push id projects-completed)
 
-     ;; Handle starting based on resources
-     when (and (not started)
-               (not blocked-externally)
-               (or (not resources)
-                   (> (length available-resources) 0)))
-     do
+       ;; NOTE: These are actually just dummy values to suppress their simulation
+       ;; .They could instead be kept out of the simulation in some other way (maybe with another flag?)
+       (setf (gantt-project-started proj) simulation-start-day
+             (gantt-project-ended proj) simulation-start-day)))
+
+    ;; Project simulation
+    (setf
+     (gantt-simulation-projects simulation)
      (loop
-      with resource-log
-      for res in available-resources do
-      (puthash res id active-resources)
+      with active-resources = (make-hash-table :test 'equal)
 
-      collect `(,res . ,day) into resource-log
+      for day from simulation-start-day to 100
+      as projects-remaining = (- (length projects) (length projects-completed))
 
-      finally do
-      (setf (gantt-project-started proj) day
-            (gantt-project-resource-log proj) resource-log))
+      while (> projects-remaining 0) do
+      (loop
+       for proj in projects
 
-     when (and started (not ended) dependencies-met) do
-     (let* ((remaining (gantt-project-work-remaining proj))
-            (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
-            (dev-power (gantt-calculate-resource-power resource-data devs))
-            (new-remaining (- remaining dev-power)))
+       as id = (gantt-project-id proj)
+       as started = (gantt-project-started proj)
+       as ended = (gantt-project-ended proj)
 
-       ;; Detect and log added resources
+       as resources = (gantt-project-resources proj)
+       as available-resources = (--remove (gethash it active-resources) resources)
+
+       as dependencies = (gantt-project-dependencies proj)
+       as dependencies-met = (or (not dependencies)
+                                 (--all? (member it projects-completed) dependencies))
+       as start-blocker = (gantt-project-start-blocker proj)
+       as blocked-externally = (and start-blocker
+                                    (< day (cdr start-blocker)))
+       as remaining = (gantt-project-work-remaining proj)
+
+       ;; Handle starting based on resources
+       when (and (not started)
+                 (> remaining 0)
+                 dependencies-met
+                 (not blocked-externally)
+                 (or (not resources)
+                     (> (length available-resources) 0)))
+       do
        (loop
-        for res in devs
-        as log = (gantt-project-resource-log proj)
-        unless (assoc res log 'equal) do
-        (progn
-          (puthash res id active-resources)
-          (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
+        with resource-log
+        for res in available-resources do
+        (puthash res id active-resources)
 
-       ;; Decrement remaining work
-       (setf (gantt-project-work-remaining proj) new-remaining)
-       (when (<= new-remaining 0)
-         ;; Free resources
+        collect `(,res . ,day) into resource-log
+
+        finally do
+        (setf (gantt-project-started proj) day
+              (gantt-project-resource-log proj) resource-log))
+
+       ;; Step project simulation
+       when (and started (not ended) dependencies-met) do
+       (let* ((remaining (gantt-project-work-remaining proj))
+              (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
+              (dev-power (gantt-calculate-resource-power resource-data devs))
+              (new-remaining (- remaining dev-power)))
+
+         ;; Detect and log added resources
          (loop
-          for res in resources
-          as on-project = (equal (gethash res active-resources) id)
+          for res in devs
+          as log = (gantt-project-resource-log proj)
+          unless (assoc res log 'equal) do
+          (progn
+            (puthash res id active-resources)
+            (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
 
-          when on-project do
-          (puthash res nil active-resources))
+         ;; Decrement remaining work
+         (setf (gantt-project-work-remaining proj) new-remaining)
+         (when (<= new-remaining 0)
+           ;; Free resources
+           (loop
+            for res in resources
+            as on-project = (equal (gethash res active-resources) id)
 
-         (decf projects-remaining)
-         (push id projects-completed)
-         (setf (gantt-project-ended proj) day))))
+            when on-project do
+            (puthash res nil active-resources))
 
-    finally return
-    (--sort
-     (let ((it-start (gantt-project-started it))
-           (it-end (gantt-project-ended it))
-           (other-start (gantt-project-started other))
-           (other-end (gantt-project-ended other)))
-       (if (= it-start other-start)
-           (< it-end other-end)
-         (< it-start other-start)))
-     projects)))
-  simulation)
+           (push id projects-completed)
+           (setf (gantt-project-ended proj) day))))
+
+      finally return
+      (--sort
+       (let ((it-start (or (gantt-project-started it) 0))
+             (it-end (or (gantt-project-ended it) 1000))
+             (other-start (or (gantt-project-started other) 0))
+             (other-end (or (gantt-project-ended other) 1000)))
+         (if (= it-start other-start)
+             (< it-end other-end)
+           (< it-start other-start)))
+       projects)))
+    simulation))
 
 (cl-defun gantt-calculate-resource-power (resource-data devs)
   (loop
@@ -211,19 +289,30 @@
    as commitment = (cadr (assoc d resource-data))
    sum (or commitment 1)))
 
-(cl-defun gantt-table-to-simulation (&key projects resources externals start-date)
+(cl-defun gantt-table-to-simulation (&key projects resources externals work-log start-date current-date)
   (make-gantt-simulation
    :resources (cdr resources)
    :externals (cdr externals)
+   :work-log (cdr work-log)
    :start-date start-date
+   :simulation-start (if current-date
+                         (gantt-date-to-day start-date current-date)
+                       0)
 
    :projects
    (cl-loop
     with data = (cdr projects)
-    for (key name days confidence actual deps resources blockers . rest) in data
+    for (key name days confidence adjustment deps resources blockers started completed . rest) in data
     as dependencies = (s-split "" deps t)
     as resources = (s-split " " resources t)
-    as blockers = (s-split " " blockers)
+    as blockers = (s-split " " blockers t)
+    as adjustment = (pcase adjustment
+                      ((pred stringp)
+                       (when (not (string-empty-p adjustment))
+                         (cl-parse-integer adjustment)))
+                      (_ adjustment))
+    as actual-started = (unless (string-empty-p started) (gantt-date-to-day start-date started))
+    as actual-ended = (unless (string-empty-p completed) (gantt-date-to-day start-date completed))
 
     unless (s-match "[!^_$#*/]" key)
     collect
@@ -232,22 +321,27 @@
      :name name
      :work days
      :confidence confidence
+     :adjustment adjustment
      :dependencies dependencies
      :resources resources
      :blockers blockers
+     :actual-started actual-started
+     :actual-ended actual-ended
      :user-data rest
 
-     :work-remaining days
+     :work-remaining (+ days (or adjustment 0))
      :resource-log nil))))
 
 ;;;###autoload
-(cl-defun gantt-simulate-from-table (data &key resources externals start-date)
+(cl-defun gantt-simulate-from-table (data &key resources externals work-log start-date current-date)
   (gantt-simulate
    (gantt-table-to-simulation
     :projects data
     :resources resources
     :externals externals
-    :start-date start-date)))
+    :work-log work-log
+    :start-date start-date
+    :current-date current-date)))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-table (simulation)
@@ -266,17 +360,19 @@
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
-  (let (blockers)
+  (let ((simulation-start (gantt-simulation-simulation-start simulation))
+        blockers)
     (apply
      'rysco-plot
      `((:unset key)
        (:data gantt ,@(loop
                        for i upfrom 1
-                       for proj in (gantt-simulation-projects simulation) collect
-                       (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
-                         (when start-blocker
-                           (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
-                         `(,started ,i ,(- (or ended 0) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))))
+                       for proj in (gantt-simulation-projects simulation)
+                       as entry = (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
+                                    (when start-blocker
+                                      (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
+                                    `(,started ,i ,(- (or ended 100) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
+                       when entry collect entry))
 
        (:data blockers ,@blockers)
 
@@ -284,11 +380,12 @@
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw 3 lc "#Eedd82")
-       (:set style arrow 2 nohead lw 20 lc "#8deeee")
-       (:set style arrow 3 lw 3 lc "#8b008b")
+       (:set style arrow 1 nohead lw 3 lc "#Eedd82") ;Period boundaries
+       (:set style arrow 2 nohead lw 20 lc "#8deeee") ;Projects
+       (:set style arrow 3 filled lw 3 lc "#8b008b") ;External blockers
 
        (:set arrow 1 from (60 0) to (60 ,(length projects)) as 1)
+       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,(length projects)) as 1)
 
        (:set yrange [,(length projects) 0])
        (:set grid x y)
@@ -325,6 +422,7 @@
 ;;;###autoload
 (cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
   (let* ((data (gantt-generate-resource-log simulation))
+         (simulation-start (gantt-simulation-simulation-start simulation))
          (height (1+ (length data)))
         project-count)
     (apply
@@ -333,21 +431,26 @@
 
        (:data gantt ,@(loop
                        with project-colors = (make-hash-table :test 'equal)
-                       with next-project-id = 3
+                       with next-style-id = 3
 
                        for i upfrom 1
                        for (res . log) in data append
                        (loop for (_ proj start end) in log
-                             as project-id = (gantt-project-name proj)
                              as project-name = (gantt-project-name proj)
-                             as style-id = (gethash project-id project-colors)
+                             as style-id = (gethash project-name project-colors)
+                             as size = (- (or end 100) start)
 
                              unless style-id do
-                             (setq style-id (puthash project-id next-project-id project-colors)
-                                   next-project-id (1+ next-project-id))
+                             (setq style-id (puthash project-name next-style-id project-colors)
+                                   next-style-id (1+ next-style-id))
 
                              collect
-                             `(,start ,i ,(- end start) 0 ,project-name ,res ,style-id))
+                             `(,start
+                               ,i
+                               ,size 0
+                               ,(if (> size 5) project-name "")
+                               ,res
+                               ,style-id))
                        finally do (setq project-count (hash-table-count project-colors))))
 
        (:set :border lc "white")
@@ -364,6 +467,7 @@
           `(:set style arrow ,(+ i 3) nohead lw 30 lc ,color))
 
        (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
 
        (:set yrange [,height 0])
        (:set grid x y)
@@ -389,7 +493,7 @@
        (:set rmargin 5)
        (:set bmargin 5)
 
-       (:plot [* *]
+       (:plot [0 *]
               (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
               (:labels :data gantt :using [1 2 5] :options (:left :font ",20")))
        )
