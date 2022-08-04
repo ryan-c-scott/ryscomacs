@@ -38,6 +38,14 @@ Additionally, in Emacs >= 27, you can add `.emacs.d/early-init.el` which will ru
 
 An example file is in `example/early-init.el`.
 
+### Windows Users
+In order to support symlink creation, used by Straight.el, on Windows, a security policy must be changed.
+To quote Straight.el's documentation:
+
+``` text
+Your user-account needs to be assigned the right to create symbolic links. To do so, run "secpol.msc" and in "Local Policies → User Rights Assignment" assign the right to "Create symbolic links" to your user-account.
+```
+
 ## Lead Key
 Ryscomacs is designed to utilize a lead key for doing window splitting and other frequently used commands.  This can help to disambiguate special ryscomacs functionality from modes or emacs in general.
 
