@@ -61,7 +61,7 @@
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
     ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
-    ("tr" "Clock in Last" bluedot-org-clock-in-last)
+    ("ti" "Clock in Last" bluedot-org-clock-in-last)
     ("tj" "Jump to Clock" bluedot-org-jump-to-clock)]
 
    ["Data Store"
