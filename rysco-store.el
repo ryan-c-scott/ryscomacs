@@ -27,14 +27,6 @@
   (interactive)
   (dired rysco-store-directory))
 
-(defun rysco-store-create-file-name (title)
-  (convert-standard-filename
-   (expand-file-name
-    (format "%s/%s-%s.org"
-            rysco-store-directory
-            (format-time-string "%Y%m%d")
-            (s-replace "/" "-" title)))))
-
 (defun rysco-store-location ()
   (let* (existing-node
          (title (funcall-interactively
@@ -53,9 +45,9 @@
       (find-file
        (if existing-node
            title
-         (rysco-store-create-file-name
-          (setq rysco-store-last-entry-name
-                (read-string "Confirm: " title))))))))
+         (setq rysco-store-last-entry-name
+                (read-string "Confirm: " title))
+         (expand-file-name "db.org" rysco-store-directory))))))
 
 (defmacro with-store-directory (&rest forms)
   "Lexically binds `org-directory' to `rysco-store-directory' and executes FORMS"
@@ -102,15 +94,6 @@
   (interactive)
   (org-id-update-id-locations
    (directory-files-recursively rysco-store-directory ".org")))
-
-;;;###autoload
-(defun rysco-store-load ()
-  "Helper function to force loading of store for org-ql based querying.
-This function is only useful for when things go wrong and org-ql queries are failing and will eventually
-not be needed"
-  (interactive)
-  ;; HACK: Executing this query seems to resolve issues with loading
-  (rysco-store-get-books))
 
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
@@ -319,7 +302,7 @@ not be needed"
    ;; Only create initial node if it doesn't exist
    unless node do
    (setq marker
-         (with-current-buffer (find-file (rysco-store-create-file-name title))
+         (with-current-buffer (find-file (expand-file-name "kindle.org" rysco-store-directory))
            (insert
             (org-element-interpret-data
              `((headline
