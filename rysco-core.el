@@ -29,7 +29,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
 (defvar rysco-fancy-modeline nil)
-(defvar rysco-fancy-modeline-theme 'ocodo-minimal-light-smt)
 (defvar rysco-theme nil)
 (defvar rysco-capslock-mapped nil)
 (defvar rysco-ssh-config-directories nil)
@@ -89,7 +88,6 @@
  markdown-mode
  memoize
  multiple-cursors
- ocodo-svg-modelines
  php-mode
  doom-modeline
  projectile
@@ -757,20 +755,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline
-(if (and rysco-fancy-modeline (image-type-available-p 'svg))
-    (progn
-      ;; Fancy SVG based mode lines
-      (require 'svg-mode-line-themes)
-      (smt/enable)
-      (set-face-attribute 'mode-line nil :box nil)
-      (set-face-attribute 'mode-line-inactive nil :box nil)
-
-      (require 'ocodo-svg-modelines)
-      (ocodo-svg-modelines-init)
-      (smt/set-theme rysco-fancy-modeline-theme))
-
-  (require 'rysco-modeline)
-  (rysco-modeline))
+(require 'rysco-modeline)
+(rysco-modeline)
 
 ;; Suppress colors being saved/restored with desktops
 (push '(background-color . :never) frameset-filter-alist)
