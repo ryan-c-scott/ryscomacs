@@ -187,35 +187,35 @@
 
 (defun rysco-org-agenda-insert-status (&rest _)
   (interactive)
-
   (save-excursion
-    (rysco-org-agenda-goto-first-section)
-    (forward-line -2)
-
     (when rysco-org-agenda-status-overlay
       (setq rysco-org-agenda-status-overlay
             (delete-overlay rysco-org-agenda-status-overlay)))
 
-    (setq rysco-org-agenda-status-overlay
-          (make-overlay (point) (+ (point) 2)))
+    (rysco-org-agenda-goto-first-section)
+    (forward-line -2)
 
-    (let* ((show-status (= (or (get-char-property 1 'org-last-args) 0) 0))
-           (status (and show-status (rysco-org-agenda-get-projects)))
-           (buffer-read-only nil)
-           (status-overlay rysco-org-agenda-status-overlay)
-           (col-count rysco-org-agenda-columns)
-           (margin-col rysco-org-agenda-margin-col)
-           (margin-col-str (make-string margin-col ?\s))
-           (margin-left rysco-org-agenda-margin-left)
-           (margin-left-str (concat "\n" (make-string margin-left ?\s)))
-           (margin-right-str ""))
+    (unless org-agenda-current-span
+      (setq rysco-org-agenda-status-overlay
+            (make-overlay (point) (+ (point) 2)))
 
-      (overlay-put rysco-org-agenda-status-overlay 'invisible t)
-      (overlay-put rysco-org-agenda-status-overlay 'display
-                   'rysco-org-agenda-status-title)
+      (let* ((show-status (= (or (get-char-property 1 'org-last-args) 0) 0))
+             (status (and show-status (rysco-org-agenda-get-projects)))
+             (buffer-read-only nil)
+             (status-overlay rysco-org-agenda-status-overlay)
+             (col-count rysco-org-agenda-columns)
+             (margin-col rysco-org-agenda-margin-col)
+             (margin-col-str (make-string margin-col ?\s))
+             (margin-left rysco-org-agenda-margin-left)
+             (margin-left-str (concat "\n" (make-string margin-left ?\s)))
+             (margin-right-str ""))
 
-      (overlay-put
-       rysco-org-agenda-status-overlay 'before-string
+        (overlay-put rysco-org-agenda-status-overlay 'invisible t)
+        (overlay-put rysco-org-agenda-status-overlay 'display
+                     'rysco-org-agenda-status-title)
+
+        (overlay-put
+         rysco-org-agenda-status-overlay 'before-string
          (concat
           (when show-status
             (loop
@@ -235,7 +235,7 @@
 
              when (= col (1- col-count)) concat margin-right-str))
 
-          "\n\n")))))
+          "\n\n"))))))
 
 ;;;###autoload
 (defun rysco-agenda-project-header (str)
