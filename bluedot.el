@@ -74,6 +74,10 @@
   "Face to serve as the base for modeline display"
   :type 'face)
 
+(defcustom bluedot-clocked-org-todo-states '("NOW")
+  "States which will not cause the active clock to be stopped for an entry"
+  :type 'sexp)
+
 (defvar bluedot-bar-characters nil)
 
 (require 'which-func)
@@ -261,6 +265,30 @@
   (unless (org-clocking-p)
     (org-clock-in-last 1)))
 
+(defun bluedot-org-clock-out-if-current ()
+  "Detects whether current entry is the running clock and clocks out if so.
+
+Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
+  (when (and (org-clocking-p)
+	     org-clock-out-when-done
+	     (marker-buffer org-clock-marker)
+	     (equal (or (buffer-base-buffer (org-clocking-buffer))
+			(org-clocking-buffer))
+		    (or (buffer-base-buffer (current-buffer))
+			(current-buffer)))
+	     (< (point) org-clock-marker)
+	     (> (org-with-wide-buffer (org-entry-end-position))
+		org-clock-marker))
+    ;; Clock out, but don't accept a logging message for this.
+    (let ((org-log-note-clock-out nil)
+	  (org-clock-out-switch-to-state nil))
+      (org-clock-out))))
+
+(defun bluedot-org-todo-change ()
+  (when (org-clocking-p)
+    (unless (member org-state bluedot-clocked-org-todo-states)
+      (bluedot-org-clock-out-if-current))))
+
 ;;;###autoload
 (defun bluedot-enable (enable)
   (if enable
@@ -268,12 +296,14 @@
         (add-hook 'org-clock-in-hook 'bluedot-org-clock-in)
         (add-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
         (add-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
+        (add-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
         (add-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
         (advice-add 'org-clock-update-mode-line :after 'bluedot--update-current-bar))
 
     (remove-hook 'org-clock-in-hook 'bluedot-org-clock-in)
     (remove-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
     (remove-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
+    (remove-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
     (remove-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
     (advice-remove 'org-clock-update-mode-line 'bluedot--update-current-bar)))
 
