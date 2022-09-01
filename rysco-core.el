@@ -299,10 +299,6 @@
                :todo "NOW"
                :transformer rysco-agenda-project-header
                :order 0)
-        (:name "WAITING"
-               :todo "WAITING"
-               :transformer rysco-agenda-project-header
-               :order 6)
         (:name "Due Today"
                :deadline today
                :transformer rysco-agenda-project-header
@@ -311,14 +307,18 @@
                :deadline t
                :transformer rysco-agenda-project-header
                :order 0)
-        (:name "Important"
-               :priority "A"
+        (:name "WAITING"
+               :todo "WAITING"
                :transformer rysco-agenda-project-header
-               :order 0)
+               :order 1)
         (:name "NEXT"
                :todo "NEXT"
                :transformer rysco-agenda-project-header
                :order 0)
+        (:name "Priority"
+               :priority ("A" "B" "C")
+               :transformer rysco-agenda-project-header
+               :order 2)
         (:todo "INACTIVE"
                :order 8)
         (:auto-property "ProjectId"
