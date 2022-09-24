@@ -3,29 +3,42 @@
 (defvar rysco-store-last-entry-name "")
 (defvar rysco-store-templates nil)
 (defvar rysco-store-templates--processed nil)
-(defvar rysco-store-directory (concat org-directory "store"))
+
+(defvar rysco-store-directories `(,(concat org-directory "store")))
+(defvar rysco-store-default-capture-file (expand-file-name "db.org" (concat org-directory "store")))
+(defvar rysco-store-kindle-vocab-file nil)
+(defvar rysco-store-kindle-file nil)
 
 (defvar-local rysco-store-insert-after-capture nil)
 
 ;;;###autoload
-(defun rysco-store-load-templates (&optional dir)
+(defun rysco-store-load-templates ()
   (interactive)
-  (let ((dir (or dir (expand-file-name (concat rysco-store-directory "/templates")))))
-    (cl-loop
-     for (key nice-name template) in rysco-store-templates
-     as capture-template = `(,key ,(concat "[store] " nice-name)
-                                  entry
-                                  (function rysco-store-location)
-                                  (file ,(expand-file-name template dir))
-                                  :create-id t)
-     do
-     (add-to-list 'org-capture-templates capture-template)
-     (add-to-list 'rysco-store-templates--processed capture-template))))
+  (cl-loop
+   for (dir . store-templates) in rysco-store-templates do
+   (cl-loop
+    for (key nice-name template) in store-templates
+    as capture-template = `(,key ,(concat "[store] " nice-name)
+                                 entry
+                                 (function rysco-store-location)
+                                 (file ,(expand-file-name template dir))
+                                 :create-id t
+                                 :add-timestamp t)
+    do
+    (add-to-list 'org-capture-templates capture-template)
+    (add-to-list 'rysco-store-templates--processed capture-template))))
+
+(setq org-capture-templates nil
+      rysco-store-templates--processed nil)
 
 ;;;###autoload
 (defun rysco-store-directory-dired ()
   (interactive)
-  (dired rysco-store-directory))
+  (helm :sources
+        (helm-build-sync-source "Store Directories"
+          :candidates rysco-store-directories
+          :action `(("Dired" . ,(lambda (&rest dir)
+                                  (dired dir)))))))
 
 (defun rysco-store-location ()
   (let* (existing-node
@@ -33,26 +46,23 @@
                  'helm-rysco-store-ql
                  :name "Knowledge Store Query"
                  :actions `(("Use Existing" . ,(lambda (marker)
-                                                 (setq existing-node t)
+                                                 (setq existing-node marker)
                                                  (buffer-file-name (marker-buffer marker)))))
                  :sources `(,(helm-build-dummy-source "Custom")))))
 
     (if (eq helm-exit-status 1)
         (keyboard-quit)
 
-      ;; TODO: Existing node behavior
+      (setq rysco-store-last-entry-name nil)
 
       (find-file
        (if existing-node
            title
          (setq rysco-store-last-entry-name
                 (read-string "Confirm: " title))
-         (expand-file-name "db.org" rysco-store-directory))))))
+         rysco-store-default-capture-file))
 
-(defmacro with-store-directory (&rest forms)
-  "Lexically binds `org-directory' to `rysco-store-directory' and executes FORMS"
-  `(let ((org-directory rysco-store-directory))
-     ,@forms))
+      (goto-char (or existing-node (point-max))))))
 
 (defmacro rysco-store--with-buffer-at-marker (marker &rest body)
   (declare (indent defun) (debug (form body)))
@@ -64,13 +74,25 @@
 ;;;###autoload
 (defun rysco-store-backlinks ()
   (interactive)
-  (with-store-directory
-   (funcall-interactively 'org-sidebar-backlinks)))
+  "See: `org-sidebar-backlinks'."
+  (interactive)
+  (let* ((id (org-entry-get (point) "ID"))
+         (custom-id (org-entry-get (point) "CUSTOM_ID"))
+         ;; FIXME: Do CUSTOM_ID links also have an "id:" prefix?
+         (query (cond ((and id custom-id)
+                       ;; This will be slow because it isn't optimized to a single regexp.  :(
+                       (warn "Entry has both ID and CUSTOM_ID set; query will be slow")
+                       `(or (link :target ,(concat "id:" id))
+                            (link :target ,(concat "id:" custom-id))))
+                      ((or id custom-id)
+                       `(link :target ,(concat "id:" (or id custom-id))))
+                      (t (error "Entry has no ID nor CUSTOM_ID property")))))
+    (org-sidebar-ql (org-ql-search-directories-files :directories rysco-store-directories)
+      query :title (concat "Links to: " (org-get-heading t t)))))
 
 (defun rysco-store-query ()
   (interactive)
-  (with-store-directory
-   (funcall-interactively 'org-sidebar-ql)))
+  (funcall-interactively 'org-sidebar-ql :directories rysco-store-directories))
 
 ;;;###autoload
 (defun rysco-store-create-and-insert ()
@@ -92,21 +114,22 @@
 (defun rysco-store-rebuild-links ()
   "Helper function to rebuild org ID database using `org-id-update-id-locations'"
   (interactive)
-  (org-id-update-id-locations
-   (directory-files-recursively rysco-store-directory ".org")))
+  (cl-loop
+   for dir in rysco-store-directories do
+   (org-id-update-id-locations
+    (directory-files-recursively dir ".org"))))
 
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
-  (interactive (list (current-buffer)))
-  (with-store-directory
-   (let ((boolean (if current-prefix-arg 'or boolean))
-         (helm-input-idle-delay helm-org-ql-input-idle-delay)
-         (helm-org-ql-actions actions)
-         (buffers-files (or buffers-files (org-ql-search-directories-files))))
+  (interactive)
+  (let ((boolean (if current-prefix-arg 'or boolean))
+        (helm-input-idle-delay helm-org-ql-input-idle-delay)
+        (helm-org-ql-actions actions)
+        (buffers-files (or buffers-files (org-ql-search-directories-files :directories rysco-store-directories))))
 
-     (helm :prompt (format "Query (boolean %s): " (-> boolean symbol-name upcase))
-           :sources `(,@sources
-                      ,(helm-org-ql-source buffers-files :name name))))))
+    (helm :prompt (format "Query (boolean %s): " (-> boolean symbol-name upcase))
+          :sources `(,@sources
+                     ,(helm-org-ql-source buffers-files :name name)))))
 
 (defun helm-rysco-store--insert-candidates (&optional _)
   (rysco-store--insert-links (helm-marked-candidates :all-sources t)))
@@ -136,12 +159,17 @@
   (when (org-capture-get :create-id)
     (org-id-get-create)))
 
+(defun rysco-store-capture-add-timestamp ()
+  (when (org-capture-get :add-timestamp)
+    (org-set-property "CREATED" (format-time-string "%F"))))
+
 (defun rysco-store-post-capture ()
   (when (and rysco-store-insert-after-capture (not org-note-abort))
     (setq rysco-store-insert-after-capture nil)
     (rysco-store--insert-links `(,org-capture-last-stored-marker))))
 
 (add-hook 'org-capture-mode-hook #'rysco-store-capture-create-id)
+(add-hook 'org-capture-mode-hook #'rysco-store-capture-add-timestamp)
 (add-hook 'org-capture-after-finalize-hook 'rysco-store-post-capture)
 
 (defun helm-rysco-store--heading (window-width)
@@ -229,18 +257,17 @@
      finally return out)))
 
 (defun rysco-store-get-books ()
-  (with-store-directory
-   (loop
-    for book in (org-ql-select
-                  (org-ql-search-directories-files)
-                  '(tags-local "book")
-                  :action 'element-with-markers)
+  (loop
+   for book in (org-ql-select
+                 (org-ql-search-directories-files :directories rysco-store-directories)
+                 '(tags-local "book")
+                 :action 'element-with-markers)
 
-    as title = (car (org-element-property :title book))
-    as marker = (org-element-property :org-marker book)
-    collect
-    `(,(substring-no-properties title)
-      ,marker))))
+   as title = (car (org-element-property :title book))
+   as marker = (org-element-property :org-marker book)
+   collect
+   `(,(substring-no-properties title)
+     ,marker)))
 
 (defun rysco-store-kindle-get-books (location)
   (let* ((author-profiles (rysco-store-kindle-get-books-author-profiles (concat location "/documents")))
@@ -275,22 +302,25 @@
 
 (defun rysco-store-insert-vocab-kindle (location)
   (interactive "D")
-  (with-store-directory
-   (with-current-buffer (find-file (expand-file-name "kindle-vocab.org" org-directory))
-     (erase-buffer)
-     (insert
-      (org-element-interpret-data
-       `((headline
-          (:level 1 :title "Kindle Vocab" :tags ("vocab")))
 
-         ,@(loop
-            with vocab = (rysco-store-kindle-get-vocab-list (concat location "/system/vocabulary"))
-            for (group . words) in vocab collect
-            `((headline (:level 2 :title ,group))
-               ,@(loop
-                  for word in words collect
-                  `("  - "  ,word "\n"))
-               "\n"))))))))
+  (unless rysco-store-kindle-vocab-file
+    (error "`rysco-store-kindle-vocab-file' not set"))
+
+  (with-current-buffer (find-file rysco-store-kindle-vocab-file)
+    (erase-buffer)
+    (insert
+     (org-element-interpret-data
+      `((headline
+         (:level 1 :title "Kindle Vocab" :tags ("vocab")))
+
+        ,@(loop
+           with vocab = (rysco-store-kindle-get-vocab-list (concat location "/system/vocabulary"))
+           for (group . words) in vocab collect
+           `((headline (:level 2 :title ,group))
+             ,@(loop
+                for word in words collect
+                `("  - "  ,word "\n"))
+             "\n")))))))
 
 (defun rysco-store-insert-books-kindle (books)
   (loop
@@ -302,7 +332,7 @@
    ;; Only create initial node if it doesn't exist
    unless node do
    (setq marker
-         (with-current-buffer (find-file (expand-file-name "kindle.org" rysco-store-directory))
+         (with-current-buffer (find-file rysco-store-kindle-file)
            (insert
             (org-element-interpret-data
              `((headline
