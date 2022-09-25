@@ -142,7 +142,7 @@
     (when replacing
       (delete-region (region-beginning) (region-end)))
 
-    (loop
+    (cl-loop
      for this-link in markers do
      (insert (rysco-store-get-marker-link this-link) sep))))
 
@@ -187,7 +187,7 @@
 ;;;;;;;;;;;;;;;;;;;
 (defun rysco-store-kindle-get-books-vocab (location)
   (with-temp-buffer
-    (loop
+    (cl-loop
      with default-directory = location
      with raw = (shell-command "sqlite3 -readonly -separator \"    \" vocab.db \"select * from book_info;\"" t nil)
      with data = (s-split "\n" (buffer-string))
@@ -210,7 +210,7 @@
       t))))
 
 (defun rysco-store-kindle-get-books-author-profiles (location)
-  (loop
+  (cl-loop
    for f in (directory-files-recursively location "AuthorProfile.profile.*.asc$")
    as data = (progn
                (with-temp-buffer
@@ -230,7 +230,7 @@
 (defun rysco-store-kindle-extract-clippings (file)
   (with-temp-buffer
     (insert-file-contents (expand-file-name file))
-    (loop
+    (cl-loop
      with out = (make-hash-table :test 'equal)
 
      for raw in (s-split "==========" (buffer-string)) do
@@ -254,7 +254,7 @@
      finally return out)))
 
 (defun rysco-store-get-books ()
-  (loop
+  (cl-loop
    for book in (org-ql-select
                  (org-ql-search-directories-files :directories rysco-store-directories)
                  '(tags-local "book")
@@ -273,7 +273,7 @@
          matched
          (books (append
                  vocab
-                 (loop
+                 (cl-loop
                   for entry in author-profiles
                   for (id title author) in author-profiles
                   as existing = (assoc id vocab 'string=)
@@ -283,7 +283,7 @@
 
                  ;; Loop through the clippings and create entries for anything not matched above
                  ;; .Add "Clippings - " to the title
-                 (loop
+                 (cl-loop
                   for title being the hash-keys of clippings
                   as highlights = (gethash title clippings)
 
@@ -292,7 +292,7 @@
                  ))))
 
     ;; Inject highlights/notes
-    (loop
+    (cl-loop
      for (id title author highlights) in books
      as highlights = (or highlights (gethash title clippings))
      collect `(,id ,title ,author ,highlights))))
@@ -310,17 +310,17 @@
       `((headline
          (:level 1 :title "Kindle Vocab" :tags ("vocab")))
 
-        ,@(loop
+        ,@(cl-loop
            with vocab = (rysco-store-kindle-get-vocab-list (concat location "/system/vocabulary"))
            for (group . words) in vocab collect
            `((headline (:level 2 :title ,group))
-             ,@(loop
+             ,@(cl-loop
                 for word in words collect
                 `("  - "  ,word "\n"))
              "\n")))))))
 
 (defun rysco-store-insert-books-kindle (books)
-  (loop
+  (cl-loop
    with existing = (rysco-store-get-books)
    for (id title author highlights) in books
    as node = (assoc title existing)
@@ -369,7 +369,7 @@
 
            "\n"
 
-           ,@(loop
+           ,@(cl-loop
               for (type page location added text) in highlights
               as timestamp = (format-time-string
                               "%Y-%m-%d:%H:%M"
