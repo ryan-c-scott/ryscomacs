@@ -61,6 +61,9 @@
 
       (goto-char (or existing-node (point-max))))))
 
+(defun rysco-store-existing-directories (directories)
+  (-filter #'f-exists? directories))
+
 (defmacro rysco-store--with-buffer-at-marker (marker &rest body)
   (declare (indent defun) (debug (form body)))
   `(with-current-buffer (marker-buffer ,marker)
@@ -84,12 +87,12 @@
                       ((or id custom-id)
                        `(link :target ,(concat "id:" (or id custom-id))))
                       (t (error "Entry has no ID nor CUSTOM_ID property")))))
-    (org-sidebar-ql (org-ql-search-directories-files :directories rysco-store-directories)
+    (org-sidebar-ql (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))
       query :title (concat "Links to: " (org-get-heading t t)))))
 
 (defun rysco-store-query ()
   (interactive)
-  (funcall-interactively 'org-sidebar-ql :directories rysco-store-directories))
+  (funcall-interactively 'org-sidebar-ql :directories (rysco-store-existing-directories rysco-store-directories)))
 
 ;;;###autoload
 (defun rysco-store-create-and-insert ()
@@ -112,7 +115,7 @@
   "Helper function to rebuild org ID database using `org-id-update-id-locations'"
   (interactive)
   (cl-loop
-   for dir in rysco-store-directories do
+   for dir in (rysco-store-existing-directories rysco-store-directories) do
    (org-id-update-id-locations
     (directory-files-recursively dir ".org"))))
 
@@ -122,7 +125,7 @@
   (let ((boolean (if current-prefix-arg 'or boolean))
         (helm-input-idle-delay helm-org-ql-input-idle-delay)
         (helm-org-ql-actions actions)
-        (buffers-files (or buffers-files (org-ql-search-directories-files :directories rysco-store-directories))))
+        (buffers-files (or buffers-files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories)))))
 
     (helm :prompt (format "Query (boolean %s): " (-> boolean symbol-name upcase))
           :sources `(,@sources
@@ -256,7 +259,7 @@
 (defun rysco-store-get-books ()
   (cl-loop
    for book in (org-ql-select
-                 (org-ql-search-directories-files :directories rysco-store-directories)
+                 (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))
                  '(tags-local "book")
                  :action 'element-with-markers)
 
