@@ -28,9 +28,6 @@
     (add-to-list 'org-capture-templates capture-template)
     (add-to-list 'rysco-store-templates--processed capture-template))))
 
-(setq org-capture-templates nil
-      rysco-store-templates--processed nil)
-
 ;;;###autoload
 (defun rysco-store-directory-dired ()
   (interactive)
