@@ -17,13 +17,14 @@
   (cl-loop
    for (dir . store-templates) in rysco-store-templates do
    (cl-loop
-    for (key nice-name template) in store-templates
+    for (key nice-name template . rest) in store-templates
     as capture-template = `(,key ,(concat "[store] " nice-name)
                                  entry
                                  (function rysco-store-location)
                                  (file ,(expand-file-name template dir))
                                  :create-id t
-                                 :add-timestamp t)
+                                 :add-timestamp t
+                                 ,@rest)
     do
     (add-to-list 'org-capture-templates capture-template)
     (add-to-list 'rysco-store-templates--processed capture-template))))
@@ -39,6 +40,7 @@
 
 (defun rysco-store-location ()
   (let* (existing-node
+         (template-target (org-capture-get :target-file))
          (title (funcall-interactively
                  'helm-rysco-store-ql
                  :name "Knowledge Store Query"
@@ -57,7 +59,7 @@
            title
          (setq rysco-store-last-entry-name
                 (read-string "Confirm: " title))
-         rysco-store-default-capture-file))
+         (or template-target rysco-store-default-capture-file)))
 
       (goto-char (or existing-node (point-max))))))
 
