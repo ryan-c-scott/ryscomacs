@@ -68,6 +68,7 @@
     :setup-children rysco-transient--wrap-children
     ("sq" "Query" helm-rysco-store-query)
     ("sd" "Dired" rysco-store-directory-dired)
+    ("sl" "Last captured" org-capture-goto-last-stored)
     ("sr" "HACK: Rebuild links" rysco-store-rebuild-links)]
 
    ["Describe"
