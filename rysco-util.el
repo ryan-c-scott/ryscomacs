@@ -95,7 +95,9 @@
 (cl-defun rysco-kill-buffer-and-frame ()
   (interactive)
   (kill-buffer (current-buffer))
-  (delete-frame))
+  (if (delete-frame-enabled-p)
+      (delete-frame nil t)
+    (save-buffers-kill-terminal)))
 
 (defun rysco-comment-dwim (arg)
   ""
