@@ -132,8 +132,17 @@
        ,@body)))
 
 (cl-defmacro rysco-org-agenda-files (&rest forms)
+  (let ((files (apply 'rysco-flat-concat forms)))
+    `(setq rysco-agenda-files
+           ',files
+           org-agenda-files
+           ',files)))
+
+(defmacro rysco-filter-agenda (&optional form)
   `(setq org-agenda-files
-         ',(apply 'rysco-flat-concat forms)))
+         ,(if (not form)
+              'rysco-agenda-files
+            `(--remove ,form rysco-agenda-files))))
 
 (cl-defmacro rysco-configure-gcal (client-id client-secret &rest calendars)
   (cl-loop

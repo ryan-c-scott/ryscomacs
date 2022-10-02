@@ -28,7 +28,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
-(defvar rysco-fancy-modeline nil)
+(defvar rysco-agenda-files nil)
 (defvar rysco-theme nil)
 (defvar rysco-capslock-mapped nil)
 (defvar rysco-ssh-config-directories nil)
