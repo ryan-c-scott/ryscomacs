@@ -152,9 +152,9 @@
    ["Exit"
     ("<return>" "Exit" transient-quit-all)]]
 
-  (lambda ()
-    (interactive)
-    (transient-setup 'rysco-mc-transient)
+  (interactive)
+  (transient-setup 'rysco-mc-transient)
+  (unless multiple-cursors-mode
     (with-current-buffer transient--original-buffer
       (call-interactively 'mc/mark-next-like-this))))
 
