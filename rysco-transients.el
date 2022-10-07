@@ -88,7 +88,8 @@
     ("ut" "Themes" rysco-load-theme)
     ("ud" "Default Theme" rysco-load-theme-default)
     ("us" "Open Current Directory (OS)" rysco-dired-os-open-dir)
-    ("ur" "Agenda Rifle" helm-org-rifle-agenda-files)]
+    ("ur" "Agenda Rifle" helm-org-rifle-agenda-files)
+    ("ul" "Process List" proced)]
 
    ["Packages"
     :setup-children rysco-transient--wrap-children
