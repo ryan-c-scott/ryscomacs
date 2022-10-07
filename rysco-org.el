@@ -162,6 +162,18 @@
   (goto-char (point-min))
   (org-agenda-next-item 1))
 
+(defun rysco-org-agenda-find-first-todo (state)
+  (save-excursion
+    (goto-char (point-min))
+    (cl-loop
+     with found
+     until (or found (eobp))
+     as todo-state = (org-get-at-bol 'todo-state)
+     do (if (equal todo-state state )
+            (setq found (point))
+          (forward-line))
+     finally return found)))
+
 (defun rysco-org-agenda--status-face (status)
   (pcase status
     ('ACTIVE 'rysco-org-agenda-status-active)
@@ -318,7 +330,9 @@
 
 (defun rysco-org-agenda-post-clock-in (&optional _)
   (org-agenda-redo-all)
-  (rysco-org-agenda-goto-first-section))
+  (--if-let (rysco-org-agenda-find-first-todo "NOW")
+      (goto-char it)
+    (rysco-org-agenda-goto-first-section)))
 
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
