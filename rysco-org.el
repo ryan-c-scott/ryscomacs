@@ -352,5 +352,43 @@
 
 (setq org-clock-heading-function 'rysco-org-clock-heading)
 
+(defun rysco-org-agenda-entry-text-show-here ()
+  "Add logbook from the entry as context to the current line."
+  (let (m txt o)
+    (setq m (org-get-at-bol 'org-hd-marker))
+    (unless (marker-buffer m)
+      (error "No marker points to an entry here"))
+    (setq txt
+          (concat
+           "\n"
+           (save-excursion
+             (with-current-buffer (marker-buffer m)
+               (org-with-wide-buffer
+                (goto-char m)
+                (-when-let* ((el (org-element-at-point))
+                             (begin (org-element-property :contents-begin el))
+                             (end (org-element-property :contents-end el))
+                             (content (buffer-substring begin end))
+                             (log (with-temp-buffer
+                                    (insert content)
+                                    (org-element-map (org-element-parse-buffer) 'drawer
+                                      (lambda (drawer)
+                                        (when (string= "LOGBOOK" (org-element-property :drawer-name drawer))
+                                          ;; TODO: Traverse drawer object and more meaningfully build a string
+                                          ;; .Treat clocks differently, etc.
+                                          (buffer-substring
+                                           (org-element-property :contents-begin drawer)
+                                           (org-element-property :contents-end drawer))))
+                                      nil t))))
+                  log))))))
+
+    (when (string-match "\\S-" txt)
+      (setq o (make-overlay (point-at-bol) (point-at-eol)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'org-overlay-type 'agenda-entry-content)
+      (overlay-put o 'after-string txt))))
+
+(advice-add 'org-agenda-entry-text-show-here :override 'rysco-org-agenda-entry-text-show-here)
+
 ;;
 (provide 'rysco-org)
