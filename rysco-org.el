@@ -374,11 +374,23 @@
                                     (org-element-map (org-element-parse-buffer) 'drawer
                                       (lambda (drawer)
                                         (when (string= "LOGBOOK" (org-element-property :drawer-name drawer))
-                                          ;; TODO: Traverse drawer object and more meaningfully build a string
-                                          ;; .Treat clocks differently, etc.
-                                          (buffer-substring
-                                           (org-element-property :contents-begin drawer)
-                                           (org-element-property :contents-end drawer))))
+                                          (let ((line-prefix "\t")
+                                                entries)
+                                            (org-element-map drawer org-element-all-elements
+                                              (lambda (el)
+                                                (--when-let
+                                                    (pcase (car el)
+                                                      ('clock)
+                                                      ('plain-list
+                                                       (concat
+                                                        line-prefix
+                                                        (s-replace
+                                                         "\n" (concat "\n" line-prefix)
+                                                       (buffer-substring
+                                                        (org-element-property :contents-begin el)
+                                                        (org-element-property :contents-end el))))))
+                                                  (push it entries))))
+                                            (apply 'concat (reverse entries)))))
                                       nil t))))
                   log))))))
 
