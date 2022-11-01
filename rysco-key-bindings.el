@@ -98,6 +98,7 @@
 
 (add-hook 'help-mode-hook 'rysco-help-movement-hook)
 (add-hook 'Info-mode-hook 'rysco-help-movement-hook)
+(add-hook 'helm-grep-mode-hook 'rysco-help-movement-hook)
 
 (with-eval-after-load 'org-colview
   (define-key org-columns-map "n" nil)
