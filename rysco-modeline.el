@@ -106,10 +106,13 @@
     (cl-loop
      for m in (s-split " " (format-mode-line minor-mode-alist))
      if (not (member m rysco-modeline-mode-blacklist)) collect
-     (s-replace-regexp
-      "Projectile\\[\\(.*\\):.*\\]"
-      "[\\1]"
-      m)))
+     (pcase m
+       ((rx "Projectile["
+            (let proj (* anything))
+            ":" (* anything) "]")
+        (concat "[" proj "]"))
+       ("tree-sitter" "ts")
+       (_ m))))
    'face current-face))
 
 (defsubst rysco-modeline-column ()
