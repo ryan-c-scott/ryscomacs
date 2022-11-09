@@ -454,7 +454,7 @@
    (all-the-icons-faicon "registered" :face `(:inherit rysco-main-transient-title :height 0.8 :underline nil))
    (propertize " Personal" 'face 'rysco-main-transient-title)))
 
-(define-transient-command rysco-personal-transient ()
+(transient-define-prefix rysco-personal-transient ()
   [:description (lambda () rysco-personal-transient-header) ""]
   [("<SPC>" "Main ➠" rysco-main-transient :transient nil)])
 

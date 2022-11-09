@@ -122,7 +122,7 @@
   [("<SPC>" "Personal ➠" rysco-personal-transient :transient nil)])
 
 ;; Magit integration
-(define-transient-command rysco-magit-transient ()
+(transient-define-prefix rysco-magit-transient ()
   "GitHub/Bitbucket helper transient for Magit"
   ["Goto"
    ("o" "Origin" rysco-magit-goto-origin)
