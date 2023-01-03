@@ -319,6 +319,9 @@
                :priority ("A" "B" "C")
                :transformer rysco-agenda-project-header
                :order 2)
+        (:name "Habits"
+               :habit t
+               :order 3)
         (:todo "INACTIVE"
                :order 8)
         (:auto-property "ProjectId"
@@ -357,6 +360,8 @@
       org-clock-out-when-done t
       org-clock-auto-clock-resolution 'when-no-clock-is-running
       org-clock-report-include-clocking-task t
+      org-habit-show-all-today t
+      org-habit-show-done-always-green t
       org-pretty-entities t
 
       whitespace-line-column nil
@@ -617,6 +622,8 @@
 (with-eval-after-load "org"
   (require 'org-refile)
   (require 'org-attach)
+
+  (add-to-list 'org-modules 'org-habit t)
 
   (rysco-store-load-templates)
 
