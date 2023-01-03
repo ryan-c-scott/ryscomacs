@@ -1118,5 +1118,44 @@ With prefix-arg prompt for type if available with your AG version."
        (url-copy-file
         url (expand-file-name file base-dir) t)))))
 
+(defun rysco-data-get-path (data path)
+  (cl-loop
+   with is-hash = (hash-table-p data)
+   with path = (if (stringp path)
+                   (s-split "/" path)
+                 path)
+   with data = data
+
+   ;; for key in path
+   while (and data path)
+   as key = (pop path)
+   do (pcase key
+        ;; Array collection
+        ("..."
+         ;; loop/recurse
+         (setq
+          data
+          (cl-loop
+           for el across data
+           collect (rysco-data-get-path el path)))
+
+         ;; clear path
+         (setq path nil))
+
+        ;; Current path
+        ("." data)
+
+        ;; Key/value collection
+        ((rx "[" (let fields (* any)) "]")
+         (setq
+          data
+          (cl-loop
+           for f in (s-split " " fields)
+           append
+           `(,(intern (format ":%s" f))
+             ,(gethash f data)))))
+        (_ (setq data (gethash key data))))
+   finally return data))
+
 ;;
 (provide 'rysco-util)
