@@ -979,7 +979,8 @@ With prefix-arg prompt for type if available with your AG version."
 (defun rysco-magit-host-type (host)
   (pcase host
     ("github.com" 'gh)
-    ("bitbucket.org" 'bb)))
+    ("bitbucket.org" 'bb)
+    (_ 'gh)))
 
 (defun rysco-magit-get-origin (&optional origin-url)
   (let ((origin-url (or origin-url (magit-get "remote" "origin" "url"))))
