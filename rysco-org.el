@@ -1,6 +1,8 @@
 (require 'org-agenda)
 (require 'helm)
 
+(defvar rysco-org-effective-time-override nil)
+
 (defvar rysco-org-refile-targets nil)
 (defvar rysco-org-agenda-status-overlay nil)
 (defvar rysco-org-agenda-status-count-code-base #x278a) ; ➊
@@ -401,6 +403,27 @@
       (overlay-put o 'after-string txt))))
 
 (advice-add 'org-agenda-entry-text-show-here :override 'rysco-org-agenda-entry-text-show-here)
+
+(defun rysco-org-current-effective-time-advice (func &rest rest)
+  (if rysco-org-effective-time-override
+      rysco-org-effective-time-override
+    (apply func rest)))
+
+(advice-add 'org-current-effective-time :around 'rysco-org-current-effective-time-advice)
+
+(defun rysco-org-todo-on-date (arg)
+  (interactive "P")
+  (let ((rysco-org-effective-time-override (org-read-date nil t)))
+    (pcase major-mode
+      ('org-mode (org-todo arg))
+      ('org-agenda-mode (org-agenda-todo arg)))))
+
+(defun rysco-org-todo-yesterday (arg)
+  (interactive "P")
+  (let ((rysco-org-effective-time-override (org-read-date nil t "-1")))
+    (pcase major-mode
+      ('org-mode (org-todo arg))
+      ('org-agenda-mode (org-agenda-todo arg)))))
 
 ;;
 (provide 'rysco-org)
