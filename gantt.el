@@ -304,17 +304,16 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
    else collect
    (pcase exp
      (`(after ,begin-date ,val)
-      `(when (date-after simulation-date ,(format "%s" begin-date))
+      `(when (string> simulation-date ,(format "%s" begin-date))
          (setq effort ,val)))
 
      (`(before ,end-date ,val)
-      `(when (date-before simulation-date ,(format "%s" begin-date))
+      `(when (string< simulation-date ,(format "%s" begin-date))
          (setq effort ,val)))
 
      (`(between ,begin-date ,end-date ,val)
-      `(when (date-between simulation-date
-                           ,(format "%s" begin-date)
-                           ,(format "%s" end-date))
+      `(when (and (string> simulation-date ,(format "%s" begin-date))
+                  (string< simulation-date ,(format "%s" end-date)))
          (setq effort ,val)))
 
      (_ 'ERROR))
@@ -323,18 +322,44 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
    finally return
    `(lambda (simulation-date)
       (let ((effort ,effort))
-      ,@conditional-effort))))
+        ,@conditional-effort
+        effort))))
 
 (cl-defun gantt-transform-projects (data)
   (cl-loop
-   for (id . proj) in data collect
-   `(,(format "%s" id)
-     )))
+   with projects = (make-hash-table :test 'equal)
+
+   for (id . proj) in data
+   as id = (format "%s" id)
+   as days = (plist-get proj :days)
+   as adjustment = (plist-get proj :adjustment)
+
+   do
+   (puthash
+    id
+    (make-gantt-project
+     :id id
+     :name (or (plist-get proj :name) id)
+     :work (plist-get proj :days)
+     :confidence (plist-get proj :confidence)
+     ;; :adjustment adjustment
+     ;; :dependencies dependencies
+     ;; :resources resources
+     ;; :blockers blockers
+     ;; :actual-started actual-started
+     ;; :actual-ended actual-ended
+     ;; :user-data rest
+
+     :work-remaining (+ days (or adjustment 0))
+     :resource-log nil)
+    projects)
+   finally return projects))
 
 (cl-defun gantt-transform-dev-project (proj)
   (pcase proj
     ((pred symbolp)
-     (format "%s" proj))
+     `(,(format "%s" proj)
+       :effort (lambda (simulation-date) 1.0)))
     (`(,id . ,proj-data)
      `(,(format "%s" id)
        :effort ,(gantt-transform-effort (plist-get proj-data :effort))))))
@@ -348,39 +373,61 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
      :projects
      ,(cl-loop
        for proj in (plist-get dev :projects) collect
-       (gantt-transform-dev-project proj))
-     )))
+       (gantt-transform-dev-project proj)))))
 
-(cl-defmacro gantt-derive-dev-form (&rest forms)
+(cl-defmacro gantt-derive-dev-form (start-date &rest forms)
   (let ((projects (plist-get forms :projects))
         (devs (plist-get forms :devs)))
 
     `(let ((projects ,(gantt-transform-projects projects))
-           (devs ,(gantt-transform-devs devs)))
+           (devs ',(gantt-transform-devs devs)))
 
-       (:errors
-        ,@(-uniq
-           (cl-loop
-            for dev in devs append
+       '(:errors
+         ,@(-uniq
             (cl-loop
-             for proj in (plist-get (cdr dev) :projects)
-             as id = (if (listp proj) (car proj) proj)
-             unless (assoc id projects) collect
-             (format "No project '%s' defined in :PROJECTS section (referenced in dev '%s')" id (car dev))))))
-
-       ;; ',(cl-loop
-       ;;    for (id . data) in projects collect
-       ;;    id)
+             for dev in devs append
+             (cl-loop
+              for proj in (plist-get (cdr dev) :projects)
+              as id = (if (listp proj) (car proj) proj)
+              unless (assoc id projects) collect
+              (format "No project '%s' defined in :PROJECTS section (referenced in dev '%s')" id (car dev))))))
 
        (cl-loop
-        for (dev . data) in devs
-        collect
+        with completed
+        until completed
+        for day from 0 to 100
+        as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
+
+        do
         (cl-loop
-         with effort = (gantt-calculate-effort (plist-get data :effort))
-         while (> effort 0)
-         for proj in (plist-get data :projects)))
-       )
-    ))
+         for (dev . data) in devs
+         collect
+         (cl-loop
+          with effort = (funcall (plist-get data :effort) simulation-date)
+          while (> effort 0)
+          for (dev-proj-id . dev-proj-data) in (plist-get data :projects)
+          as proj = (gethash dev-proj-id projects)
+          ;; TODO: Project specific effort (min of dev and project forms)
+          ;; as project-effort
+          as remaining = (gantt-project-work-remaining proj)
+          as new-remaining = (max 0 (- remaining effort))
+          when (> remaining 0)
+          do
+          (progn
+            ;; TODO: Detect start
+            ;; .Detect end
+            ;; .Log to project resource log
+            (setq effort (- effort (- remaining new-remaining)))
+            (setf (gantt-project-work-remaining proj) new-remaining)
+
+            (message "Effort: %s %s %s %s %s %s"
+                     simulation-date
+                     dev
+                     dev-proj-id
+                     remaining
+                     new-remaining
+                     effort)
+          )))))))
 
 (cl-defun gantt-calculate-resource-power (resource-data devs)
   (loop
