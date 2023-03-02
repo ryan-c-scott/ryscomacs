@@ -80,22 +80,6 @@
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
-(cl-defun gantt-calculate-blocker (blockers externals start-date)
-  (cl-loop
-   with latest-blocker
-
-   for b in blockers
-   as date = (cadr (assoc b externals 'string=))
-   as day = (and date (gantt-date-to-day start-date date))
-
-   when (and day
-             (or (not latest-blocker)
-                 (> day (cdr latest-blocker))))
-   do
-   (setq latest-blocker `(,b . ,day))
-
-   finally return latest-blocker))
-
 (cl-defun gantt-generate-resource-log (simulation)
   (let* ((projects (gantt-simulation-projects simulation))
          (combined
@@ -111,179 +95,6 @@
      (cons
       dev
       (-group-by 'car log)))))
-
-(cl-defun gantt-simulation-actual-work (simulation &optional start-date current-date)
-  (cl-loop
-   with end-day = (gantt-date-to-day start-date current-date)
-   with resource-data = (gantt-simulation-resources simulation)
-
-   for proj in (gantt-simulation-projects simulation)
-   as proj-end = (or (gantt-project-ended proj) end-day)
-   as id = (gantt-project-id proj)
-
-   append
-   (cl-loop
-    for (res . start) in (gantt-project-resource-log proj)
-    as res-power = (or (cadr (assoc res resource-data)) 1)
-
-    when (< start end-day) collect
-    `(,id ,res ,start ,(min proj-end end-day) ,res-power))))
-
-(cl-defun gantt-simulation--calculate-blockers (simulation)
-  (cl-loop
-   with externals = (gantt-simulation-externals simulation)
-   with start-date = (gantt-simulation-start-date simulation)
-
-   for proj in (gantt-simulation-projects simulation) do
-   (setf (gantt-project-start-blocker proj)
-         (gantt-calculate-blocker
-          (gantt-project-blockers proj)
-          externals
-          start-date))))
-
-(cl-defun gantt-simulation--calculate-historic-work (simulation &optional simulation-start)
-  "Generate a lookup table of `(ID . HOURS) from a simulation's historic data.
-SIMULATION-START is day of simulation start and historic work will be clamped appropriately."
-  (cl-loop
-   with simulation-start = (or simulation-start 0)
-   for (id . entries) in (--group-by
-                          (car it)
-                          (gantt-simulation-work-log simulation))
-   collect `(,id . ,(cl-loop
-                     for (_ _ start end effort) in entries
-                     as end = (min end simulation-start)
-                     as effort = (pcase effort
-                                   ("" 1)
-                                   (_ effort))
-
-                     when (< start simulation-start) sum
-                     (* (- end start) (or effort 1))))))
-
-;;;###autoload
-(cl-defun gantt-simulate (simulation)
-  (let ((projects (gantt-simulation-projects simulation))
-        (resource-data (gantt-simulation-resources simulation))
-        (simulation-start-day (or (gantt-simulation-simulation-start simulation) 0))
-        projects-completed)
-
-    (gantt-simulation--calculate-blockers simulation)
-
-    ;; Reduce all projects days by any historical efforts
-    (cl-loop
-     with historic-work = (gantt-simulation--calculate-historic-work simulation simulation-start-day)
-
-     for proj in projects
-     as id = (gantt-project-id proj)
-     as previous-effort = (cdr (assoc id historic-work))
-
-     when previous-effort do
-     (cl-decf (gantt-project-work-remaining proj) previous-effort)
-
-     when (<= (gantt-project-work-remaining proj) 0) do
-     (progn
-       (push id projects-completed)
-
-       ;; NOTE: These are actually just dummy values to suppress their simulation
-       ;; .They could instead be kept out of the simulation in some other way (maybe with another flag?)
-       (setf (gantt-project-started proj) simulation-start-day
-             (gantt-project-ended proj) simulation-start-day)))
-
-    ;; Project simulation
-    (setf
-     (gantt-simulation-projects simulation)
-     (cl-loop
-      with active-resources = (make-hash-table :test 'equal)
-
-      for day from simulation-start-day to 100
-
-      ;; TODO: Pivot to looping through devs
-      ;; .A project will then need to be chosen based on listed priority
-      ;; .Potential effort for each project listed will be determined
-      ;; .Potential daily effort will be decremented from dev
-      ;; .Early out if no effort is left
-      ;; .projects-remaining and active-resources won't be needed at that point
-      ;;
-      ;; .More clearly, loop for each dev; for each dev project, loop until out of available effort, logging each to the projects
-      as projects-remaining = (- (length projects) (length projects-completed))
-      while (> projects-remaining 0) do
-      (cl-loop
-       for proj in projects
-
-       as id = (gantt-project-id proj)
-       as started = (gantt-project-started proj)
-       as ended = (gantt-project-ended proj)
-
-       as resources = (gantt-project-resources proj)
-       as available-resources = (--remove (gethash it active-resources) resources)
-
-       as dependencies = (gantt-project-dependencies proj)
-       as dependencies-met = (or (not dependencies)
-                                 (--all? (member it projects-completed) dependencies))
-       as start-blocker = (gantt-project-start-blocker proj)
-       as blocked-externally = (and start-blocker
-                                    (< day (cdr start-blocker)))
-       as remaining = (gantt-project-work-remaining proj)
-
-       ;; Handle starting based on resources
-       when (and (not started)
-                 (> remaining 0)
-                 dependencies-met
-                 (not blocked-externally)
-                 (or (not resources)
-                     (> (length available-resources) 0)))
-       do
-       (cl-loop
-        with resource-log
-        for res in available-resources do
-        (puthash res id active-resources)
-
-        collect `(,res . ,day) into resource-log
-
-        finally do
-        (setf (gantt-project-started proj) day
-              (gantt-project-resource-log proj) resource-log))
-
-       ;; Step project simulation
-       when (and started (not ended) dependencies-met) do
-       (let* ((remaining (gantt-project-work-remaining proj))
-              (devs (-union available-resources (mapcar 'car (gantt-project-resource-log proj))))
-              (dev-power (gantt-calculate-resource-power resource-data devs))
-              (new-remaining (- remaining dev-power)))
-
-         ;; Detect and log added resources
-         (cl-loop
-          for res in devs
-          as log = (gantt-project-resource-log proj)
-          unless (assoc res log 'equal) do
-          (progn
-            (puthash res id active-resources)
-            (setf (gantt-project-resource-log proj) (append log `((,res . ,day))))))
-
-         ;; Decrement remaining work
-         (setf (gantt-project-work-remaining proj) new-remaining)
-         (when (<= new-remaining 0)
-           ;; Free resources
-           (cl-loop
-            for res in resources
-            as on-project = (equal (gethash res active-resources) id)
-
-            when on-project do
-            (puthash res nil active-resources))
-
-           (push id projects-completed)
-           (setf (gantt-project-ended proj) day))))
-
-      finally return
-      (--sort
-       (let ((it-start (or (gantt-project-started it) 0))
-             (it-end (or (gantt-project-ended it) 1000))
-             (other-start (or (gantt-project-started other) 0))
-             (other-end (or (gantt-project-ended other) 1000)))
-         (if (= it-start other-start)
-             (< it-end other-end)
-           (< it-start other-start)))
-       projects)))
-    simulation))
 
 (cl-defun gantt-transform-effort (effort-data)
   (cl-loop
@@ -368,6 +179,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
        for proj in (plist-get dev :projects) collect
        (gantt-transform-dev-project proj)))))
 
+;;;###autoload
 (cl-defmacro gantt-derive-dev-form (start-date &rest forms)
   (let ((projects (plist-get forms :projects))
         (devs (plist-get forms :devs)))
@@ -440,67 +252,17 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
         :start-date ,start-date
         :simulation-start 0
         :work-log nil
-        :projects (hash-table-values projects)))))
-
-(cl-defun gantt-calculate-resource-power (resource-data devs)
-  (cl-loop
-   for d in devs
-   as commitment = (cadr (assoc d resource-data))
-   sum (or commitment 1)))
-
-(cl-defun gantt-table-to-simulation (&key projects resources externals work-log start-date current-date)
-  (make-gantt-simulation
-   :resources (cdr resources)
-   :externals (cdr externals)
-   :work-log (cdr work-log)
-   :start-date start-date
-   :simulation-start (if current-date
-                         (gantt-date-to-day start-date current-date)
-                       0)
-
-   :projects
-   (cl-loop
-    with data = (cdr projects)
-    for (key name days confidence adjustment deps resources blockers started completed . rest) in data
-    as dependencies = (s-split "" deps t)
-    as resources = (s-split " " resources t)
-    as blockers = (s-split " " blockers t)
-    as adjustment = (pcase adjustment
-                      ((pred stringp)
-                       (when (not (string-empty-p adjustment))
-                         (cl-parse-integer adjustment)))
-                      (_ adjustment))
-    as actual-started = (unless (string-empty-p started) (gantt-date-to-day start-date started))
-    as actual-ended = (unless (string-empty-p completed) (gantt-date-to-day start-date completed))
-
-    unless (s-match "[!^_$#*/]" key)
-    collect
-    (make-gantt-project
-     :id key
-     :name name
-     :work days
-     :confidence confidence
-     :adjustment adjustment
-     :dependencies dependencies
-     :resources resources
-     :blockers blockers
-     :actual-started actual-started
-     :actual-ended actual-ended
-     :user-data rest
-
-     :work-remaining (+ days (or adjustment 0))
-     :resource-log nil))))
-
-;;;###autoload
-(cl-defun gantt-simulate-from-table (data &key resources externals work-log start-date current-date)
-  (gantt-simulate
-   (gantt-table-to-simulation
-    :projects data
-    :resources resources
-    :externals externals
-    :work-log work-log
-    :start-date start-date
-    :current-date current-date)))
+        :projects
+        (--sort
+         (let ((it-start (or (gantt-project-started it) 0))
+               (it-end (or (gantt-project-ended it) 1000))
+               (other-start (or (gantt-project-started other) 0))
+               (other-end (or (gantt-project-ended other) 1000)))
+           (if (= it-start other-start)
+               (< it-end other-end)
+             (< it-start other-start)))
+         (hash-table-values projects))
+        ))))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-table (simulation)
@@ -657,90 +419,6 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
               (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable)))
        )
      options)))
-
-;;;###autoload
-(cl-defun gantt--find-table (name)
-  (org-element-map (org-element-parse-buffer) 'table
-    (lambda (tbl)
-      (when (string= name (org-element-property :name tbl))
-        tbl))
-    nil t))
-
-(cl-defun gantt--goto-and-delete-table (tbl)
-  (-when-let* ((start (org-element-property :post-affiliated tbl))
-               (end (org-element-property :end tbl)))
-      (goto-char start)
-      (delete-region start end)))
-
-(cl-defun gantt--find-and-replace-table (name header data)
-  (-when-let* ((tbl (gantt--find-table name))
-               (post-blank (org-element-property :post-blank tbl)))
-    (gantt--goto-and-delete-table tbl)
-    (insert
-     (orgtbl-to-orgtbl
-      (append header data)
-      nil)
-     (make-string (1+ post-blank) ?\n))))
-
-;;;###autoload
-(cl-defun gantt-reorganize-tables (projects-name work-log-name)
-  ;; TODO: Undo if error
-
-  (let ((projects (gantt--find-table projects-name))
-        (work-log (gantt--find-table work-log-name)))
-
-    (when (not (and projects work-log))
-      (error "Tables missing or malformed"))
-
-    ;; Generate map and fix tables
-    (let* ((projects-begin (org-element-property :post-affiliated projects))
-           (projects-end (org-element-property :end projects))
-           (projects-raw (-split-at 3 (org-table-to-lisp (buffer-substring-no-properties projects-begin projects-end))))
-           (projects-header (car projects-raw))
-           (projects-data (cadr projects-raw))
-
-           (mapping (cl-loop
-                     with new-id = ?A
-                     for entry in projects-data
-                     as map = (pcase entry
-                                (`(,id . ,_)
-                                 (cons id (char-to-string new-id)))
-                                (_))
-                     when map collect map
-                     when map do (cl-incf new-id)))
-
-           (work-log-begin (org-element-property :post-affiliated work-log))
-           (work-log-end (org-element-property :end work-log))
-           (work-log-raw (-split-at 3 (org-table-to-lisp (buffer-substring-no-properties work-log-begin work-log-end))))
-           (work-log-header (car work-log-raw))
-           (work-log-data (cadr work-log-raw))
-
-           (projects-fixed
-            (cl-loop
-             with project-mappings = mapping
-
-             for entry in projects-data collect
-             (pcase entry
-               (`(,_ ,name ,days ,confidence ,adjust ,deps . ,rest)
-                (let ((map (pop project-mappings)))
-                  `(,(cdr map) ,name ,days ,confidence ,adjust
-                    ,(cl-loop
-                      for d in (s-split "" deps t) concat
-                      (cdr (assoc d mapping)))
-                    ,@rest)))
-               (_ entry))))
-
-           (work-log-fixed
-            (cl-loop
-             for entry in work-log-data collect
-             (pcase entry
-               (`(,id . ,rest)
-                `(,(cdr (assoc id mapping)) ,@rest))
-               (_ entry)))))
-
-      (save-excursion
-        (gantt--find-and-replace-table work-log-name work-log-header work-log-fixed)
-        (gantt--find-and-replace-table projects-name projects-header projects-fixed)))))
 
 ;;;;
 (provide 'gantt)
