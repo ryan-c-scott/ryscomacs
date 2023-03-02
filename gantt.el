@@ -129,14 +129,25 @@
         ,@conditional-effort
         effort))))
 
-(cl-defun gantt-transform-projects (data)
+(cl-defun gantt-transform-project-dependencies (start-date depencies)
+  `(lambda (day project-lookup)
+     (and
+      ,@(cl-loop
+         for dep in depencies collect
+         (pcase dep
+           ((or (pred symbolp) (pred stringp))
+            `(let ((proj (gethash ,(format "%s" dep) project-lookup)))
+               (and proj (gantt-project-ended proj))))
+
+           (`(:external ,date ,description)
+            `(> day ,(gantt-date-to-day start-date date))))))))
+
+(cl-defun gantt-transform-projects (start-date data)
   (cl-loop
    with projects = (make-hash-table :test 'equal)
 
    for (id . proj) in data
    as id = (format "%s" id)
-   as days = (plist-get proj :days)
-   as adjustment = (plist-get proj :adjustment)
 
    do
    (puthash
@@ -153,8 +164,9 @@
      ;; :actual-started actual-started
      ;; :actual-ended actual-ended
      ;; :user-data rest
+     :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
 
-     :work-remaining (+ days (or adjustment 0))
+     :work-remaining (plist-get proj :days)
      :resource-log nil)
     projects)
    finally return projects))
@@ -184,7 +196,7 @@
   (let ((projects (plist-get forms :projects))
         (devs (plist-get forms :devs)))
 
-    `(let ((projects ,(gantt-transform-projects projects))
+    `(let ((projects ,(gantt-transform-projects start-date projects))
            (devs ',(gantt-transform-devs devs)))
 
        '(:errors
@@ -214,7 +226,7 @@
           as proj = (gethash dev-proj-id projects)
           ;; TODO: Project specific effort (min of dev and project forms)
           ;; as project-effort
-          ;; TODO: dependencies
+          as dependency-check = (gantt-project-dependencies proj)
           as remaining = (gantt-project-work-remaining proj)
           as new-remaining = (max 0 (- remaining effort))
           as work-done = (- remaining new-remaining)
@@ -224,7 +236,8 @@
           as resource-log = (gantt-project-resource-log proj)
 
           when (and (> remaining 0)
-                    (> work-done 0))
+                    (> work-done 0)
+                    (funcall dependency-check day projects))
           do
           (progn
             (setq effort (- effort work-done))
