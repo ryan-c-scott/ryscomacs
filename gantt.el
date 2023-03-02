@@ -36,7 +36,7 @@
 
 ;;;###autoload
 (cl-defun gantt-create-palette (size)
-  (loop
+  (cl-loop
    for i upfrom 0 to size
    as rotations = (/ i 1.0)
 
@@ -72,7 +72,7 @@
 
 (cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
   (when start-date
-    (loop
+    (cl-loop
      for dev-day from 0 to (* sprints 10) by 10
      collect
      `(,(format-time-string
@@ -81,7 +81,7 @@
        ,dev-day))))
 
 (cl-defun gantt-calculate-blocker (blockers externals start-date)
-  (loop
+  (cl-loop
    with latest-blocker
 
    for b in blockers
@@ -122,7 +122,7 @@
    as id = (gantt-project-id proj)
 
    append
-   (loop
+   (cl-loop
     for (res . start) in (gantt-project-resource-log proj)
     as res-power = (or (cadr (assoc res resource-data)) 1)
 
@@ -130,7 +130,7 @@
     `(,id ,res ,start ,(min proj-end end-day) ,res-power))))
 
 (cl-defun gantt-simulation--calculate-blockers (simulation)
-  (loop
+  (cl-loop
    with externals = (gantt-simulation-externals simulation)
    with start-date = (gantt-simulation-start-date simulation)
 
@@ -144,12 +144,12 @@
 (cl-defun gantt-simulation--calculate-historic-work (simulation &optional simulation-start)
   "Generate a lookup table of `(ID . HOURS) from a simulation's historic data.
 SIMULATION-START is day of simulation start and historic work will be clamped appropriately."
-  (loop
+  (cl-loop
    with simulation-start = (or simulation-start 0)
    for (id . entries) in (--group-by
                           (car it)
                           (gantt-simulation-work-log simulation))
-   collect `(,id . ,(loop
+   collect `(,id . ,(cl-loop
                      for (_ _ start end effort) in entries
                      as end = (min end simulation-start)
                      as effort = (pcase effort
@@ -169,7 +169,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
     (gantt-simulation--calculate-blockers simulation)
 
     ;; Reduce all projects days by any historical efforts
-    (loop
+    (cl-loop
      with historic-work = (gantt-simulation--calculate-historic-work simulation simulation-start-day)
 
      for proj in projects
@@ -177,7 +177,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
      as previous-effort = (cdr (assoc id historic-work))
 
      when previous-effort do
-     (decf (gantt-project-work-remaining proj) previous-effort)
+     (cl-decf (gantt-project-work-remaining proj) previous-effort)
 
      when (<= (gantt-project-work-remaining proj) 0) do
      (progn
@@ -191,7 +191,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
     ;; Project simulation
     (setf
      (gantt-simulation-projects simulation)
-     (loop
+     (cl-loop
       with active-resources = (make-hash-table :test 'equal)
 
       for day from simulation-start-day to 100
@@ -206,7 +206,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
       ;; .More clearly, loop for each dev; for each dev project, loop until out of available effort, logging each to the projects
       as projects-remaining = (- (length projects) (length projects-completed))
       while (> projects-remaining 0) do
-      (loop
+      (cl-loop
        for proj in projects
 
        as id = (gantt-project-id proj)
@@ -232,7 +232,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
                  (or (not resources)
                      (> (length available-resources) 0)))
        do
-       (loop
+       (cl-loop
         with resource-log
         for res in available-resources do
         (puthash res id active-resources)
@@ -251,7 +251,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
               (new-remaining (- remaining dev-power)))
 
          ;; Detect and log added resources
-         (loop
+         (cl-loop
           for res in devs
           as log = (gantt-project-resource-log proj)
           unless (assoc res log 'equal) do
@@ -263,7 +263,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
          (setf (gantt-project-work-remaining proj) new-remaining)
          (when (<= new-remaining 0)
            ;; Free resources
-           (loop
+           (cl-loop
             for res in resources
             as on-project = (equal (gethash res active-resources) id)
 
@@ -504,7 +504,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-table (simulation)
-  (loop
+  (cl-loop
    for proj in (gantt-simulation-projects simulation)
    as start = (floor (or (gantt-project-started proj) 0))
    as end = (ceiling (or (gantt-project-ended proj) 0))
@@ -699,7 +699,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
            (projects-header (car projects-raw))
            (projects-data (cadr projects-raw))
 
-           (mapping (loop
+           (mapping (cl-loop
                      with new-id = ?A
                      for entry in projects-data
                      as map = (pcase entry
@@ -707,7 +707,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
                                  (cons id (char-to-string new-id)))
                                 (_))
                      when map collect map
-                     when map do (incf new-id)))
+                     when map do (cl-incf new-id)))
 
            (work-log-begin (org-element-property :post-affiliated work-log))
            (work-log-end (org-element-property :end work-log))
@@ -716,7 +716,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
            (work-log-data (cadr work-log-raw))
 
            (projects-fixed
-            (loop
+            (cl-loop
              with project-mappings = mapping
 
              for entry in projects-data collect
@@ -724,14 +724,14 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
                (`(,_ ,name ,days ,confidence ,adjust ,deps . ,rest)
                 (let ((map (pop project-mappings)))
                   `(,(cdr map) ,name ,days ,confidence ,adjust
-                    ,(loop
+                    ,(cl-loop
                       for d in (s-split "" deps t) concat
                       (cdr (assoc d mapping)))
                     ,@rest)))
                (_ entry))))
 
            (work-log-fixed
-            (loop
+            (cl-loop
              for entry in work-log-data collect
              (pcase entry
                (`(,id . ,rest)
