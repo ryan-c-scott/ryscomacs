@@ -97,30 +97,23 @@
    finally return latest-blocker))
 
 (cl-defun gantt-generate-resource-log (simulation)
-  (let ((projects (--map (cons (gantt-project-id it) it)
-                         (gantt-simulation-projects simulation))))
-
-    (--group-by
-     (car it)
-     (append
-      (loop for proj in (gantt-simulation-projects simulation)
-            as id = (gantt-project-id proj)
-            as ended = (gantt-project-ended proj)
-            as resource-log = (gantt-project-resource-log proj)
-            append
-            (loop for (res . start) in resource-log collect
-                  `(,res ,proj ,start ,ended)))
-
-      (loop for (id res start end effort) in (gantt-simulation-work-log simulation)
-            as proj = (cdr (assoc id projects))
-            collect
-            `(,res
-              ,(or proj (make-gantt-project :name id :id id))
-              ,start
-              ,end))))))
+  (let* ((projects (gantt-simulation-projects simulation))
+         (combined
+          (cl-loop
+           for proj in projects
+           as id = (gantt-project-id proj)
+           append
+           (--map
+            (cons id it)
+            (gantt-project-resource-log proj)))))
+    (cl-loop
+     for (dev . log) in (-group-by 'cadr combined) collect
+     (cons
+      dev
+      (-group-by 'car log)))))
 
 (cl-defun gantt-simulation-actual-work (simulation &optional start-date current-date)
-  (loop
+  (cl-loop
    with end-day = (gantt-date-to-day start-date current-date)
    with resource-data = (gantt-simulation-resources simulation)
 
@@ -409,28 +402,48 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
           as proj = (gethash dev-proj-id projects)
           ;; TODO: Project specific effort (min of dev and project forms)
           ;; as project-effort
+          ;; TODO: dependencies
           as remaining = (gantt-project-work-remaining proj)
           as new-remaining = (max 0 (- remaining effort))
-          when (> remaining 0)
+          as work-done = (- remaining new-remaining)
+          as started = (gantt-project-started proj)
+          as ended = (gantt-project-ended proj)
+          as resources = (gantt-project-resources proj)
+          as resource-log = (gantt-project-resource-log proj)
+
+          when (and (> remaining 0)
+                    (> work-done 0))
           do
           (progn
-            ;; TODO: Detect start
-            ;; .Detect end
-            ;; .Log to project resource log
-            (setq effort (- effort (- remaining new-remaining)))
+            (setq effort (- effort work-done))
             (setf (gantt-project-work-remaining proj) new-remaining)
+            (setf (gantt-project-resources proj)
+                  (-uniq (append resources (list dev))))
 
-            (message "Effort: %s %s %s %s %s %s"
-                     simulation-date
-                     dev
-                     dev-proj-id
-                     remaining
-                     new-remaining
-                     effort)
-          )))))))
+            (setf (gantt-project-resource-log proj)
+                  (append
+                   resource-log
+                   (list
+                    (list dev day work-done))))
+
+            (when (not started)
+              (setf (gantt-project-started proj) day))
+
+            (when (and (= new-remaining 0)
+                       (not ended))
+              (setf (gantt-project-ended proj) day)
+              ;; TESTING: No mid-day project change after completion
+              (setq effort 0)
+              )))))
+
+       (make-gantt-simulation
+        :start-date ,start-date
+        :simulation-start 0
+        :work-log nil
+        :projects (hash-table-values projects)))))
 
 (cl-defun gantt-calculate-resource-power (resource-data devs)
-  (loop
+  (cl-loop
    for d in devs
    as commitment = (cadr (assoc d resource-data))
    sum (or commitment 1)))
@@ -506,14 +519,16 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
-  (let ((simulation-start (gantt-simulation-simulation-start simulation))
-        blockers)
+  (let* ((simulation-start (gantt-simulation-simulation-start simulation))
+         (projects (gantt-simulation-projects simulation))
+         (height (1+ (length projects)))
+         blockers)
     (apply
      'rysco-plot
      `((:unset key)
-       (:data gantt ,@(loop
+       (:data gantt ,@(cl-loop
                        for i upfrom 1
-                       for proj in (gantt-simulation-projects simulation)
+                       for proj in projects
                        as entry = (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
                                     (when start-blocker
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
@@ -530,10 +545,10 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
        (:set style arrow 2 nohead lw 20 lc "#8deeee") ;Projects
        (:set style arrow 3 filled lw 3 lc "#8b008b") ;External blockers
 
-       (:set arrow 1 from (60 0) to (60 ,(length projects)) as 1)
-       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,(length projects)) as 1)
+       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
 
-       (:set yrange [,(length projects) 0])
+       (:set yrange [,height 0])
        (:set grid x y)
 
        (:set ytics
@@ -542,10 +557,11 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
              :textcolor "white")
 
        (:set lmargin ,(*
-                       3 ;; HACK: Magic number to create space for the larger xtics
-                       (loop
-                        for (id name _ _ _ resources . rest) in projects maximize
-                        (length (format "%s: %s" name resources)))))
+                       1.8 ;; HACK: Magic number to create space for the larger ytics
+                       (cl-loop
+                        for proj in projects maximize
+                        (pcase-let (((cl-struct gantt-project id name resources) proj))
+                          (length (format "%s: %s" name resources))))))
 
        (:tics x
               :options (:out
@@ -569,35 +585,34 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
 (cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
   (let* ((data (gantt-generate-resource-log simulation))
          (simulation-start (gantt-simulation-simulation-start simulation))
+         (projects (gantt-simulation-projects simulation))
          (height (1+ (length data)))
-        project-count)
+         project-count)
     (apply
      'rysco-plot
      `((:unset key)
+       (:data
+        worklog
+        ,@(cl-loop
+           with project-colors = (make-hash-table :test 'equal)
+           with next-style-id = 3
 
-       (:data gantt ,@(loop
-                       with project-colors = (make-hash-table :test 'equal)
-                       with next-style-id = 3
+           for i upfrom 1
+           for (dev . proj-log) in data append
+           (cl-loop
+            for (proj . entries) in proj-log
 
-                       for i upfrom 1
-                       for (res . log) in data append
-                       (loop for (_ proj start end) in log
-                             as project-name = (gantt-project-name proj)
-                             as style-id = (gethash project-name project-colors)
-                             as size = (- (or end 100) start)
+            as style-id = (gethash proj project-colors)
+            unless style-id do
+            (setq style-id (puthash proj next-style-id project-colors)
+                  next-style-id (1+ next-style-id))
 
-                             unless style-id do
-                             (setq style-id (puthash project-name next-style-id project-colors)
-                                   next-style-id (1+ next-style-id))
+            append
+            (cl-loop
+             for (_ _ day effort) in entries collect
+             `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))
 
-                             collect
-                             `(,start
-                               ,i
-                               ,size 0
-                               ,(if (> size 5) project-name "")
-                               ,res
-                               ,style-id))
-                       finally do (setq project-count (hash-table-count project-colors))))
+            finally do (setq project-count (hash-table-count project-colors)))))
 
        (:set :border lc "white")
 
@@ -606,7 +621,7 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
        (:set style arrow 1 nohead lw 3 lc "#Eedd82")
        (:set style arrow 2 nohead lw 20 lc "#8deeee")
 
-       ,@(loop
+       ,@(cl-loop
           for i upfrom 0
           for color in (gantt-create-palette project-count)
           collect
@@ -631,17 +646,15 @@ SIMULATION-START is day of simulation start and historic work will be clamped ap
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
 
-       (:set lmargin ,(*
-                       1 ;; HACK: Magic number to create space for the larger xtics
-                       (loop
-                        for (id name _ _ _ resources . rest) in projects maximize
-                        (length (format "%s: %s" name resources)))))
+       (:set lmargin ,(cl-loop
+                        for proj in projects maximize
+                        (pcase-let (((cl-struct gantt-project id name resources) proj))
+                          (length (format "%s: %s" name resources)))))
        (:set rmargin 5)
        (:set bmargin 5)
 
        (:plot [0 *]
-              (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
-              (:labels :data gantt :using [1 2 5] :options (:left :font ",20")))
+              (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable)))
        )
      options)))
 
