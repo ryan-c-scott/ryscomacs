@@ -9,19 +9,15 @@
   name
   work
   confidence
-  adjustment
   dependencies
-  resources
-  user-data
   blockers
-  actual-started
-  actual-ended
 
   ;; Simulation data
   work-remaining
   start-blocker
   started
   ended
+  resources
   resource-log)
 
 (cl-defstruct gantt-simulation
