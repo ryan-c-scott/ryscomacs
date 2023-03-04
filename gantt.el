@@ -198,11 +198,12 @@
        as data = (cdr entry)
 
        collect
-       `((,id)
-         (lambda (day project-lookup)
-           (let ((proj (gethash ,id project-lookup)))
-             (and (> (gantt-project-work-remaining proj) 0)
-                  (funcall (gantt-project-dependencies proj) day project-lookup)proj))))))))
+       `(lambda (day project-lookup)
+          (let ((proj (gethash ,id project-lookup)))
+            (and proj
+                 (> (gantt-project-work-remaining proj) 0)
+                 (funcall (gantt-project-dependencies proj) day project-lookup)
+                 proj)))))))
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (start-date &rest forms)
@@ -231,49 +232,44 @@
         (cl-loop
          for (dev . data) in devs do
          (cl-loop
-          with work-data = (plist-get data :dev-work)
-
           ;; TODO: Change this lambda to use day like others
           with effort = (funcall (plist-get data :effort) simulation-date)
 
-          for (entry-projects gate) in work-data do
-          (cl-loop
-           for proj in entry-projects
-           as proj = (gethash proj projects)
+          for selector in (plist-get data :dev-work)
+          while (> effort 0)
 
-           while (> effort 0)
+          as proj = (funcall selector day projects)
+          when proj do
+          (let* (
+                 ;; TODO: Project specific effort (min of dev and project forms)
+                 (remaining (gantt-project-work-remaining proj))
+                 (new-remaining (max 0 (- remaining effort)))
+                 (work-done (- remaining new-remaining))
+                 (started (gantt-project-started proj))
+                 (ended (gantt-project-ended proj))
+                 (resources (gantt-project-resources proj))
+                 (resource-log (gantt-project-resource-log proj)))
 
-           ;; TODO: Project specific effort (min of dev and project forms)
-           ;; as project-effort
-           as remaining = (gantt-project-work-remaining proj)
-           as new-remaining = (max 0 (- remaining effort))
-           as work-done = (- remaining new-remaining)
-           as started = (gantt-project-started proj)
-           as ended = (gantt-project-ended proj)
-           as resources = (gantt-project-resources proj)
-           as resource-log = (gantt-project-resource-log proj)
+            (when (> work-done 0)
+              (setq effort (- effort work-done))
+              (setf (gantt-project-work-remaining proj) new-remaining)
+              (setf (gantt-project-resources proj)
+                    (-uniq (append resources (list dev))))
 
-           when (> work-done 0) do
-           (progn
-             (setq effort (- effort work-done))
-             (setf (gantt-project-work-remaining proj) new-remaining)
-             (setf (gantt-project-resources proj)
-                   (-uniq (append resources (list dev))))
+              (setf (gantt-project-resource-log proj)
+                    (append
+                     resource-log
+                     (list
+                      (list dev day work-done))))
 
-             (setf (gantt-project-resource-log proj)
-                   (append
-                    resource-log
-                    (list
-                     (list dev day work-done))))
+              (when (not started)
+                (setf (gantt-project-started proj) day))
 
-             (when (not started)
-               (setf (gantt-project-started proj) day))
-
-             (when (and (= new-remaining 0)
-                        (not ended))
-               (setf (gantt-project-ended proj) day)
-               ;; TESTING: No mid-day project change after completion
-               (setq effort 0)))))))
+              (when (and (= new-remaining 0)
+                         (not ended))
+                (setf (gantt-project-ended proj) day)
+                ;; TESTING: No mid-day project change after completion
+                (setq effort 0)))))))
 
        (make-gantt-simulation
         :start-date ,start-date
