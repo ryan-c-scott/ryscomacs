@@ -11,6 +11,7 @@
   confidence
   dependencies
   blockers
+  tags
 
   ;; Simulation data
   work-remaining
@@ -153,6 +154,7 @@
      :name (or (plist-get proj :name) id)
      :work (plist-get proj :days)
      :confidence (plist-get proj :confidence)
+     :tags (--map (format "%s" it) (plist-get proj :tags))
      ;; :adjustment adjustment
      ;; :dependencies dependencies
      ;; :resources resources
@@ -176,7 +178,16 @@
      `(,(format "%s" id)
        :effort ,(gantt-transform-effort (plist-get proj-data :effort))))))
 
-(cl-defun gantt-transform-devs (data)
+(cl-defun gantt-get-tagged-projects (projects query)
+  (cl-loop
+   for proj in projects append
+   (cl-loop
+    with tags = (gantt-project-tags proj)
+    for query-tag in query
+    when (cl-member query-tag tags :test 'string=) collect
+    proj)))
+
+(cl-defun gantt-transform-devs (data projects)
   (cl-loop
    for (id . dev) in data
    collect
@@ -185,33 +196,41 @@
 
      :dev-work
      ,(cl-loop
-       for entry in (plist-get dev :projects)
-       as entry = (pcase entry
-                    ((pred symbolp)
-                     `(,(format "%s" entry)))
+       for entry in (plist-get dev :projects) append
+       (cl-loop
+        with selected-projects = (pcase entry
+                                   (`(:tag . ,tagset)
+                                    (--map
+                                     (gantt-project-id it)
+                                     (gantt-get-tagged-projects
+                                      (hash-table-values projects)
+                                      tagset)))
 
-                    ;; TODO: This should instead destructure from plist
-                    (`(,id . ,_)
-                     ;; TODO: Other data
-                     `(,(format "%s" id))))
-       as id = (car entry)
-       as data = (cdr entry)
+                                   ((pred symbolp)
+                                    `(,(format "%s" entry)))
 
-       collect
-       `(lambda (day project-lookup)
-          (let ((proj (gethash ,id project-lookup)))
-            (and proj
-                 (> (gantt-project-work-remaining proj) 0)
-                 (funcall (gantt-project-dependencies proj) day project-lookup)
-                 proj)))))))
+                                   ;; TODO: This should instead destructure from plist
+                                   (`(,id . ,_)
+                                    ;; TODO: Other data
+                                    `(,(format "%s" id))))
+
+        for id in selected-projects
+        collect
+        `(lambda (day project-lookup)
+           (let ((proj (gethash ,id project-lookup)))
+             (and proj
+                  (> (gantt-project-work-remaining proj) 0)
+                  (funcall (gantt-project-dependencies proj) day project-lookup)
+                  proj))))))))
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (start-date &rest forms)
-  (let ((projects (plist-get forms :projects))
-        (devs (plist-get forms :devs)))
+  (let* ((projects (plist-get forms :projects))
+         (devs (plist-get forms :devs))
+         (transformed-projects (gantt-transform-projects start-date projects)))
 
-    `(let ((projects ,(gantt-transform-projects start-date projects))
-           (devs ',(gantt-transform-devs devs)))
+    `(let ((projects ,transformed-projects)
+           (devs ',(gantt-transform-devs devs transformed-projects)))
 
        '(:errors
          ,@(-uniq
