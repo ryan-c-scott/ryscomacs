@@ -180,12 +180,9 @@
 
 (cl-defun gantt-get-tagged-projects (projects query)
   (cl-loop
-   for proj in projects append
-   (cl-loop
-    with tags = (gantt-project-tags proj)
-    for query-tag in query
-    when (cl-member query-tag tags :test 'string=) collect
-    proj)))
+   for proj in projects
+   as tags = (gantt-project-tags proj)
+   when (--all? (cl-member it tags :test 'string=) query) collect proj))
 
 (cl-defun gantt-transform-devs (data projects)
   (cl-loop
