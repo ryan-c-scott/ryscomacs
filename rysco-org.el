@@ -131,7 +131,7 @@
 
                 (when (or (equal todo "NOW")
                           (equal todo "NEXT"))
-                  (incf count)
+                  (cl-incf count)
                   (puthash project count next-count))
 
                 (unless (or (equal state 'ACTIVE)
@@ -153,7 +153,7 @@
 
               do (forward-line 1)
               finally return
-              (loop
+              (cl-loop
                for k being the hash-keys of status
                collect
                `(,k ,(gethash k status) ,(or (gethash k next-count) 0))))))
@@ -232,12 +232,12 @@
          rysco-org-agenda-status-overlay 'before-string
          (concat
           (when show-status
-            (loop
+            (cl-loop
              with i = 0
              for (k state count) in status
              as col = (% i col-count)
 
-             when k do (incf i)
+             when k do (cl-incf i)
 
              when k concat
              (if (= col 0)

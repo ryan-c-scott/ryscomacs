@@ -126,7 +126,7 @@
         (end-visible (equal (window-end) (point-max))))
     (if (or start-visible end-visible)
         (progn
-          (incf width-adjustment 0.65)
+          (cl-incf width-adjustment 0.65)
           (concat
            (propertize "  " 'face current-face)
            (all-the-icons-material
@@ -169,13 +169,13 @@
 
 (defsubst rysco-modeline-bluedot ()
   (when bluedot-mode
-    (incf width-adjustment 0.1)
+    (cl-incf width-adjustment 0.1)
     (format-mode-line
      bluedot--current-bar current-face)))
 
 (defsubst rysco-modeline-read-only ()
   (when buffer-read-only
-    (incf width-adjustment 0.65)
+    (cl-incf width-adjustment 0.65)
     (propertize
      (all-the-icons-material
       "error_outline"
@@ -197,7 +197,7 @@
                          width-adjustment)))))))
 
 (defun rysco-modeline--section (segments)
-  (loop
+  (cl-loop
    for part in segments
 
    as handled = (pcase part
@@ -219,7 +219,7 @@
                    (when is-read-only
                      (setq current-face face)))
                   (`(:width ,amount)
-                   (incf width-adjustment amount)))
+                   (cl-incf width-adjustment amount)))
 
    unless handled collect
    (pcase part

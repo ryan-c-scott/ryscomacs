@@ -150,7 +150,7 @@
   (interactive)
   (helm
    :sources
-   (loop
+   (cl-loop
     for (dir strip ext) in rysco-document-collections
     as ext = (format "\\.%s$" (or ext "pdf"))
     collect
@@ -490,7 +490,7 @@ If region is active, narrow to the region boundaries first."
   "Returns a list of arguments from ARGS following elisp syntax.
 All items are converted to strings.
 Quoted strings are returned as a single element."
-  (loop
+  (cl-loop
    for (a . pos) = (ignore-errors (read-from-string args pos))
    while a
    collect (format "%s" a)))
@@ -507,7 +507,7 @@ Quoted strings are returned as a single element."
     (rysco-fontify-using-faces (buffer-string))))
 
 (defun rysco-json-pretty-insert (text)
-  (loop
+  (cl-loop
    with text = (s-replace "\n" "" text)
    with array = 0
    with obj = 0
@@ -538,19 +538,19 @@ Quoted strings are returned as a single element."
       (setq after t))
 
      (?\{
-      (incf obj)
+      (cl-incf obj)
       (setq after t))
 
      (?\}
-      (decf obj)
+      (cl-decf obj)
       (setq after t before t))
 
      (?\[
-      (incf array)
+      (cl-incf array)
       (setq after t))
 
      (?\]
-      (decf array)
+      (cl-decf array)
       (setq before t after t))
      )
 
@@ -594,9 +594,9 @@ Quoted strings are returned as a single element."
   (setf (rest (last values)) values)  ; construct circularity
   (lambda (n)
     (when (first pointer)
-      (decf sum (first pointer)))     ; subtract old value
-    (incf sum n)                      ; add new value
-    (incf count)
+      (cl-decf sum (first pointer)))     ; subtract old value
+    (cl-incf sum n)                      ; add new value
+    (cl-incf count)
     (setf (first pointer) n)
     (setf pointer (rest pointer))     ; advance pointer
     (/ sum (min count period))))
@@ -642,7 +642,7 @@ With prefix-arg prompt for type if available with your AG version."
   `(let ((window-size ,(pcase splitter
                          (:horizontal '(window-width))
                          (:vertical '(window-height)))))
-     ,@(loop
+     ,@(cl-loop
         for f in layout collect
         (pcase f
           (:clear '(delete-other-frames))
@@ -787,7 +787,7 @@ With prefix-arg prompt for type if available with your AG version."
          (s-join
           " "
           (sort
-           (loop for it in tags collect
+           (cl-loop for it in tags collect
                  (propertize
                   (format
                    "%s"
@@ -852,7 +852,7 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun helm-rysco-goto-common-links-default-action (candidate)
   (--if-let (helm-marked-candidates)
-      (loop for link in it do (rysco-goto-common-links--execute link))
+      (cl-loop for link in it do (rysco-goto-common-links--execute link))
     (rysco-goto-common-links--execute candidate)))
 
 (defun helm-rysco-goto-common-links ()
@@ -864,7 +864,7 @@ With prefix-arg prompt for type if available with your AG version."
      `(,(when rysco-gcal-calendars
           (helm-build-sync-source "Calendars"
             :candidates
-            (loop
+            (cl-loop
              for (id _ _ url) in rysco-gcal-calendars collect
              `(,(propertize
                  id
@@ -875,7 +875,7 @@ With prefix-arg prompt for type if available with your AG version."
        ,(helm-build-sync-source "Bookmarks"
           :candidates
           (when (boundp 'bookmark-alist)
-            (loop
+            (cl-loop
              for (name . data) in bookmark-alist
              as tags = (car (assq 'tags data))
              collect
@@ -886,7 +886,7 @@ With prefix-arg prompt for type if available with your AG version."
        ,(helm-build-sync-source "Links"
           :pattern-transformer 'helm-rysco-goto-common-links--pattern
           :candidates
-          (loop
+          (cl-loop
            for (label link . tags) in rysco-common-links
            as type = (rysco-goto-common-links--type link)
            as url = (when (stringp link) (url-generic-parse-url link))
@@ -1096,7 +1096,7 @@ With prefix-arg prompt for type if available with your AG version."
       (unless (boundp 'ispell-hunspell-dict-paths-alist)
         (setq ispell-hunspell-dict-paths-alist nil))
 
-      (loop
+      (cl-loop
        for path in (f-entries dictionary-dir)
        if (f-ext? path "aff") do
        (add-to-list 'ispell-hunspell-dict-paths-alist
@@ -1111,7 +1111,7 @@ With prefix-arg prompt for type if available with your AG version."
            '(("en_US.aff" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f")
              ("en_US.dic" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f"))))
 
-      (loop
+      (cl-loop
        initially do
        (f-mkdir base-dir)
 
