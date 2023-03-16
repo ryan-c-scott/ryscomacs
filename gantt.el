@@ -3,6 +3,9 @@
 (require 'dash)
 (require 'cl)
 
+(defvar gantt-max-days 260)
+(defvar gantt-max-sprints 26)
+
 (cl-defstruct gantt-project
   ""
   id
@@ -242,7 +245,7 @@
 
        (cl-loop
         ;; TODO: This max should be calculated elsewhere
-        for day from ,simulation-start-day to 100
+        for day from ,simulation-start-day to ,gantt-max-days
         as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
 
         do
@@ -376,7 +379,7 @@
                         :rotate by 45 right
                         :textcolor "white")
               :data
-              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
+              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) gantt-max-sprints))
 
        (:set rmargin ,(* 5 scale))
        (:set bmargin ,(* 5 scale))
@@ -452,7 +455,7 @@
                         :rotate by 45 right
                         :textcolor "white")
               :data
-              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
+              ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) gantt-max-sprints))
 
        (:set lmargin ,(*
                        scale
