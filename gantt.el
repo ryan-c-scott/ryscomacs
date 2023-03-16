@@ -196,7 +196,7 @@
        for entry in (plist-get dev :projects) append
        (cl-loop
         with selected-projects = (pcase entry
-                                   (`(:tag . ,tagset)
+                                   (`(:tags . ,tagset)
                                     (--map
                                      (gantt-project-id it)
                                      (gantt-get-tagged-projects
