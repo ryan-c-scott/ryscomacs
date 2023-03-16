@@ -308,7 +308,7 @@
   (cl-loop
    for proj in (gantt-simulation-projects simulation)
    as start = (floor (or (gantt-project-started proj) 0))
-   as end = (ceiling (or (gantt-project-ended proj) 0))
+   as end = (ceiling (or (gantt-project-ended proj) start))
    as resources = (gantt-project-resources proj)
 
    collect
