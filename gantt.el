@@ -221,10 +221,11 @@
                   proj))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (start-date &rest forms)
-  (let* ((projects (plist-get forms :projects))
-         (devs (plist-get forms :devs))
-         (transformed-projects (gantt-transform-projects start-date projects)))
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date)
+  (let* ((transformed-projects (gantt-transform-projects start-date projects))
+         (simulation-start-day (if simulation-date
+                                     (gantt-date-to-day start-date simulation-date)
+                                   0)))
 
     `(let ((projects ,transformed-projects)
            (devs ',(gantt-transform-devs devs transformed-projects)))
