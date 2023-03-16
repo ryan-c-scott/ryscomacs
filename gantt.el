@@ -242,7 +242,7 @@
 
        (cl-loop
         ;; TODO: This max should be calculated elsewhere
-        for day from 0 to 100
+        for day from ,simulation-start-day to 100
         as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
 
         do
@@ -290,7 +290,7 @@
 
        (make-gantt-simulation
         :start-date ,start-date
-        :simulation-start 0
+        :simulation-start ,simulation-start-day
         :projects
         (--sort
          (let ((it-start (or (gantt-project-started it) 0))
@@ -375,7 +375,7 @@
        (:set rmargin 5)
        (:set bmargin 5)
 
-       (:plot [* *]
+       (:plot [0 *]
               (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
               (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
               (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front)))
