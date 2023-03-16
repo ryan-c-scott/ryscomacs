@@ -323,6 +323,7 @@
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
          (height (1+ (length projects)))
+         (scale (or (plist-get options :fontscale) 1.0))
          blockers
          fails)
     (apply
@@ -346,9 +347,9 @@
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw 3 lc "#Eedd82") ;Period boundaries
-       (:set style arrow 2 nohead lw 20 lc "#8deeee") ;Projects
-       (:set style arrow 3 filled lw 3 lc "#8b008b") ;External blockers
+       (:set style arrow 1 nohead lw ,(* scale 3) lc "#Eedd82") ;Period boundaries
+       (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
+       (:set style arrow 3 filled lw ,(* scale 3) lc "#8b008b") ;External blockers
 
        (:set arrow 1 from (60 0) to (60 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
@@ -363,6 +364,7 @@
 
        (:set lmargin ,(*
                        1.8 ;; HACK: Magic number to create space for the larger ytics
+                       scale
                        (cl-loop
                         for proj in projects maximize
                         (pcase-let (((cl-struct gantt-project id name resources) proj))
@@ -376,8 +378,8 @@
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
 
-       (:set rmargin 5)
-       (:set bmargin 5)
+       (:set rmargin ,(* 5 scale))
+       (:set bmargin ,(* 5 scale))
 
        (:plot [0 *]
               (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
@@ -392,6 +394,7 @@
          (simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
          (height (1+ (length data)))
+         (scale (or (plist-get options :fontscale) 1.0))
          project-count)
     (apply
      'rysco-plot
@@ -423,14 +426,14 @@
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw 3 lc "#Eedd82")
-       (:set style arrow 2 nohead lw 20 lc "#8deeee")
+       (:set style arrow 1 nohead lw ,(* 3 scale) lc "#Eedd82")
+       (:set style arrow 2 nohead lw ,(* 20 scale) lc "#8deeee")
 
        ,@(cl-loop
           for i upfrom 0
           for color in (gantt-create-palette project-count)
           collect
-          `(:set style arrow ,(+ i 3) nohead lw 30 lc ,color))
+          `(:set style arrow ,(+ i 3) nohead lw ,(* 30 scale) lc ,color))
 
        (:set arrow 1 from (60 0) to (60 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
@@ -451,12 +454,14 @@
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) 10))
 
-       (:set lmargin ,(cl-loop
+       (:set lmargin ,(*
+                       scale
+                       (cl-loop
                         for proj in projects maximize
                         (pcase-let (((cl-struct gantt-project id name resources) proj))
-                          (length (format "%s: %s" name resources)))))
-       (:set rmargin 5)
-       (:set bmargin 5)
+                          (length (format "%s: %s" name resources))))))
+       (:set rmargin ,(* 5 scale))
+       (:set bmargin ,(* 5 scale))
 
        (:plot [0 *]
               (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable)))
