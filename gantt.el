@@ -323,7 +323,8 @@
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
          (height (1+ (length projects)))
-         blockers)
+         blockers
+         fails)
     (apply
      'rysco-plot
      `((:unset key)
@@ -333,10 +334,13 @@
                        as entry = (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
                                     (when start-blocker
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
-                                    `(,started ,i ,(- (or ended 100) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
+                                    (unless (or started ended)
+                                      (push `(1 ,i 0 0 ,name) fails))
+                                    `(,started ,i ,(- (or ended 365) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
+       (:data fails ,@fails)
 
        (:set :border lc "white")
 
@@ -378,8 +382,8 @@
        (:plot [0 *]
               (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
               (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
-              (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front)))
-       )
+              ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front))
+              (:labels :data fails :using [1 2 5] :options (:left :font ",25" :tc "#Cf0000" :front))))
      options)))
 
 ;;;###autoload
