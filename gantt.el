@@ -384,7 +384,7 @@
                                     (when start-blocker
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless (or started ended)
-                                      (push `(1 ,i 0 0 ,name) fails))
+                                      (push `(1 ,i ,name) fails))
                                     `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
                        when entry collect entry))
 
@@ -397,16 +397,17 @@
 
        (:set style arrow 1 nohead lw ,(* scale 3) lc "#Eedd82") ;Period boundaries
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
-       (:set style arrow 3 filled lw ,(* scale 3) lc "#8b008b") ;External blockers
+       (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
 
        (:set arrow 1 from (60 0) to (60 ,height) as 1)
-       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
+       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 3)
 
        (:set yrange [,height 0])
        (:set grid x y)
 
        (:set ytics
              :out
+             :offset (0.25 0.25)
              :font ",28"
              :textcolor "white")
 
@@ -433,7 +434,7 @@
               (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
               (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
               ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front))
-              (:labels :data fails :using [1 2 5] :options (:left :font ",25" :tc "#Cf0000" :front))))
+              (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000" :front))))
      options)))
 
 ;;;###autoload
@@ -443,6 +444,7 @@
          (projects (gantt-simulation-projects simulation))
          (height (1+ (length data)))
          (scale (or (plist-get options :fontscale) 1.0))
+         labels
          project-count)
     (apply
      'rysco-plot
@@ -465,17 +467,26 @@
 
             append
             (cl-loop
-             for (_ _ day effort) in entries collect
-             `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))
+             for j upfrom 0
+             for (_ _ day effort) in (--sort
+                                      (< (nth 2 it)
+                                         (nth 2 other))
+                                      entries) collect
+             (progn
+               (when (= j 0)
+                 (push `(,day ,i ,proj) labels))
+               `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id)))
 
             finally do (setq project-count (hash-table-count project-colors)))))
+
+       (:data labels ,@labels)
 
        (:set :border lc "white")
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw ,(* 3 scale) lc "#Eedd82")
-       (:set style arrow 2 nohead lw ,(* 20 scale) lc "#8deeee")
+       (:set style arrow 1 nohead lw ,(* 3 scale) lc "#Eedd82") ;Period boundaries
+       (:set style arrow 2 nohead lw ,(* 6 scale) lc "#8b008b") ;Simulation boundary
 
        ,@(cl-loop
           for i upfrom 0
@@ -484,7 +495,7 @@
           `(:set style arrow ,(+ i 3) nohead lw ,(* 30 scale) lc ,color))
 
        (:set arrow 1 from (60 0) to (60 ,height) as 1)
-       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 1)
+       (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 2)
 
        (:set yrange [,height 0])
        (:set grid x y)
@@ -512,7 +523,8 @@
        (:set bmargin ,(* 5 scale))
 
        (:plot [0 *]
-              (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable)))
+              (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
+              (:labels :data labels :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#0f0f0f" :front)))
        )
      options)))
 
