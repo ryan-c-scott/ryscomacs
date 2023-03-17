@@ -107,13 +107,14 @@
 
    else collect
    (pcase exp
-     (`(after ,begin-date ,val)
-      `(when (string> simulation-date ,(format "%s" begin-date))
+     (`(after ,date ,val)
+      `(when (string> simulation-date ,(format "%s" date))
          (setq effort ,val)))
 
-     (`(before ,end-date ,val)
-      `(when (string< simulation-date ,(format "%s" begin-date))
-         (setq effort ,val)))
+     (`(before ,date ,val)
+      `(progn
+         (when (string< simulation-date ,(format "%s" date))
+         (setq effort ,val))))
 
      (`(between ,begin-date ,end-date ,val)
       `(when (and (string> simulation-date ,(format "%s" begin-date))
