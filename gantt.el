@@ -225,7 +225,7 @@
                   proj))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
   (let* ((transformed-projects (gantt-transform-projects start-date projects))
          (simulation-start-day (if simulation-date
                                      (gantt-date-to-day start-date simulation-date)
@@ -243,6 +243,51 @@
               as id = (if (listp proj) (car proj) proj)
               unless (assoc id projects) collect
               (format "No project '%s' defined in :PROJECTS section (referenced in dev '%s')" id (car dev))))))
+
+       ,(when work-log
+          `(cl-loop
+            for (proj-id dev day effort) in ',work-log
+            as proj = (gethash proj-id projects)
+
+            unless proj do
+            (setq proj
+                  (puthash
+                   proj-id
+                   (make-gantt-project
+                    :id proj-id
+                    :name proj-id
+                    :work 0
+                    :work-remaining 0)
+                   projects))
+
+            do
+            (let* ((remaining (gantt-project-work-remaining proj))
+                   (new-remaining (max 0 (- remaining effort)))
+                   (started (gantt-project-started proj))
+                   (ended (gantt-project-ended proj))
+                   (resources (gantt-project-resources proj))
+                   (resource-log (gantt-project-resource-log proj)))
+
+              (setf (gantt-project-work-remaining proj) new-remaining)
+              (setf (gantt-project-resources proj)
+                    (-uniq (append resources (list dev))))
+
+              (setf (gantt-project-resource-log proj)
+                    (append
+                     resource-log
+                     (list
+                      (list dev day effort))))
+
+              (setf (gantt-project-started proj)
+                    (if started
+                        (min day started)
+                      day))
+
+              (when (= new-remaining 0)
+                (setf (gantt-project-ended proj)
+                      (if ended
+                          (max day ended)
+                        day))))))
 
        (cl-loop
         for day from ,simulation-start-day to ,gantt-max-days
