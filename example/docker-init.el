@@ -17,7 +17,7 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(straight-use-package
- '(ryscomacs :type git :host bitbucket :repo "scott105/ryscomacs"))
+;;
+(add-to-list 'load-path (concat user-emacs-directory "elisp"))
+(require 'rysco-docker-autoloads)
 (require 'rysco-core)
