@@ -93,8 +93,8 @@
  projectile
  protobuf-mode
  rust-mode
- (rysco-graph :type git :repo "git@bitbucket.org:scott105/rysco-graph.git")
- (rysco-plot :type git :repo "git@bitbucket.org:scott105/rysco-plot.git")
+ (rysco-graph :type git :host bitbucket :repo "scott105/rysco-graph")
+ (rysco-plot :type git :host bitbucket :repo "scott105/rysco-plot")
  s
  shift-number
  svg-mode-line-themes
