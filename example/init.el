@@ -19,5 +19,5 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (straight-use-package
- '(ryscomacs :type git :host bitbucket :repo "scott105/ryscomacs"))
+ '(ryscomacs :type git :host github :repo "ryan-c-scott/ryscomacs"))
 (require 'rysco-core)
