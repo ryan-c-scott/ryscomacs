@@ -18,13 +18,13 @@ The following snippet will pull down the latest and get you setup
 ``` shell
 mkdir ~/.emacs.d
 cd ~/.emacs.d
-wget -O init.el https://bitbucket.org/scott105/ryscomacs/raw/master/example/init.el
+wget -O init.el https://raw.githubusercontent.com/ryan-c-scott/ryscomacs/master/example/init.el
 ```
 
 If you are integrating into an existing emacs configuration
 ``` emacs-lisp
 (straight-use-package
- '(ryscomacs :type git :repo "git@bitbucket.org:scott105/ryscomacs.git"))
+ '(ryscomacs :type git :host github :repo "ryan-c-scott/ryscomacs"))
 (require 'rysco-core)
 ```
 
