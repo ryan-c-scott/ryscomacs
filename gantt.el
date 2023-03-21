@@ -258,12 +258,13 @@
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
-  (let* ((transformed-projects (gantt-transform-projects start-date projects))
-         (simulation-start-day (if simulation-date
-                                     (gantt-date-to-day start-date simulation-date)
-                                   0)))
-
-    `(let ((projects ,transformed-projects)
+  (let* ((transformed-projects (gantt-transform-projects start-date projects)))
+    `(let ((start-date ,start-date)
+           (simulation-start-day ,(pcase simulation-date
+                                    ((pred stringp)
+                                     (gantt-date-to-day start-date simulation-date))
+                                    (_ 0)))
+           (projects ,transformed-projects)
            (devs ',(gantt-transform-devs devs transformed-projects)))
 
        '(:errors
@@ -278,8 +279,15 @@
 
        ,(when work-log
           `(cl-loop
-            for (proj-id dev day effort) in ',work-log
+            with max-day
+            with min-day
+
+            for (proj-id dev day effort) in ,work-log
             as proj = (gethash proj-id projects)
+
+            ,@(when (eq simulation-date 'latest)
+                `(maximize day into max-day
+                  minimize day into min-day))
 
             unless proj do
             (setq proj
@@ -319,10 +327,13 @@
                 (setf (gantt-project-ended proj)
                       (if ended
                           (max day ended)
-                        day))))))
+                        day))))
+
+            ,@(when (eq simulation-date 'latest)
+                `(finally do (setq simulation-start-day max-day)))))
 
        (cl-loop
-        for day from ,simulation-start-day to ,gantt-max-days
+        for day from simulation-start-day to ,gantt-max-days
         as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
 
         do
@@ -370,7 +381,7 @@
 
        (make-gantt-simulation
         :start-date ,start-date
-        :simulation-start ,simulation-start-day
+        :simulation-start simulation-start-day
         :projects
         (--sort
          (let ((it-start (or (gantt-project-started it) 0))
