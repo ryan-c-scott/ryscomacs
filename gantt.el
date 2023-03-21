@@ -80,6 +80,38 @@
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
+(cl-defun gantt-parse-work-log (path start-date)
+  (let ((path-data (pcase path
+                     ((rx (* any) (seq ?/ (let dev (+ alpha))) (seq ?/ (let date (+ (any alnum ?-))) ".log"))
+                      `(,dev . ,date)))))
+    (when path-data
+      (with-temp-buffer
+        (insert-file-contents-literally path)
+        (cl-loop
+         with dev = (car path-data)
+         with log-date = (cdr path-data)
+         with start-day = (gantt-date-to-day start-date log-date)
+
+         for line in (s-split "\n" (buffer-string) t)
+         as entry = (car (read-from-string (concat "(" line ")")))
+         as day-range = (pcase entry
+                          (`(* ,proj)
+                           `(0 5 ,proj)))
+         append
+         (cl-loop
+          with range-start = (+ start-day (car day-range))
+          with range-end = (+ start-day (cadr day-range))
+          with proj = (caddr day-range)
+
+          for day from range-start to range-end collect
+          `(,(format "%s" proj) ,dev ,day 1.0)))))))
+
+(cl-defun gantt-work-log-from-directory (dir start-date)
+  (cl-loop
+   for log-path in (f-entries dir nil t)
+   as data = (gantt-parse-work-log log-path start-date)
+   when data append data))
+
 (cl-defun gantt-generate-resource-log (simulation)
   (let* ((projects (gantt-simulation-projects simulation))
          (combined
