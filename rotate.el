@@ -50,7 +50,7 @@
   (interactive)
   (let* ((bl (reverse (rotate:buffer-list)))
          (nbl (append (cdr bl) (list (car bl)))))
-    (loop for w in (rotate:window-list)
+    (cl-loop for w in (rotate:window-list)
           for b in (reverse nbl)
           do (set-window-buffer w b))
     (select-window (next-window))))
@@ -147,7 +147,7 @@
           (current-pos (cl-position (selected-window) (rotate:window-list))))
       (delete-other-windows)
       (funcall proc window-num)
-      (loop for w in (rotate:window-list)
+      (cl-loop for w in (rotate:window-list)
             for b in buffer-list
             do (set-window-buffer w b))
       (select-window (nth current-pos (rotate:window-list))))))

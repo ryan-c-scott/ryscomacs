@@ -25,7 +25,7 @@
       wrapped)))
 
 (defun rysco-transient--wrap-children (children)
-  (loop
+  (cl-loop
    for (id type data) in children
    as cmd = (rysco-transient--wrap-command (plist-get data :command))
    collect

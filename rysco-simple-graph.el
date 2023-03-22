@@ -25,7 +25,7 @@
         (--any? (cl-member it all-layers :test 'string-equal) current-layers))))
 
 (cl-defun rysco-simple-graph--plist-to-settings (data &optional id color-cache rand-state layers)
-  (loop
+  (cl-loop
    with out
    with obj-layer = (plist-get data :layer)
    with visible = (rysco-simple-graph--layer-visible layers obj-layer)
@@ -58,7 +58,7 @@
       "fontcolor=\"#FF000000\", bgcolor=\"#FF000000\", color=\"#FF000000\""))))
 
 (defun rysco-simple-graph--properties (data &optional layers)
-  (loop
+  (cl-loop
    with out
    with obj-layer = (plist-get data :layer)
    with visible = (rysco-simple-graph--layer-visible layers obj-layer)
@@ -79,7 +79,7 @@
       "fontcolor=\"#FF000000\"; bgcolor=\"#FF000000\"; color=\"#FF000000\";\n"))))
 
 (cl-defun rysco-simple-graph--nodes (patch &key path name subgraph prefix properties rand-state color-cache layers)
-  (loop
+  (cl-loop
    with entry-prefix = (if path (format "%s_" path) "")
 
    for entry in patch do
@@ -313,7 +313,7 @@ DELAY is the delay between frames (passed to Imagemagick).
 LOOP is the number of loop cycles (passed to Imagemagick).
 DEBUG set to non-nil will create a single frame gif with all of the specified layers present.  Useful for seeing all of the objects at once.
 "
-  (loop
+  (cl-loop
    with filename = (or filename (rysco-simple-graph--guess-filename ".gif"))
    with delay = (or delay 100)
    with loop = (or loop 0)
@@ -343,7 +343,7 @@ DEBUG set to non-nil will create a single frame gif with all of the specified la
 
           (command-result (string-trim (shell-command-to-string cmd))))
 
-     (loop for temp in frame-list do
+     (cl-loop for temp in frame-list do
            (delete-file temp))
 
      filename)))

@@ -126,7 +126,7 @@
 
 (defun rysco-calendar-convert-same-day-periods (event-list)
   ;; Note:  Assumes (('periods ...) ...) structure
-  (loop
+  (cl-loop
    with events = (cdr event-list)
    with periods
 
@@ -309,7 +309,7 @@
   (unless (get-text-property (point) 'cfw:row-count)
     (cfw:navi-next-item-command))
 
-  (loop
+  (cl-loop
    with last-row
    as row = (get-text-property (point) 'cfw:row-count)
    as old = (get-text-property (point) 'cfw:old)

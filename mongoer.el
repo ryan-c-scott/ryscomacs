@@ -99,7 +99,7 @@
 
 (defun mongoer-output-last-input-to-kill ()
   (interactive)
-  (loop
+  (cl-loop
    for ov being the overlays from (point) to (point)
    as last-input = (overlay-get ov 'last-input)
    when last-input do
