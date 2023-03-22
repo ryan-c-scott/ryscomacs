@@ -427,7 +427,7 @@
 
 ;; Embedded images in HTML export as new backend
 ;; NOTE: From https://niklasfasching.de/posts/org-html-export-inline-images/
-(defun rysco-org-html-export-to-embedded-html (async subtree visible body)
+(defun rysco-org-html-export-to-embedded-html (&optional async subtree visible body)
   (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))
     (org-html-export-to-html nil subtree visible body)))
 
@@ -443,10 +443,11 @@
          (attributes (org-combine-plists `(:src ,data-url) attributes)))
     (org-html-close-tag "img" (org-html--make-attribute-string attributes) info)))
 
-(org-export-define-derived-backend 'html-inline-images 'html
-  :menu-entry
-  '(?h "Export to HTML"
-       ((?e "As MHTML file" rysco-org-html-export-to-embedded-html))))
+(with-eval-after-load 'ox
+    (org-export-define-derived-backend 'html-inline-images 'html
+      :menu-entry
+      '(?h "Export to HTML"
+           ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
 
 
 ;;
