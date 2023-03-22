@@ -428,7 +428,7 @@
 ;; Embedded images in HTML export as new backend
 ;; NOTE: From https://niklasfasching.de/posts/org-html-export-inline-images/
 (defun rysco-org-html-export-to-embedded-html (&optional async subtree visible body)
-  (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))
+  (cl-letf (((symbol-function 'org-html--format-image) 'rysco-format-image-inline))
     (org-html-export-to-html nil subtree visible body)))
 
 (defun rysco-format-image-inline (source attributes info)
