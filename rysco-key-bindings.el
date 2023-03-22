@@ -80,6 +80,8 @@
 ;; Multiple-Cursors
 (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
 (global-set-key (kbd "C->") 'rysco-mc-transient)
+(define-key mc/keymap (kbd "C-c n") 'mc/insert-numbers)
+(define-key mc/keymap (kbd "C-c a") 'mc/insert-letters)
 
 ;; Helpers for things that have a lot of muscle memory
 (global-set-key (kbd "<escape>d") 'kill-word)
