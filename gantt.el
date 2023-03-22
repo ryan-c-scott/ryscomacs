@@ -70,6 +70,7 @@
 
     (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
 
+;;;###autoload
 (cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
   (when start-date
     (cl-loop
