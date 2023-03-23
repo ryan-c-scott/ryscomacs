@@ -108,10 +108,11 @@
           `(,(format "%s" proj) ,dev ,day 1.0)))))))
 
 (cl-defun gantt-work-log-from-directory (dir start-date)
-  (cl-loop
-   for log-path in (f-entries dir nil t)
-   as data = (gantt-parse-work-log log-path start-date)
-   when data append data))
+  (when (f-exists? dir)
+    (cl-loop
+     for log-path in (f-entries dir nil t)
+     as data = (gantt-parse-work-log log-path start-date)
+     when data append data)))
 
 (cl-defun gantt-generate-resource-log (simulation)
   (let* ((projects (gantt-simulation-projects simulation))
@@ -331,7 +332,7 @@
                         day))))
 
             ,@(when (eq simulation-date 'latest)
-                `(finally do (setq simulation-start-day max-day)))))
+                `(finally do (setq simulation-start-day (or max-day 0))))))
 
        (cl-loop
         for day from simulation-start-day to ,gantt-max-days
