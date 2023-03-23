@@ -4,9 +4,7 @@
 
 ;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
 (let ((straight-current-profile 'rysco))
-  ;; (straight-use-package 'org)
-  ;; TEMP: Pointing org at main branch until the 'attach feature goes into a release
-  (straight-use-package '(org :type git :repo "git://git.savannah.gnu.org/emacs/org-mode.git" :branch "main"))
+  (straight-use-package 'org)
   (straight-use-package 'org-contrib))
 
 ;; Disable some features for setup duration
