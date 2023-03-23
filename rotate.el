@@ -43,7 +43,7 @@
       (call-interactively func)
       (if (>= rotate-count (- len 1))
           (setq rotate-count 0)
-        (incf rotate-count)))))
+        (cl-incf rotate-count)))))
 
 ;;;###autoload
 (defun rotate-window ()

@@ -444,10 +444,10 @@
     (org-html-close-tag "img" (org-html--make-attribute-string attributes) info)))
 
 (with-eval-after-load 'ox
-    (org-export-define-derived-backend 'html-inline-images 'html
-      :menu-entry
-      '(?h "Export to HTML"
-           ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
+  (org-export-define-derived-backend 'html-inline-images 'html
+    :menu-entry
+    '(?h "Export to HTML"
+         ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
 
 
 ;;
