@@ -177,12 +177,20 @@
            (`(:external ,date ,description)
             `(> day ,(gantt-date-to-day start-date date))))))))
 
+(cl-defun gantt-calculate-duration (data)
+  (+
+   (* (or (plist-get data :months) 0) 20)
+   (* (or (plist-get data :sprints) 0) 10)
+   (* (or (plist-get data :weeks) 0) 5)
+   (or (plist-get data :days) 0)))
+
 (cl-defun gantt-transform-projects (start-date data)
   (cl-loop
    with projects = (make-hash-table :test 'equal)
 
    for (id . proj) in data
    as id = (format "%s" id)
+   as dev-days = (gantt-calculate-duration proj)
 
    do
    (puthash
@@ -190,7 +198,7 @@
     (make-gantt-project
      :id id
      :name (or (plist-get proj :name) id)
-     :work (plist-get proj :days)
+     :work dev-days
      :confidence (plist-get proj :confidence)
      :tags (--map (format "%s" it) (plist-get proj :tags))
      ;; :adjustment adjustment
@@ -202,7 +210,7 @@
      ;; :user-data rest
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
 
-     :work-remaining (plist-get proj :days)
+     :work-remaining dev-days
      :resource-log nil)
     projects)
    finally return projects))
