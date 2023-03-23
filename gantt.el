@@ -295,6 +295,9 @@
             for (proj-id dev day effort) in ,work-log
             as proj = (gethash proj-id projects)
 
+            ,@(unless (eq simulation-date 'latest)
+                `(while (< day simulation-start-day)))
+
             ,@(when (eq simulation-date 'latest)
                 `(maximize day into max-day
                   minimize day into min-day))
