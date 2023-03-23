@@ -420,6 +420,22 @@
        (make-string (- end start) ?#)))))
 
 ;;;###autoload
+(cl-defun gantt-simulation-to-completion-table (simulation)
+  (cl-loop
+   with start-date = (gantt-simulation-start-date simulation)
+   for proj in (gantt-simulation-projects simulation)
+   as start = (floor (or (gantt-project-started proj) 0))
+   as end = (ceiling (or (gantt-project-ended proj) start))
+   as resources = (gantt-project-resources proj)
+
+   collect
+   `(,(gantt-project-name proj)
+     ,(s-join " " resources)
+     ,(format-time-string
+       "%F"
+       (gantt-day-to-date start-date end)))))
+
+;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
