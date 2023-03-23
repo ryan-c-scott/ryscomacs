@@ -18,6 +18,11 @@
   (load bootstrap-file nil 'nomessage))
 
 ;;
+(setq rysco-theme :none
+      org-confirm-babel-evaluate nil
+      user-emacs-directory "/root/.emacs.d/"
+      user-init-file (expand-file-name "init.el" user-emacs-directory))
+
 (add-to-list 'load-path (concat user-emacs-directory "elisp"))
 (require 'rysco-docker-autoloads)
 (require 'rysco-core)
