@@ -127,7 +127,8 @@
   ["Goto"
    ("o" "Origin" rysco-magit-goto-origin)
    ("b" "Branch" rysco-magit-goto-branch)
-   ("c" "Compare" rysco-magit-goto-compare)]
+   ("c" "Compare" rysco-magit-goto-compare)
+   ("a" "Actions" rysco-magit-goto-actions)]
   ["Pull Request"
    ("p" "Create" rysco-magit-pull-request)
    ("m" "Create to master" rysco-magit-pull-request-master)])
