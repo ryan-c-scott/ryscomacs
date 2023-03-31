@@ -131,38 +131,43 @@
       (-group-by 'car log)))))
 
 (cl-defun gantt-transform-effort (effort-data)
-  (cl-loop
-   with conditional-effort
-   with effort = 1.0
+  (if (numberp effort-data)
+      `(lambda (simulation-date) ,effort-data)
 
-   for exp in effort-data
-   if (numberp exp) do
-   (setq effort exp)
+    (cl-loop
+     with conditional-effort
+     with effort = 1.0
 
-   else collect
-   (pcase exp
-     (`(after ,date ,val)
-      `(when (string> simulation-date ,(format "%s" date))
-         (setq effort ,val)))
+     for exp in effort-data
+     if (numberp exp) do
+     (progn
+       (message "HERE: %s" exp)
+       (setq effort exp))
 
-     (`(before ,date ,val)
-      `(progn
-         (when (string< simulation-date ,(format "%s" date))
-         (setq effort ,val))))
+     else collect
+     (pcase exp
+       (`(after ,date ,val)
+        `(when (string> simulation-date ,(format "%s" date))
+           (setq effort ,val)))
 
-     (`(between ,begin-date ,end-date ,val)
-      `(when (and (string> simulation-date ,(format "%s" begin-date))
-                  (string< simulation-date ,(format "%s" end-date)))
-         (setq effort ,val)))
+       (`(before ,date ,val)
+        `(progn
+           (when (string< simulation-date ,(format "%s" date))
+             (setq effort ,val))))
 
-     (_ 'ERROR))
-   into conditional-effort
+       (`(between ,begin-date ,end-date ,val)
+        `(when (and (string> simulation-date ,(format "%s" begin-date))
+                    (string< simulation-date ,(format "%s" end-date)))
+           (setq effort ,val)))
 
-   finally return
-   `(lambda (simulation-date)
-      (let ((effort ,effort))
-        ,@conditional-effort
-        effort))))
+       (_ 'ERROR))
+     into conditional-effort
+
+     finally return
+     `(lambda (simulation-date)
+        (or
+         ,@conditional-effort
+         ,effort)))))
 
 (cl-defun gantt-transform-project-dependencies (start-date depencies)
   `(lambda (day project-lookup)
