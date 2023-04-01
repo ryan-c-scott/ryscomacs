@@ -97,11 +97,11 @@
          with start-day = (gantt-date-to-day start-date log-date)
 
          for line in (s-split "\n" (buffer-string) t)
-         as entry = (car (read-from-string (concat "(" line ")")))
+         as entry = (car (read-from-string (concat "(\n" line "\n)")))
          as day-range = (pcase entry
                           (`(* ,proj)
                            `(0 5 ,proj)))
-         append
+         when entry append
          (cl-loop
           with range-start = (+ start-day (car day-range))
           with range-end = (+ start-day (cadr day-range))
