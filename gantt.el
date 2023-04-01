@@ -101,7 +101,7 @@
          as day-range = (pcase entry
                           (`(* ,proj)
                            `(0 5 ,proj)))
-         when entry append
+         when (and entry day-range) append
          (cl-loop
           with range-start = (+ start-day (car day-range))
           with range-end = (+ start-day (cadr day-range))
