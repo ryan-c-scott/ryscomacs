@@ -70,16 +70,19 @@
 
     (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
 
-;;;###autoload
-(cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
+(cl-defun gantt-calculate-date-by-interval (start-date interval count &optional format-string)
   (when start-date
     (cl-loop
-     for dev-day from 0 to (* sprints 10) by 10
+     for dev-day from 0 to (* count interval) by interval
      collect
      `(,(format-time-string
          (or format-string "%m/%d")
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
+
+;;;###autoload
+(cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
+  (gantt-calculate-date-by-interval start-date 10 sprints format-string))
 
 (cl-defun gantt-parse-work-log (path start-date)
   (let ((path-data (pcase path
