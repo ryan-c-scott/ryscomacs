@@ -103,13 +103,22 @@
                         (pcase entry
                           ;; Special entries first
                           ;; Anything else is considered a work log entry
-                          ((or `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
+                          ((or
+                            ;; TODO: Find better solution to having to explicitly specify permutations
+                            ;; Full entry
+                            `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
                                  ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
                                  ,proj
                                  ,(and (pred numberp) effort))
 
-                               `(* ,proj ,(and (pred numberp) effort))
-                               `(* ,proj))
+                            ;; Effort omitted
+                            `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
+                              ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                              ,proj)
+
+                            ;; Special range symbol
+                            `(* ,proj ,(and (pred numberp) effort))
+                            `(* ,proj))
 
                            (cl-loop
                             with range-start = (+ start-day (or start 0))
