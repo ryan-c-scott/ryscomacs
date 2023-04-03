@@ -154,7 +154,7 @@
       dev
       (-group-by 'car log)))))
 
-(cl-defun gantt-transform-effort (effort-data)
+(cl-defun gantt-transform-effort (start-date effort-data)
   (if (numberp effort-data)
       `(lambda (simulation-date) ,effort-data)
 
@@ -165,23 +165,22 @@
      for exp in effort-data
      if (numberp exp) do
      (progn
-       (message "HERE: %s" exp)
        (setq effort exp))
 
      else collect
      (pcase exp
        (`(after ,date ,val)
-        `(when (string> simulation-date ,(format "%s" date))
+        `(when (>= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
            (setq effort ,val)))
 
        (`(before ,date ,val)
         `(progn
-           (when (string< simulation-date ,(format "%s" date))
+           (when (< simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
              (setq effort ,val))))
 
        (`(between ,begin-date ,end-date ,val)
-        `(when (and (string> simulation-date ,(format "%s" begin-date))
-                    (string< simulation-date ,(format "%s" end-date)))
+        `(when (and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
+                    (< simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
            (setq effort ,val)))
 
        (_ 'ERROR))
@@ -244,14 +243,14 @@
     projects)
    finally return projects))
 
-(cl-defun gantt-transform-dev-project (proj)
+(cl-defun gantt-transform-dev-project (start-date proj)
   (pcase proj
     ((pred symbolp)
      `(,(format "%s" proj)
        :effort (lambda (simulation-date) 1.0)))
     (`(,id . ,proj-data)
      `(,(format "%s" id)
-       :effort ,(gantt-transform-effort (plist-get proj-data :effort))))))
+       :effort ,(gantt-transform-effort start-date (plist-get proj-data :effort))))))
 
 (cl-defun gantt-get-tagged-projects (projects query)
   (cl-loop
@@ -259,12 +258,12 @@
    as tags = (gantt-project-tags proj)
    when (--all? (cl-member it tags :test 'string=) query) collect proj))
 
-(cl-defun gantt-transform-devs (data projects)
+(cl-defun gantt-transform-devs (start-date data projects)
   (cl-loop
    for (id . dev) in data
    collect
    `(,(format "%s" id)
-     :effort ,(gantt-transform-effort (plist-get dev :effort))
+     :effort ,(gantt-transform-effort start-date (plist-get dev :effort))
 
      :dev-work
      ,(cl-loop
@@ -304,7 +303,7 @@
                                      (gantt-date-to-day start-date simulation-date))
                                     (_ 0)))
            (projects ,transformed-projects)
-           (devs ',(gantt-transform-devs devs transformed-projects)))
+           (devs ',(gantt-transform-devs start-date devs transformed-projects)))
 
        '(:errors
          ,@(-uniq
@@ -382,8 +381,7 @@
         (cl-loop
          for (dev . data) in devs do
          (cl-loop
-          ;; TODO: Change this lambda to use day like others
-          with effort = (funcall (plist-get data :effort) simulation-date)
+          with effort = (funcall (plist-get data :effort) day)
 
           for selector in (plist-get data :dev-work)
           while (> effort 0)
