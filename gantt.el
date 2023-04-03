@@ -98,17 +98,29 @@
 
          for line in (s-split "\n" (buffer-string) t)
          as entry = (car (read-from-string (concat "(\n" line "\n)")))
-         as day-range = (pcase entry
-                          (`(* ,proj)
-                           `(0 5 ,proj)))
-         when (and entry day-range) append
-         (cl-loop
-          with range-start = (+ start-day (car day-range))
-          with range-end = (+ start-day (cadr day-range))
-          with proj = (caddr day-range)
 
-          for day from range-start to range-end collect
-          `(,(format "%s" proj) ,dev ,day 1.0)))))))
+         as log-out = (when entry
+                        (pcase entry
+                          ;; Special entries first
+                          ;; Anything else is considered a work log entry
+                          ((or `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
+                                 ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                                 ,proj
+                                 ,(and (pred numberp) effort))
+
+                               `(* ,proj ,(and (pred numberp) effort))
+                               `(* ,proj))
+
+                           (cl-loop
+                            with range-start = (+ start-day (or start 0))
+                            with range-end = (+ start-day (or end 4))
+
+                            for day from range-start to range-end collect
+                            `(,(format "%s" proj) ,dev ,day ,(or effort 1.0))))
+
+                          (_ (error "Malformed work log entry in %s: %s" path line))))
+
+         when log-out append log-out)))))
 
 (cl-defun gantt-work-log-from-directory (dir start-date)
   (when (f-exists? dir)
