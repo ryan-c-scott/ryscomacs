@@ -291,6 +291,35 @@
         (goto-char block-point)
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
+(defmacro with-rysco-org-result-src-block (&rest forms)
+  `(let* ((current (point))
+          (_ (org-babel-previous-src-block))
+          (src-start (point))
+          (result-start (org-babel-where-is-src-block-result))
+          (_ (goto-char result-start))
+          (_ (forward-line))
+          (result-end (org-babel-result-end)))
+     (when (and (>= current result-start)
+                (<= current result-end))
+       (goto-char src-start)
+       ,@forms)))
+
+;;;###autoload
+(defun rysco-org-result-execute-src ()
+  (interactive)
+  (let ((current (point)))
+    (with-rysco-org-result-src-block
+     (org-babel-execute-src-block))
+   (goto-char current)))
+
+;;;###autoload
+(defun rysco-org-result-edit-src ()
+  (interactive)
+  (with-rysco-org-result-src-block
+   (org-edit-special)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'rysco-org-result-execute-src)
+
 ;;;###autoload
 (cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
   (cl-loop
