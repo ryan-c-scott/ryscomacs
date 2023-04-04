@@ -171,17 +171,17 @@
      (pcase exp
        (`(after ,date ,val)
         `(when (>= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           (setq effort ,val)))
+           (setq effort ',val)))
 
-       (`(before ,date ,val)
+       (`(before ,date ',val)
         `(progn
            (when (< simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-             (setq effort ,val))))
+             (setq effort ',val))))
 
        (`(between ,begin-date ,end-date ,val)
         `(when (and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
                     (< simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
-           (setq effort ,val)))
+           (setq effort ',val)))
 
        (_ 'ERROR))
      into conditional-effort
@@ -382,9 +382,11 @@
 
         do
         (cl-loop
-         for (dev . data) in devs do
+         for (dev . data) in devs
+         as default-effort = (funcall (plist-get data :effort) day)
+
+         unless (eq default-effort 'PTO) do
          (cl-loop
-          with default-effort = (funcall (plist-get data :effort) day)
           with daily-effort = 0 ;; Can never exceed a single day worth of time
           with proj
           with proj-effort
