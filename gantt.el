@@ -243,15 +243,6 @@
     projects)
    finally return projects))
 
-(cl-defun gantt-transform-dev-project (start-date proj)
-  (pcase proj
-    ((pred symbolp)
-     `(,(format "%s" proj)
-       :effort (lambda (simulation-date) 1.0)))
-    (`(,id . ,proj-data)
-     `(,(format "%s" id)
-       :effort ,(gantt-transform-effort start-date (plist-get proj-data :effort))))))
-
 (cl-defun gantt-get-tagged-projects (projects query)
   (cl-loop
    for proj in projects
@@ -272,27 +263,39 @@
         with selected-projects = (pcase entry
                                    (`(:tags . ,tagset)
                                     (--map
-                                     (gantt-project-id it)
+                                     (list (gantt-project-id it))
                                      (gantt-get-tagged-projects
                                       (hash-table-values projects)
                                       tagset)))
 
                                    ((pred symbolp)
-                                    `(,(format "%s" entry)))
+                                    `((,(format "%s" entry))))
 
                                    ;; TODO: This should instead destructure from plist
-                                   (`(,id . ,_)
-                                    ;; TODO: Other data
-                                    `(,(format "%s" id))))
+                                   (`(,id . ,proj-data)
+                                    `((,(format "%s" id)
+                                       ,(--when-let (plist-get proj-data :effort)
+                                          (gantt-transform-effort start-date it))))))
 
-        for id in selected-projects
+        for (id effort-form) in selected-projects
         collect
-        `(lambda (day project-lookup)
-           (let ((proj (gethash ,id project-lookup)))
+        `(lambda (dev day default-effort project-lookup)
+           (let ((proj (gethash ,id project-lookup))
+                 (proj-effort ,(if effort-form
+                                   `(funcall ,effort-form day)
+                                 'default-effort)))
              (and proj
                   (> (gantt-project-work-remaining proj) 0)
+                  (> proj-effort 0)
                   (funcall (gantt-project-dependencies proj) day project-lookup)
-                  proj))))))))
+
+                  ;; Only contribute once per day
+                  (not
+                   (--any? (and (eq (car it) dev)
+                                (eq day (nth 2 it)))
+                           (gantt-project-resource-log proj)))
+
+                  (cons proj proj-effort)))))))))
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
@@ -371,7 +374,7 @@
                         day))))
 
             ,@(when (eq simulation-date 'latest)
-                `(finally do (setq simulation-start-day (or max-day 0))))))
+                `(finally do (setq simulation-start-day (or (and max-day (1+ max-day)) 0))))))
 
        (cl-loop
         for day from simulation-start-day to ,gantt-max-days
@@ -381,17 +384,25 @@
         (cl-loop
          for (dev . data) in devs do
          (cl-loop
-          with effort = (funcall (plist-get data :effort) day)
+          with default-effort = (funcall (plist-get data :effort) day)
+          with daily-effort = 0 ;; Can never exceed a single day worth of time
+          with proj
+          with proj-effort
 
           for selector in (plist-get data :dev-work)
-          while (> effort 0)
+          as proj-data = (funcall selector dev day default-effort projects)
 
-          as proj = (funcall selector day projects)
+          when proj-data
+          do (setq
+              proj (car proj-data)
+              proj-effort (cdr proj-data))
+
+          while (and (< daily-effort 1.0)
+                     (< daily-effort (or proj-effort default-effort)))
+
           when proj do
-          (let* (
-                 ;; TODO: Project specific effort (min of dev and project forms)
-                 (remaining (gantt-project-work-remaining proj))
-                 (new-remaining (max 0 (- remaining effort)))
+          (let* ((remaining (gantt-project-work-remaining proj))
+                 (new-remaining (max 0 (- remaining proj-effort)))
                  (work-done (- remaining new-remaining))
                  (started (gantt-project-started proj))
                  (ended (gantt-project-ended proj))
@@ -399,7 +410,7 @@
                  (resource-log (gantt-project-resource-log proj)))
 
             (when (> work-done 0)
-              (setq effort (- effort work-done))
+              (setq daily-effort (+ daily-effort work-done))
               (setf (gantt-project-work-remaining proj) new-remaining)
               (setf (gantt-project-resources proj)
                     (-uniq (append resources (list dev))))
@@ -417,7 +428,7 @@
                          (not ended))
                 (setf (gantt-project-ended proj) day)
                 ;; TESTING: No mid-day project change after completion
-                (setq effort 0)))))))
+                (setq daily-effort 1.0)))))))
 
        (make-gantt-simulation
         :start-date ,start-date
@@ -431,8 +442,7 @@
            (if (= it-start other-start)
                (< it-end other-end)
              (< it-start other-start)))
-         (hash-table-values projects))
-        ))))
+         (hash-table-values projects))))))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-table (simulation)
