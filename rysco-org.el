@@ -292,13 +292,15 @@
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
 (defmacro with-rysco-org-result-src-block (&rest forms)
-  `(let* ((current (point))
-          (_ (org-babel-previous-src-block))
-          (src-start (point))
-          (result-start (org-babel-where-is-src-block-result))
-          (_ (goto-char result-start))
-          (_ (forward-line))
-          (result-end (org-babel-result-end)))
+  `(when-let* ((current (point))
+               (_ (condition-case nil
+                      (org-babel-previous-src-block)
+                    (error nil)))
+               (src-start (point))
+               (result-start (org-babel-where-is-src-block-result))
+               (_ (goto-char result-start))
+               (_ (forward-line))
+               (result-end (org-babel-result-end)))
      (when (and (>= current result-start)
                 (<= current result-end))
        (goto-char src-start)
@@ -308,9 +310,9 @@
 (defun rysco-org-result-execute-src ()
   (interactive)
   (let ((current (point)))
-    (with-rysco-org-result-src-block
-     (org-babel-execute-src-block))
-   (goto-char current)))
+    (when (with-rysco-org-result-src-block
+           (org-babel-execute-src-block))
+      (goto-char current))))
 
 ;;;###autoload
 (defun rysco-org-result-edit-src ()
