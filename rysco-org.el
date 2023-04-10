@@ -292,26 +292,44 @@
         (call-interactively 'org-ctrl-c-ctrl-c)))))
 
 (defmacro with-rysco-org-result-src-block (&rest forms)
-  `(when-let* ((current (point))
-               (_ (condition-case nil
-                      (org-babel-previous-src-block)
-                    (error nil)))
-               (src-start (point))
-               (result-start (org-babel-where-is-src-block-result))
-               (_ (goto-char result-start))
-               (_ (forward-line))
-               (result-end (org-babel-result-end)))
-     (when (and (>= current result-start)
-                (<= current result-end))
-       (goto-char src-start)
-       ,@forms)))
+  `(save-excursion
+     (when-let* ((current (point))
+                 (src-start (let ((case-fold-search t))
+                                  (save-excursion
+                                    (re-search-backward
+                                     (rx (seq
+                                          line-start
+                                          (* whitespace)
+                                          "#+"
+                                          (or "BEGIN_SRC" "CALL:")))
+                                     nil t))))
+                 (_ (goto-char src-start))
+                 (result-start (org-babel-where-is-src-block-result))
+                 (_ (goto-char result-start))
+                 (_ (forward-line))
+                 (result-end (org-babel-result-end)))
+       (when (and (>= current result-start)
+                  (<= current result-end))
+         (goto-char src-start)
+         ,@forms))))
 
 ;;;###autoload
 (defun rysco-org-result-execute-src ()
   (interactive)
   (let ((current (point)))
     (when (with-rysco-org-result-src-block
-           (org-babel-execute-src-block))
+           (let* ((context
+	           (org-element-lineage
+	            (org-element-context)
+	            '(babel-call inline-babel-call inline-src-block)
+	            t))
+                  (type (org-element-type context)))
+             (pcase type
+               ((or `babel-call `inline-babel-call)
+                (let ((info (org-babel-lob-get-info context)))
+	          (when info (org-babel-execute-src-block nil info nil type))))
+               (_
+                (org-babel-execute-src-block)))))
       (goto-char current))))
 
 ;;;###autoload
@@ -320,7 +338,7 @@
   (with-rysco-org-result-src-block
    (org-edit-special)))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'rysco-org-result-execute-src)
+(add-hook 'org-ctrl-c-ctrl-c-final-hook 'rysco-org-result-execute-src)
 
 ;;;###autoload
 (cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
