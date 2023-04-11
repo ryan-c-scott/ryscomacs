@@ -475,6 +475,9 @@
      ,(s-join " " resources)
      ,(format-time-string
        "%F"
+       (gantt-day-to-date start-date start))
+     ,(format-time-string
+       "%F"
        (gantt-day-to-date start-date end)))))
 
 ;;;###autoload
