@@ -513,7 +513,8 @@
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
        (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
 
-       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       ;; TODO: Use actual end date
+       (:set arrow 1 from (70 0) to (70 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 3)
 
        (:set yrange [,height 0])
@@ -608,7 +609,8 @@
           collect
           `(:set style arrow ,(+ i 3) nohead lw ,(* 30 scale) lc ,color))
 
-       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       ;; TODO: Use actual end date
+       (:set arrow 1 from (70 0) to (70 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 2)
 
        (:set yrange [,height 0])
