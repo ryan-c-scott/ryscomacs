@@ -499,7 +499,7 @@
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless (or started ended)
                                       (push `(1 ,i ,name) fails))
-                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
+                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,name))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
@@ -527,7 +527,6 @@
              :textcolor "white")
 
        (:set lmargin ,(*
-                       1.8 ;; HACK: Magic number to create space for the larger ytics
                        scale
                        (cl-loop
                         for proj in projects maximize
