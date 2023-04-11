@@ -104,12 +104,18 @@
                           ;; Special entries first
                           ;; Anything else is considered a work log entry
                           ((or
+                            `(,(and (pred numberp) day (guard (and (>= day 0) (<= day 4))))
+                              close
+                              ,proj)
+                            `(* close ,proj))
+                           `((,(format "%s" proj) ,dev ,(+ start-day (or day 4)) close)))
+                          ((or
                             ;; TODO: Find better solution to having to explicitly specify permutations
                             ;; Full entry
                             `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
-                                 ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
-                                 ,proj
-                                 ,(and (pred numberp) effort))
+                              ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                              ,proj
+                              ,(and (pred numberp) effort))
 
                             ;; Effort omitted
                             `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
@@ -325,6 +331,9 @@
 
             for (proj-id dev day effort) in ,work-log
             as proj = (gethash proj-id projects)
+            as effort = (pcase effort
+                          ('close (gantt-project-work-remaining proj))
+                          (_ effort))
 
             ,@(unless (eq simulation-date 'latest)
                 `(while (< day simulation-start-day)))
