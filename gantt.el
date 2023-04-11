@@ -149,7 +149,7 @@
             (cons id it)
             (gantt-project-resource-log proj)))))
     (cl-loop
-     for (dev . log) in (-group-by 'cadr combined) collect
+     for (dev . log) in (--sort (string< (car it) (car other)) (-group-by 'cadr combined)) collect
      (cons
       dev
       (-group-by 'car log)))))
