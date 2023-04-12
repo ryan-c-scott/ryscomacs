@@ -145,6 +145,12 @@
      as data = (gantt-parse-work-log log-path start-date)
      when data append data)))
 
+(cl-defun gantt-read-forms-from-file (path)
+  ;; TODO: Support files not wrapped into a single form/list
+  (with-temp-buffer
+    (insert-file-contents-literally path)
+    (read (current-buffer))))
+
 (cl-defun gantt-generate-resource-log (simulation)
   (let* ((projects (gantt-simulation-projects simulation))
          (combined
@@ -300,7 +306,14 @@
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
-  (let* ((transformed-projects (gantt-transform-projects start-date projects)))
+  (let* ((projects (if (stringp projects)
+                       (gantt-read-forms-from-file projects)
+                     projects))
+         (devs (if (stringp devs)
+                   (gantt-read-forms-from-file devs)
+                 devs))
+         (transformed-projects (gantt-transform-projects start-date projects)))
+
     `(let ((start-date ,start-date)
            (simulation-start-day ,(pcase simulation-date
                                     ((pred stringp)
