@@ -15,6 +15,7 @@
   dependencies
   blockers
   tags
+  user-data
 
   ;; Simulation data
   work-remaining
@@ -235,13 +236,7 @@
      :work dev-days
      :confidence (plist-get proj :confidence)
      :tags (--map (format "%s" it) (plist-get proj :tags))
-     ;; :adjustment adjustment
-     ;; :dependencies dependencies
-     ;; :resources resources
-     ;; :blockers blockers
-     ;; :actual-started actual-started
-     ;; :actual-ended actual-ended
-     ;; :user-data rest
+     :user-data (plist-get proj :user-data)
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
 
      :work-remaining dev-days
@@ -470,24 +465,52 @@
        (make-string start ?\_)
        (make-string (- end start) ?#)))))
 
+
+;;;###autoload
+(defmacro with-gantt-simulation-projects (simulation &rest forms)
+  `(cl-loop
+    with start-date = (gantt-simulation-start-date simulation)
+    with projects = (gantt-simulation-projects simulation)
+    for proj in (--sort
+                 (string< (gantt-project-name it) (gantt-project-name other))
+                 projects)
+
+    as start = (gantt-project-started proj)
+    as end = (gantt-project-ended proj)
+
+    collect
+    (list
+     ,@(cl-loop
+        for entry in forms collect
+        (pcase entry
+          ('name
+           `(gantt-project-name proj))
+
+          ('resources
+           `(s-join " " (gantt-project-resources proj)))
+
+          ('start
+           `(when start
+              (format-time-string
+               "%F"
+               (gantt-day-to-date start-date (floor start)))))
+
+          ('end
+           `(when end
+              (format-time-string
+               "%F"
+               (gantt-day-to-date start-date (ceiling end)))))
+
+          (_ entry))))))
+
 ;;;###autoload
 (cl-defun gantt-simulation-to-completion-table (simulation)
-  (cl-loop
-   with start-date = (gantt-simulation-start-date simulation)
-   for proj in (gantt-simulation-projects simulation)
-   as start = (floor (or (gantt-project-started proj) 0))
-   as end = (ceiling (or (gantt-project-ended proj) start))
-   as resources = (gantt-project-resources proj)
-
-   collect
-   `(,(gantt-project-name proj)
-     ,(s-join " " resources)
-     ,(format-time-string
-       "%F"
-       (gantt-day-to-date start-date start))
-     ,(format-time-string
-       "%F"
-       (gantt-day-to-date start-date end)))))
+  (with-gantt-simulation-projects
+   simulation
+   name
+   resources
+   start
+   end))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
