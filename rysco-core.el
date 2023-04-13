@@ -44,87 +44,75 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages
 (rysco-packages
- org
- use-package
- transient
- alert
  (alert-toast :type git :host github :repo "gkowzan/alert-toast")
+ alert
+ all-the-icons
+ async
  autothemer
  csharp-mode
  csv-mode
  dash
- dash-functional
+ diff-hl
+ dired+
  dired-hacks
  dired-hacks-utils
- dired+
- diff-hl
- eimp
- eros
- async
- request
- molokai-theme
+ docker
+ docker-compose-mode
+ dockerfile-mode
+ doom-modeline
  doom-themes
- kaolin-themes
+ eimp
+ epl
+ eros
  expand-region
  f
  fill-column-indicator
+ flycheck
  font-lock-plus
- glsl-mode
- go-mode
+ god-mode
  graphviz-dot-mode
  helm
- (helm-org :type git :host github :repo "emacs-helm/helm-org")
- helm-projectile
  helm-descbinds
- helm-unicode
+ helm-flycheck
+ (helm-org :type git :host github :repo "emacs-helm/helm-org")
+ helm-org-ql
  helm-org-rifle
+ helm-projectile
+ helm-unicode
  hl-todo
  json-mode
- rjsx-mode
+ json-reformat
+ json-snatcher
+ kaolin-themes
  lua-mode
  magit
  markdown-mode
  memoize
+ molokai-theme
  multiple-cursors
- php-mode
- doom-modeline
+ nginx-mode
+ org
+ org-ql
+ org-sidebar
+ org-super-agenda
+ pkg-info
  projectile
- protobuf-mode
- rust-mode
+ request
+ rjsx-mode
  (rysco-graph :type git :host bitbucket :repo "scott105/rysco-graph")
  (rysco-plot :type git :host bitbucket :repo "scott105/rysco-plot")
  s
  shift-number
- svg-mode-line-themes
+ transient
  transpose-frame
- websocket
- writegood-mode
- xmlgen
- god-mode
- flycheck
- helm-flycheck
- desktop+
- all-the-icons
- epl
- json-reformat
- json-snatcher
- pkg-info
- org-super-agenda
- org-gcal
- org-sidebar
- org-ql
- helm-org-ql
- calfw
- calfw-ical
- calfw-org
- with-editor
- docker-compose-mode
- dockerfile-mode
- docker
- nginx-mode
  tree-sitter
  tree-sitter-langs
- which-key)
+ use-package
+ websocket
+ with-editor
+ writegood-mode
+ which-key
+ xmlgen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; requires
@@ -200,37 +188,9 @@
          ("Exe"
           (extension "exe" "sh" "bat")))))
 
-(rysco-auto-modes
- ("\\.h$" . c++-mode)
- ("\\.ino$" . c++-mode)
- ("\\.xml$" . xml-mode)
- ("\\.css$" . css-mode)
- ("\\.cs$" . csharp-mode)
- ("\\.shader$" . lua-mode)
- ("\\.fs$" . c++-mode)
- ("\\.vs$" . c++-mode)
- ("\\.lua$" . lua-mode)
- ("\\.particle$" . lua-mode)
- ("\\.material$" . lua-mode)
- ("\\.prefab$" . lua-mode)
- ("\\.scene$" . lua-mode)
- ("\\.deps$" . lua-mode)
- ("\\.item_list$" . lua-mode)
- ("\\.json$" . json-mode)
- ("\\.php$" . php-mode)
- ("\\.proto$" . protobuf-mode)
- ("\\.markdown$" . gfm-mode)
- ("\\.md$" . gfm-mode)
- ("\\.screenplay$" . screenwriter-mode)
- ("\\.csv$" . csv-mode)
- ("\\.dot$" . graphviz-dot-mode)
- ("\\.gv$" . graphviz-dot-mode)
- ("\\.rs$" . rust-mode))
-
 ;;;; Icons for modes
 (rysco-add-to-list
  all-the-icons-mode-icon-alist
- (monky-mode all-the-icons-faicon "mercury")
  (kodi-mode all-the-icons-material "tv")
  (lua-mode all-the-icons-fileicon "lua"))
 
@@ -489,7 +449,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
-(require 'dash-functional)
 (eval-after-load 'dash '(dash-enable-font-lock))
 
 (defun eshell/w32-explorer-path ()
