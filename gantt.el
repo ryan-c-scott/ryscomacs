@@ -15,6 +15,7 @@
   dependencies
   blockers
   tags
+  user-data
 
   ;; Simulation data
   work-remaining
@@ -104,12 +105,18 @@
                           ;; Special entries first
                           ;; Anything else is considered a work log entry
                           ((or
+                            `(,(and (pred numberp) day (guard (and (>= day 0) (<= day 4))))
+                              close
+                              ,proj)
+                            `(* close ,proj))
+                           `((,(format "%s" proj) ,dev ,(+ start-day (or day 4)) close)))
+                          ((or
                             ;; TODO: Find better solution to having to explicitly specify permutations
                             ;; Full entry
                             `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
-                                 ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
-                                 ,proj
-                                 ,(and (pred numberp) effort))
+                              ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                              ,proj
+                              ,(and (pred numberp) effort))
 
                             ;; Effort omitted
                             `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
@@ -138,6 +145,12 @@
      as data = (gantt-parse-work-log log-path start-date)
      when data append data)))
 
+(cl-defun gantt-read-forms-from-file (path)
+  ;; TODO: Support files not wrapped into a single form/list
+  (with-temp-buffer
+    (insert-file-contents-literally path)
+    (read (current-buffer))))
+
 (cl-defun gantt-generate-resource-log (simulation)
   (let* ((projects (gantt-simulation-projects simulation))
          (combined
@@ -149,7 +162,7 @@
             (cons id it)
             (gantt-project-resource-log proj)))))
     (cl-loop
-     for (dev . log) in (-group-by 'cadr combined) collect
+     for (dev . log) in (--sort (string< (car it) (car other)) (-group-by 'cadr combined)) collect
      (cons
       dev
       (-group-by 'car log)))))
@@ -229,13 +242,7 @@
      :work dev-days
      :confidence (plist-get proj :confidence)
      :tags (--map (format "%s" it) (plist-get proj :tags))
-     ;; :adjustment adjustment
-     ;; :dependencies dependencies
-     ;; :resources resources
-     ;; :blockers blockers
-     ;; :actual-started actual-started
-     ;; :actual-ended actual-ended
-     ;; :user-data rest
+     :user-data (plist-get proj :user-data)
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
 
      :work-remaining dev-days
@@ -299,7 +306,14 @@
 
 ;;;###autoload
 (cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
-  (let* ((transformed-projects (gantt-transform-projects start-date projects)))
+  (let* ((projects (if (stringp projects)
+                       (gantt-read-forms-from-file projects)
+                     projects))
+         (devs (if (stringp devs)
+                   (gantt-read-forms-from-file devs)
+                 devs))
+         (transformed-projects (gantt-transform-projects start-date projects)))
+
     `(let ((start-date ,start-date)
            (simulation-start-day ,(pcase simulation-date
                                     ((pred stringp)
@@ -325,6 +339,9 @@
 
             for (proj-id dev day effort) in ,work-log
             as proj = (gethash proj-id projects)
+            as effort = (pcase effort
+                          ('close (gantt-project-work-remaining proj))
+                          (_ effort))
 
             ,@(unless (eq simulation-date 'latest)
                 `(while (< day simulation-start-day)))
@@ -461,21 +478,52 @@
        (make-string start ?\_)
        (make-string (- end start) ?#)))))
 
+
+;;;###autoload
+(defmacro with-gantt-simulation-projects (simulation &rest forms)
+  `(cl-loop
+    with start-date = (gantt-simulation-start-date simulation)
+    with projects = (gantt-simulation-projects simulation)
+    for proj in (--sort
+                 (string< (gantt-project-name it) (gantt-project-name other))
+                 projects)
+
+    as start = (gantt-project-started proj)
+    as end = (gantt-project-ended proj)
+
+    collect
+    (list
+     ,@(cl-loop
+        for entry in forms collect
+        (pcase entry
+          ('name
+           `(gantt-project-name proj))
+
+          ('resources
+           `(s-join " " (gantt-project-resources proj)))
+
+          ('start
+           `(when start
+              (format-time-string
+               "%F"
+               (gantt-day-to-date start-date (floor start)))))
+
+          ('end
+           `(when end
+              (format-time-string
+               "%F"
+               (gantt-day-to-date start-date (ceiling end)))))
+
+          (_ entry))))))
+
 ;;;###autoload
 (cl-defun gantt-simulation-to-completion-table (simulation)
-  (cl-loop
-   with start-date = (gantt-simulation-start-date simulation)
-   for proj in (gantt-simulation-projects simulation)
-   as start = (floor (or (gantt-project-started proj) 0))
-   as end = (ceiling (or (gantt-project-ended proj) start))
-   as resources = (gantt-project-resources proj)
-
-   collect
-   `(,(gantt-project-name proj)
-     ,(s-join " " resources)
-     ,(format-time-string
-       "%F"
-       (gantt-day-to-date start-date end)))))
+  (with-gantt-simulation-projects
+   simulation
+   name
+   resources
+   start
+   end))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
@@ -496,7 +544,7 @@
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless (or started ended)
                                       (push `(1 ,i ,name) fails))
-                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,(format "%s: %s" name resources)))
+                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,name))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
@@ -510,7 +558,8 @@
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
        (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
 
-       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       ;; TODO: Use actual end date
+       (:set arrow 1 from (70 0) to (70 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 3)
 
        (:set yrange [,height 0])
@@ -523,7 +572,6 @@
              :textcolor "white")
 
        (:set lmargin ,(*
-                       1.8 ;; HACK: Magic number to create space for the larger ytics
                        scale
                        (cl-loop
                         for proj in projects maximize
@@ -605,7 +653,8 @@
           collect
           `(:set style arrow ,(+ i 3) nohead lw ,(* 30 scale) lc ,color))
 
-       (:set arrow 1 from (60 0) to (60 ,height) as 1)
+       ;; TODO: Use actual end date
+       (:set arrow 1 from (70 0) to (70 ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 2)
 
        (:set yrange [,height 0])
