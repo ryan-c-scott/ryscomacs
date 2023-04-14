@@ -107,16 +107,22 @@
   (define-key org-columns-map "n" nil)
   (define-key org-columns-map "p" nil))
 
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c t") 'rysco-org-add-triage-tag))
+
 (with-eval-after-load 'org-agenda
   (define-key org-agenda-mode-map [mouse-1] 'org-agenda-goto)
   (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
   (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
+  (define-key org-agenda-mode-map (kbd "C-c t") 'org-agenda-add-triage-tag)
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
-(with-eval-after-load 'calfw
-  (define-key cfw:calendar-mode-map "g" 'cfw:refresh-calendar-buffer)
-  (define-key cfw:calendar-mode-map "r" nil))
+(with-eval-after-load 'elisp-mode
+  (define-key emacs-lisp-mode-map (kbd "C-c C-e") 'macrostep-expand)
+  (define-key emacs-lisp-mode-map (kbd "C-c C-q") 'macrostep-collapse)
+  (define-key emacs-lisp-mode-map (kbd "C-c e") 'macrostep-expand)
+  (define-key emacs-lisp-mode-map (kbd "C-c q") 'macrostep-collapse-all))
 
 (defun markdown-unset-move-keys ()
   ""

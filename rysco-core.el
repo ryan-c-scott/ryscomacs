@@ -85,6 +85,7 @@
  json-snatcher
  kaolin-themes
  lua-mode
+ macrostep
  magit
  markdown-mode
  memoize
@@ -252,9 +253,12 @@
       org-ellipsis " ➟"
 
       org-super-agenda-groups
-      '((:name "Unfiled"
+      '((:name "Triage"
+               :tag "triage"
+               :order 2)
+        (:name "Unfiled"
                :file-path "unfiled.org"
-               :order 0)
+               :order 1)
         (:name "NOW"
                :todo "NOW"
                :transformer rysco-agenda-project-header
@@ -262,26 +266,26 @@
         (:name "Due Today"
                :deadline today
                :transformer rysco-agenda-project-header
-               :order 0)
+               :order 3)
         (:name "Due Soon"
                :deadline t
                :transformer rysco-agenda-project-header
-               :order 0)
+               :order 3)
         (:name "WAITING"
                :todo "WAITING"
                :transformer rysco-agenda-project-header
-               :order 1)
+               :order 4)
         (:name "NEXT"
                :todo "NEXT"
                :transformer rysco-agenda-project-header
-               :order 0)
+               :order 4)
         (:name "Priority"
                :priority ("A" "B" "C")
                :transformer rysco-agenda-project-header
-               :order 2)
+               :order 4)
         (:name "Habits"
                :habit t
-               :order 3)
+               :order 5)
         (:todo "INACTIVE"
                :order 8)
         (:auto-property "ProjectId"

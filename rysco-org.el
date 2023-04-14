@@ -499,5 +499,16 @@
          ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
 
 
+(defun rysco-org-add-triage-tag ()
+  (interactive)
+  (org-toggle-tag "triage"))
+
+(defun rysco-org-agenda-add-triage-tag ()
+  (interactive)
+    (--when-let (org-get-at-bol 'org-marker)
+      (with-current-buffer (marker-buffer it)
+        (goto-char (marker-position it))
+        (rysco-org-add-triage-tag))))
+
 ;;
 (provide 'rysco-org)
