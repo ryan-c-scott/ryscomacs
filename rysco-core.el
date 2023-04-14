@@ -364,22 +364,6 @@
       graphviz-dot-auto-indent-on-newline nil
       git-commit-style-convention-checks nil)
 
-;; Calfw display
-(setq cfw:event-format-overview "%s%t"
-      cfw:fchar-junction ?╋
-      cfw:fchar-vertical-line ?┃
-      cfw:fchar-horizontal-line ?━
-      cfw:fchar-left-junction ?┣
-      cfw:fchar-right-junction ?┫
-      cfw:fchar-top-junction ?┯
-      cfw:fchar-top-left-corner ?┏
-      cfw:fchar-top-right-corner ?┓
-      cfw:fstring-period-start " "
-      cfw:fstring-period-end " "
-      cfw:face-item-separator-color "Gray23"
-      cfw:render-line-breaker 'cfw:render-line-breaker-wordwrap
-      org-gcal-auto-archive nil)
-
 (custom-set-variables '(org-startup-folded t))
 
 ;; OSX Specific key bindings/fixes
