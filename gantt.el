@@ -339,6 +339,7 @@
 
             for (proj-id dev day effort) in ,work-log
             as proj = (gethash proj-id projects)
+            as closing-proj = (eq effort 'close)
             as effort = (pcase effort
                           ('close (gantt-project-work-remaining proj))
                           (_ effort))
@@ -370,14 +371,16 @@
                    (resource-log (gantt-project-resource-log proj)))
 
               (setf (gantt-project-work-remaining proj) new-remaining)
+
               (setf (gantt-project-resources proj)
                     (-uniq (append resources (list dev))))
 
-              (setf (gantt-project-resource-log proj)
-                    (append
-                     resource-log
-                     (list
-                      (list dev day effort))))
+              (unless closing-proj
+                (setf (gantt-project-resource-log proj)
+                      (append
+                       resource-log
+                       (list
+                        (list dev day effort)))))
 
               (setf (gantt-project-started proj)
                     (if started
