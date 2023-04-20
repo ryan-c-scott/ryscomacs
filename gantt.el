@@ -36,24 +36,27 @@
   dev-form)
 
 ;;;###autoload
-(cl-defun gantt-create-palette (size)
+(cl-defun gantt-create-palette (keys &optional start-id)
   (cl-loop
-   for i upfrom 0 to size
+   for i upfrom 0
+   for k in (sort keys 'string<)
    as rotations = (/ i 1.0)
 
    collect
-   (apply
-    'color-rgb-to-hex
-    `(,@(color-hsl-to-rgb
-         (mod
-          (+
-           (* i 0.3) ;; Primary rotation
-           (* rotations 0.01) ;; Increased offset for each full rotation
-           )
-          1.0)
-         (min 0.9 (+ 0.5 (* rotations 0.2)))
-         0.6)
-      2))))
+   `(,k
+     :id ,(+ i (or start-id 0))
+     :color ,(apply
+              'color-rgb-to-hex
+              `(,@(color-hsl-to-rgb
+                   (mod
+                    (+
+                     (* i 0.3) ;; Primary rotation
+                     (* rotations 0.01) ;; Increased offset for each full rotation
+                     )
+                    1.0)
+                   (min 0.9 (+ 0.5 (* rotations 0.2)))
+                   0.6)
+                2)))))
 
 (cl-defun gantt-date-to-day (start-date date)
   "Convert from real date to day number based on 5 working days per week."
@@ -532,6 +535,7 @@
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
+         (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height (1+ (length projects)))
          (scale (or (plist-get options :fontscale) 1.0))
          blockers
@@ -542,12 +546,15 @@
        (:data gantt ,@(cl-loop
                        for i upfrom 1
                        for proj in projects
+                       as style-data = (cdr (assoc (gantt-project-name proj) palette))
+                       as style-id = (plist-get style-data :id)
+
                        as entry = (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
                                     (when start-blocker
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless (or started ended)
                                       (push `(1 ,i ,name) fails))
-                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,name))
+                                    `(,started ,i ,(- (or ended gantt-max-days) (or started 0)) 0 ,id ,name ,style-id))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
@@ -560,6 +567,14 @@
        (:set style arrow 1 nohead lw ,(* scale 3) lc "#Eedd82") ;Period boundaries
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
        (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
+
+       ,@(cl-loop
+          for (_ . style-data) in palette collect
+          `(:set style
+                 arrow ,(plist-get style-data :id)
+                 nohead
+                 lw ,(* 22 scale)
+                 lc ,(plist-get style-data :color)))
 
        ;; TODO: Use actual end date
        (:set arrow 1 from (70 0) to (70 ,height) as 1)
@@ -593,7 +608,7 @@
        (:set bmargin ,(* 5 scale))
 
        (:plot [0 *]
-              (:vectors :data gantt :using [1 2 3 4 (ytic 6)] :options (:arrowstyle 2))
+              (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
               (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
               ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front))
               (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000" :front))))
@@ -604,28 +619,22 @@
   (let* ((data (gantt-generate-resource-log simulation))
          (simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-simulation-projects simulation))
+         (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
          (height (1+ (length data)))
          (scale (or (plist-get options :fontscale) 1.0))
-         labels
-         project-count)
+         labels)
     (apply
      'rysco-plot
      `((:unset key)
        (:data
         worklog
         ,@(cl-loop
-           with project-colors = (make-hash-table :test 'equal)
-           with next-style-id = 3
-
            for i upfrom 1
            for (dev . proj-log) in data append
            (cl-loop
             for (proj . entries) in proj-log
-
-            as style-id = (gethash proj project-colors)
-            unless style-id do
-            (setq style-id (puthash proj next-style-id project-colors)
-                  next-style-id (1+ next-style-id))
+            as style-data = (cdr (assoc proj palette))
+            as style-id = (plist-get style-data :id)
 
             append
             (cl-loop
@@ -637,9 +646,7 @@
              (progn
                (when (= j 0)
                  (push `(,day ,i ,proj) labels))
-               `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id)))
-
-            finally do (setq project-count (hash-table-count project-colors)))))
+               `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))))))
 
        (:data labels ,@labels)
 
@@ -651,10 +658,12 @@
        (:set style arrow 2 nohead lw ,(* 6 scale) lc "#8b008b") ;Simulation boundary
 
        ,@(cl-loop
-          for i upfrom 0
-          for color in (gantt-create-palette project-count)
-          collect
-          `(:set style arrow ,(+ i 3) nohead lw ,(* 30 scale) lc ,color))
+          for (_ . style-data) in palette collect
+          `(:set style
+                 arrow ,(plist-get style-data :id)
+                 nohead
+                 lw ,(* 30 scale)
+                 lc ,(plist-get style-data :color)))
 
        ;; TODO: Use actual end date
        (:set arrow 1 from (70 0) to (70 ,height) as 1)
