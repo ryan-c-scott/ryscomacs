@@ -546,15 +546,22 @@
        (:data gantt ,@(cl-loop
                        for i upfrom 1
                        for proj in projects
-                       as style-data = (cdr (assoc (gantt-project-name proj) palette))
-                       as style-id = (plist-get style-data :id)
 
-                       as entry = (pcase-let (((cl-struct gantt-project id name started ended resources start-blocker) proj))
+                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker) proj)
+                                               (last-day (or ended
+                                                             (--reduce-from (max acc (nth 1 it))
+                                                                            started
+                                                                            resource-log)))
+                                               (style-data (cdr (assoc name palette)))
+                                               (style-id (plist-get style-data :id)))
+
                                     (when start-blocker
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
-                                    (unless (or started ended)
-                                      (push `(1 ,i ,name) fails))
-                                    `(,started ,i ,(1+ (- (or ended gantt-max-days) (or started 0))) 0 ,id ,name ,style-id))
+                                    (unless ended
+                                      (push `(,(1+ (or last-day 0)) ,i ,name) fails))
+                                    `(,started ,i
+                                      ,(1+ (- last-day (or started 0)))
+                                      0 ,id ,name ,style-id))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
