@@ -340,7 +340,7 @@
             with max-day
             with min-day
 
-            for (proj-id dev day effort) in ,work-log
+            for (proj-id dev day effort) in (--sort (< (nth 2 it) (nth 2 other)) ,work-log)
             as proj = (gethash proj-id projects)
             as closing-proj = (eq effort 'close)
             as effort = (pcase effort
