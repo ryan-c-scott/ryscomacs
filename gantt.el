@@ -196,7 +196,7 @@
 
        (`(between ,begin-date ,end-date ,val)
         `(when (and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
-                    (< simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
+                    (<= simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
            (setq effort ',val)))
 
        (_ 'ERROR))
