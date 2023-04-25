@@ -494,33 +494,28 @@
                  (string< (gantt-project-name it) (gantt-project-name other))
                  projects)
 
-    as start = (gantt-project-started proj)
-    as end = (gantt-project-ended proj)
-
     collect
-    (list
-     ,@(cl-loop
-        for entry in forms collect
-        (pcase entry
-          ('name
-           `(gantt-project-name proj))
+    (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker user-data) proj))
+      (list
+       ,@(cl-loop
+          for entry in forms collect
+          (pcase entry
+            ('resources
+             `(s-join " " resources))
 
-          ('resources
-           `(s-join " " (gantt-project-resources proj)))
+            ('start
+             `(when started
+                (format-time-string
+                 "%F"
+                 (gantt-day-to-date start-date (floor started)))))
 
-          ('start
-           `(when start
-              (format-time-string
-               "%F"
-               (gantt-day-to-date start-date (floor start)))))
+            ('end
+             `(when ended
+                (format-time-string
+                 "%F"
+                 (gantt-day-to-date start-date (ceiling ended)))))
 
-          ('end
-           `(when end
-              (format-time-string
-               "%F"
-               (gantt-day-to-date start-date (ceiling end)))))
-
-          (_ entry))))))
+            (_ entry)))))))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-completion-table (simulation)
