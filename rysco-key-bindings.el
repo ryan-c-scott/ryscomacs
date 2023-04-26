@@ -114,7 +114,7 @@
   (define-key org-agenda-mode-map [mouse-1] 'org-agenda-goto)
   (define-key org-agenda-mode-map "n" 'org-agenda-next-item)
   (define-key org-agenda-mode-map "p" 'org-agenda-previous-item)
-  (define-key org-agenda-mode-map (kbd "C-c t") 'org-agenda-add-triage-tag)
+  (define-key org-agenda-mode-map (kbd "C-c t") 'rysco-org-agenda-add-triage-tag)
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
