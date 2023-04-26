@@ -80,6 +80,7 @@
  helm-projectile
  helm-unicode
  hl-todo
+ htmlize
  json-mode
  json-reformat
  json-snatcher
@@ -94,6 +95,7 @@
  nginx-mode
  org
  org-ql
+ org-reveal
  org-sidebar
  org-super-agenda
  pkg-info
@@ -303,6 +305,8 @@
       org-reverse-note-order t
 
       org-html-html5-fancy t
+
+      org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"
 
       org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted"))
@@ -569,6 +573,7 @@
 (with-eval-after-load "org"
   (require 'org-refile)
   (require 'org-attach)
+  (require 'ox-reveal)
 
   (add-to-list 'org-modules 'org-habit t)
 
