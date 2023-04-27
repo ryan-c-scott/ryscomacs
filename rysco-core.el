@@ -95,7 +95,7 @@
  nginx-mode
  org
  org-ql
- org-reveal
+ (org-reveal :type git :host github :repo "ryan-c-scott/org-reveal")
  org-sidebar
  org-super-agenda
  pkg-info
@@ -307,6 +307,7 @@
       org-html-html5-fancy t
 
       org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"
+      org-reveal-single-file t
 
       org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted"))
