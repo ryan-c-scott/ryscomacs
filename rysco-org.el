@@ -342,6 +342,9 @@
 
 ;;;###autoload
 (cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
+  "DATA is expected to be a table sorted by the first column in ascending order.
+VALUE-COLUMN can be specified to use a different column of data for processing
+(it must also be sorted in ascending order)"
   (cl-loop
    with rolling = (--map (rysco-rolling-average it) windows)
 
