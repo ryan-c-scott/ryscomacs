@@ -382,6 +382,16 @@ VALUE-COLUMN can be specified to use a different column of data for processing
    do (when degrade
         (setf carried (max 0 (* this-value (- 1 degrade)))))))
 
+(defun rysco-org-markers-from-links (links)
+  "Map Org node links to markers"
+  (save-window-excursion
+    (save-mark-and-excursion
+      (cl-loop
+       for link in links collect
+       (progn
+         (org-link-open-from-string link)
+         (point-marker))))))
+
 (defun rysco-org-agenda-post-clock-in (&optional _)
   (org-agenda-redo-all)
   (--if-let (rysco-org-agenda-find-first-todo "NOW")
