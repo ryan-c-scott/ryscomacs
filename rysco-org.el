@@ -342,6 +342,9 @@
 
 ;;;###autoload
 (cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
+  "DATA is expected to be a table sorted by the first column in ascending order.
+VALUE-COLUMN can be specified to use a different column of data for processing
+(it must also be sorted in ascending order)"
   (cl-loop
    with rolling = (--map (rysco-rolling-average it) windows)
 
@@ -378,6 +381,122 @@
      ,@(--map (funcall it this-value) rolling))
    do (when degrade
         (setf carried (max 0 (* this-value (- 1 degrade)))))))
+
+(cl-defun rysco-org-process-habit-log (periods &optional marker)
+  (with-current-buffer (if marker
+                           (marker-buffer marker)
+                         (current-buffer))
+    (when marker
+      (goto-char (marker-position marker)))
+
+    (goto-char (org-log-beginning))
+    (cons
+     (org-get-heading t t t t)
+     (rysco-org-process-date-log
+      (let* ((logbook (org-element-at-point))
+             (structure (org-element-property :structure logbook)))
+
+        (--sort
+         (string< (car it) (car other))
+         (cl-loop
+          for (beg _ _ _ _ _ end) in structure
+          as entry = (buffer-substring-no-properties beg end)
+          as completion = (pcase entry
+                            ((rx (seq "- State \"DONE\""
+                                      (*? any)
+                                      "from \"" (*? any) "\""
+                                      (*? any)
+                                      "[" (let date (*? any)) "]"))
+                             date))
+          when completion collect `(,completion))))
+      periods))))
+
+(cl-defun rysco-org-plot-habit (&key title start periods markers columns max-width section-height options)
+  (let* ((periods (or periods '(7 30 60 90)))
+         (period-titles (mapcar (lambda (p) (format "%s-day" p)) periods))
+         (markers (or markers `(,(point-marker))))
+         (title (or title (org-get-heading t t t t)))
+         (marker-count (length markers))
+         (columns (or columns 1))
+         (rows (ceiling marker-count columns))
+         (multi (> marker-count 1)))
+    (apply
+     `(rysco-plot
+       (
+        ;; TODO: Create style helpers
+        ,@(cl-loop
+           for id in '(1 2 3 4) collect
+           `(:set :linetype ,id :linewidth 1.5))
+
+        (:set :key fixed top horizontal Right noreverse enhanced autotitle box lt black linewidth 2.000 dashtype solid opaque)
+        (:set :grid)
+        (:set :border lc "white")
+        (:set :title font ",20" textcolor lt -1 norotate tc "white")
+
+        ,(when multi
+           `(:set :multiplot
+                  :layout (,rows ,columns)
+                  :scale (1 1)))
+
+        ,@(cl-loop
+           for m in markers
+           as scheduled = (org-entry-get m "SCHEDULED")
+           as repeat = (pcase scheduled
+                         ((rx
+                           (seq
+                            "<" (*? any)
+                            (let num (* digit))
+                            (let unit (any alpha))
+                            ">"))
+                          `(,num . ,unit)))
+
+           as target-interval = (/ 1.0
+                                   (* (cl-parse-integer (car repeat))
+                                      (pcase (cdr repeat)
+                                        ("d" 1)
+                                        ("w" 7)
+                                        ("m" 30)
+                                        (_ 1))))
+
+           as data = (rysco-org-process-habit-log periods m)
+           as name = (car data)
+           as id = (string-replace " " "" name)
+           as log = (cdr data)
+
+           collect
+           `(:data ,id ,@log)
+
+           if (< target-interval 1.0) append
+           `((:set style arrow 1 nohead lw 2 lc "#030303")
+             (:set arrow 1 from graph (0 ,target-interval) to graph (1 ,target-interval) as 1)
+             (:show arrow 1))
+           else collect
+           `(:unset arrow 1)
+
+           collect
+           `(:plot-date-log :title ,(format "%s (%s%s)" name (car repeat) (cdr repeat))
+                            :data ,id
+                            :start ,(or start '*)
+                            :col 3
+                            :maxy 1.0
+                            :map ,period-titles)
+           collect `(:unset :key)))
+
+       ,@(append
+          `(:dimensions
+            (,(min (or max-width 1500) (window-width nil t))
+             ,(* (or section-height 300) rows)))
+          options)))))
+
+(defun rysco-org-markers-from-links (links)
+  "Map Org node links to markers"
+  (save-window-excursion
+    (save-mark-and-excursion
+      (cl-loop
+       for link in links collect
+       (progn
+         (org-link-open-from-string link)
+         (point-marker))))))
 
 (defun rysco-org-agenda-post-clock-in (&optional _)
   (org-agenda-redo-all)
