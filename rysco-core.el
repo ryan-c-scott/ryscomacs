@@ -285,9 +285,12 @@
                :priority ("A" "B" "C")
                :transformer rysco-agenda-project-header
                :order 4)
+        (:name "Work Categories"
+               :tag "category"
+               :order 5)
         (:name "Habits"
                :habit t
-               :order 5)
+               :order 6)
         (:todo "INACTIVE"
                :order 8)
         (:auto-property "ProjectId"
