@@ -478,6 +478,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
                             :data ,id
                             :start ,(or start '*)
                             :col 3
+                            :miny 0
                             :maxy 1.0
                             :map ,period-titles)
            collect `(:unset :key)))
@@ -616,7 +617,6 @@ VALUE-COLUMN can be specified to use a different column of data for processing
     :menu-entry
     '(?h "Export to HTML"
          ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
-
 
 (defun rysco-org-add-triage-tag ()
   (interactive)
