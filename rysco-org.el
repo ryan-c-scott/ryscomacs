@@ -616,7 +616,11 @@ VALUE-COLUMN can be specified to use a different column of data for processing
   (org-export-define-derived-backend 'html-inline-images 'html
     :menu-entry
     '(?h "Export to HTML"
-         ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)))))
+         ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)
+          (?E "As MHTML file and open"
+	    (lambda (a s v b)
+	      (if a (rysco-org-html-export-to-embedded-html t s v b)
+		(org-open-file (rysco-org-html-export-to-embedded-html nil s v b)))))))))
 
 (defun rysco-org-add-triage-tag ()
   (interactive)
