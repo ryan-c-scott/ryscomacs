@@ -11,6 +11,7 @@
   id
   name
   work
+  estimate
   confidence
   dependencies
   blockers
@@ -235,6 +236,8 @@
    for (id . proj) in data
    as id = (format "%s" id)
    as dev-days = (gantt-calculate-duration proj)
+   as estimate = (plist-get proj :estimate)
+   as estimate-days = (when estimate (gantt-calculate-duration estimate))
 
    do
    (puthash
@@ -243,6 +246,7 @@
      :id id
      :name (or (plist-get proj :name) id)
      :work dev-days
+     :estimate estimate-days
      :confidence (plist-get proj :confidence)
      :tags (--map (format "%s" it) (plist-get proj :tags))
      :user-data (plist-get proj :user-data)
