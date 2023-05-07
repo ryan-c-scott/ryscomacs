@@ -493,33 +493,28 @@
 (defmacro with-gantt-simulation-projects (simulation &rest forms)
   `(cl-loop
     with start-date = (gantt-simulation-start-date simulation)
+    with simulation-start = (gantt-simulation-simulation-start simulation)
     with projects = (gantt-simulation-projects simulation)
     for proj in (--sort
                  (string< (gantt-project-name it) (gantt-project-name other))
                  projects)
 
-    collect
-    (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker user-data) proj))
-      (list
-       ,@(cl-loop
-          for entry in forms collect
-          (pcase entry
-            ('resources
-             `(s-join " " resources))
+    as out =
+    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker user-data) proj)
+                 (resources-string (s-join " " resources))
+                 (started-string (when started
+                                   (format-time-string
+                                    "%F"
+                                    (gantt-day-to-date start-date (floor started)))))
 
-            ('start
-             `(when started
-                (format-time-string
-                 "%F"
-                 (gantt-day-to-date start-date (floor started)))))
+                 (ended-string (when ended
+                                 (format-time-string
+                                  "%F"
+                                  (gantt-day-to-date start-date (ceiling ended))))))
 
-            ('end
-             `(when ended
-                (format-time-string
-                 "%F"
-                 (gantt-day-to-date start-date (ceiling ended)))))
+      (progn ,@forms))
 
-            (_ entry)))))))
+    when out collect out))
 
 ;;;###autoload
 (cl-defun gantt-simulation-to-completion-table (simulation)
