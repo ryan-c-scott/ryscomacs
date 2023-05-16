@@ -553,9 +553,10 @@
                                       (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless ended
                                       (push `(,(1+ (or last-day 0)) ,i ,name) fails))
-                                    `(,started ,i
-                                      ,(1+ (- last-day (or started 0)))
-                                      0 ,id ,name ,style-id))
+                                    (when last-day
+                                      `(,started ,i
+                                                 ,(1+ (- last-day (or started 0)))
+                                                 0 ,id ,name ,style-id)))
                        when entry collect entry))
 
        (:data blockers ,@blockers)
