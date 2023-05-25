@@ -5,7 +5,6 @@
 
 (defvar rysco-org-refile-targets nil)
 (defvar rysco-org-agenda-status-overlay nil)
-(defvar rysco-org-agenda-status-count-code-base #x278a) ; ➊
 
 (defvar rysco-org-agenda-columns 3)
 (defvar rysco-org-agenda-margin-col 2)
@@ -184,12 +183,7 @@
     (_ 'rysco-org-agenda-status-stalled)))
 
 (defun rysco-org-agenda--status-string (status count)
-  (if status
-      (format
-       "%s %s"
-       (make-string 1 (+ rysco-org-agenda-status-count-code-base (1- count)))
-       status)
-    "STALLED"))
+  (or status "STALLED"))
 
 (defun rysco-org-agenda--status-entry (project status count)
   (concat
