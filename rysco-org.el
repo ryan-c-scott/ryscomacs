@@ -499,6 +499,15 @@ VALUE-COLUMN can be specified to use a different column of data for processing
       (goto-char it)
     (rysco-org-agenda-goto-first-section)))
 
+(defun rysco-org-clock-out-switch-state (status)
+  "Callback for `org-clock-out-switch-to-state' which sets to TODO if the last clock entry has the tag 'category'"
+  (or
+   (--when-let (car org-clock-history)
+     (with-current-buffer (marker-buffer it)
+       (when (member "category" (org-get-tags (marker-position it) t))
+         "TODO")))
+   "NEXT"))
+
 (advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
 (advice-add #'org-agenda-todo :after 'org-agenda-redo-all)

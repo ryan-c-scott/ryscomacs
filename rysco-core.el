@@ -326,9 +326,9 @@
       org-clock-in-resume t
       org-clock-persist-query-resume nil
       org-clock-in-switch-to-state "NOW"
-      org-clock-out-switch-to-state "NEXT"
+      org-clock-out-switch-to-state 'rysco-org-clock-out-switch-state
       org-clock-into-drawer t
-      org-clock-out-remove-zero-time-clocks t
+      org-clock-out-remove-zero-time-clocks nil ;;TEMP: Disabled until it can be made to function correctly with the state change stuff
       org-clock-out-when-done t
       org-clock-auto-clock-resolution 'when-no-clock-is-running
       org-clock-report-include-clocking-task t
