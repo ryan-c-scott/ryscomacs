@@ -261,6 +261,15 @@
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
+(defun rysco-org-agenda-goto-last-refile ()
+  (interactive)
+  (--when-let
+      (save-window-excursion
+        (org-refile-goto-last-stored)
+        (org-element-property :title (org-element-at-point)))
+    (re-search-forward it nil t)
+    (beginning-of-line)))
+
 (defun rysco-org-get-path-string ()
   (s-replace
    "\n" ""
