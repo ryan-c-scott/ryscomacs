@@ -535,6 +535,47 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 
 (setq org-clock-heading-function 'rysco-org-clock-heading)
 
+(defun rysco-org-insert-into-drawer (txt &optional drawer-name)
+  ""
+  (save-excursion
+
+  (unless (org-at-heading-p)
+    (org-back-to-heading t))
+
+  (--when-let (org-element-at-point)
+    (narrow-to-region (org-element-property :begin it)
+                      (org-element-property :end it))
+    (let ((drawer
+           (org-element-map (org-element-parse-buffer) 'drawer
+             (lambda (drawer)
+               (when (string= (or drawer-name "LOGBOOK") (org-element-property :drawer-name drawer))
+                 drawer)) nil t)))
+      (when drawer
+        (goto-char (org-element-property :contents-begin drawer))
+        (insert txt "\n"))))))
+
+(defun rysco-org-insert-clock-entry (&optional minutes)
+  ""
+  (interactive)
+   (let* ((seconds (* 60 (or minutes 30)))
+          (now (org-read-date t t "now"))
+          (then (time-subtract now seconds)))
+     (rysco-org-insert-into-drawer
+      (concat
+       "CLOCK: "
+       (format-time-string "[%F %a %R]" then)
+       "--"
+       (format-time-string "[%F %a %R]" now)
+       " =>  "
+       (format-time-string "%R" seconds t)))))
+
+(defun rysco-org-agenda-insert-clock-entry (&optional minutes)
+  ""
+  (interactive)
+  (--when-let (org-get-at-bol 'org-hd-marker)
+    (with-current-buffer (marker-buffer it)
+      (rysco-org-insert-clock-entry minutes))))
+
 (defun rysco-org-agenda-entry-text-show-here ()
   "Add logbook from the entry as context to the current line."
   (let (m txt o)
