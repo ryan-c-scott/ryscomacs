@@ -312,13 +312,16 @@
                   (cons proj proj-effort)))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log global-effort)
   (let* ((projects (if (stringp projects)
                        (gantt-read-forms-from-file projects)
                      projects))
          (devs (if (stringp devs)
                    (gantt-read-forms-from-file devs)
                  devs))
+         (global-effort (if (stringp global-effort)
+                            (gantt-read-forms-from-file global-effort)
+                          global-effort))
          (transformed-projects (gantt-transform-projects start-date projects)))
 
     `(let ((start-date ,start-date)
@@ -327,7 +330,8 @@
                                      (gantt-date-to-day start-date simulation-date))
                                     (_ 0)))
            (projects ,transformed-projects)
-           (devs ',(gantt-transform-devs start-date devs transformed-projects)))
+           (devs ',(gantt-transform-devs start-date devs transformed-projects))
+           (global-effort ,(gantt-transform-effort start-date global-effort nil)))
 
        '(:errors
          ,@(-uniq
@@ -410,7 +414,8 @@
         do
         (cl-loop
          for (dev . data) in devs
-         as default-effort = (funcall (plist-get data :effort) day)
+         as default-effort = (or (funcall global-effort day)
+                                 (funcall (plist-get data :effort) day))
 
          unless (eq default-effort 'PTO) do
          (cl-loop
