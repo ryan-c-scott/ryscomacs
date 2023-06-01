@@ -171,13 +171,13 @@
       dev
       (-group-by 'car log)))))
 
-(cl-defun gantt-transform-effort (start-date effort-data)
+(cl-defun gantt-transform-effort (start-date effort-data default-effort)
   (if (numberp effort-data)
       `(lambda (simulation-date) ,effort-data)
 
     (cl-loop
      with conditional-effort
-     with effort = 1.0
+     with effort = default-effort
 
      for exp in effort-data
      if (numberp exp) do
@@ -268,7 +268,7 @@
    for (id . dev) in data
    collect
    `(,(format "%s" id)
-     :effort ,(gantt-transform-effort start-date (plist-get dev :effort))
+     :effort ,(gantt-transform-effort start-date (plist-get dev :effort) 1.0)
 
      :dev-work
      ,(cl-loop
@@ -289,7 +289,7 @@
                                    (`(,id . ,proj-data)
                                     `((,(format "%s" id)
                                        ,(--when-let (plist-get proj-data :effort)
-                                          (gantt-transform-effort start-date it))))))
+                                          (gantt-transform-effort start-date it 1.0))))))
 
         for (id effort-form) in selected-projects
         collect
