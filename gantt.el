@@ -549,7 +549,7 @@
                        as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker) proj)
                                                (last-day (or ended
                                                              (--reduce-from (max acc (nth 1 it))
-                                                                            started
+                                                                            (or started 0)
                                                                             resource-log)))
                                                (style-data (cdr (assoc name palette)))
                                                (style-id (plist-get style-data :id)))
