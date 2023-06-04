@@ -74,7 +74,15 @@
               with action = `(("Go to item" . (lambda (pos) (goto-char pos)))
                               ("Go to heading" . (lambda (pos)
                                                    (goto-char pos)
-                                                   (org-agenda-goto))))
+                                                   (org-agenda-goto)))
+                              ("TODO" . (lambda (pos)
+                                          (save-excursion
+                                            (goto-char pos)
+                                            (org-agenda-todo))))
+                              ("Refile" . (lambda (pos)
+                                            (save-excursion
+                                              (goto-char pos)
+                                              (org-agenda-refile)))))
 
               do (org-agenda-forward-block)
               as heading = (s-replace "\n" "" (thing-at-point 'line))
