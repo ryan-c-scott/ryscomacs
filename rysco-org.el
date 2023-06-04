@@ -37,6 +37,12 @@
   ""
   :group 'rysco-org-agenda-faces)
 
+(defface rysco-org-agenda-status-active-underutilized
+  '((t :inherit 'rysco-org-agenda-status-base
+       :foreground "DarkTurquoise"))
+  ""
+  :group 'rysco-org-agenda-faces)
+
 (defface rysco-org-agenda-status-excess
   '((t :inherit 'rysco-org-agenda-status-base
        :foreground "yellow"))
@@ -52,7 +58,7 @@
 (defface rysco-org-agenda-status-stalled
   '((t :inherit 'rysco-org-agenda-status-base
        :weight bold
-       :foreground "DarkTurquoise"))
+       :foreground "salmon"))
   ""
   :group 'rysco-org-agenda-faces)
 
@@ -175,9 +181,12 @@
           (forward-line))
      finally return found)))
 
-(defun rysco-org-agenda--status-face (status)
+(defun rysco-org-agenda--status-face (status count)
   (pcase status
-    ('ACTIVE 'rysco-org-agenda-status-active)
+    ('ACTIVE
+     (if (< count rysco-org-agenda-excess-threshold)
+         'rysco-org-agenda-status-active-underutilized
+       'rysco-org-agenda-status-active))
     ('BLOCKED 'rysco-org-agenda-status-blocked)
     ('EXCESS 'rysco-org-agenda-status-excess)
     (_ 'rysco-org-agenda-status-stalled)))
@@ -189,7 +198,7 @@
   (concat
    (propertize (format "%-10s"
                        (rysco-org-agenda--status-string status count))
-               'face (rysco-org-agenda--status-face status))
+               'face (rysco-org-agenda--status-face status count))
    (propertize (format "%-12s" project)
                'face 'rysco-org-agenda-status-project)))
 
