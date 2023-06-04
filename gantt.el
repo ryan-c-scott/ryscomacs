@@ -16,6 +16,7 @@
   dependencies
   blockers
   tags
+  type
   user-data
 
   ;; Simulation data
@@ -263,6 +264,11 @@
    as tags = (gantt-project-tags proj)
    when (--all? (cl-member it tags :test 'string=) query) collect proj))
 
+(cl-defmacro gantt-filter-projects (simulation &rest forms)
+  `(--filter
+    (and ,@forms)
+    (gantt-simulation-projects ,simulation)))
+
 (cl-defun gantt-transform-devs (start-date data projects)
   (cl-loop
    for (id . dev) in data
@@ -407,8 +413,41 @@
             ,@(when (eq simulation-date 'latest)
                 `(finally do (setq simulation-start-day (or (and max-day (1+ max-day)) 0))))))
 
+       ;; Special global effort projects (holidays, etc.)
+       ,(when global-effort
+          `(cl-loop
+            for day from 0 to ,gantt-max-days
+            as effort-id = (funcall global-effort day)
+            as specialp = (and effort-id (not (numberp effort-id)))
+            as proj = (gethash effort-id projects)
+
+            when (and specialp (not proj)) do
+            (setq proj
+                  (puthash
+                   effort-id
+                   (make-gantt-project
+                    :id effort-id
+                    :name effort-id
+                    :type 'global-events
+                    :work 0
+                    :work-remaining 0)
+                   projects))
+
+            ;; Make appropriate work entries for all devs into project
+            when specialp do
+            (cl-loop
+             for (dev . data) in devs
+             as resource-log = (gantt-project-resource-log proj)
+             do
+             (setf (gantt-project-resource-log proj)
+                   (append
+                    resource-log
+                    (list
+                     (list dev day effort-id)))))))
+
+       ;; Main simulation
        (cl-loop
-        for day from simulation-start-day to ,gantt-max-days
+        for day from 0 to ,gantt-max-days
         as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
 
         do
@@ -416,8 +455,28 @@
          for (dev . data) in devs
          as default-effort = (or (funcall global-effort day)
                                  (funcall (plist-get data :effort) day))
+         as special-entry = (not (numberp default-effort))
 
-         unless (eq default-effort 'PTO) do
+         when special-entry do
+         (let* ((proj (gethash default-effort projects))
+                (proj (or proj
+                          (puthash
+                           default-effort
+                           (make-gantt-project
+                            :id default-effort
+                            :name default-effort
+                            :type 'dev-events
+                            :work 0
+                            :work-remaining 0)
+                           projects)))
+                (resource-log (gantt-project-resource-log proj)))
+           (setf (gantt-project-resource-log proj)
+                 (append
+                  resource-log
+                  (list
+                   (list dev day default-effort)))))
+
+         when (and (>= day simulation-start-day) (not special-entry)) do
          (cl-loop
           with daily-effort = 0 ;; Can never exceed a single day worth of time
           with proj
@@ -533,7 +592,9 @@
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
-         (projects (gantt-simulation-projects simulation))
+         (projects (gantt-filter-projects
+                    simulation
+                    (not (eq (gantt-project-type it) 'global-events))))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height (1+ (length projects)))
          (scale (or (plist-get options :fontscale) 1.0))
@@ -642,6 +703,8 @@
             for (proj . entries) in proj-log
             as style-data = (cdr (assoc proj palette))
             as style-id = (plist-get style-data :id)
+            as proj-obj = (--first (string= (gantt-project-id it) proj) projects)
+            as proj-type = (gantt-project-type proj-obj)
 
             append
             (cl-loop
@@ -651,7 +714,8 @@
                                          (nth 2 other))
                                       entries) collect
              (progn
-               (when (= j 0)
+               (when (and (= j 0)
+                          (not (eq proj-type 'global-events)))
                  (push `(,day ,i ,proj) labels))
                `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))))))
 
