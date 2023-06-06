@@ -357,6 +357,7 @@
             for (proj-id dev day effort) in (--sort (< (nth 2 it) (nth 2 other)) ,work-log)
             as proj = (gethash proj-id projects)
             as closing-proj = (eq effort 'close)
+            as effort-override = (funcall global-effort day)
             as effort = (pcase effort
                           ('close (gantt-project-work-remaining proj))
                           (_ effort))
@@ -381,7 +382,7 @@
 
             do
             (let* ((remaining (gantt-project-work-remaining proj))
-                   (new-remaining (max 0 (- remaining effort)))
+                   (new-remaining (max 0 (- remaining (if (numberp effort) effort 0))))
                    (started (gantt-project-started proj))
                    (ended (gantt-project-ended proj))
                    (resources (gantt-project-resources proj))
@@ -389,10 +390,11 @@
 
               (setf (gantt-project-work-remaining proj) new-remaining)
 
-              (setf (gantt-project-resources proj)
-                    (-uniq (append resources (list dev))))
+              (unless effort-override
+                (setf (gantt-project-resources proj)
+                      (-uniq (append resources (list dev)))))
 
-              (unless closing-proj
+              (unless (or closing-proj effort-override)
                 (setf (gantt-project-resource-log proj)
                       (append
                        resource-log
