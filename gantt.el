@@ -564,7 +564,7 @@
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker user-data) proj)
+    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data) proj)
                  (resources-string (s-join " " resources))
                  (started-string (when started
                                    (format-time-string
