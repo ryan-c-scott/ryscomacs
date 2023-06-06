@@ -594,7 +594,7 @@
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (projects (gantt-filter-projects
                     simulation
-                    (not (eq (gantt-project-type it) 'global-events))))
+                    (not (gantt-project-type it))))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height (1+ (length projects)))
          (scale (or (plist-get options :fontscale) 1.0))
