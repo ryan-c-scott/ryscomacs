@@ -441,6 +441,72 @@ VALUE-COLUMN can be specified to use a different column of data for processing
           when completion collect `(,completion))))
       periods))))
 
+(cl-defun rysco-org-clocking-data (&optional start-date)
+  (--sort
+   (string< (car it) (car other))
+   (let (output total)
+     (with-rysco-files
+      (org-agenda-files t t)
+      (org-element-map (org-element-parse-buffer) 'clock
+        (lambda (clock)
+          (let* ((entry (rysco-org-element-get-ancestor
+                         clock
+                         (eq (org-element-type it) 'headline)))
+                 (timestamp-obj (org-element-property :value clock))
+                 (timestamp (format "%s-%02d-%02d"
+                                    (org-element-property :year-end timestamp-obj)
+                                    (org-element-property :month-end timestamp-obj)
+                                    (org-element-property :day-end timestamp-obj)))
+                 (period (org-read-date t nil (or start-date "-3m"))))
+
+            (when (string> timestamp period)
+              (push
+               (list
+                timestamp
+                (org-element-property :duration clock))
+               output))))))
+
+     (cl-loop
+      for (proj . data) in (--group-by (car it) output)
+      as proj-sum = (cl-loop
+                     for (_ duration) in data sum
+                     (rysco-org-duration-string-to-minutes duration))
+      do (setq total (+ (or total 0) proj-sum))
+      collect `(,proj ,proj-sum)))))
+
+(cl-defun rysco-org-plot-clocking (&key title start periods max-width options)
+  (let* ((periods (or periods '(7 30 60 90)))
+         (period-titles (mapcar (lambda (p) (format "%s-day" p)) periods))
+         (title (or title "Clocking")))
+    (apply
+     `(rysco-plot
+       (
+        ;; TODO: Create style helpers
+        ,@(cl-loop
+           for id in '(1 2 3 4) collect
+           `(:set :linetype ,id :linewidth 1.5))
+
+        (:set :key fixed top horizontal Right noreverse enhanced autotitle box lt black linewidth 2.000 dashtype solid opaque)
+        (:set :grid)
+        (:set :border lc "white")
+        (:set :title font ",20" textcolor lt -1 norotate tc "white")
+
+        (:data data ,@(rysco-org-process-date-log (rysco-org-clocking-data start) periods :value-column 1))
+
+        (:plot-date-log :title "Clocking"
+                        :data data
+                        :start *
+                        :col 3
+                        :miny 0
+                        :maxy 180
+                        :map ,period-titles))
+
+        ,@(append
+          `(:dimensions
+            (,(min (or max-width 1500) (window-width nil t))
+             400))
+          options))))))
+
 (cl-defun rysco-org-plot-habit (&key title start periods markers columns max-width section-height options)
   (let* ((periods (or periods '(7 30 60 90)))
          (period-titles (mapcar (lambda (p) (format "%s-day" p)) periods))
