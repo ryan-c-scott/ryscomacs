@@ -1168,5 +1168,14 @@ With prefix-arg prompt for type if available with your AG version."
         (_ (setq data (gethash key data))))
    finally return data))
 
+(cl-defmacro with-rysco-files (files &rest forms)
+  `(save-window-excursion
+     (cl-loop
+      for file in ,files do
+      (with-current-buffer (find-file file)
+        (save-excursion
+        (goto-char (point-min))
+        ,@forms)))))
+
 ;;
 (provide 'rysco-util)

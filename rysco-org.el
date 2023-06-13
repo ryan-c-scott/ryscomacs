@@ -287,6 +287,16 @@
     (re-search-forward it nil t)
     (beginning-of-line)))
 
+(cl-defmacro rysco-org-element-get-ancestor (element &rest forms)
+  (when element
+    `(cl-loop
+      with it = (org-element-property :parent ,element)
+      for depth from 1
+      until (progn ,@forms) do
+      (progn
+        (setq it (org-element-property :parent it)))
+      finally return it)))
+
 (defun rysco-org-get-path-string ()
   (s-replace
    "\n" ""
@@ -649,6 +659,13 @@ VALUE-COLUMN can be specified to use a different column of data for processing
     (apply func rest)))
 
 (advice-add 'org-current-effective-time :around 'rysco-org-current-effective-time-advice)
+
+
+(defun rysco-org-duration-string-to-minutes (s)
+  (cl-loop
+   for mult in (list 1 60 (* 24 60))
+   for part in (reverse (s-split ":" s))
+   sum (* (string-to-number part) mult)))
 
 (defun rysco-org-todo-on-date (arg)
   (interactive "P")
