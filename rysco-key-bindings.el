@@ -103,6 +103,11 @@
 (add-hook 'Info-mode-hook 'rysco-help-movement-hook)
 (add-hook 'helm-grep-mode-hook 'rysco-help-movement-hook)
 
+(define-key messages-buffer-mode-map "n" 'next-line)
+(define-key messages-buffer-mode-map "p" 'previous-line)
+(define-key messages-buffer-mode-map "a" 'move-beginning-of-line)
+(define-key messages-buffer-mode-map "e" 'move-end-of-line)
+
 (with-eval-after-load 'org-colview
   (define-key org-columns-map "n" nil)
   (define-key org-columns-map "p" nil))
