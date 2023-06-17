@@ -861,18 +861,7 @@ With prefix-arg prompt for type if available with your AG version."
     (helm
      :truncate-lines t
      :sources
-     `(,(when rysco-gcal-calendars
-          (helm-build-sync-source "Calendars"
-            :candidates
-            (cl-loop
-             for (id _ _ url) in rysco-gcal-calendars collect
-             `(,(propertize
-                 id
-                 'face 'rysco-common-links-title) .
-                 ,url))
-            :action action))
-
-       ,(helm-build-sync-source "Bookmarks"
+     `(,(helm-build-sync-source "Bookmarks"
           :candidates
           (when (boundp 'bookmark-alist)
             (cl-loop
