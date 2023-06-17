@@ -505,7 +505,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
           `(:dimensions
             (,(min (or max-width 1500) (window-width nil t))
              400))
-          options))))))
+          options)))))
 
 (cl-defun rysco-org-plot-habit (&key title start periods markers columns max-width section-height options)
   (let* ((periods (or periods '(7 30 60 90)))
