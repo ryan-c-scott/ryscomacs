@@ -49,6 +49,7 @@
  all-the-icons
  async
  autothemer
+ buttercup
  csharp-mode
  csv-mode
  dash
@@ -62,6 +63,7 @@
  doom-modeline
  doom-themes
  eimp
+ eldev
  epl
  eros
  expand-region

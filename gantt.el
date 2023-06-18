@@ -2,6 +2,7 @@
 
 (require 'dash)
 (require 'cl)
+(require 'org)
 
 (defvar gantt-max-days 260)
 (defvar gantt-max-sprints 26)
