@@ -24,6 +24,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Build and export
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ryscomacs:latest
+
+      - name: Test
+        run: docker --rm ${{ secrets.DOCKERHUB_USERNAME }}/ryscomacs:latest emacs -batch --chdir /root/.emacs.d/test/ -l /root/.emacs.d/init.el -L . -f buttercup-run-discover
+
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
