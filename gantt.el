@@ -41,9 +41,11 @@
 ;;;###autoload
 (cl-defun gantt-create-palette (keys &optional start-id)
   (cl-loop
+   with sep = 0.3
    for i upfrom 0
    for k in (sort keys 'string<)
-   as rotations = (/ i 1.0)
+   as rotations = (floor (* i sep))
+   as hash = (md5 (format "%s" k))
 
    collect
    `(,k
@@ -53,7 +55,7 @@
               `(,@(color-hsl-to-rgb
                    (mod
                     (+
-                     (* i 0.3) ;; Primary rotation
+                     (* i sep) ;; Primary rotation
                      (* rotations 0.01) ;; Increased offset for each full rotation
                      )
                     1.0)
