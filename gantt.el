@@ -190,6 +190,10 @@
 
      else collect
      (pcase exp
+       (`(on ,date ,val)
+        `(when (= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
+           (setq effort ',val)))
+
        (`(after ,date ,val)
         `(when (>= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
            (setq effort ',val)))
