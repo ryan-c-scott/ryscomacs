@@ -325,7 +325,7 @@
                   (cons proj proj-effort)))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-date work-log global-effort)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort)
   (let* ((projects (if (stringp projects)
                        (gantt-read-forms-from-file projects)
                      projects))
@@ -338,6 +338,7 @@
          (transformed-projects (gantt-transform-projects start-date projects)))
 
     `(let ((start-date ,start-date)
+           (simulation-days ,(or simulation-days gantt-max-days))
            (simulation-start-day ,(pcase simulation-date
                                     ((pred stringp)
                                      (gantt-date-to-day start-date simulation-date))
@@ -425,7 +426,7 @@
        ;; Special global effort projects (holidays, etc.)
        ,(when global-effort
           `(cl-loop
-            for day from 0 to ,gantt-max-days
+            for day from 0 to simulation-days
             as effort-id = (funcall global-effort day)
             as specialp = (and effort-id (not (numberp effort-id)))
             as proj = (gethash effort-id projects)
@@ -456,7 +457,7 @@
 
        ;; Main simulation
        (cl-loop
-        for day from 0 to ,gantt-max-days
+        for day from 0 to simulation-days
         as simulation-date = (format-time-string "%F" (gantt-day-to-date ,start-date day))
 
         do
