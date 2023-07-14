@@ -641,7 +641,7 @@
                                                  ,(1+ (- last-day (or started 0)))
                                                  0 ,id ,name ,style-id)))
                        when entry collect entry
-                       when entry do (incf height)))
+                       when entry do (cl-incf height)))
 
        (:data blockers ,@blockers)
        (:data fails ,@fails)
