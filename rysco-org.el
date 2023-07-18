@@ -469,7 +469,8 @@ VALUE-COLUMN can be specified to use a different column of data for processing
      (cl-loop
       for (proj . data) in (--group-by (car it) output)
       as proj-sum = (cl-loop
-                     for (_ duration) in data sum
+                     for (_ duration) in data
+                     when duration sum
                      (rysco-org-duration-string-to-minutes duration))
       do (setq total (+ (or total 0) proj-sum))
       collect `(,proj ,proj-sum)))))

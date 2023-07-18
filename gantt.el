@@ -35,6 +35,8 @@
   externals
   start-date
   simulation-start
+  view-start-day
+  view-end-day
   work-log
   dev-form)
 
@@ -325,10 +327,12 @@
                   (cons proj proj-effort)))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort view-start-date view-end-date)
   (let* ((projects (if (stringp projects)
                        (gantt-read-forms-from-file projects)
                      projects))
+         (view-start-day (--when-let view-start-date (gantt-date-to-day start-date it)))
+         (view-end-day (--when-let view-end-date (gantt-date-to-day start-date it)))
          (devs (if (stringp devs)
                    (gantt-read-forms-from-file devs)
                  devs))
@@ -536,6 +540,8 @@
        (make-gantt-simulation
         :start-date ,start-date
         :simulation-start simulation-start-day
+        :view-start-day ,view-start-day
+        :view-end-day ,view-end-day
         :projects
         (--sort
          (let ((it-start (or (gantt-project-started it) 0))
@@ -605,8 +611,10 @@
          (projects (gantt-filter-projects
                     simulation
                     (not (gantt-project-type it))))
+         (view-start (or (gantt-simulation-view-start-day simulation) 0))
+         (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
-         (height (1+ (length projects)))
+         (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          blockers
          fails)
@@ -614,7 +622,6 @@
      'rysco-plot
      `((:unset key)
        (:data gantt ,@(cl-loop
-                       for i upfrom 1
                        for proj in projects
 
                        as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker) proj)
@@ -626,14 +633,15 @@
                                                (style-id (plist-get style-data :id)))
 
                                     (when start-blocker
-                                      (push `(0 ,i ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
+                                      (push `(0 ,height ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless ended
-                                      (push `(,(1+ (or last-day 0)) ,i ,name) fails))
-                                    (when last-day
-                                      `(,started ,i
+                                      (push `(,(1+ (or last-day 0)) ,height ,name) fails))
+                                    (when (and last-day (>= last-day view-start))
+                                      `(,started ,height
                                                  ,(1+ (- last-day (or started 0)))
                                                  0 ,id ,name ,style-id)))
-                       when entry collect entry))
+                       when entry collect entry
+                       when entry do (cl-incf height)))
 
        (:data blockers ,@blockers)
        (:data fails ,@fails)
@@ -685,7 +693,7 @@
        (:set rmargin ,(* 5 scale))
        (:set bmargin ,(* 5 scale))
 
-       (:plot [0 *]
+       (:plot [,view-start ,view-end]
               (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
               (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
               ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front))
@@ -696,6 +704,8 @@
 (cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
   (let* ((data (gantt-generate-resource-log simulation))
          (simulation-start (gantt-simulation-simulation-start simulation))
+         (view-start (or (gantt-simulation-view-start-day simulation) 0))
+         (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (projects (gantt-simulation-projects simulation))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
          (height (1+ (length data)))
@@ -718,13 +728,20 @@
 
             append
             (cl-loop
-             for j upfrom 0
+             with first-in-view
              for (_ _ day effort) in (--sort
                                       (< (nth 2 it)
                                          (nth 2 other))
-                                      entries) collect
+                                      entries)
+
+             when (and (not first-in-view)
+                       (>= day view-start))
+             do (setq first-in-view day)
+
+             collect
              (progn
-               (when (and (= j 0)
+               (when (and first-in-view
+                          (= day first-in-view)
                           (not (eq proj-type 'global-events)))
                  (push `(,day ,i ,proj) labels))
                `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))))))
@@ -775,7 +792,7 @@
        (:set rmargin ,(* 5 scale))
        (:set bmargin ,(* 5 scale))
 
-       (:plot [0 *]
+       (:plot [,view-start ,view-end]
               (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
               (:labels :data labels :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#0f0f0f" :front)))
        )
