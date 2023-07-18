@@ -1119,6 +1119,7 @@ With prefix-arg prompt for type if available with your AG version."
         url (expand-file-name file base-dir) t)))))
 
 (defun rysco-data-get-path (data path)
+  "Helpers for processing nested hashes and such, like what is returned by the json parser."
   (cl-loop
    with is-hash = (hash-table-p data)
    with path = (if (stringp path)
