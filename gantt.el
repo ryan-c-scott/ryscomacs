@@ -73,13 +73,16 @@
          (weeks (/ days 7)))
     (- days (* weeks 2))))
 
-(cl-defun gantt-day-to-date (start-date day)
-  "Convert from working day to real date, assuming 5 working days per week."
+(cl-defun gantt-day-to-date (start-date day &optional time-format)
+  "Convert from working day to real date, assuming 5 working days per week.
+Optional TIME-FORMAT will return the result of the date sent to `format-time-string'"
   (let* ((week (/ day 5))
          (start (org-read-date nil t start-date))
-         (irl-offset (* week 2)))
-
-    (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
+         (irl-offset (* week 2))
+         (date (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
+    (if time-format
+        (format-time-string time-format date)
+      date)))
 
 (cl-defun gantt-calculate-date-by-interval (start-date interval count &optional format-string)
   (when start-date
@@ -710,7 +713,8 @@
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (projects (gantt-simulation-projects simulation))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
-         (height (1+ (length data)))
+         ;; (height (1+ (length data)))
+         (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          labels)
     (apply
