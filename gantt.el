@@ -575,6 +575,8 @@
     with start-date = (gantt-simulation-start-date simulation)
     with simulation-start = (gantt-simulation-simulation-start simulation)
     with projects = (gantt-simulation-projects simulation)
+    with view-start-day = (gantt-simulation-view-start-day simulation)
+    with view-end-day = (gantt-simulation-view-end-day simulation)
     for proj in (--sort
                  (string< (gantt-project-name it) (gantt-project-name other))
                  projects)
