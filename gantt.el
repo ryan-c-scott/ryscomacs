@@ -724,33 +724,38 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
         worklog
         ,@(cl-loop
            for i upfrom 1
-           for (dev . proj-log) in data append
-           (cl-loop
-            for (proj . entries) in proj-log
-            as style-data = (cdr (assoc proj palette))
-            as style-id = (plist-get style-data :id)
-            as proj-obj = (--first (string= (gantt-project-id it) proj) projects)
-            as proj-type = (gantt-project-type proj-obj)
+           for (dev . proj-log) in data
 
-            append
-            (cl-loop
-             with first-in-view
-             for (_ _ day effort) in (--sort
-                                      (< (nth 2 it)
-                                         (nth 2 other))
-                                      entries)
+           as dev-has-work = nil
+           as dev-work = (cl-loop
+                          for (proj . entries) in proj-log
+                          as style-data = (cdr (assoc proj palette))
+                          as style-id = (plist-get style-data :id)
+                          as proj-obj = (--first (string= (gantt-project-id it) proj) projects)
+                          as proj-type = (gantt-project-type proj-obj)
 
-             when (and (not first-in-view)
-                       (>= day view-start))
-             do (setq first-in-view day)
+                          append
+                          (cl-loop
+                           with first-in-view
+                           for (_ _ day effort) in (--sort
+                                                    (< (nth 2 it)
+                                                       (nth 2 other))
+                                                    entries)
 
-             collect
-             (progn
-               (when (and first-in-view
-                          (= day first-in-view)
-                          (not (eq proj-type 'global-events)))
-                 (push `(,day ,i ,proj) labels))
-               `(,proj ,dev ,day ,i ,(or 1 effort) 0 ,style-id))))))
+                           when (and (not first-in-view)
+                                     (>= day view-start))
+                           do (setq first-in-view day)
+
+                           collect
+                           (progn
+                             (when (and first-in-view
+                                        (= day first-in-view)
+                                        (not (eq proj-type 'global-events)))
+                               (setq dev-has-work t)
+                               (push `(,day ,height ,proj) labels))
+                             `(,proj ,dev ,day ,height ,(or 1 effort) 0 ,style-id))))
+           when dev-has-work do (cl-incf height)
+           when dev-has-work append dev-work))
 
        (:data labels ,@labels)
 
