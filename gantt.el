@@ -87,7 +87,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
 (cl-defun gantt-calculate-date-by-interval (start-date interval count &optional format-string)
   (when start-date
     (cl-loop
-     for dev-day from 0 to (* count interval) by interval
+     for dev-day from 0 below (* count interval) by interval
      collect
      `(,(format-time-string
          (or format-string "%m/%d")
