@@ -84,6 +84,12 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
         (format-time-string time-format date)
       date)))
 
+(cl-defun gantt-day-to-end-of-quarter-day (start-date day)
+  (let* ((date (format-time-string "%F" (gantt-day-to-date start-date day)))
+         (q (1+ (/ (cl-parse-integer (substring date 5 7)) 3)))
+         (year (cl-parse-integer (substring date 0 4))))
+    (gantt-date-to-day start-date (format "%s-%02d-01" year (1+ (* q 3))))))
+
 (cl-defun gantt-calculate-date-by-interval (start-date interval count &optional format-string)
   (when start-date
     (cl-loop
@@ -613,11 +619,13 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
 ;;;###autoload
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
+         (start-date (gantt-simulation-start-date simulation))
          (projects (gantt-filter-projects
                     simulation
                     (not (gantt-project-type it))))
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
+         (end-of-quarter (gantt-day-to-end-of-quarter-day start-date view-start))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
@@ -667,8 +675,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
                  lw ,(* 22 scale)
                  lc ,(plist-get style-data :color)))
 
-       ;; TODO: Use actual end date
-       (:set arrow 1 from (70 0) to (70 ,height) as 1)
+       (:set arrow 1 from (,end-of-quarter 0) to (,end-of-quarter ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 3)
 
        (:set yrange [,height 0])
@@ -709,8 +716,10 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
 (cl-defun gantt-simulation-to-resource-log-plot (simulation &rest options)
   (let* ((data (gantt-generate-resource-log simulation))
          (simulation-start (gantt-simulation-simulation-start simulation))
+         (start-date (gantt-simulation-start-date simulation))
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
+         (end-of-quarter (gantt-day-to-end-of-quarter-day start-date view-start))
          (projects (gantt-simulation-projects simulation))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
          ;; (height (1+ (length data)))
@@ -774,8 +783,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
                  lw ,(* 30 scale)
                  lc ,(plist-get style-data :color)))
 
-       ;; TODO: Use actual end date
-       (:set arrow 1 from (70 0) to (70 ,height) as 1)
+       (:set arrow 1 from (,end-of-quarter 0) to (,end-of-quarter ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 2)
 
        (:set yrange [,height 0])
