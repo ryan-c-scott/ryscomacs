@@ -109,7 +109,6 @@
  shift-number
  transient
  transpose-frame
- tree-sitter
  tree-sitter-langs
  use-package
  websocket
@@ -508,10 +507,7 @@
 ;; Do not use tabs
 (setq-default indent-tabs-mode nil)
 
-(require 'tree-sitter)
 (require 'tree-sitter-langs)
-(global-tree-sitter-mode)
-(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
 (add-hook 'prog-mode-hook
           (lambda ()
