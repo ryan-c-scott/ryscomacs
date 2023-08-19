@@ -82,6 +82,36 @@
   ""
   :group 'rysco-modeline)
 
+;; NOTE: Borrowed from Doom
+(defvar rysco-modeline-current-window (frame-selected-window)
+  "Current window.")
+
+;; NOTE: Borrowed from Doom
+(defun rysco-modeline--active ()
+  "Whether is an active window."
+  (unless (and (bound-and-true-p mini-frame-frame)
+               (and (frame-live-p mini-frame-frame)
+                    (frame-visible-p mini-frame-frame)))
+    (and rysco-modeline-current-window
+         (eq (frame-selected-window) rysco-modeline-current-window))))
+
+;; NOTE: Borrowed from Doom
+(defun rysco-modeline-string-pixel-width (str)
+  "Return the width of STR in pixels."
+  (if (fboundp 'string-pixel-width)
+      (string-pixel-width str)
+    (* (string-width str) (window-font-width nil 'mode-line) 1.05)))
+
+
+(defun rysco-modeline-set-selected-window ()
+  (setq rysco-modeline-current-window (selected-window)))
+
+(defun rysco-modeline-update-all ()
+  (force-mode-line-update t))
+
+(add-hook 'post-command-hook 'rysco-modeline-set-selected-window)
+(add-hook 'buffer-list-update-hook 'rysco-modeline-update-all)
+
 (defsubst rysco-modeline-vc ()
   (when (and (buffer-file-name (current-buffer)) vc-mode)
     (format "%s%s"
@@ -140,7 +170,7 @@
       (propertize
        (concat
         (format "%3s" (floor (* 100 (/ (float (window-end)) (point-max)))))
-        "%%")
+        "%% ")
        'face current-face))))
 
 (defsubst rysco-modeline-major-mode ()
@@ -189,12 +219,9 @@
    'display `((space
                :align-to
                (- (+ right right-fringe right-margin)
-                  ,(* (let ((width (doom-modeline--font-width)))
-                        (or (and (= width 1) 1)
-                            (/ width (frame-char-width) 1.0)))
-                      (+ (string-width
-                          (format-mode-line (cons "" rhs)))
-                         width-adjustment)))))))
+                  ,width-adjustment
+                  ,(* (/ 1.0 (frame-char-width))
+                      (rysco-modeline-string-pixel-width (format-mode-line (cons "" rhs)))))))))
 
 (defun rysco-modeline--section (segments)
   (cl-loop
@@ -232,13 +259,9 @@
      (_
       (format-mode-line part current-face)))))
 
-;; HACK:  Using helpers from doom-modeline
-(require 'doom-modeline-core)
-;;;;
-
 (cl-defun rysco-modeline--render (&key left center right)
   (let* (current-face
-         (is-active (doom-modeline--active))
+         (is-active (rysco-modeline--active))
          (is-god (and (boundp god-local-mode)
                       god-local-mode))
          (is-modified (buffer-modified-p))
@@ -296,8 +319,7 @@
          " "
          rysco-modeline-pos
          rysco-modeline-bluedot
-         ;; HACK: Needed to adjust everything over by a character
-         (:width 1)))))))
+         ))))))
 
 ;;;;;;;;
 (provide 'rysco-modeline)

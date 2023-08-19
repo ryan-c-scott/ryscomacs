@@ -60,7 +60,6 @@
  docker
  docker-compose-mode
  dockerfile-mode
- doom-modeline
  doom-themes
  eimp
  eldev
