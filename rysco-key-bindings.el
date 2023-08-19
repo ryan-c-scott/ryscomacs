@@ -170,11 +170,14 @@
             (local-set-key (kbd "<tab>") 'dired-subtree-toggle)
             (local-set-key [C-M-return] 'rysco-dired-os-open-dir)))
 
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+
 (add-hook 'c-mode-common-hook
           (lambda ()
             (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
-            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'csharp-mode-hook
           (lambda ()
@@ -185,31 +188,16 @@
             ;; with point inside the block, use these keys to hide/show
             (local-set-key "\C-c>"  'hs-hide-block)
             (local-set-key "\C-c<"  'hs-show-block)
-            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'python-mode-hook
           (lambda ()
-            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
-
-(add-hook 'lua-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'js-mode-hook
           (lambda ()
             (local-set-key (kbd "M-.") 'find-tag)
-            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
-
-(add-hook 'html-mode-hook
-          (lambda ()
             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
-
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
 
 (add-hook 'graphviz-dot-mode-hook
           (lambda ()
