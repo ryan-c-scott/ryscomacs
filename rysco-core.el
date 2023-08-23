@@ -16,14 +16,6 @@
 (require 'cl)
 (require 'rysco-system)
 
-;; Enable gcmh as early as possible
-(rysco-packages
- gcmh)
-
-(require 'gcmh)
-(gcmh-mode 1)
-;;;;
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
 (defvar rysco-agenda-files nil)
