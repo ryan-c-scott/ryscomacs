@@ -741,12 +741,30 @@ VALUE-COLUMN can be specified to use a different column of data for processing
       ('org-mode (org-todo arg))
       ('org-agenda-mode (org-agenda-todo arg)))))
 
+(defun rysco-org-todo-yesterday--fix-scheduled-date ()
+  "Decrement by delta from today to day of completion (which, because it's yesterday, means 1)"
+  (let* ((scheduled (org-entry-get (point) "SCHEDULED"))
+         (scheduled-time (org-get-scheduled-time (point)))
+         (repeat (org-get-repeat scheduled))
+         (yesterday (org-read-date nil nil "--1" nil scheduled-time)))
+    (org-schedule nil (concat yesterday " " repeat))))
+
 (defun rysco-org-todo-yesterday (arg)
   (interactive "P")
   (let ((rysco-org-effective-time-override (org-read-date nil t "-1")))
     (pcase major-mode
-      ('org-mode (org-todo arg))
-      ('org-agenda-mode (org-agenda-todo arg)))))
+      ('org-mode
+       (org-todo arg)
+       (rysco-org-todo-yesterday--fix-scheduled-date))
+      ('org-agenda-mode
+       (let* ((marker (or (org-get-at-bol 'org-marker)
+		          (org-agenda-error)))
+              (buffer (marker-buffer marker))
+	      (pos (marker-position marker)))
+         (org-agenda-todo arg)
+         (with-current-buffer buffer
+           (goto-char pos)
+           (rysco-org-todo-yesterday--fix-scheduled-date)))))))
 
 ;; Embedded images in HTML export as new backend
 ;; NOTE: From https://niklasfasching.de/posts/org-html-export-inline-images/
