@@ -113,7 +113,18 @@
   (define-key org-columns-map "p" nil))
 
 (with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c t") 'rysco-org-add-triage-tag))
+  (define-key org-mode-map (kbd "C-c t") 'rysco-org-add-triage-tag)
+  (define-key
+   org-read-date-minibuffer-local-map (kbd "C-b")
+   (lambda ()
+     (interactive)
+     (org-eval-in-calendar '(calendar-backward-day 1))))
+
+  (define-key
+   org-read-date-minibuffer-local-map (kbd "C-f")
+   (lambda ()
+     (interactive)
+     (org-eval-in-calendar '(calendar-forward-day 1)))))
 
 (with-eval-after-load 'org-agenda
   (define-key org-agenda-mode-map [mouse-1] 'org-agenda-goto)
