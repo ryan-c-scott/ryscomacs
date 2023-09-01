@@ -632,21 +632,28 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 (defun rysco-org-insert-into-drawer (txt &optional drawer-name)
   ""
   (save-excursion
+    (save-restriction
 
-  (unless (org-at-heading-p)
-    (org-back-to-heading t))
+      (unless (org-at-heading-p)
+        (org-back-to-heading t))
 
-  (--when-let (org-element-at-point)
-    (narrow-to-region (org-element-property :begin it)
-                      (org-element-property :end it))
-    (let ((drawer
-           (org-element-map (org-element-parse-buffer) 'drawer
-             (lambda (drawer)
-               (when (string= (or drawer-name "LOGBOOK") (org-element-property :drawer-name drawer))
-                 drawer)) nil t)))
-      (when drawer
-        (goto-char (org-element-property :contents-begin drawer))
-        (insert txt "\n"))))))
+      (--when-let (org-element-at-point)
+        (narrow-to-region (org-element-property :begin it)
+                          (org-element-property :end it))
+        (let ((drawer
+               (or
+                (org-element-map (org-element-parse-buffer) 'drawer
+                  (lambda (drawer)
+                    (when (string= (or drawer-name "LOGBOOK") (org-element-property :drawer-name drawer))
+                      drawer)) nil t)
+                (progn
+                  (forward-line)
+                  (org-insert-drawer nil (or drawer-name "LOGBOOK"))
+                  (forward-line -1)
+                  (org-element-at-point)))))
+          (when drawer
+            (goto-char (org-element-property :contents-begin drawer))
+            (insert txt "\n")))))))
 
 (defun rysco-org-insert-clock-entry (&optional minutes)
   ""
@@ -661,13 +668,15 @@ VALUE-COLUMN can be specified to use a different column of data for processing
        "--"
        (format-time-string "[%F %a %R]" now)
        " =>  "
-       (format-time-string "%R" seconds t)))))
+       (format-time-string "%R" seconds t))
+      "LOGBOOK")))
 
 (defun rysco-org-agenda-insert-clock-entry (&optional minutes)
   ""
   (interactive)
   (--when-let (org-get-at-bol 'org-hd-marker)
     (with-current-buffer (marker-buffer it)
+      (goto-char it)
       (rysco-org-insert-clock-entry minutes))))
 
 (defun rysco-org-agenda-entry-text-show-here ()
