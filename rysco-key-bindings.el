@@ -183,7 +183,9 @@
 
 (add-hook 'prog-mode-hook
           (lambda ()
-            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)))
+            (local-set-key (kbd "M-<RET>") 'indent-new-comment-line)
+            (local-set-key (kbd "C-<tab>") 'rysco-treesit-fold-toggle)
+            (local-set-key (kbd "C-c C-<tab>") 'rysco-treesit-fold-unfold-all)))
 
 (add-hook 'c-mode-common-hook
           (lambda ()
