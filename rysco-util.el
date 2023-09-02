@@ -893,7 +893,7 @@ With prefix-arg prompt for type if available with your AG version."
   (save-excursion
     (end-of-line)
     (beginning-of-defun)
-    (insert generate-autoload-cookie "\n")))
+    (insert ";;;###autoload\n")))
 
 (defun rysco-load-theme (&optional theme)
   (interactive)
