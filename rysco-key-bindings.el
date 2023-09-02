@@ -133,6 +133,7 @@
   (define-key org-agenda-mode-map (kbd "C-c t") 'rysco-org-agenda-add-triage-tag)
   (define-key org-agenda-mode-map (kbd "C-c r") 'rysco-org-agenda-goto-last-refile)
   (define-key org-agenda-mode-map (kbd "C-c f") 'rysco-org-agenda-insert-clock-entry)
+  (define-key org-agenda-mode-map (kbd "C-c y") 'rysco-org-todo-yesterday)
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
