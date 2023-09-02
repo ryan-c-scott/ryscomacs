@@ -98,10 +98,12 @@
 ;; NOTE: Borrowed from Doom
 (defun rysco-modeline-string-pixel-width (str)
   "Return the width of STR in pixels."
-  (if (fboundp 'string-pixel-width)
-      (string-pixel-width str)
-    (* (string-width str) (window-font-width nil 'mode-line) 1.05)))
-
+  ;; HACK: Commented out the string-pixel-width usage as it was causing lag in line number updating for some reason
+  ;; (if (fboundp 'string-pixel-width)
+      ;; (string-pixel-width str)
+    (* (string-width str) (window-font-width nil 'mode-line) 1.05)
+    ;; )
+  )
 
 (defun rysco-modeline-set-selected-window ()
   (setq rysco-modeline-current-window (selected-window)))
@@ -274,17 +276,20 @@
          (rhs (rysco-modeline--section right))
          (rhs-width-adjustment width-adjustment)
 
-         (center-section (rysco-modeline--section center)))
+         (center-section (rysco-modeline--section center))
+         )
 
-    `(,lhs
+    `(
+      ,lhs
       ,center-section
-      ,rhs)))
+      ,rhs
+      )))
 
 (defun rysco-modeline ()
   (interactive)
   (setq-default
    mode-line-format
-   `("%e"
+   `(;"%e"
      (:eval
       (rysco-modeline--render
        :left
@@ -301,16 +306,20 @@
          rysco-modeline-narrowed
          rysco-modeline-minor-modes
          (:active rysco-modeline-vc)
-         rysco-modeline-vc)
+         rysco-modeline-vc
+         )
 
        :center
-       '((:face rysco-modeline-backing)
+       '(
+         (:face rysco-modeline-backing)
          (:modified rysco-modeline-backing-modified)
          (:read-only rysco-modeline-backing-ro)
-         rysco-modeline-center)
+         rysco-modeline-center
+         )
 
        :right
-       '(mode-line-misc-info
+       '(
+         mode-line-misc-info
          rysco-modeline-read-only
          (:face rysco-modeline-right)
          (:inactive nil)
@@ -319,7 +328,9 @@
          " "
          rysco-modeline-pos
          rysco-modeline-bluedot
-         ))))))
+       )
+      ))
+     )))
 
 ;;;;;;;;
 (provide 'rysco-modeline)
