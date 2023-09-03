@@ -425,8 +425,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
      (org-get-heading t t t t)
      (rysco-org-process-date-log
       (let* ((logbook (org-element-at-point))
-             (structure (org-element-property :structure logbook)))
-
+             (structure (org-element-property :structure logbook nil t)))
         (--sort
          (string< (car it) (car other))
          (cl-loop
