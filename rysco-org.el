@@ -375,42 +375,43 @@
   "DATA is expected to be a table sorted by the first column in ascending order.
 VALUE-COLUMN can be specified to use a different column of data for processing
 (it must also be sorted in ascending order)"
-  (cl-loop
-   with rolling = (--map (rysco-rolling-average it) windows)
+  (when data
+    (cl-loop
+     with rolling = (--map (rysco-rolling-average it) windows)
 
-   with dates = (--map (cons (format-time-string
-                              "%F" (org-read-date nil t (car it))) (cdr it)) data)
-   with today-stamp = (format-time-string "%F")
-   with last-stamp = (if (string= today-stamp (car (-last-item dates)))
-                         today-stamp
-                       (format-time-string
-                        "%F"
-                        (org-read-date nil t "--1" nil)))
-   with first = (org-read-date nil t (caar dates))
-   with last = (org-read-date nil t "++1" nil
-                              (org-read-date
-                               nil t
-                               last-stamp))
+     with dates = (--map (cons (format-time-string
+                                "%F" (org-read-date nil t (car it))) (cdr it)) data)
+     with today-stamp = (format-time-string "%F")
+     with last-stamp = (if (string= today-stamp (car (-last-item dates)))
+                           today-stamp
+                         (format-time-string
+                          "%F"
+                          (org-read-date nil t "--1" nil)))
+     with first = (org-read-date nil t (caar dates))
+     with last = (org-read-date nil t "++1" nil
+                                (org-read-date
+                                 nil t
+                                 last-stamp))
 
-   with carried = 0
+     with carried = 0
 
-   for i from 0
-   as this-date = (org-read-date nil t (format "++%s" i) nil first)
-   as this-date-string = (format-time-string "%F" this-date)
+     for i from 0
+     as this-date = (org-read-date nil t (format "++%s" i) nil first)
+     as this-date-string = (format-time-string "%F" this-date)
 
-   while (time-less-p this-date last)
-   as entry-data = (cl-assoc this-date-string dates :test 'string=)
-   as this-value = (or (if value-column
-                           (nth value-column entry-data)
-                         (when entry-data 1.0))
-                       carried)
+     while (time-less-p this-date last)
+     as entry-data = (cl-assoc this-date-string dates :test 'string=)
+     as this-value = (or (if value-column
+                             (nth value-column entry-data)
+                           (when entry-data 1.0))
+                         carried)
 
-   collect
-   `(,this-date-string
-     ,this-value
-     ,@(--map (funcall it this-value) rolling))
-   do (when degrade
-        (setf carried (max 0 (* this-value (- 1 degrade)))))))
+     collect
+     `(,this-date-string
+       ,this-value
+       ,@(--map (funcall it this-value) rolling))
+     do (when degrade
+          (setf carried (max 0 (* this-value (- 1 degrade))))))))
 
 (cl-defun rysco-org-process-habit-log (periods &optional marker)
   (with-current-buffer (if marker
