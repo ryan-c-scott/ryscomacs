@@ -187,6 +187,9 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
       (-group-by 'car log)))))
 
 (cl-defun gantt-transform-effort (start-date effort-data default-effort)
+  "Transforms an effort form.
+The first rule that passes is used, so in the case of overlapping time periods,
+they should be listed in their order of precedence and not date."
   (if (numberp effort-data)
       `(lambda (simulation-date) ,effort-data)
 
@@ -697,7 +700,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
        (:tics x
               :options (:out
                         :font ",25"
-                        :rotate by 45 right
+                        :rotate by 20 right
                         :textcolor "white")
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) gantt-max-sprints))
@@ -797,7 +800,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
        (:tics x
               :options (:out
                         :font ",25"
-                        :rotate by 45 right
+                        :rotate by 20 right
                         :textcolor "white")
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) gantt-max-sprints))
@@ -813,8 +816,7 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
 
        (:plot [,view-start ,view-end]
               (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
-              (:labels :data labels :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#0f0f0f" :front)))
-       )
+              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white" :front))))
      options)))
 
 ;;;;
