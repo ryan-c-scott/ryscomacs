@@ -728,6 +728,7 @@ they should be listed in their order of precedence and not date."
          ;; (height (1+ (length data)))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
+         (label-placement (make-hash-table))
          labels)
     (apply
      'rysco-plot
@@ -745,6 +746,7 @@ they should be listed in their order of precedence and not date."
                           as style-id = (plist-get style-data :id)
                           as proj-obj = (--first (string= (gantt-project-id it) proj) projects)
                           as proj-type = (gantt-project-type proj-obj)
+                          as not-global-event = (not (eq proj-type 'global-events))
 
                           append
                           (cl-loop
@@ -762,10 +764,17 @@ they should be listed in their order of precedence and not date."
                            (progn
                              (when (and first-in-view
                                         (= day first-in-view)
-                                        (not (eq proj-type 'global-events)))
+                                        not-global-event)
                                (setq dev-has-work t)
-                               (push `(,day ,height ,proj) labels))
-                             `(,proj ,dev ,day ,height ,(or 1 effort) 0 ,style-id))))
+                               (pcase-let* ((`(,last-day . ,offset) (gethash height label-placement `(0 . 0)))
+                                            (delta (- day last-day))
+                                            (offset (if (< delta 10)
+                                                        (+ offset 1)
+                                                      0))
+                                            (offset 0))
+                                 (puthash height `(,day . ,offset) label-placement)
+                                 (push `(,day ,(+ height (* 0.75 (/ (mod offset 3) 3.0))) ,proj) labels)))
+                             `(,proj ,dev ,day ,height ,(or (and not-global-event effort) 1) 0 ,style-id))))
            when dev-has-work do (cl-incf height)
            when dev-has-work append dev-work))
 
