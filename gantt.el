@@ -816,7 +816,8 @@ they should be listed in their order of precedence and not date."
 
        (:plot [,view-start ,view-end]
               (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
-              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white" :front))))
+              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (0.95 0.7) :font ",20" :tc "black"))
+              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white"))))
      options)))
 
 ;;;;
