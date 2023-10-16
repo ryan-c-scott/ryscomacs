@@ -709,10 +709,12 @@ they should be listed in their order of precedence and not date."
        (:set bmargin ,(* 5 scale))
 
        (:plot [,view-start ,view-end]
-              (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
-              (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3))
-              ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf" :front))
-              (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000" :front))))
+              ,@(-non-nil
+                 `((:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
+                   ,(when blockers
+                      (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3)))
+                   ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
+                   (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000"))))))
      options)))
 
 ;;;###autoload
