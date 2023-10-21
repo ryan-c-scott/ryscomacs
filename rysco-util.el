@@ -612,9 +612,12 @@ For some reason, currently, ido-mode will get disabled..."
   "Preconfigured helm for grepping with AG in (projectile-project-root).
 With prefix-arg prompt for type if available with your AG version."
   (interactive "P")
-  (--when-let (projectile-project-root)
-    (require 'helm-files)
-    (helm-grep-ag it arg)))
+  (require 'helm-files)
+  (let ((dir (if arg
+                 default-directory
+               (projectile-project-root))))
+    (when dir
+      (helm-grep-ag dir nil))))
 
 (defun helm-rysco-occur-or-resume (arg)
   (interactive "P")
