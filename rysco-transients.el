@@ -125,6 +125,7 @@
    ("c" "Compare" rysco-magit-goto-compare)
    ("a" "Actions" rysco-magit-goto-actions)]
   ["Pull Request"
+   ("r" "Requests" rysco-magit-goto-prs)
    ("p" "Create" rysco-magit-pull-request)
    ("m" "Create to master" rysco-magit-pull-request-master)])
 

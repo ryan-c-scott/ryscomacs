@@ -1057,6 +1057,16 @@ With prefix-arg prompt for type if available with your AG version."
         ('gh "/actions")
         ('bb "/pipelines"))))))
 
+(defun rysco-magit-goto-prs ()
+  (interactive)
+  (let* ((origin (rysco-magit-get-origin)))
+    (browse-url
+     (concat
+      (rysco-magit-origin-url origin)
+      (pcase (rysco-magit-origin-host-type origin)
+        ('gh "/pulls")
+        ('bb "/pull-requests"))))))
+
 (cl-defmacro rysco-magit-set-repos (&rest forms)
   `(setq magit-repository-directories
          (--map
