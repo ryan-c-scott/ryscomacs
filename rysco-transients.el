@@ -46,7 +46,8 @@
     ("wn" "Name Frame" set-frame-name)
     ("wp" "Name Frame [Project]" rysco-name-frame-project)
     ("wc" "Clone & Narrow" rysco-clone-and-narrow)
-    ("wf" "Buffer Font" rysco-set-buffer-local-font)]
+    ("wf" "Buffer Font" rysco-set-buffer-local-font)
+    ("wy" "Repo path to kill ring" rysco-magit-path-to-kill-ring)]
 
    ["Buffer Killing"
     :setup-children rysco-transient--wrap-children

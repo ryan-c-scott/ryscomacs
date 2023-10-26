@@ -442,6 +442,13 @@ If region is active, narrow to the region boundaries first."
              (t
               (message "Not a git or hg repository")))))))
 
+(defun rysco-magit-path-to-kill-ring (&optional buffer)
+  "If in repository, add the current repo relative file path to the kill ring"
+  (interactive)
+  (require 'magit)
+  (--when-let (magit-file-relative-name)
+    (kill-new it)))
+
 (defun rysco-magit-status (&optional dir cache)
   "Like `magit-status', but attempts to switch to any existing buffer for the requested directory prior to calling `magit-status' directly"
   (interactive)
