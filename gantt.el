@@ -38,7 +38,8 @@
   view-start-day
   view-end-day
   work-log
-  dev-form)
+  dev-form
+  key-dates)
 
 ;;;###autoload
 (cl-defun gantt-create-palette (keys &optional start-id)
@@ -339,7 +340,7 @@ they should be listed in their order of precedence and not date."
                   (cons proj proj-effort)))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort view-start-date view-end-date)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort view-start-date view-end-date key-dates)
   (let* ((projects (if (stringp projects)
                        (gantt-read-forms-from-file projects)
                      projects))
@@ -361,7 +362,8 @@ they should be listed in their order of precedence and not date."
                                     (_ 0)))
            (projects ,transformed-projects)
            (devs ',(gantt-transform-devs start-date devs transformed-projects))
-           (global-effort ,(gantt-transform-effort start-date global-effort nil)))
+           (global-effort ,(gantt-transform-effort start-date global-effort nil))
+           (key-dates ',(when key-dates (gantt-read-forms-from-file key-dates))))
 
        '(:errors
          ,@(-uniq
@@ -554,6 +556,7 @@ they should be listed in their order of precedence and not date."
         :simulation-start simulation-start-day
         :view-start-day ,view-start-day
         :view-end-day ,view-end-day
+        :key-dates key-dates
         :projects
         (--sort
          (let ((it-start (or (gantt-project-started it) 0))
@@ -628,7 +631,7 @@ they should be listed in their order of precedence and not date."
                     (not (gantt-project-type it))))
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
-         (end-of-quarter (gantt-day-to-end-of-quarter-day start-date view-start))
+         (key-dates (gantt-simulation-key-dates simulation))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
@@ -662,11 +665,20 @@ they should be listed in their order of precedence and not date."
        (:data blockers ,@blockers)
        (:data fails ,@fails)
 
+       ,(when key-dates
+          `(:data
+            keydates
+            ,@(cl-loop
+               for (date label) in key-dates
+               as day = (gantt-date-to-day start-date date)
+               collect
+               `(,date ,label ,day 0 0 ,height))))
+
        (:set :border lc "white")
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw ,(* scale 3) lc "#Eedd82") ;Period boundaries
+       (:set style arrow 1 nohead lw ,(* 2 scale) lc "#999999") ;Key dates
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
        (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
 
@@ -678,7 +690,6 @@ they should be listed in their order of precedence and not date."
                  lw ,(* 22 scale)
                  lc ,(plist-get style-data :color)))
 
-       (:set arrow 1 from (,end-of-quarter 0) to (,end-of-quarter ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 3)
 
        (:set yrange [,height 0])
@@ -705,12 +716,21 @@ they should be listed in their order of precedence and not date."
               :data
               ,(gantt-calculate-sprint-dates (gantt-simulation-start-date simulation) gantt-max-sprints))
 
+       (:set x2tics
+             nomirror
+             :out
+             :font ",20"
+             :textcolor "#999999")
+
        (:set rmargin ,(* 5 scale))
        (:set bmargin ,(* 5 scale))
 
        (:plot [,view-start ,view-end]
               ,@(-non-nil
-                 `((:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
+                 `(,(when key-dates
+                      `(:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1)))
+                   (:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1))
+                   (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
                    ,(when blockers
                       (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3)))
                    ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
@@ -724,10 +744,9 @@ they should be listed in their order of precedence and not date."
          (start-date (gantt-simulation-start-date simulation))
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
-         (end-of-quarter (gantt-day-to-end-of-quarter-day start-date view-start))
+         (key-dates (gantt-simulation-key-dates simulation))
          (projects (gantt-simulation-projects simulation))
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
-         ;; (height (1+ (length data)))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          labels)
@@ -773,11 +792,20 @@ they should be listed in their order of precedence and not date."
 
        (:data labels ,@labels)
 
+       ,(when key-dates
+          `(:data
+            keydates
+            ,@(cl-loop
+               for (date label) in key-dates
+               as day = (gantt-date-to-day start-date date)
+               collect
+               `(,date ,label ,day 0 0 ,height))))
+
        (:set :border lc "white")
 
        (:set style line 1 lc "yellow")
 
-       (:set style arrow 1 nohead lw ,(* 3 scale) lc "#Eedd82") ;Period boundaries
+       (:set style arrow 1 nohead lw ,(* 2 scale) lc "#999999") ;Key dates
        (:set style arrow 2 nohead lw ,(* 6 scale) lc "#8b008b") ;Simulation boundary
 
        ,@(cl-loop
@@ -788,7 +816,6 @@ they should be listed in their order of precedence and not date."
                  lw ,(* 30 scale)
                  lc ,(plist-get style-data :color)))
 
-       (:set arrow 1 from (,end-of-quarter 0) to (,end-of-quarter ,height) as 1)
        (:set arrow 2 from (,simulation-start 0) to (,simulation-start ,height) as 2)
 
        (:set yrange [,height 0])
@@ -798,6 +825,12 @@ they should be listed in their order of precedence and not date."
              :out
              :font ",28"
              :textcolor "white")
+
+       (:set x2tics
+             nomirror
+             :out
+             :font ",20"
+             :textcolor "#999999")
 
        (:tics x
               :options (:out
@@ -817,9 +850,12 @@ they should be listed in their order of precedence and not date."
        (:set bmargin ,(* 5 scale))
 
        (:plot [,view-start ,view-end]
-              (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
-              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (0.95 0.7) :font ",20" :tc "black"))
-              (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white"))))
+              ,@(-non-nil
+                 `(,(when key-dates
+                      `(:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1)))
+                   (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
+                   (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (0.95 0.7) :font ",20" :tc "black"))
+                   (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white"))))))
      options)))
 
 ;;;;
