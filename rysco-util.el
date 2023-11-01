@@ -442,6 +442,21 @@ If region is active, narrow to the region boundaries first."
              (t
               (message "Not a git or hg repository")))))))
 
+(defun rysco-magit-shell-command-on-file (command)
+  "Execute COMMAND asynchronously; display output.
+
+Interactively, prompt for COMMAND in the minibuffer.  With a
+prefix argument COMMAND is run in the top-level directory of
+the current working tree, otherwise in `default-directory'.
+
+'%' in the command will be replaced with the current file
+in the magit status interface.
+
+See `magit-shell-command'"
+  (interactive (list (magit-read-shell-command)))
+  (magit-shell-command
+   (string-replace "%" (magit-current-file) command)))
+
 (defun rysco-magit-path-to-kill-ring (&optional buffer)
   "If in repository, add the current repo relative file path to the kill ring"
   (interactive)

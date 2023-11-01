@@ -134,7 +134,10 @@
   (define-key magit-mode-map ">" 'rysco-magit-transient)
   (transient-append-suffix 'magit-dispatch
     "!"
-    '(">" "Goto GH/BB" rysco-magit-transient)))
+    '(">" "Goto GH/BB" rysco-magit-transient))
+  (transient-append-suffix 'magit-run
+    "S"
+    '("f" "with current file as %" rysco-magit-shell-command-on-file)))
 
 ;; MC
 (with-eval-after-load 'multiple-cursors-core
