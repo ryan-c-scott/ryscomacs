@@ -120,15 +120,15 @@
 ;; Magit integration
 (transient-define-prefix rysco-magit-transient ()
   "GitHub/Bitbucket helper transient for Magit"
-  ["Goto"
-   ("o" "Origin" rysco-magit-goto-origin)
-   ("b" "Branch" rysco-magit-goto-branch)
-   ("c" "Compare" rysco-magit-goto-compare)
-   ("a" "Actions" rysco-magit-goto-actions)]
-  ["Pull Request"
-   ("r" "Requests" rysco-magit-goto-prs)
-   ("p" "Create" rysco-magit-pull-request)
-   ("m" "Create to master" rysco-magit-pull-request-master)])
+  [["Goto"
+    ("o" "Origin" rysco-magit-goto-origin)
+    ("b" "Branch" rysco-magit-goto-branch)
+    ("c" "Compare" rysco-magit-goto-compare)
+    ("a" "Actions" rysco-magit-goto-actions)]
+   ["Pull Request"
+    ("r" "Requests" rysco-magit-goto-prs)
+    ("p" "Create" rysco-magit-pull-request)
+    ("m" "Create to master" rysco-magit-pull-request-master)]])
 
 (with-eval-after-load 'magit
   (define-key magit-mode-map ">" 'rysco-magit-transient)
