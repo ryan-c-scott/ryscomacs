@@ -16,7 +16,7 @@
           (kbd (concat ,lead " " ,key))
           ,bind))))
 
-(cl-defmacro rysco-auto-modes (list &rest elements)
+(cl-defmacro rysco-auto-modes (&rest elements)
   `(progn
      ,@(cl-loop
         for entry in elements collect
