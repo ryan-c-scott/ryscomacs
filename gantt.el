@@ -625,13 +625,14 @@ they should be listed in their order of precedence and not date."
 (cl-defun gantt-simulation-to-plot (simulation &rest options)
   (let* ((simulation-start (gantt-simulation-simulation-start simulation))
          (start-date (gantt-simulation-start-date simulation))
+         (all-projects (gantt-simulation-projects simulation))
          (projects (gantt-filter-projects
                     simulation
                     (not (gantt-project-type it))))
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (key-dates (gantt-simulation-key-dates simulation))
-         (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
+         (palette (gantt-create-palette (--map (gantt-project-name it) all-projects) 4))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          blockers
@@ -728,7 +729,6 @@ they should be listed in their order of precedence and not date."
               ,@(-non-nil
                  `(,(when key-dates
                       `(:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1)))
-                   (:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1))
                    (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
                    ,(when blockers
                       (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3)))
@@ -745,7 +745,7 @@ they should be listed in their order of precedence and not date."
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (key-dates (gantt-simulation-key-dates simulation))
          (projects (gantt-simulation-projects simulation))
-         (palette (gantt-create-palette (--map (gantt-project-name it) projects) 3))
+         (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          labels)
