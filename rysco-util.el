@@ -691,7 +691,8 @@ With prefix-arg prompt for type if available with your AG version."
                   (:horizontal 'split-window-horizontally)
                   (:vertical 'split-window-vertically))
                ,(let ((size (plist-get props :size)))
-                  `(floor (* ,size window-size))))
+                  (unless (= size 0.5)
+                    `(floor (* ,size window-size)))))
               (other-window 1)))
           (_ f)))))
 
