@@ -1203,5 +1203,17 @@ With prefix-arg prompt for type if available with your AG version."
         (goto-char (point-min))
         ,@forms)))))
 
+(defun rysco-hl-todo-in-comment-p (func &rest rest)
+  (if (and (fboundp 'treesit-available-p)
+             (treesit-available-p)
+             (treesit-language-at (point)))
+    (pcase (treesit-node-type (treesit-node-at (point)))
+      ((or "comment" "STRING")
+       t))
+    (apply func rest)))
+
+(advice-add #'hl-todo--inside-comment-or-string-p :around 'rysco-hl-todo-in-comment-p)
+(advice-remove #'hl-todo--inside-comment-or-string-p 'rysco-hl-todo-in-comment-p)
+
 ;;
 (provide 'rysco-util)
