@@ -6,6 +6,9 @@
 
 (defvar rysco-store-directories `(,(concat org-directory "store")))
 (defvar rysco-store-default-capture-file (expand-file-name "db.org" (concat org-directory "store")))
+(defvar rysco-store-freshness-threshold "+7d" "Freshness query threshold as read by `org-read-date'")
+(defvar rysco-store-freshness-schedule "+3m" "Future freshness check date as read by `org-read-date'")
+(defvar rysco-store-initial-query nil)
 (defvar rysco-store-kindle-vocab-file nil)
 (defvar rysco-store-kindle-file nil)
 
@@ -92,6 +95,7 @@
     (org-sidebar-ql (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))
       query :title (concat "Links to: " (org-get-heading t t)))))
 
+;; NOTE: This seems wrong... org-sidebar-ql parameters don't match current definition
 (defun rysco-store-query ()
   (interactive)
   (funcall-interactively 'org-sidebar-ql :directories (rysco-store-existing-directories rysco-store-directories)))
@@ -104,6 +108,13 @@
     (org-capture)))
 
 ;;;###autoload
+(defun rysco-store-org-stamp-freshness ()
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (org-toggle-tag "draft" 'on)
+    (org-schedule nil rysco-store-freshness-schedule)))
+
+;;;###autoload
 (defun helm-rysco-store-query ()
   (interactive)
   (funcall-interactively
@@ -111,6 +122,20 @@
    :name "Knowledge Store Query"
    :actions `(,@helm-org-ql-actions
               ("Insert as link" . helm-rysco-store--insert-candidates))))
+
+;;;###autoload
+(defun helm-rysco-store-query-for-freshness ()
+  (interactive)
+  (let ((rysco-store-initial-query (format "planning:to=%s "
+                                           (format-time-string
+                                            "%F"
+                                            (org-read-date nil t rysco-store-freshness-threshold)))))
+    (funcall-interactively
+     'helm-rysco-store-ql
+     :name "Knowledge Store Query"
+     ;; TODO: Possibly helpers to address freshness?
+     :actions `(,@helm-org-ql-actions
+                ("Insert as link" . helm-rysco-store--insert-candidates)))))
 
 ;;;###autoload
 (defun rysco-store-rebuild-links ()
@@ -130,6 +155,7 @@
         (buffers-files (or buffers-files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories)))))
 
     (helm :prompt (format "Query (boolean %s): " (-> boolean symbol-name upcase))
+          :input rysco-store-initial-query
           :sources `(,@sources
                      ,(helm-org-ql-source buffers-files :name name)))))
 

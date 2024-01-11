@@ -70,6 +70,8 @@
     ("sq" "Query" helm-rysco-store-query)
     ("sd" "Dired" rysco-store-directory-dired)
     ("sl" "Last captured" org-capture-goto-last-stored)
+    ("sf" "Stamp Freshness" rysco-store-org-stamp-freshness)
+    ("sc" "Check Freshness" helm-rysco-store-query-for-freshness)
     ("sr" "HACK: Rebuild links" rysco-store-rebuild-links)]
 
    ["Describe"
