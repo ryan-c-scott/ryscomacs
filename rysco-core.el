@@ -4,8 +4,7 @@
 
 ;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
 (let ((straight-current-profile 'rysco))
-  (straight-use-package 'org)
-  (straight-use-package 'org-contrib))
+  (straight-use-package 'org))
 
 ;; Disable some features for setup duration
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
