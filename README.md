@@ -54,34 +54,34 @@ Ryscomacs is designed to utilize a lead key for doing window splitting and other
 # Commands of note
 There are several custom configuration options, bindings, etc.
 
-* <LEAD><LEAD> :  Switch buffer (helm-mini)
-* <LEAD><SPC> :  Semantic mode.  This shows language specific information for the buffer.
-* <LEAD>s :  Helm occur
-* <LEAD><RET> :  Helm resume session
-* <LEAD>p : Launch Magit (defaulting to current directory)
-* <LEAD>w : Run an ag helm search (actually RipGrep) from the root of the Projectile project
+* `<LEAD><LEAD>` :  Switch buffer (helm-mini)
+* `<LEAD><SPC>` :  Semantic mode.  This shows language specific information for the buffer.
+* `<LEAD>s` :  Helm occur
+* `<LEAD><RET>` :  Helm resume session
+* `<LEAD>p` : Launch Magit (defaulting to current directory)
+* `<LEAD>w` : Run an ag helm search (actually RipGrep) from the root of the Projectile project
 * helm-colors :  Brings up a helm interface for color selection.
 * C-c o :  In C modes, opens the related file in a verical pane (using vertical-windows-with-related)
 
 ## Window Manipulation
-* <LEAD>g : Dismiss current window
-* <LEAD>r : Maximize current window
-* <LEAD>h : Move left to window; possibly creating it.
-* <LEAD>t : Move down to window; possibly creating it.
-* <LEAD>n : Move right to window; possibly creating it.
-* <LEAD>/ : Create new frame
-* <LEAD>= : Destroy current frame
-* <LEAD>\ : Cycle to next frame
+* `<LEAD>g` : Dismiss current window
+* `<LEAD>r` : Maximize current window
+* `<LEAD>h` : Move left to window; possibly creating it.
+* `<LEAD>t` : Move down to window; possibly creating it.
+* `<LEAD>n` : Move right to window; possibly creating it.
+* `<LEAD>/` : Create new frame
+* `<LEAD>=` : Destroy current frame
+* `<LEAD>\` : Cycle to next frame
 
 You may notice that those bindings are on strange keys and it's because they're Dvorak-centric and I'm sorry.
 The *"Spiritual intention"* there is `uoijkl`.
 
 ## Version Control
-Magit and a fork of Monky are provided for working with Git and Mercurial repositories respectively.
+Magit is provided for working with Git repositories.
 `vc-mode` should provide most other things you need, with the most notable exception being P4.
 
 ## Custom Commands
-Two built-in "transient" menus are provided and by default bound to '<lead><lead>' and '<lead><tab>'.
+Two built-in "transient" menus are provided and by default bound to `<lead><lead>` and `<lead><tab>`.
 The main one provides an access point to some of the higher-level features of Ryscomacs.
 The second is an empty menu for users to place their items by adding 'transient' compatible suffix commands to the list 'personal-transients' during the processing of 'ryscomacs/config.el'.
 
