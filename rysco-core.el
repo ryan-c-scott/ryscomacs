@@ -86,6 +86,7 @@
  multiple-cursors
  nginx-mode
  org
+ org-modern
  org-ql
  (org-reveal :type git :host github :repo "ryan-c-scott/org-reveal")
  org-sidebar
@@ -247,6 +248,10 @@
       org-log-into-drawer t
       org-ellipsis " ➟"
 
+      org-modern-hide-stars nil
+      org-modern-star nil
+      org-modern-keyword (concat (all-the-icons-faicon "barcode") " ")
+
       org-super-agenda-groups
       '((:name "Triage"
                :tag "triage"
@@ -375,6 +380,7 @@
 
 (transient-mark-mode t)
 (global-font-lock-mode t)
+(global-org-modern-mode)
 (jit-lock-mode t)
 (eros-mode 1)
 (normal-erase-is-backspace-mode 1)
