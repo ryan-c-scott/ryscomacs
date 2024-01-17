@@ -229,6 +229,8 @@
   (setq sql-mysql-options '("-C" "-t" "-f" "-n")))
 
 (setq org-export-allow-bind-keywords t
+      org-export-with-toc nil
+      org-export-with-section-numbers nil
       org-id-link-to-org-use-id t
       org-image-max-width 'window
       org-startup-folded nil
