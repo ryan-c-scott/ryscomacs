@@ -309,7 +309,28 @@
       org-reverse-note-order t
 
       org-html-html5-fancy t
+      org-html-head-extra "<style>
+#content {
+max-width: 90em;
+}
 
+img {
+  width: 100%;
+}
+
+table {
+  width: 100%;
+}
+
+tr:nth-child(even) {
+background-color: lightgray;
+}
+
+thead {
+background-color: #adffc1;
+}
+</style>
+"
       org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"
       org-reveal-single-file t
 
