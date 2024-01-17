@@ -251,6 +251,9 @@
       org-modern-hide-stars nil
       org-modern-star nil
       org-modern-keyword (concat (all-the-icons-faicon "barcode") " ")
+      org-modern-list '((?+ . "•")
+                        (?- . "•")
+                        (?* . "•"))
 
       org-super-agenda-groups
       '((:name "Triage"
