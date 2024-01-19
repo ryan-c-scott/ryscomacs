@@ -275,29 +275,29 @@
         (:name "Due Soon"
                :deadline t
                :transformer rysco-agenda-project-header
-               :order 3)
+               :order 4)
         (:name "WAITING"
                :todo "WAITING"
                :transformer rysco-agenda-project-header
-               :order 4)
+               :order 5)
         (:name "NEXT"
                :todo "NEXT"
                :transformer rysco-agenda-project-header
-               :order 4)
+               :order 5)
         (:name "Priority"
                :priority ("A" "B" "C")
                :transformer rysco-agenda-project-header
-               :order 4)
+               :order 5)
         (:name "Work Categories"
                :tag "category"
-               :order 5)
+               :order 6)
         (:name "Habits"
                :habit t
-               :order 6)
+               :order 7)
         (:todo "INACTIVE"
-               :order 8)
+               :order 9)
         (:auto-property "ProjectId"
-                        :order 7))
+                        :order 8))
 
       org-refile-targets
       '((nil :maxlevel . 9)
