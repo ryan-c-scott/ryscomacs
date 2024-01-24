@@ -252,6 +252,8 @@
 
       org-modern-hide-stars nil
       org-modern-star nil
+      org-modern-progress nil
+      org-modern-statistics nil
       org-modern-keyword (concat (all-the-icons-faicon "barcode") " ")
       org-modern-list '((?+ . "•")
                         (?- . "•")
