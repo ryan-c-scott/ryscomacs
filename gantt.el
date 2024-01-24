@@ -106,55 +106,68 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
   (gantt-calculate-date-by-interval start-date 10 sprints format-string))
 
 (cl-defun gantt-parse-work-log (path start-date)
+  ;; TODO: Make this docstring follow Emacs best practices with regards to the data format listing.
+  "The date of entries is ascertained from `path' as 'YYYY-MM-DD.log'.
+Entries are in the form
+  DEV DATA
+
+Where 'DATA' can be:
+  DAY close PROJ
+  * close PROJ
+  START END PROJ EFFORT
+  START END PROJ
+  * PROJ EFFORT
+  * PROJ"
   (let ((path-data (pcase path
-                     ((rx (* any) (seq ?/ (let dev (+ alpha))) (seq ?/ (let date (+ (any alnum ?-))) ".log"))
-                      `(,dev . ,date)))))
+                     ((rx (* any) (seq ?/ (let date (+ (any alnum ?-))) ".log"))
+                      date))))
     (when path-data
       (with-temp-buffer
         (insert-file-contents-literally path)
         (cl-loop
-         with dev = (car path-data)
-         with log-date = (cdr path-data)
+         with log-date = path-data
          with start-day = (gantt-date-to-day start-date log-date)
 
          for line in (s-split "\n" (buffer-string) t)
          as entry = (car (read-from-string (concat "(\n" line "\n)")))
 
          as log-out = (when entry
-                        (pcase entry
-                          ;; Special entries first
-                          ;; Anything else is considered a work log entry
-                          ((or
-                            `(,(and (pred numberp) day (guard (and (>= day 0) (<= day 4))))
-                              close
-                              ,proj)
-                            `(* close ,proj))
-                           `((,(format "%s" proj) ,dev ,(+ start-day (or day 4)) close)))
-                          ((or
-                            ;; TODO: Find better solution to having to explicitly specify permutations
-                            ;; Full entry
-                            `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
-                              ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
-                              ,proj
-                              ,(and (pred numberp) effort))
+                        (let ((dev (format "%s" (car entry)))
+                              (entry-data (cdr entry)))
+                          (pcase entry-data
+                            ;; Special entries first
+                            ;; Anything else is considered a work log entry
+                            ((or
+                              `(,(and (pred numberp) day (guard (and (>= day 0) (<= day 4))))
+                                close
+                                ,proj)
+                              `(* close ,proj))
+                             `((,(format "%s" proj) ,dev ,(+ start-day (or day 4)) close)))
+                            ((or
+                              ;; TODO: Find better solution to having to explicitly specify permutations
+                              ;; Full entry
+                              `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
+                                ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                                ,proj
+                                ,(and (pred numberp) effort))
 
-                            ;; Effort omitted
-                            `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
-                              ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
-                              ,proj)
+                              ;; Effort omitted
+                              `(,(and (pred numberp) start (guard (and (>= start 0) (<= start 4))))
+                                ,(and (pred numberp) end (guard (and (>= end 0) (<= end 4))))
+                                ,proj)
 
-                            ;; Special range symbol
-                            `(* ,proj ,(and (pred numberp) effort))
-                            `(* ,proj))
+                              ;; Special range symbol
+                              `(* ,proj ,(and (pred numberp) effort))
+                              `(* ,proj))
 
-                           (cl-loop
-                            with range-start = (+ start-day (or start 0))
-                            with range-end = (+ start-day (or end 4))
+                             (cl-loop
+                              with range-start = (+ start-day (or start 0))
+                              with range-end = (+ start-day (or end 4))
 
-                            for day from range-start to range-end collect
-                            `(,(format "%s" proj) ,dev ,day ,(or effort 1.0))))
+                              for day from range-start to range-end collect
+                              `(,(format "%s" proj) ,dev ,day ,(or effort 1.0))))
 
-                          (_ (error "Malformed work log entry in %s: %s" path line))))
+                            (_ (error "Malformed work log entry in %s: %s" path line)))))
 
          when log-out append log-out)))))
 
