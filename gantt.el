@@ -6,6 +6,7 @@
 
 (defvar gantt-max-days 260)
 (defvar gantt-max-sprints 26)
+(defvar gantt-min-effort-threshold 0.1)
 
 (cl-defstruct gantt-project
   ""
@@ -530,8 +531,8 @@ they should be listed in their order of precedence and not date."
               proj (car proj-data)
               proj-effort (cdr proj-data))
 
-          while (and (< daily-effort 1.0)
-                     (< daily-effort (or proj-effort default-effort)))
+          while (and (> (- 1.0 daily-effort) ,gantt-min-effort-threshold)
+                     (> (- (or proj-effort default-effort) daily-effort) ,gantt-min-effort-threshold))
 
           when proj do
           (let* ((remaining (gantt-project-work-remaining proj))
