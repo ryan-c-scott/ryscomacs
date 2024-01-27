@@ -20,6 +20,7 @@
   tags
   type
   user-data
+  description
 
   ;; Simulation data
   work-remaining
@@ -295,6 +296,7 @@ they should be listed in their order of precedence and not date."
      :tags (--map (format "%s" it) (plist-get proj :tags))
      :user-data (plist-get proj :user-data)
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
+     :description (plist-get proj :description)
 
      :work-remaining dev-days
      :resource-log nil)
@@ -618,7 +620,7 @@ they should be listed in their order of precedence and not date."
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data) proj)
+    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data description) proj)
                  (resources-string (s-join " " resources))
                  (started-string (when started
                                    (format-time-string
