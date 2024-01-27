@@ -81,7 +81,15 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
   (let* ((week (/ day 5))
          (start (org-read-date nil t start-date))
          (irl-offset (* week 2))
-         (date (org-read-date nil t (format "++%s" (+ day irl-offset)) nil start)))
+         (relative-day (+ day irl-offset))
+         (date (org-read-date
+                nil t
+                (format "%s%s"
+                        (if (>= relative-day 0)
+                            "++"
+                          "--")
+                        (abs relative-day))
+                nil start)))
     (if time-format
         (format-time-string time-format date)
       date)))
