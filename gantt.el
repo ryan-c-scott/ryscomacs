@@ -630,7 +630,9 @@ they should be listed in their order of precedence and not date."
                  (ended-string (when ended
                                  (format-time-string
                                   "%F"
-                                  (gantt-day-to-date start-date (ceiling ended))))))
+                                  (gantt-day-to-date start-date (ceiling ended)))))
+                 (description-safe (when description
+                                     (s-replace-regexp "[\n|]" " " description))))
 
       (progn ,@forms))
 
