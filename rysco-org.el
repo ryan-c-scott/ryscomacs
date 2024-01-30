@@ -371,6 +371,32 @@
 (add-hook 'org-ctrl-c-ctrl-c-final-hook 'rysco-org-result-execute-src)
 
 ;;;###autoload
+(defun rysco-org-table-to-kill (&optional sep)
+  "Adds the content of the table under the point to the kill ring as a line per
+row.
+Each cell is separated by `SEP', which defaults to \"\t\""
+  (interactive)
+
+  (let* ((sep (or sep "\t"))
+         (beg (org-table-begin))
+         (end (org-table-end))
+         (parsed-elements (org-element-parse-buffer)))
+    (kill-new
+     (s-join
+      "\n"
+      (org-element-map parsed-elements 'table-row
+        (lambda (row)
+          (when (and (>= (org-element-property :begin row) beg)
+                     (<= (org-element-property :end row) end))
+            (s-join
+             sep
+             (org-element-map row 'table-cell
+               '(buffer-substring
+                 (org-element-property :contents-begin node)
+                 (org-element-property :contents-end node)))))))))))
+
+
+;;;###autoload
 (cl-defun rysco-org-process-date-log (data windows &key value-column degrade)
   "DATA is expected to be a table sorted by the first column in ascending order.
 VALUE-COLUMN can be specified to use a different column of data for processing
