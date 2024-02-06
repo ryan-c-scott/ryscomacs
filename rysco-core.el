@@ -244,6 +244,7 @@
                            "WAITING(w@)"
                            "DONE(d)")
                           (type
+                           "DELEGATED(o@)"
                            "INACTIVE(i)"
                            "CANCELLED(c@)"))
       org-use-fast-todo-selection 'expert
@@ -278,6 +279,10 @@
                :deadline t
                :transformer rysco-agenda-project-header
                :order 4)
+        (:name "DELEGATED"
+               :todo "DELEGATED"
+               :transformer rysco-agenda-project-header
+               :order 6)
         (:name "WAITING"
                :todo "WAITING"
                :transformer rysco-agenda-project-header
