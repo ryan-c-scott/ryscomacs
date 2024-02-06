@@ -33,6 +33,21 @@
     (add-to-list 'rysco-store-templates--processed capture-template))))
 
 ;;;###autoload
+(defun rysco-store-load ()
+  (interactive)
+  (let ((files (org-ql-search-directories-files
+                :directories
+                (rysco-store-existing-directories
+                 rysco-store-directories))))
+    (cl-loop
+     for f in files
+     as buff = (find-file-noselect f)
+     do
+     (with-current-buffer buff
+       (unless (eq major-mode 'org-mode)
+         (org-mode))))))
+
+;;;###autoload
 (defun rysco-store-directory-dired ()
   (interactive)
   (helm :sources

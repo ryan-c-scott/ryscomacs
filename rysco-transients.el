@@ -72,6 +72,7 @@
     ("sl" "Last captured" org-capture-goto-last-stored)
     ("sf" "Stamp Freshness" rysco-store-org-stamp-freshness)
     ("sc" "Check Freshness" helm-rysco-store-query-for-freshness)
+    ("ss" "Store Load" rysco-store-load)
     ("sr" "HACK: Rebuild links" rysco-store-rebuild-links)]
 
    ["Describe"
