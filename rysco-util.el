@@ -1189,9 +1189,15 @@ With prefix-arg prompt for type if available with your AG version."
           (cl-loop
            for f in (s-split " " fields)
            append
-           `(,(intern (format ":%s" f))
-             ,(gethash f data)))))
-        (_ (setq data (gethash key data))))
+           `(,(intern (format "%s%s" (if is-hash ":" "") f))
+             ,(if is-hash
+                  (gethash f data)
+                (plist-get data (intern f)))))))
+        (_ (setq data
+                 (if is-hash
+                     (gethash key data)
+                   (plist-get data (intern key)))
+                 )))
    finally return data))
 
 (cl-defmacro with-rysco-files (files &rest forms)
