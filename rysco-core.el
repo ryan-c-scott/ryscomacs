@@ -205,7 +205,8 @@
 (setq make-backup-files nil)
 
 (setq helm-split-window-default-side 'other
-      helm-allow-mouse t)
+      helm-allow-mouse t
+      helm-move-to-line-cycle-in-source nil)
 (helm-mode 1)
 (setq helm-completing-read-handlers-alist
       (append '((find-file . ido)
