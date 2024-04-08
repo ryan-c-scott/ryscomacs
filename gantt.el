@@ -621,7 +621,7 @@ they should be listed in their order of precedence and not date."
 
     as out =
     (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data description) proj)
-                 (resources-string (s-join " " resources))
+                 (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
                  (started-string (when started
                                    (format-time-string
                                     "%F"
