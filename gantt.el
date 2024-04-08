@@ -8,6 +8,8 @@
 (defvar gantt-max-sprints 26)
 (defvar gantt-min-effort-threshold 0.1)
 
+(defvar gantt-plot-with-descriptions nil)
+
 (cl-defstruct gantt-project
   ""
   id
@@ -669,7 +671,7 @@ they should be listed in their order of precedence and not date."
        (:data gantt ,@(cl-loop
                        for proj in projects
 
-                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker) proj)
+                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker description) proj)
                                                (last-day (or ended
                                                              (--reduce-from (max acc (nth 1 it))
                                                                             (or started 0)
@@ -684,7 +686,11 @@ they should be listed in their order of precedence and not date."
                                     (when (and last-day (>= last-day view-start))
                                       `(,started ,height
                                                  ,(1+ (- last-day (or started 0)))
-                                                 0 ,id ,name ,style-id)))
+                                                 0 ,id
+                                                 ,(if gantt-plot-with-descriptions
+                                                      description
+                                                    name)
+                                                 ,style-id)))
                        when entry collect entry
                        when entry do (cl-incf height)))
 
@@ -810,7 +816,9 @@ they should be listed in their order of precedence and not date."
                                         (= day first-in-view)
                                         (not (eq proj-type 'global-events)))
                                (setq dev-has-work t)
-                               (push `(,day ,height ,proj) labels))
+                               (push `(,day ,height ,(if gantt-plot-with-descriptions
+                                                         (gantt-project-description proj-obj)
+                                                       proj)) labels))
                              `(,proj ,dev ,day ,height ,(or 1 effort) 0 ,style-id))))
            when dev-has-work do (cl-incf height)
            when dev-has-work append dev-work))
