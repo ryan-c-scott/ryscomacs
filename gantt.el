@@ -682,7 +682,11 @@ they should be listed in their order of precedence and not date."
                                     (when start-blocker
                                       (push `(0 ,height ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless ended
-                                      (push `(,(1+ (or last-day 0)) ,height ,name) fails))
+                                      (push `(,(1+ (or last-day 0)) ,height
+                                              ,(if gantt-plot-with-descriptions
+                                                      description
+                                                 name))
+                                            fails))
                                     (when (and last-day (>= last-day view-start))
                                       `(,started ,height
                                                  ,(1+ (- last-day (or started 0)))
