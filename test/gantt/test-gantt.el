@@ -1,5 +1,6 @@
-(require 'buttercup)
+;;; -*- lexical-binding: t; -*-
 
+(require 'buttercup)
 (require 'gantt)
 
 (describe "(Gantt) Project Planning DSL"
