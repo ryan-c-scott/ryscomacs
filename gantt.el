@@ -845,7 +845,8 @@ they should be listed in their order of precedence and not date."
                                         (not (eq proj-type 'global-events)))
                                (setq dev-has-work t)
                                (push `(,day ,height ,(if gantt-plot-with-descriptions
-                                                         (gantt-project-description proj-obj)
+                                                         (or (gantt-project-description proj-obj)
+                                                             proj)
                                                        proj)) labels))
                              `(,proj ,dev ,day ,height ,(or 1 effort) 0 ,style-id))))
            when dev-has-work do (cl-incf height)
