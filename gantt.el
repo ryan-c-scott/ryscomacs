@@ -29,6 +29,7 @@
   start-blocker
   started
   ended
+  shipped
   resources
   resource-log)
 
@@ -365,7 +366,7 @@ they should be listed in their order of precedence and not date."
                   (cons proj proj-effort)))))))))
 
 ;;;###autoload
-(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort view-start-date view-end-date key-dates)
+(cl-defmacro gantt-derive-dev-form (&key projects devs start-date simulation-days simulation-date work-log global-effort view-start-date view-end-date key-dates post-project)
   (let* ((projects (if (stringp projects)
                        (gantt-read-forms-from-file projects)
                      (eval projects)))
@@ -576,6 +577,13 @@ they should be listed in their order of precedence and not date."
                 ;; TESTING: No mid-day project change after completion
                 (setq daily-effort 1.0)))))))
 
+       ,(when post-project
+          `(cl-loop
+            for proj in (hash-table-values projects) do
+            (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data description) proj)
+                         (start-date ,start-date))
+              ,post-project)))
+
        (make-gantt-simulation
         :start-date ,start-date
         :simulation-start simulation-start-day
@@ -622,7 +630,7 @@ they should be listed in their order of precedence and not date."
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended work estimate resources resource-log start-blocker type user-data description) proj)
+    (pcase-let* (((cl-struct gantt-project id name started ended shipped work estimate resources resource-log start-blocker type user-data description) proj)
                  (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
                  (started-string (when started
                                    (format-time-string
@@ -633,6 +641,10 @@ they should be listed in their order of precedence and not date."
                                  (format-time-string
                                   "%F"
                                   (gantt-day-to-date start-date (ceiling ended)))))
+                 (shipped-string (when shipped
+                                   (format-time-string
+                                    "%F"
+                                    (gantt-day-to-date start-date (ceiling shipped)))))
                  (description-safe (when description
                                      (s-replace-regexp "[\n|]" " " description))))
 
@@ -660,18 +672,19 @@ they should be listed in their order of precedence and not date."
          (view-start (or (gantt-simulation-view-start-day simulation) 0))
          (view-end (or (gantt-simulation-view-end-day simulation) '*))
          (key-dates (gantt-simulation-key-dates simulation))
-         (palette (gantt-create-palette (--map (gantt-project-name it) all-projects) 4))
+         (palette (gantt-create-palette (--map (gantt-project-name it) all-projects) 5))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
          blockers
-         fails)
+         fails
+         shipping)
     (apply
      'rysco-plot
      `((:unset key)
        (:data gantt ,@(cl-loop
                        for proj in projects
 
-                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended resources resource-log start-blocker description) proj)
+                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended shipped resources resource-log start-blocker description) proj)
                                                (last-day (or ended
                                                              (--reduce-from (max acc (nth 1 it))
                                                                             (or started 0)
@@ -688,6 +701,13 @@ they should be listed in their order of precedence and not date."
                                                  name))
                                             fails))
                                     (when (and last-day (>= last-day view-start))
+                                      (when shipped
+                                        (push
+                                         `(,(1+ last-day) ,height
+                                           ,(1+ (- shipped last-day))
+                                           0)
+                                         shipping))
+
                                       `(,started ,height
                                                  ,(1+ (- last-day (or started 0)))
                                                  0 ,id
@@ -700,6 +720,7 @@ they should be listed in their order of precedence and not date."
 
        (:data blockers ,@blockers)
        (:data fails ,@fails)
+       (:data shipping ,@shipping)
 
        ,(when key-dates
           `(:data
@@ -717,6 +738,7 @@ they should be listed in their order of precedence and not date."
        (:set style arrow 1 nohead lw ,(* 2 scale) lc "#999999") ;Key dates
        (:set style arrow 2 nohead lw ,(* scale 20) lc "#8deeee") ;Projects
        (:set style arrow 3 nohead lw ,(* scale 6) lc "#8b008b") ;Simulation boundary
+       (:set style arrow 4 filled size (1 90 0) lw ,(* 2 scale) lc "#999999") ;Ship dates
 
        ,@(cl-loop
           for (_ . style-data) in palette collect
@@ -768,6 +790,8 @@ they should be listed in their order of precedence and not date."
                    (:vectors :data gantt :using [1 2 3 4 7 (ytic 6)] :options (:arrowstyle variable))
                    ,(when blockers
                       (:vectors :data blockers :using [1 2 3 4] :options (:arrowstyle 3)))
+                   ,(when shipping
+                      `(:vectors :data shipping :using [1 2 3 4] :options (:arrowstyle 4)))
                    ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
                    (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000"))))))
      options)))
