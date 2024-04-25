@@ -385,6 +385,10 @@ they should be listed in their order of precedence and not date."
            (simulation-start-day ,(pcase simulation-date
                                     ((pred stringp)
                                      (gantt-date-to-day start-date simulation-date))
+                                    ('monday
+                                     (gantt-date-to-day
+                                      start-date
+                                      (org-read-date nil nil "++Mon" nil (org-read-date nil t "-1w"))))
                                     (_ 0)))
            (projects ,transformed-projects)
            (devs ',(gantt-transform-devs start-date devs transformed-projects))
