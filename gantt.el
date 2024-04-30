@@ -708,7 +708,7 @@ they should be listed in their order of precedence and not date."
                                       (when shipped
                                         (push
                                          `(,(1+ last-day) ,height
-                                           ,(1+ (- shipped last-day))
+                                           ,(max 0 (- shipped last-day 1))
                                            0)
                                          shipping))
 
