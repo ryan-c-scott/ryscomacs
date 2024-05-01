@@ -119,6 +119,7 @@
 
 (require 'doom-themes)
 (doom-themes-org-config)
+(require 'rysco-city-lights-theme)
 (require 'kaolin-themes)
 
 (require 'all-the-icons)
