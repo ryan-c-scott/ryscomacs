@@ -265,7 +265,9 @@ they should be listed in their order of precedence and not date."
          (pcase dep
            ((or (pred symbolp) (pred stringp))
             `(let ((proj (gethash ,(format "%s" dep) project-lookup)))
-               (and proj (gantt-project-ended proj))))
+               (if proj
+                   (gantt-project-ended proj)
+                 t)))
 
            (`(:external ,date ,description)
             `(> day ,(gantt-date-to-day start-date date))))))))
