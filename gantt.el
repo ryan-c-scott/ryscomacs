@@ -9,6 +9,7 @@
 (defvar gantt-min-effort-threshold 0.1)
 
 (defvar gantt-plot-with-descriptions nil)
+(defvar gantt-output-date-format "%F")
 
 (cl-defstruct gantt-project
   ""
@@ -640,16 +641,16 @@ they should be listed in their order of precedence and not date."
                  (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
                  (started-string (when started
                                    (format-time-string
-                                    "%F"
+                                    gantt-output-date-format
                                     (gantt-day-to-date start-date (floor started)))))
 
                  (ended-string (when ended
                                  (format-time-string
-                                  "%F"
+                                  gantt-output-date-format
                                   (gantt-day-to-date start-date (ceiling ended)))))
                  (shipped-string (when shipped
                                    (format-time-string
-                                    "%F"
+                                    gantt-output-date-format
                                     (gantt-day-to-date start-date (ceiling shipped)))))
                  (description-safe (when description
                                      (s-replace-regexp "[\n|]" " " description))))
