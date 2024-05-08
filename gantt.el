@@ -192,6 +192,22 @@ Where 'DATA' can be:
      as data = (gantt-parse-work-log log-path start-date)
      when data append data)))
 
+(cl-defun gantt-work-log-entry-equal (a b)
+  "Compares two work log entries by their first three elements"
+  (and
+   (equal (car a) (car b))
+   (equal (cadr a) (cadr b))
+   (equal (caddr a) (caddr b))))
+
+(cl-defun gantt-work-log-from-files (&rest files)
+  "Reads all files listed in FILES as work logs, combines them, and de-duplicates
+using the logic in `gantt-work-log-entry-equal'"
+  (let ((-compare-fn 'gantt-work-log-entry-equal))
+    (-uniq
+     (cl-loop
+      for path in files append
+      (gantt-read-forms-from-file path)))))
+
 (cl-defun gantt-read-forms-from-file (path)
   ;; TODO: Support files not wrapped into a single form/list
   (with-temp-buffer
