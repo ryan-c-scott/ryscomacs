@@ -115,6 +115,9 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
+(cl-defun gantt-scrub-description (description)
+  (s-replace-regexp "[\n|]" " " description))
+
 ;;;###autoload
 (cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
   (gantt-calculate-date-by-interval start-date 10 sprints format-string))
@@ -669,7 +672,7 @@ they should be listed in their order of precedence and not date."
                                     gantt-output-date-format
                                     (gantt-day-to-date start-date (ceiling shipped)))))
                  (description-safe (when description
-                                     (s-replace-regexp "[\n|]" " " description))))
+                                     (gantt-scrub-description description))))
 
       (progn ,@forms))
 
