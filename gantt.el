@@ -115,6 +115,9 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
          (gantt-day-to-date start-date dev-day))
        ,dev-day))))
 
+(cl-defun gantt-scrub-description (description)
+  (s-replace-regexp "[\n|]" " " description))
+
 ;;;###autoload
 (cl-defun gantt-calculate-sprint-dates (start-date sprints &optional format-string)
   (gantt-calculate-date-by-interval start-date 10 sprints format-string))
@@ -191,6 +194,22 @@ Where 'DATA' can be:
      for log-path in (f-entries dir nil t)
      as data = (gantt-parse-work-log log-path start-date)
      when data append data)))
+
+(cl-defun gantt-work-log-entry-equal (a b)
+  "Compares two work log entries by their first three elements"
+  (and
+   (equal (car a) (car b))
+   (equal (cadr a) (cadr b))
+   (equal (caddr a) (caddr b))))
+
+(cl-defun gantt-work-log-from-files (&rest files)
+  "Reads all files listed in FILES as work logs, combines them, and de-duplicates
+using the logic in `gantt-work-log-entry-equal'"
+  (let ((-compare-fn 'gantt-work-log-entry-equal))
+    (-uniq
+     (cl-loop
+      for path in files append
+      (gantt-read-forms-from-file path)))))
 
 (cl-defun gantt-read-forms-from-file (path)
   ;; TODO: Support files not wrapped into a single form/list
@@ -653,7 +672,7 @@ they should be listed in their order of precedence and not date."
                                     gantt-output-date-format
                                     (gantt-day-to-date start-date (ceiling shipped)))))
                  (description-safe (when description
-                                     (s-replace-regexp "[\n|]" " " description))))
+                                     (gantt-scrub-description description))))
 
       (progn ,@forms))
 

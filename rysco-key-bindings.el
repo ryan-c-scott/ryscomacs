@@ -225,7 +225,8 @@
             (local-unset-key (kbd "<S-up>"))
             (local-set-key (kbd (concat rysco-lead-key " SPC")) 'helm-org-in-buffer-headings)
             (local-set-key (kbd "C-c i") 'rysco-store-create-and-insert)
-            (local-set-key (kbd "C-c e") 'rysco-org-result-edit-src)))
+            (local-set-key (kbd "C-c e") 'rysco-org-result-edit-src)
+            (local-set-key (kbd "C-c M-h") 'org-fold-hide-block-all)))
 
 ;;;;
 (provide 'rysco-key-bindings)
