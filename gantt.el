@@ -253,20 +253,20 @@ they should be listed in their order of precedence and not date."
      (pcase exp
        (`(on ,date ,val)
         `(when (= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           (setq effort ',val)))
+           ',val))
 
        (`(after ,date ,val)
         `(when (>= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           (setq effort ',val)))
+           ',val))
 
        (`(before ,date ,val)
         `(when (< simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           (setq effort ',val)))
+           ',val))
 
        (`(between ,begin-date ,end-date ,val)
         `(when (and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
                     (<= simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
-           (setq effort ',val)))
+           ',val))
 
        (_ 'ERROR))
      into conditional-effort
