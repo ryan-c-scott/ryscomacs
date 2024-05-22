@@ -10,6 +10,12 @@
 
 (defvar gantt-plot-with-descriptions nil)
 (defvar gantt-output-date-format "%F")
+(defvar gantt-project-status-symbols
+  '((alpha . "\\U+03B1")
+    (beta . "\\U+03B2")
+    (gamma . "\\U+03B3")
+    (delta . "\\U+0394")
+    (omega . "\\U+03A9")))
 
 (cl-defstruct gantt-project
   ""
@@ -736,6 +742,15 @@ they should be listed in their order of precedence and not date."
                                                (style-data (cdr (assoc name palette)))
                                                (style-id (plist-get style-data :id)))
 
+                                    (when status-log
+                                      (cl-loop
+                                       for (day status) in status-log do
+                                       (push `(,day
+                                               ,height
+                                               ,(--if-let (cdr (assoc status gantt-project-status-symbols))
+                                                    it
+                                                  (format "%s" status)))
+                                             statuses)))
                                     (when start-blocker
                                       (push `(0 ,height ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless ended
@@ -765,6 +780,7 @@ they should be listed in their order of precedence and not date."
        (:data blockers ,@blockers)
        (:data fails ,@fails)
        (:data shipping ,@shipping)
+       (:data statuses ,@statuses)
 
        ,(when key-dates
           `(:data
@@ -838,7 +854,9 @@ they should be listed in their order of precedence and not date."
                       `(:vectors :data shipping :using [1 2 3 4] :options (:arrowstyle 4)))
                    ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
                    ,(when fails
-                      `(:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000")))))))
+                      `(:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000")))
+                   ,(when statuses
+                      `(:labels :data statuses :using [1 2 3] :options (:left :offset (0 0.125) :font ",23" :tc "white")))))))
      options)))
 
 ;;;###autoload
