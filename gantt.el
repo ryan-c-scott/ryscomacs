@@ -32,7 +32,9 @@
   ended
   shipped
   resources
-  resource-log)
+  resource-log
+  status-log
+  current-status)
 
 (cl-defstruct gantt-simulation
   ""
@@ -434,11 +436,17 @@ they should be listed in their order of precedence and not date."
 
             for (proj-id dev day effort) in (--sort (< (nth 2 it) (nth 2 other)) ,work-log)
             as proj = (gethash proj-id projects)
-            as closing-proj = (eq effort 'close)
             as effort-override = (funcall global-effort day)
             as effort = (pcase effort
+                          ;; NOTE: Deprecated; use (:status closed)
                           ('close (gantt-project-work-remaining proj))
                           (_ effort))
+            as status = (pcase effort
+                          (`(:status closed)
+                           (setq effort (gantt-project-work-remaining proj))
+                           'closed)
+                          (`(:status ,status)
+                           status))
 
             ,@(unless (eq simulation-date 'latest)
                 `(while (< day simulation-start-day)))
@@ -464,7 +472,8 @@ they should be listed in their order of precedence and not date."
                    (started (gantt-project-started proj))
                    (ended (gantt-project-ended proj))
                    (resources (gantt-project-resources proj))
-                   (resource-log (gantt-project-resource-log proj)))
+                   (resource-log (gantt-project-resource-log proj))
+                   (status-log (gantt-project-status-log proj)))
 
               (setf (gantt-project-work-remaining proj) new-remaining)
 
@@ -472,12 +481,20 @@ they should be listed in their order of precedence and not date."
                 (setf (gantt-project-resources proj)
                       (-uniq (append resources (list dev)))))
 
-              (unless (or closing-proj effort-override)
+              (unless (or status effort-override)
                 (setf (gantt-project-resource-log proj)
                       (append
                        resource-log
                        (list
                         (list dev day effort)))))
+
+              (when status
+                (setf (gantt-project-current-status proj) status)
+                (setf (gantt-project-status-log proj)
+                      (append
+                       status-log
+                       (list
+                        (list day status)))))
 
               (setf (gantt-project-started proj)
                     (if started
@@ -656,7 +673,7 @@ they should be listed in their order of precedence and not date."
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended shipped work estimate resources resource-log start-blocker type user-data description) proj)
+    (pcase-let* (((cl-struct gantt-project id name started ended shipped work estimate resources resource-log status-log current-status start-blocker type user-data description) proj)
                  (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
                  (started-string (when started
                                    (format-time-string
@@ -703,14 +720,15 @@ they should be listed in their order of precedence and not date."
          (scale (or (plist-get options :fontscale) 1.0))
          blockers
          fails
-         shipping)
+         shipping
+         statuses)
     (apply
      'rysco-plot
      `((:unset key)
        (:data gantt ,@(cl-loop
                        for proj in projects
 
-                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended shipped resources resource-log start-blocker description) proj)
+                       as entry = (pcase-let* (((cl-struct gantt-project id name started ended shipped resources resource-log status-log start-blocker description) proj)
                                                (last-day (or ended
                                                              (--reduce-from (max acc (nth 1 it))
                                                                             (or started 0)
