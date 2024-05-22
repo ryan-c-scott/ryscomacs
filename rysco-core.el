@@ -95,8 +95,8 @@
  projectile
  request
  rjsx-mode
- (rysco-graph :type git :host bitbucket :repo "scott105/rysco-graph")
- (rysco-plot :type git :host bitbucket :repo "scott105/rysco-plot")
+ (rysco-graph :type git :host github :repo "ryan-c-scott/rysco-graph")
+ (rysco-plot :type git :host github :repo "ryan-c-scott/rysco-plot")
  s
  shift-number
  transient
