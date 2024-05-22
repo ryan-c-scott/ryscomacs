@@ -893,7 +893,11 @@ they should be listed in their order of precedence and not date."
                                                          (or (gantt-project-description proj-obj)
                                                              proj)
                                                        proj)) labels))
-                             `(,proj ,dev ,day ,height ,(or 1 effort) 0 ,style-id))))
+                             `(,proj ,dev ,day ,height
+                                     ,(if (symbolp effort)
+                                          1
+                                        effort)
+                                     0 ,style-id))))
            when dev-has-work do (cl-incf height)
            when dev-has-work append dev-work))
 
