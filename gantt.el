@@ -15,7 +15,8 @@
     (beta . "\\U+03B2")
     (gamma . "\\U+03B3")
     (delta . "\\U+0394")
-    (omega . "\\U+03A9")))
+    (omega . "\\U+03A9")
+    (closed . "")))
 
 (cl-defstruct gantt-project
   ""
