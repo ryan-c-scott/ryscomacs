@@ -483,7 +483,7 @@ they should be listed in their order of precedence and not date."
 
               (setf (gantt-project-work-remaining proj) new-remaining)
 
-              (unless effort-override
+              (unless (or status effort-override)
                 (setf (gantt-project-resources proj)
                       (-uniq (append resources (list dev)))))
 
