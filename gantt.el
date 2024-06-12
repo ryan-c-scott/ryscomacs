@@ -443,10 +443,17 @@ they should be listed in their order of precedence and not date."
 
             for (proj-id dev day effort) in (--sort (< (nth 2 it) (nth 2 other)) ,work-log)
             as proj = (gethash proj-id projects)
+            as dev-data = (cdr (assoc dev devs 'string=))
             as effort-override = (funcall global-effort day)
+            as default-effort = (and dev-data (--when-let (plist-get dev-data :effort) (funcall it day)))
+
             as effort = (pcase effort
                           ;; NOTE: Deprecated; use (:status closed)
                           ('close (gantt-project-work-remaining proj))
+                          ((pred numberp)
+                           (if (numberp default-effort)
+                               (* effort default-effort)
+                             effort))
                           (_ effort))
             as status = (pcase effort
                           (`(:status closed)
