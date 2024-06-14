@@ -130,29 +130,6 @@
     (org-schedule nil rysco-store-freshness-schedule)))
 
 ;;;###autoload
-(defun helm-rysco-store-query ()
-  (interactive)
-  (funcall-interactively
-   'helm-rysco-store-ql
-   :name "Knowledge Store Query"
-   :actions `(,@helm-org-ql-actions
-              ("Insert as link" . helm-rysco-store--insert-candidates))))
-
-;;;###autoload
-(defun helm-rysco-store-query-for-freshness ()
-  (interactive)
-  (let ((rysco-store-initial-query (format "planning:to=%s "
-                                           (format-time-string
-                                            "%F"
-                                            (org-read-date nil t rysco-store-freshness-threshold)))))
-    (funcall-interactively
-     'helm-rysco-store-ql
-     :name "Knowledge Store Query"
-     ;; TODO: Possibly helpers to address freshness?
-     :actions `(,@helm-org-ql-actions
-                ("Insert as link" . helm-rysco-store--insert-candidates)))))
-
-;;;###autoload
 (defun rysco-store-rebuild-links ()
   "Helper function to rebuild org ID database using `org-id-update-id-locations'"
   (interactive)
@@ -160,22 +137,6 @@
    for dir in (rysco-store-existing-directories rysco-store-directories) do
    (org-id-update-id-locations
     (directory-files-recursively dir ".org"))))
-
-(cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
-  "See: `helm-org-ql'."
-  (interactive)
-  (let ((boolean (if current-prefix-arg 'or boolean))
-        (helm-input-idle-delay helm-org-ql-input-idle-delay)
-        (helm-org-ql-actions actions)
-        (buffers-files (or buffers-files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories)))))
-
-    (helm :prompt (format "Query (boolean %s): " (-> boolean symbol-name upcase))
-          :input rysco-store-initial-query
-          :sources `(,@sources
-                     ,(helm-org-ql-source buffers-files :name name)))))
-
-(defun helm-rysco-store--insert-candidates (&optional _)
-  (rysco-store--insert-links (helm-marked-candidates :all-sources t)))
 
 (defun rysco-store--insert-links (markers)
   (let* ((count (length markers))
@@ -214,21 +175,6 @@
 (add-hook 'org-capture-mode-hook #'rysco-store-capture-create-id)
 (add-hook 'org-capture-mode-hook #'rysco-store-capture-add-timestamp)
 (add-hook 'org-capture-after-finalize-hook 'rysco-store-post-capture)
-
-(defun helm-rysco-store--heading (window-width)
-  ""
-  (font-lock-ensure (point-at-bol) (point-at-eol))
-  (let* ((heading (org-get-heading t))
-         (path (-> (org-get-outline-path)
-                   (org-format-outline-path window-width nil "")
-                 (org-split-string "")))
-         (path (if helm-org-ql-reverse-paths
-                   (concat heading "\\" (s-join "\\" (nreverse path)))
-                 (concat (s-join "/" path) "/" heading))))
-    (cons path (point-marker))))
-
-(eval-after-load 'helm-org-ql
-  (advice-add 'helm-org-ql--heading :override 'helm-rysco-store--heading))
 
 ;;;;;;;;;;;;;;;;;;;
 (defun rysco-store-kindle-get-books-vocab (location)
@@ -445,15 +391,4 @@
 
      (set-buffer-file-coding-system 'utf-8))))
 
-(defun helm-rysco-store-kindle-import (location)
-  (interactive "D")
-  (helm :prompt "Kindle Import "
-        :sources
-        (helm-build-sync-source "Kindle Books"
-          :candidates (lambda ()
-                        (--map `(,(format "%s:\t%s" (caddr it) (cadr it)) . ,it)
-                               (rysco-store-kindle-get-books location)))
-          :action `(("Insert" . (lambda (&rest _)
-                                  (rysco-store-insert-books-kindle (helm-marked-candidates))))))))
-
-(provide 'rysco-org-store)
+(provide 'rysco-store)
