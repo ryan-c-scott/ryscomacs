@@ -114,15 +114,30 @@ Optional TIME-FORMAT will return the result of the date sent to `format-time-str
          (year (cl-parse-integer (substring date 0 4))))
     (gantt-date-to-day start-date (format "%s-%02d-01" year (1+ (* q 3))))))
 
-(cl-defun gantt-insert-day ()
+(cl-defun gantt-read-date (prompt)
+  (org-read-date nil nil nil prompt))
+
+(cl-defun gantt-insert-day (timeframe-start date)
   "Prompts for dates necessary to calculate a project date and then inserts that into the local buffer"
-  (interactive)
-  (let ((timeframe-start (org-read-date nil nil nil "Start: "))
-        (date (org-read-date nil nil nil "Day: ")))
-    (insert
-     (format
-      "%s"
-      (gantt-date-to-day timeframe-start date)))))
+  (interactive (list
+                (gantt-read-date "Start: ")
+                (gantt-read-date "Day: ")))
+  (insert
+   (format
+    "%s"
+    (gantt-date-to-day timeframe-start date))))
+
+
+(cl-defun gantt-insert-date (timeframe-start day)
+  "Prompts for dates necessary to calculate a project day and then inserts that into the local buffer"
+  (interactive (list
+                (gantt-read-date "Start: ")
+                (read-number "Day: ")))
+  (insert
+   (format
+    "%s"
+    (gantt-day-to-date timeframe-start day "%F"))))
+
 
 (cl-defun gantt-calculate-date-by-interval (start-date interval count &optional format-string)
   (when start-date
