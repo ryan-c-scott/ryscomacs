@@ -474,7 +474,7 @@ they should be listed in their order of precedence and not date."
 
             as effort = (pcase effort
                           ;; NOTE: Deprecated; use (:status closed)
-                          ('close (gantt-project-work-remaining proj))
+                          ('close (if proj (gantt-project-work-remaining proj) 0))
                           ((pred numberp)
                            (if (numberp default-effort)
                                (* effort default-effort)
@@ -482,7 +482,7 @@ they should be listed in their order of precedence and not date."
                           (_ effort))
             as status = (pcase effort
                           (`(:status closed)
-                           (setq effort (gantt-project-work-remaining proj))
+                           (setq effort (if proj (gantt-project-work-remaining proj) 0))
                            'closed)
                           (`(:status ,status)
                            status))
