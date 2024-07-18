@@ -31,6 +31,7 @@
   type
   user-data
   description
+  owner
 
   ;; Simulation data
   work-remaining
@@ -356,6 +357,7 @@ they should be listed in their order of precedence and not date."
      :user-data (plist-get proj :user-data)
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
      :description (plist-get proj :description)
+     :owner (plist-get proj :owner)
 
      :work-remaining dev-days
      :resource-log nil)
@@ -712,8 +714,9 @@ they should be listed in their order of precedence and not date."
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended shipped work estimate resources resource-log status-log current-status start-blocker type user-data description) proj)
+    (pcase-let* (((cl-struct gantt-project id name owner started ended shipped work estimate resources resource-log status-log current-status start-blocker type user-data description) proj)
                  (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
+                 (owner (or owner ""))
                  (started-string (when started
                                    (format-time-string
                                     gantt-output-date-format
