@@ -887,8 +887,9 @@ they should be listed in their order of precedence and not date."
                    ,(when shipping
                       `(:vectors :data shipping :using [1 2 3 4] :options (:arrowstyle 4)))
                    ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
-                   ,(when fails
-                      `(:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000")))
+                   ,@(when fails
+                       `((:labels :data fails :using [1 2 3] :options (:left :offset (0.15 0.15) :font ",25" :tc "black"))
+                         (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000"))))
                    ,(when statuses
                       `(:labels :data statuses :using [1 2 3] :options (:left :offset (0 0.125) :font ",23" :tc "white")))))))
      options)))
