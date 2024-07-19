@@ -24,6 +24,7 @@
                 ("Insert as link" . helm-rysco-store--insert-candidates)
                 ("Save as buffer" . helm-rysco-store--save-search-buffer)))))
 
+;;;###autoload
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
   "See: `helm-org-ql'."
   (interactive)
