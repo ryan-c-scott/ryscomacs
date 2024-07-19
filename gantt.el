@@ -31,6 +31,7 @@
   type
   user-data
   description
+  owner
 
   ;; Simulation data
   work-remaining
@@ -356,6 +357,7 @@ they should be listed in their order of precedence and not date."
      :user-data (plist-get proj :user-data)
      :dependencies (gantt-transform-project-dependencies start-date (plist-get proj :deps))
      :description (plist-get proj :description)
+     :owner (plist-get proj :owner)
 
      :work-remaining dev-days
      :resource-log nil)
@@ -474,7 +476,7 @@ they should be listed in their order of precedence and not date."
 
             as effort = (pcase effort
                           ;; NOTE: Deprecated; use (:status closed)
-                          ('close (gantt-project-work-remaining proj))
+                          ('close (if proj (gantt-project-work-remaining proj) 0))
                           ((pred numberp)
                            (if (numberp default-effort)
                                (* effort default-effort)
@@ -482,7 +484,7 @@ they should be listed in their order of precedence and not date."
                           (_ effort))
             as status = (pcase effort
                           (`(:status closed)
-                           (setq effort (gantt-project-work-remaining proj))
+                           (setq effort (if proj (gantt-project-work-remaining proj) 0))
                            'closed)
                           (`(:status ,status)
                            status))
@@ -712,8 +714,9 @@ they should be listed in their order of precedence and not date."
                  projects)
 
     as out =
-    (pcase-let* (((cl-struct gantt-project id name started ended shipped work estimate resources resource-log status-log current-status start-blocker type user-data description) proj)
+    (pcase-let* (((cl-struct gantt-project id name owner started ended shipped work estimate resources resource-log status-log current-status start-blocker type user-data description) proj)
                  (resources-string (s-join " " (--remove (eq it 'SYSTEM) resources)))
+                 (owner (or owner ""))
                  (started-string (when started
                                    (format-time-string
                                     gantt-output-date-format
@@ -787,11 +790,12 @@ they should be listed in their order of precedence and not date."
                                     (when start-blocker
                                       (push `(0 ,height ,(cdr start-blocker) 0 ,(format "[{/:Bold %s}]" (car start-blocker))) blockers))
                                     (unless ended
-                                      (push `(,(1+ (or last-day 0)) ,height
+                                      (push `(,(1+ (max last-day view-start)) ,height
                                               ,(if gantt-plot-with-descriptions
                                                       description
                                                  name))
-                                            fails))
+                                            fails)
+                                      (cl-incf height))
                                     (when (and last-day (>= last-day view-start))
                                       (when shipped
                                         (push
@@ -886,8 +890,9 @@ they should be listed in their order of precedence and not date."
                    ,(when shipping
                       `(:vectors :data shipping :using [1 2 3 4] :options (:arrowstyle 4)))
                    ;; (:labels :data blockers :using [1 2 5] :options (:left :font ",25" :tc "#Cfcfcf"))
-                   ,(when fails
-                      `(:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000")))
+                   ,@(when fails
+                       `((:labels :data fails :using [1 2 3] :options (:left :offset (0.15 0.15) :font ",25" :tc "black"))
+                         (:labels :data fails :using [1 2 3] :options (:left :offset (0.25 0.25) :font ",25" :tc "#Cf0000"))))
                    ,(when statuses
                       `(:labels :data statuses :using [1 2 3] :options (:left :offset (0 0.125) :font ",23" :tc "white")))))))
      options)))
