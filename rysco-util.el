@@ -1140,19 +1140,21 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-download-hunspell-dictionaries ()
   (interactive)
-  (when (eq system-type 'windows-nt)
-    (let ((base-dir (f-join user-emacs-directory "dictionaries"))
-          (dictionaries
-           '(("en_US.aff" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f")
-             ("en_US.dic" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f"))))
+  (let ((base-dir (pcase system-type
+                    (darwin "~/Library/Spelling")
+                    (_ (f-join user-emacs-directory "dictionaries"))))
+        (dictionaries
+         '(("en_US.aff" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.aff?id=a4473e06b56bfe35187e302754f6baaa8d75e54f")
+           ("en_US.dic" "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f"))))
 
-      (cl-loop
-       initially do
-       (f-mkdir base-dir)
+    (cl-loop
+     initially do
+     (f-mkdir base-dir)
 
-       for (file url) in dictionaries do
-       (url-copy-file
-        url (expand-file-name file base-dir) t)))))
+     for (file url) in dictionaries do
+     (url-copy-file
+      url (expand-file-name file base-dir) t)
+     (message "Downloaded dictionaries to %s." base-dir))))
 
 (defun rysco-data-get-path (data path)
   "Helpers for processing nested hashes and such, like what is returned by the json parser."
