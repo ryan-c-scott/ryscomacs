@@ -1,3 +1,5 @@
+(require 'dash)
+
 (defvar rysco-modeline-mode-blacklist
   '("" "Helm" "Projectile[-]" "Projectile" "ElDoc" "God" "WK" "ARev" "GCMH"))
 

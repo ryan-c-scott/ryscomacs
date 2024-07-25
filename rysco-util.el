@@ -2,6 +2,7 @@
 
 (require 'cl)
 (require 'dash)
+(require 'helm-source)
 
 (defun rysco-semantic-mode (&optional state)
   (if state
