@@ -1203,6 +1203,21 @@ With prefix-arg prompt for type if available with your AG version."
                  )))
    finally return data))
 
+(defun rysco-generate-qr-code (data label file &optional no-overwrite-prompt)
+  "Generates a labeled QR encoded image"
+  (interactive "sdata: \nslabel: \nFfile: ")
+  (when-let* ((proceed (or no-overwrite-prompt
+                           (not (f-exists? file))
+                           (y-or-n-p (format "Overwrite '%s'?" file))))
+              (qr-cmd (format "qrencode -m 16 -d 30 -t png -o \"%s\" \"%s\"" file data))
+              (label-cmd (format "magick \"%s\" -gravity south -fill red -pointsize 44 -annotate 0,0 \"%s\" \"%s\"" file label file)))
+
+    (--when-let (shell-command-to-string qr-cmd)
+      (message "QR Generate: %s" it))
+    (--when-let (shell-command-to-string label-cmd)
+      (message "QR Label: %s" it))
+    (message "QR: '%s'" file)))
+
 (cl-defmacro with-rysco-files (files &rest forms)
   `(save-window-excursion
      (cl-loop
