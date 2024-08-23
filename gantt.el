@@ -268,7 +268,33 @@ using the logic in `gantt-work-log-entry-equal'"
       dev
       (-group-by 'car log)))))
 
-(cl-defun gantt-transform-effort (start-date effort-data default-effort)
+(cl-defun gantt-transform-effort--condition (condition start-date &optional project-id)
+  (pcase condition
+    (`(on ,date)
+     `(= simulation-date ,(gantt-date-to-day start-date (format "%s" date))))
+
+    (`(after ,date)
+     `(>= simulation-date ,(gantt-date-to-day start-date (format "%s" date))))
+
+    (`(before ,date)
+     `(< simulation-date ,(gantt-date-to-day start-date (format "%s" date))))
+
+    (`(between ,begin-date ,end-date)
+     `(and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
+           (<= simulation-date ,(gantt-date-to-day start-date (format "%s" end-date)))))
+
+    (`(,(and (or 'and 'or) op) . ,entries)
+     `(,op
+       ,@(cl-loop
+         for exp in entries collect
+         (gantt-transform-effort--condition exp start-date project-id))))
+
+    (`(,(and (or '> '< '=) op) ,a ,b)
+     `(,op ,a ,b))
+
+    (_ 'ERROR)))
+
+(cl-defun gantt-transform-effort (start-date effort-data default-effort &optional project-id)
   "Transforms an effort form.
 The first rule that passes is used, so in the case of overlapping time periods,
 they should be listed in their order of precedence and not date."
@@ -285,25 +311,8 @@ they should be listed in their order of precedence and not date."
        (setq effort exp))
 
      else collect
-     (pcase exp
-       (`(on ,date ,val)
-        `(when (= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           ',val))
-
-       (`(after ,date ,val)
-        `(when (>= simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           ',val))
-
-       (`(before ,date ,val)
-        `(when (< simulation-date ,(gantt-date-to-day start-date (format "%s" date)))
-           ',val))
-
-       (`(between ,begin-date ,end-date ,val)
-        `(when (and (>= simulation-date ,(gantt-date-to-day start-date (format "%s" begin-date)))
-                    (<= simulation-date ,(gantt-date-to-day start-date (format "%s" end-date))))
-           ',val))
-
-       (_ 'ERROR))
+     `(when ,(gantt-transform-effort--condition (butlast exp) start-date project-id)
+       ',(car (last exp)))
      into conditional-effort
 
      finally return
@@ -401,17 +410,29 @@ they should be listed in their order of precedence and not date."
                                    (`(,id . ,proj-data)
                                     `((,(format "%s" id)
                                        ,(--when-let (plist-get proj-data :effort)
-                                          (gantt-transform-effort start-date it 1.0))))))
+                                          (gantt-transform-effort start-date it 1.0 id))))))
 
         for (id effort-form) in selected-projects
         collect
         `(lambda (dev day default-effort project-lookup)
-           (let ((proj (gethash ,id project-lookup))
-                 (proj-effort ,(if effort-form
-                                   `(funcall ,effort-form day)
-                                 'default-effort)))
+           (let* ((proj (gethash ,id project-lookup))
+                  (proj-days-remaining (and proj (gantt-project-work-remaining proj)))
+                  ;; TODO: Optimize this to not recomputer for every dev, for every project, for every day.
+                  (proj-dev-work (or
+                                  (and proj
+                                       (--reduce-from
+                                        (+ acc (if (string-equal dev (car it))
+                                                   (car (last it))
+                                                 0))
+                                        0
+                                        (gantt-project-resource-log proj)))
+                                  0))
+                  ;;
+                  (proj-effort ,(if effort-form
+                                    `(funcall ,effort-form day)
+                                  'default-effort)))
              (and proj
-                  (> (gantt-project-work-remaining proj) 0)
+                  (> proj-days-remaining 0)
                   (> proj-effort 0)
                   (funcall (gantt-project-dependencies proj) day project-lookup)
 
