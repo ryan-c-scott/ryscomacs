@@ -896,7 +896,8 @@ they should be listed in their order of precedence and not date."
              nomirror
              :out
              :font ",20"
-             :textcolor "#999999")
+             :textcolor "#999999"
+             :rotate by 45 left)
 
        (:set rmargin ,(* 5 scale))
        (:set bmargin ,(* 5 scale))
@@ -1018,7 +1019,8 @@ they should be listed in their order of precedence and not date."
              nomirror
              :out
              :font ",20"
-             :textcolor "#999999")
+             :textcolor "#999999"
+             :rotate by 45 left)
 
        (:tics x
               :options (:out
