@@ -939,6 +939,7 @@ they should be listed in their order of precedence and not date."
          (palette (gantt-create-palette (--map (gantt-project-name it) projects) 4))
          (height 1)
          (scale (or (plist-get options :fontscale) 1.0))
+         simulation-lines
          labels)
     (apply
      'rysco-plot
@@ -946,9 +947,11 @@ they should be listed in their order of precedence and not date."
        (:data
         worklog
         ,@(cl-loop
+           with dev-simulation-days = (gantt-simulation-work-log-latest-days simulation)
            for i upfrom 1
            for (dev . proj-log) in data
 
+           as dev-simulation-start-day = (cl-gethash dev dev-simulation-days 0)
            as dev-has-work = nil
            as dev-work = (cl-loop
                           for (proj . entries) in proj-log
@@ -984,10 +987,12 @@ they should be listed in their order of precedence and not date."
                                           1
                                         effort)
                                      0 ,style-id))))
+           when dev-has-work do (push `(0 ,(+ height 0.125) ,(1+ dev-simulation-start-day) 0) simulation-lines)
            when dev-has-work do (cl-incf height)
            when dev-has-work append dev-work))
 
        (:data labels ,@labels)
+       (:data simulationlines ,@simulation-lines)
 
        ,(when key-dates
           `(:data
@@ -1004,6 +1009,7 @@ they should be listed in their order of precedence and not date."
 
        (:set style arrow 1 nohead lw ,(* 2 scale) lc "#999999") ;Key dates
        (:set style arrow 2 nohead lw ,(* 6 scale) lc "#8b008b") ;Simulation boundary
+       (:set style arrow 3 nohead lw ,(* 2 scale) lc "black") ;Dev simulation start
 
        ,@(cl-loop
           for (_ . style-data) in palette collect
@@ -1052,6 +1058,7 @@ they should be listed in their order of precedence and not date."
                  `(,(when key-dates
                       `(:vectors :data keydates :using [3 4 5 6 (x2tic 2)] :options (:arrowstyle 1)))
                    (:vectors :data worklog :using [3 4 5 6 7 (ytic 2)] :options (:arrowstyle variable))
+                   (:vectors :data simulationlines :using [1 2 3 4] :options (:arrowstyle 3))
                    (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (0.95 0.7) :font ",20" :tc "black"))
                    (:labels :data labels :using [1 2 3] :options (:rotate by 20 left :offset (1.0 0.75) :font ",20" :tc "white"))))))
      options)))
