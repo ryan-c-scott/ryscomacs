@@ -54,6 +54,7 @@
   view-start-day
   view-end-day
   work-log
+  work-log-latest-days
   dev-form
   key-dates)
 
@@ -472,7 +473,8 @@ they should be listed in their order of precedence and not date."
            (projects ,transformed-projects)
            (devs ',(gantt-transform-devs start-date devs transformed-projects))
            (global-effort ,(gantt-transform-effort start-date global-effort nil))
-           (key-dates ',(when key-dates (gantt-read-forms-from-file key-dates))))
+           (key-dates ',(when key-dates (gantt-read-forms-from-file key-dates)))
+           (latest-days (cl-make-hash-table :test 'equal)))
 
        '(:errors
          ,@(-uniq
@@ -494,6 +496,10 @@ they should be listed in their order of precedence and not date."
             as dev-data = (cdr (assoc dev devs 'string=))
             as effort-override = (funcall global-effort day)
             as default-effort = (and dev-data (--when-let (plist-get dev-data :effort) (funcall it day)))
+            as latest-dev-day = (cl-puthash
+                                 dev
+                                 (max (cl-gethash dev latest-days 0) day)
+                                 latest-days)
 
             as effort = (pcase effort
                           ;; NOTE: Deprecated; use (:status closed)
@@ -615,6 +621,7 @@ they should be listed in their order of precedence and not date."
          as default-effort = (or (funcall global-effort day)
                                  (funcall (plist-get data :effort) day))
          as special-entry = (not (numberp default-effort))
+         as dev-simulation-start-day = (or (cl-gethash dev latest-days) simulation-start-day)
 
          when special-entry do
          (let* ((proj (gethash default-effort projects))
@@ -635,7 +642,7 @@ they should be listed in their order of precedence and not date."
                   (list
                    (list dev day default-effort)))))
 
-         when (and (>= day simulation-start-day) (not special-entry)) do
+         when (and (>= day dev-simulation-start-day) (not special-entry)) do
          (cl-loop
           with daily-effort = 0 ;; Can never exceed a single day worth of time
           with proj
@@ -695,6 +702,7 @@ they should be listed in their order of precedence and not date."
         :view-start-day ,view-start-day
         :view-end-day ,view-end-day
         :key-dates key-dates
+        :work-log-latest-days latest-days
         :projects
         (--sort
          (let ((it-start (or (gantt-project-started it) 0))
