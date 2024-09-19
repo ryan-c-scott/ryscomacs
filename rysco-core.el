@@ -262,7 +262,7 @@
                         (?- . "•")
                         (?* . "•"))
 
-      org-columns-default-format-for-agenda "%25ITEM %TODO %3PRIORITY %EFFORT %TAGS"
+      org-columns-default-format-for-agenda "%25ITEM %TODO %3PRIORITY %EFFORT %DEADLINE %TAGS"
       org-super-agenda-groups
       '((:name "Triage"
                :tag "triage"
