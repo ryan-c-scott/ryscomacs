@@ -224,7 +224,9 @@
       (setq rysco-org-agenda-status-overlay
             (make-overlay (point) (+ (point) 2)))
 
-      (let* ((show-status (= (or (get-char-property 1 'org-last-args) 0) 0))
+      (let* ((last-args-prop (get-char-property 1 'org-last-args))
+             (show-status (and (numberp last-args-prop)
+                               (= (or last-args-prop 0) 0)))
              (status (and show-status (rysco-org-agenda-get-projects)))
              (buffer-read-only nil)
              (status-overlay rysco-org-agenda-status-overlay)
