@@ -86,7 +86,7 @@
  multiple-cursors
  nginx-mode
  org
- org-download
+ (org-download :type git :host github :repo "ryan-c-scott/org-download")
  org-modern
  org-ql
  (org-reveal :type git :host github :repo "ryan-c-scott/org-reveal")
