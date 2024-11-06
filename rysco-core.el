@@ -86,6 +86,7 @@
  multiple-cursors
  nginx-mode
  org
+ org-download
  org-modern
  org-ql
  (org-reveal :type git :host github :repo "ryan-c-scott/org-reveal")
@@ -253,6 +254,7 @@
       org-log-into-drawer t
       org-ellipsis " ➟"
 
+      org-download-method 'attach
       org-modern-hide-stars nil
       org-modern-star nil
       org-modern-progress nil
@@ -609,6 +611,7 @@ background-color: #adffc1;
 (with-eval-after-load "org"
   (require 'org-refile)
   (require 'org-attach)
+  (require 'org-download)
   (require 'ox-reveal)
 
   (add-to-list 'org-modules 'org-habit t)

@@ -764,6 +764,18 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 
 (advice-add 'org-current-effective-time :around 'rysco-org-current-effective-time-advice)
 
+(defun rysco-org-insert-link (old &rest rest)
+  "Invoke `org-download-clipboard', or, failing that, `org-insert-link'"
+  (let ((last-file org-download-path-last-file))
+    (call-interactively 'org-download-clipboard)
+
+    (when (fboundp 'gui-set-selection)
+      (gui-set-selection 'CLIPBOARD ""))
+
+    (when (string= last-file org-download-path-last-file)
+      (call-interactively old rest))))
+
+(advice-add 'org-insert-link :around 'rysco-org-insert-link)
 
 (defun rysco-org-duration-string-to-minutes (s)
   (cl-loop
