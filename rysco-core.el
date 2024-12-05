@@ -41,7 +41,6 @@
  async
  autothemer
  buttercup
- csharp-mode
  csv-mode
  dash
  diff-hl
