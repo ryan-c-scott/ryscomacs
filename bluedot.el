@@ -116,8 +116,15 @@
     (ding t)))
 
 (defun bluedot--notify (title msg &optional sound)
-  (when (eq system-type 'windows-nt)
-    (alert-toast-notify `(:title ,title :message ,msg :data (:audio ,(or sound 'default))))))
+  "Sends OS-level notification.
+On MacOS, requires application `terminal-notifier' in path.
+OS notification settings may suppress messages"
+  (pcase system-type
+    ('windows-nt
+     (alert-toast-notify `(:title ,title :message ,msg :data (:audio ,(or sound 'default)))))
+    ('darwin
+     (shell-command
+      (format "terminal-notifier -title \"%s\" -message \"%s\" -sound default -group Emacs" title msg)))))
 
 (defun bluedot--notify-work-done ()
   (message "work done")
