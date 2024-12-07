@@ -56,14 +56,15 @@
     ("kp" "Projectile" projectile-kill-buffers)
     ("kb" "Buffer & Frame" rysco-kill-buffer-and-frame)]
 
-   ["Time Management"
+   ["Agenda"
     :setup-children rysco-transient--wrap-children
     ("ta" "Agenda" rysco-org-agenda)
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
     ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
     ("ti" "Clock in Last" bluedot-org-clock-in-last)
-    ("tj" "Jump to Clock" bluedot-org-jump-to-clock)]
+    ("tj" "Jump to Clock" bluedot-org-jump-to-clock)
+    ("tc" "Recapture" rysco-agenda-recapture)]
 
    ["Data Store"
     :setup-children rysco-transient--wrap-children
