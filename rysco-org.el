@@ -280,6 +280,35 @@
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
+(defun rysco-agenda-file-into-store ()
+  "Copy node content, excluding headline and properties, into a temp buffer and mark the region
+for use with `%i' in org capture templates (see `org-capture-templates')"
+  (interactive)
+  (-when-let* ((marker (get-text-property (point) 'org-marker))
+               (contents (with-current-buffer (marker-buffer marker)
+                           (--when-let (org-element-at-point)
+                             (buffer-substring
+                              (org-element-property :contents-begin it)
+                              (org-element-property :contents-end it))))))
+
+    (with-temp-buffer
+      (insert contents)
+      (let ((data (org-element-parse-buffer))
+            begin)
+
+        (org-element-end
+         (org-element-map data org-element-all-elements
+           (lambda (el)
+             (pcase (org-element-type el)
+               ((or 'drawer 'property-drawer 'section) nil)
+               (_ (setq begin (org-element-begin el)))))
+           nil t
+           '(drawer property-drawer)))
+
+        (set-mark begin)
+        (goto-char (point-max))
+        (funcall-interactively 'org-capture)))))
+
 (defun rysco-org-agenda-goto-last-refile ()
   (interactive)
   (--when-let
