@@ -17,24 +17,24 @@
 ;;
 ;; (setq associated-program-alist
 ;;    '(("gnochm" "\\.chm$")
-;; 	("evince" "\\.pdf$")
-;; 	("mplayer" "\\.mp3$")
-;; 	((lambda (file)
-;; 	   (let ((newfile (concat (file-name-sans-extension (file-name-nondirectory file)) ".txt")))
-;; 	     (cond
-;; 	      ((get-buffer newfile)
-;; 	       (switch-to-buffer newfile)
-;; 	       (message "Buffer with name %s exists, switching to it" newfile))
-;; 	      ((file-exists-p newfile)
-;; 	       (find-file newfile)
-;; 	       (message "File %s exists, opening" newfile))
-;; 	      (t (find-file newfile)
-;; 		 (= 0 (call-process "antiword" file
-;; 				    newfile t "-")))))) "\\.doc$")
-;; 	("evince" "\\.ps$")
+;;      ("evince" "\\.pdf$")
+;;      ("mplayer" "\\.mp3$")
+;;      ((lambda (file)
+;;         (let ((newfile (concat (file-name-sans-extension (file-name-nondirectory file)) ".txt")))
+;;           (cond
+;;            ((get-buffer newfile)
+;;             (switch-to-buffer newfile)
+;;             (message "Buffer with name %s exists, switching to it" newfile))
+;;            ((file-exists-p newfile)
+;;             (find-file newfile)
+;;             (message "File %s exists, opening" newfile))
+;;            (t (find-file newfile)
+;;               (= 0 (call-process "antiword" file
+;;                                  newfile t "-")))))) "\\.doc$")
+;;      ("evince" "\\.ps$")
 ;;	("fontforge" "\\.\\(sfd\\(ir\\)?\\|ttf\\|otf\\)$")
-;; 	((lambda (file)
-;; 	   (browse-url (concat "file:///" (expand-file-name file)))) "\\.html?$")))
+;;      ((lambda (file)
+;;         (browse-url (concat "file:///" (expand-file-name file)))) "\\.html?$")))
 ;;
 ;;
 ;;		Then, you can run the associated program in dired mode by
@@ -68,26 +68,26 @@
   "Run program or function associated with file-name-arg.
       If no application is associated with file, then `find-file'."
   (interactive "ffile:")
-  (let ((items associated-program-alist) 
-	item
-	program
-	regexp
-	file-name
-	result)
+  (let ((items associated-program-alist)
+        item
+        program
+        regexp
+        file-name
+        result)
     (setq file-name (expand-file-name file-name-arg))
     (while (and (not result) items)
       (setq item (car items))
       (setq program (nth 0 item))
       (setq regexp (nth 1 item))
       (if (string-match regexp file-name)
-	  (cond ((stringp program)
-		 (setq result (start-process program nil program file-name)))
-		((functionp program)
-		 (funcall program file-name)
-		 ;; This implementation assumes everything went well,
-		 ;; or that the called function handled an error by
-		 ;; itself:
-		 (setq result t))))
+          (cond ((stringp program)
+                 (setq result (start-process program nil program file-name)))
+                ((functionp program)
+                 (funcall program file-name)
+                 ;; This implementation assumes everything went well,
+                 ;; or that the called function handled an error by
+                 ;; itself:
+                 (setq result t))))
       (setq items (cdr items)))
     ;; fail to run
     (unless result (find-file file))))

@@ -11,10 +11,10 @@
 
     (shell-command-to-string
      (format "%s -l \"%s\" -f html %s"
-	     (executable-find pyggy-pygments-path)
-	     (or (org-element-property :language code)
-		 "")
-	     temp-source-file))))
+             (executable-find pyggy-pygments-path)
+             (or (org-element-property :language code)
+                 "")
+             temp-source-file))))
 
 (org-export-define-derived-backend 'pyggy-html 'html
   :translate-alist

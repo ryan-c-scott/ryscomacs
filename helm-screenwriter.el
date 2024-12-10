@@ -31,7 +31,7 @@
 ;; USAGE:
 ;; Copy helm-screenwriter.el into a location that's in your load-path.
 ;; Include helm-screenwriter.el via autoload or require.
-;; Add helm-screenwriter-init to the screenwriter-mode-hook will rebind M-s, M-d, and M-t setup initially in screenwriter-mode to use the 
+;; Add helm-screenwriter-init to the screenwriter-mode-hook will rebind M-s, M-d, and M-t setup initially in screenwriter-mode to use the
 
 ;; (autoload 'screenwriter-mode "screenwriter" "Major mode for the screenwriter tool." t)
 ;; (autoload 'helm-screenwriter-init "helm-screenwriter" "Helm routines for screenwriter-mode." t)
@@ -40,7 +40,7 @@
 ;; (require 'helm-screenwriter)
 
 ;; (add-hook 'screenwriter-mode-hook
-;; 	  '(lambda ()
+;;        '(lambda ()
 ;;              (helm-screenwriter-init)))
 
 ;;; Code:
@@ -60,32 +60,32 @@
   (let (res)
     (with-current-buffer helm-screenwriter-buffer
       (save-excursion
-	(goto-char (point-min))
-					; TODO: ignore notes
-					;.Split multiple characters separated by '/'
-	(while (re-search-forward helm-screenwriter-regex-actor nil t)
-	  (let ((character (match-string 1)))
-	    (cl-pushnew 'res character))))
+        (goto-char (point-min))
+                                        ; TODO: ignore notes
+                                        ;.Split multiple characters separated by '/'
+        (while (re-search-forward helm-screenwriter-regex-actor nil t)
+          (let ((character (match-string 1)))
+            (cl-pushnew 'res character))))
       res)))
 
 (defun helm-screenwriter-get-transitions ()
   (let (res)
     (with-current-buffer helm-screenwriter-buffer
       (save-excursion
-	(goto-char (point-min))
-	(while (re-search-forward helm-screenwriter-regex-transition nil t)
-	  (let ((transition (match-string 1)))
-	    (cl-pushnew 'res transition))))
+        (goto-char (point-min))
+        (while (re-search-forward helm-screenwriter-regex-transition nil t)
+          (let ((transition (match-string 1)))
+            (cl-pushnew 'res transition))))
       res)))
 
 (defun helm-screenwriter-get-sluglines ()
   (let (res (case-fold-search nil))
     (with-current-buffer helm-screenwriter-buffer
       (save-excursion
-	(goto-char (point-min))
-	(while (re-search-forward helm-screenwriter-regex-slugline nil t)
-	  (let ((slug (match-string 0)))
-	    (cl-pushnew 'res slug))))
+        (goto-char (point-min))
+        (while (re-search-forward helm-screenwriter-regex-slugline nil t)
+          (let ((slug (match-string 0)))
+            (cl-pushnew 'res slug))))
       res)))
 
 
@@ -113,40 +113,39 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defconst helm-scrn-character-source
       `(((name . "Screenwriter Characters")
-	(init . (lambda ()
-		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
-	(candidates . helm-screenwriter-get-characters)
-	(action . (("Use" . (lambda (candidate) (screenwriter-dialog-block candidate))))))
+        (init . (lambda ()
+                  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
+        (candidates . helm-screenwriter-get-characters)
+        (action . (("Use" . (lambda (candidate) (screenwriter-dialog-block candidate))))))
 
-	;;
-	((name . "Screenwriter Create Character")
-	 (dummy)
-	 (action . (("Create" . (lambda (candidate) (screenwriter-dialog-block (upcase candidate)))))))))
+        ;;
+        ((name . "Screenwriter Create Character")
+         (dummy)
+         (action . (("Create" . (lambda (candidate) (screenwriter-dialog-block (upcase candidate)))))))))
 
 (defconst helm-scrn-transition-source
       `(((name . "Screenwriter transitions")
-	(init . (lambda ()
-		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
-	(candidates . helm-screenwriter-get-transitions)
-	(action . (("Use" . (lambda (candidate) (screenwriter-transition candidate))))))
+        (init . (lambda ()
+                  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
+        (candidates . helm-screenwriter-get-transitions)
+        (action . (("Use" . (lambda (candidate) (screenwriter-transition candidate))))))
 
-	;;
-	((name . "Screenwriter Create Transition")
-	 (dummy)
-	 (action . (("Create" . (lambda (candidate) (screenwriter-transition (upcase candidate)))))))))
+        ;;
+        ((name . "Screenwriter Create Transition")
+         (dummy)
+         (action . (("Create" . (lambda (candidate) (screenwriter-transition (upcase candidate)))))))))
 
 (defconst helm-scrn-slug-source
       `(((name . "Screenwriter slugs")
-	(init . (lambda ()
-		  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
-	(candidates . helm-screenwriter-get-sluglines)
-	(action . (("Use" . (lambda (candidate) (screenwriter-slugline candidate))))))
+        (init . (lambda ()
+                  (helm-set-local-variable 'helm-screenwriter-buffer (current-buffer))))
+        (candidates . helm-screenwriter-get-sluglines)
+        (action . (("Use" . (lambda (candidate) (screenwriter-slugline candidate))))))
 
-	;;
-	((name . "Screenwriter Create Slugline")
-	 (dummy)
-	 (action . (("Create" . (lambda (candidate) (screenwriter-slugline (upcase candidate)))))))))
-	
+        ;;
+        ((name . "Screenwriter Create Slugline")
+         (dummy)
+         (action . (("Create" . (lambda (candidate) (screenwriter-slugline (upcase candidate)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun helm-screenwriter-display-official ()
@@ -163,7 +162,7 @@
 (defun helm-screenwriter-what-page ()
   (interactive)
   (message "Page %s / %s" (helm-screenwriter-calculate-page (point))
-	   (helm-screenwriter-calculate-page (point-max))))
+           (helm-screenwriter-calculate-page (point-max))))
 
 (defun helm-screenwriter-goto-page (page)
   (interactive "nGoto page: ")
@@ -177,15 +176,15 @@
 (defun helm-screenwriter-move-next-page ()
   (interactive)
   (helm-screenwriter-move-page 1))
-  
+
 (defun helm-screenwriter-move-previous-page ()
   (interactive)
   (helm-screenwriter-move-page -1))
-  
+
 (defun helm-screenwriter-dialog-block ()
   (interactive)
   (helm :sources helm-scrn-character-source))
-  
+
 (defun helm-screenwriter-transition ()
   (interactive)
   (helm :sources helm-scrn-transition-source))
@@ -199,39 +198,39 @@
   ;; Do regex matches to determine which margin function to call from screenwriter
   (save-mark-and-excursion
     (let ((line (thing-at-point 'line t)) case-fold-search)
-      
+
       (cond
        ((string-match helm-screenwriter-regex-slugline line)
-	(message "Found: Slugline")
-	(scrn-margins)
-	(back-to-indentation))
+        (message "Found: Slugline")
+        (scrn-margins)
+        (back-to-indentation))
 
        ((string-match helm-screenwriter-regex-action line)
-	(message "Found: action")
-	(scrn-margins)
-	(back-to-indentation))
+        (message "Found: action")
+        (scrn-margins)
+        (back-to-indentation))
 
        ((string-match helm-screenwriter-regex-transition line)
-	(message "Found: Transition")
-	(scrn-trans-margins)
-	(back-to-indentation))
-       
+        (message "Found: Transition")
+        (scrn-trans-margins)
+        (back-to-indentation))
+
        ((string-match helm-screenwriter-regex-actor line)
-	(message "Found: Actor")
-	(scrn-dialog-margins)
-	(setq left-margin 20)
-	(back-to-indentation))
+        (message "Found: Actor")
+        (scrn-dialog-margins)
+        (setq left-margin 20)
+        (back-to-indentation))
 
        ((string-match helm-screenwriter-regex-dialogue line)
-	(message "Found: Dialogue")
-	(scrn-dialog-margins)
-	(back-to-indentation))))))
+        (message "Found: Dialogue")
+        (scrn-dialog-margins)
+        (back-to-indentation))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq helm-screenwriter-highlights
       `((,helm-screenwriter-regex-actor . font-lock-function-name-face)
-	(,helm-screenwriter-regex-slugline . font-lock-keyword-face)
-	(,helm-screenwriter-regex-transition . font-lock-constant-face)))
+        (,helm-screenwriter-regex-slugline . font-lock-keyword-face)
+        (,helm-screenwriter-regex-transition . font-lock-constant-face)))
 
 
 (defun helm-screenwriter-init ()
@@ -239,7 +238,7 @@
 
   (setq font-lock-defaults '(helm-screenwriter-highlights))
   (font-lock-mode)
-  
+
   (local-set-key (kbd "M-i") 'helm-screenwriter-guess-margins)
   (local-set-key (kbd "M-s") 'helm-screenwriter-slugline)
   (local-set-key (kbd "M-d") 'helm-screenwriter-dialog-block)
@@ -253,4 +252,3 @@
   (local-set-key (kbd "C-M-b") 'helm-screenwriter-move-previous-dialogue)
 
   (helm-screenwriter-what-page))
-  

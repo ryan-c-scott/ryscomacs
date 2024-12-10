@@ -402,15 +402,15 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
   (let ((current (point)))
     (when (with-rysco-org-result-src-block
            (let* ((context
-	           (org-element-lineage
-	            (org-element-context)
-	            '(babel-call inline-babel-call inline-src-block)
-	            t))
+                   (org-element-lineage
+                    (org-element-context)
+                    '(babel-call inline-babel-call inline-src-block)
+                    t))
                   (type (org-element-type context)))
              (pcase type
                ((or `babel-call `inline-babel-call)
                 (let ((info (org-babel-lob-get-info context)))
-	          (when info (org-babel-execute-src-block nil info nil type))))
+                  (when info (org-babel-execute-src-block nil info nil type))))
                (_
                 (org-babel-execute-src-block)))))
       (goto-char current))))
@@ -887,9 +887,9 @@ VALUE-COLUMN can be specified to use a different column of data for processing
        (rysco-org-todo-yesterday--fix-scheduled-date))
       ('org-agenda-mode
        (let* ((marker (or (org-get-at-bol 'org-marker)
-		          (org-agenda-error)))
+                          (org-agenda-error)))
               (buffer (marker-buffer marker))
-	      (pos (marker-position marker)))
+              (pos (marker-position marker)))
          (org-agenda-todo arg)
          (with-current-buffer buffer
            (goto-char pos)
@@ -919,9 +919,9 @@ VALUE-COLUMN can be specified to use a different column of data for processing
     '(?h "Export to HTML"
          ((?e "As MHTML file" rysco-org-html-export-to-embedded-html)
           (?E "As MHTML file and open"
-	    (lambda (a s v b)
-	      (if a (rysco-org-html-export-to-embedded-html t s v b)
-		(org-open-file (rysco-org-html-export-to-embedded-html nil s v b)))))))))
+            (lambda (a s v b)
+              (if a (rysco-org-html-export-to-embedded-html t s v b)
+                (org-open-file (rysco-org-html-export-to-embedded-html nil s v b)))))))))
 
 (defun rysco-org-add-triage-tag ()
   (interactive)

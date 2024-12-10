@@ -41,7 +41,7 @@
 ;;
 ;; M-d does the dialog headings and blocks
 ;;         BOB
-;;   Got GNU Linux installed 
+;;   Got GNU Linux installed
 ;;   on this computer!
 ;;
 ;; M-t does transitions, such as  CUT TO:  and FADE IN:  and  FADE OUT.
@@ -55,7 +55,7 @@
 ;;
 ;; Don't enter any spurious newlines when finished editing any one
 ;; particular element.  Just hit the key combo for the next thing you
-;; want to do, e.g., (type M-s) INT. HOUSE -- DAY (Type M-a to go 
+;; want to do, e.g., (type M-s) INT. HOUSE -- DAY (Type M-a to go
 ;; into a action block.
 ;;
 ;; TODO
@@ -263,8 +263,8 @@ and call this function with a prefix-arg, i.e, C-u M-t"
          (newline 2)
          (scrn-trans-margins)
          (indent-to-left-margin)
-	 (while ( < (length trans) 30 )
-	   (setq trans (concat " " trans)))
+         (while ( < (length trans) 30 )
+           (setq trans (concat " " trans)))
          (insert trans))))
 
 (defun screenwriter-version ()

@@ -3,7 +3,7 @@
 ;;; bluedot.el --- Small pomodoro timer (1 char)
 
 ;; Author: Ryon C. Scott
-;; URL: 
+;; URL:
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: calendar
@@ -277,18 +277,18 @@ OS notification settings may suppress messages"
 
 Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
   (when (and (org-clocking-p)
-	     org-clock-out-when-done
-	     (marker-buffer org-clock-marker)
-	     (equal (or (buffer-base-buffer (org-clocking-buffer))
-			(org-clocking-buffer))
-		    (or (buffer-base-buffer (current-buffer))
-			(current-buffer)))
-	     (< (point) org-clock-marker)
-	     (> (org-with-wide-buffer (org-entry-end-position))
-		org-clock-marker))
+             org-clock-out-when-done
+             (marker-buffer org-clock-marker)
+             (equal (or (buffer-base-buffer (org-clocking-buffer))
+                        (org-clocking-buffer))
+                    (or (buffer-base-buffer (current-buffer))
+                        (current-buffer)))
+             (< (point) org-clock-marker)
+             (> (org-with-wide-buffer (org-entry-end-position))
+                org-clock-marker))
     ;; Clock out, but don't accept a logging message for this.
     (let ((org-log-note-clock-out nil)
-	  (org-clock-out-switch-to-state nil))
+          (org-clock-out-switch-to-state nil))
       (org-clock-out))))
 
 (defun bluedot-org-todo-change ()
@@ -322,4 +322,3 @@ Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
 
 ;;;;;;;;
 (provide 'bluedot)
-
