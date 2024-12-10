@@ -281,17 +281,14 @@
     (apply old args)))
 
 (defun rysco-org-recapture ()
-  "Copy node content, excluding headline and properties, into a temp buffer and mark the region
+  "Narrow to node content, excluding headline and properties, and mark the region
 for use with `%i' in org capture templates (see `org-capture-templates')"
   (interactive)
-  (-when-let* ((element (org-element-at-point))
-               (contents
-                (buffer-substring
-                 (org-element-contents-begin element)
-                 (org-element-contents-end element))))
+  (-when-let* ((element (org-element-at-point)))
+    (save-restriction
+      (narrow-to-region (org-element-contents-begin element)
+                        (org-element-contents-end element))
 
-    (with-temp-buffer
-      (insert contents)
       (let ((data (org-element-parse-buffer))
             begin)
 
@@ -314,8 +311,9 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
   (interactive)
   (-when-let* ((marker (get-text-property (point) 'org-marker)))
     (with-current-buffer (marker-buffer marker)
-      (goto-char (marker-position marker))
-      (funcall-interactively 'rysco-org-recapture))))
+      (save-excursion
+        (goto-char (marker-position marker))
+        (funcall-interactively 'rysco-org-recapture)))))
 
 (defun rysco-org-agenda-goto-last-refile ()
   (interactive)
