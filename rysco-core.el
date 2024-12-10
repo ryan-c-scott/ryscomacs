@@ -267,9 +267,11 @@
       org-super-agenda-groups
       '((:name "Triage"
                :tag "triage"
+               :transformer rysco-agenda-entry-header
                :order 2)
         (:name "Unfiled"
                :file-path "unfiled.org"
+               :transformer rysco-agenda-entry-header
                :order 1)
         (:name "NOW"
                :todo "NOW"
@@ -301,13 +303,16 @@
                :order 5)
         (:name "Work Categories"
                :tag "category"
+               :transformer rysco-agenda-entry-header
                :order 6)
         (:name "Habits"
                :habit t
                :order 7)
         (:todo "INACTIVE"
+               :transformer rysco-agenda-entry-header
                :order 9)
         (:auto-property "ProjectId"
+                        :transformer rysco-agenda-entry-header-auto-grouped
                         :order 8))
 
       org-refile-targets

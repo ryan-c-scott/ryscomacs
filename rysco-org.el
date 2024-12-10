@@ -265,10 +265,27 @@
           "\n\n"))))))
 
 ;;;###autoload
+(defun rysco-agenda-entry-header (str)
+  (-if-let* ((marker (get-text-property 0 'org-marker str))
+             (has-note (rysco-org-agenda-entry-has-note marker)))
+      (apply 'propertize
+             (concat "⌄" (substring str 1))
+             (text-properties-at 0 str))
+    str))
+
+;;;###autoload
+(defun rysco-agenda-entry-header-auto-grouped (data)
+  `(:name
+    ,(plist-get data :name)
+    :items
+    ,(-map 'rysco-agenda-entry-header (plist-get data :items))))
+
+;;;###autoload
 (defun rysco-agenda-project-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (face-name (org-entry-get marker "projectface" t))
              (face (intern face-name))
+             (str (rysco-agenda-entry-header str))
              (header-width (-if-let (header-text (car (s-match "^.*:\s+" str)))
                                (1- (length header-text))
                              (+ 3 (length (format "%s" (get-text-property 0 'org-category str)))))))
@@ -292,14 +309,13 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
       (let ((data (org-element-parse-buffer))
             begin)
 
-        (org-element-end
-         (org-element-map data org-element-all-elements
-           (lambda (el)
-             (pcase (org-element-type el)
-               ((or 'drawer 'property-drawer 'section) nil)
-               (_ (setq begin (org-element-begin el)))))
-           nil t
-           '(drawer property-drawer)))
+        (org-element-map data org-element-all-elements
+          (lambda (el)
+            (pcase (org-element-type el)
+              ((or 'drawer 'property-drawer 'section) nil)
+              (_ (setq begin (org-element-begin el)))))
+          nil t
+          '(drawer property-drawer))
 
         (set-mark begin)
         (goto-char (point-max))
@@ -742,6 +758,30 @@ VALUE-COLUMN can be specified to use a different column of data for processing
       (goto-char it)
       (rysco-org-insert-clock-entry minutes))))
 
+(defun rysco-org-agenda-entry-has-note (&optional marker)
+  (interactive)
+  (-when-let* ((marker (or marker (get-text-property (point) 'org-marker))))
+    (with-current-buffer (marker-buffer marker)
+      (save-excursion
+        (goto-char (marker-position marker))
+        (when-let* ((element (org-element-at-point))
+                    (begin (org-element-contents-begin element))
+                    (end (org-element-contents-end element)))
+          (save-restriction
+            (narrow-to-region begin end)
+
+            (let* ((data (org-element-parse-buffer))
+                   (parent (org-element-map data '(drawer)
+                             (lambda (el)
+                               (when (string= (org-element-property :drawer-name el) "LOGBOOK")
+                                 el))
+                             nil t '(headline))))
+              (when parent
+                (org-element-map parent org-element-all-elements
+                  (lambda (el)
+                    (not (member (org-element-type el) '(drawer clock))))
+                  nil t)))))))))
+
 (defun rysco-org-agenda-entry-text-show-here ()
   "Add logbook from the entry as context to the current line."
   (let (m txt o)
@@ -772,13 +812,18 @@ VALUE-COLUMN can be specified to use a different column of data for processing
                                                     (pcase (car el)
                                                       ('clock)
                                                       ('plain-list
-                                                       (concat
-                                                        line-prefix
-                                                        (s-replace
-                                                         "\n" (concat "\n" line-prefix)
-                                                       (buffer-substring
-                                                        (org-element-property :contents-begin el)
-                                                        (org-element-property :contents-end el))))))
+                                                       (let* ((text-begin (org-element-contents-begin el))
+                                                              (text-end (org-element-contents-end el))
+                                                              (text-entry (buffer-substring
+                                                                           text-begin
+                                                                           text-end)))
+
+                                                         (unless (s-starts-with? "- State \"DONE\"" text-entry)
+                                                           (concat
+                                                            line-prefix
+                                                            (s-replace
+                                                             "\n" (concat "\n" line-prefix)
+                                                             text-entry))))))
                                                   (push it entries))))
                                             (apply 'concat (reverse entries)))))
                                       nil t))))
