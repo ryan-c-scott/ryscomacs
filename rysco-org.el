@@ -284,11 +284,11 @@
   "Copy node content, excluding headline and properties, into a temp buffer and mark the region
 for use with `%i' in org capture templates (see `org-capture-templates')"
   (interactive)
-  (-when-let* ((contents
-                (--when-let (org-element-at-point)
-                  (buffer-substring
-                   (org-element-property :contents-begin it)
-                   (org-element-property :contents-end it)))))
+  (-when-let* ((element (org-element-at-point))
+               (contents
+                (buffer-substring
+                 (org-element-contents-begin element)
+                 (org-element-contents-end element))))
 
     (with-temp-buffer
       (insert contents)
@@ -314,6 +314,7 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
   (interactive)
   (-when-let* ((marker (get-text-property (point) 'org-marker)))
     (with-current-buffer (marker-buffer marker)
+      (goto-char (marker-position marker))
       (funcall-interactively 'rysco-org-recapture))))
 
 (defun rysco-org-agenda-goto-last-refile ()
