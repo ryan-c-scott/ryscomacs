@@ -69,37 +69,9 @@
 
 (defun helm-rysco-store--save-search-buffer (&optional _)
   (let* ((buf "*squery*")
-         new-buf
-         (pattern (with-helm-buffer helm-input-local))
-         (src (helm-get-current-source))
-         (src-name (assoc-default 'name src)))
-    (with-current-buffer (get-buffer-create buf)
-      (setq buffer-read-only t)
-      (let ((inhibit-read-only t)
-            (map (make-sparse-keymap)))
-        (erase-buffer)
-        (insert "-*- mode: helm-rysco-store -*-\n\n"
-                (format "%s Results for `%s':\n\n" src-name pattern))
-        (save-excursion
-          (insert (with-current-buffer helm-buffer
-                    (goto-char (point-min)) (forward-line 1)
-                    (buffer-substring (point) (point-max)))))
-        (save-excursion
-          (while (not (eobp))
-            ;; (add-text-properties (pos-bol) (pos-eol)
-            ;;                      `(keymap ,map
-            ;;                               help-echo ,(concat
-            ;;                                           (get-text-property
-            ;;                                            (point) 'helm-grep-fname)
-            ;;                                           "\nmouse-1: set point\nmouse-2: jump to selection")
-            ;;                               mouse-face highlight))
-            ;; (define-key map [mouse-1] 'mouse-set-point)
-            ;; (define-key map [mouse-2] 'helm-grep-mode-mouse-jump)
-            ;; (define-key map [mouse-3] 'ignore)
-            (forward-line 1))))
-      (helm-rysco-store-mode))
-    (pop-to-buffer buf)
-    (message "Query %s Results saved in `%s' buffer" src-name buf)))
+         (query (with-helm-buffer helm-input-local))
+         (files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))))
+  (org-ql-search files query :buffer buf)))
 
 ;;;;
 (defvar helm-rysco-store-mode-map
@@ -114,13 +86,12 @@
     (define-key map (kbd "p") 'previous-line)
     map))
 
-(define-derived-mode helm-rysco-store-mode
-    special-mode "helm-rysco-store"
-    "Major mode to provide actions in helm rysco-store saved buffer.
+(define-minor-mode helm-rysco-store-mode
+  "Minor mode to provide actions in helm rysco-store saved buffer.
 
 Special commands:
-\\{helm-rysco-store-mode-map}")
-(put 'helm-rysco-store-mode 'helm-only t)
+\\{helm-rysco-store-mode-map}"
+  :lighter "store")
 
 (defun helm-rysco-store-mode-jump ()
   (interactive)
@@ -145,7 +116,7 @@ Special commands:
 
 (defun helm-rysco-store-mode-jump-internal (&optional method)
   (when-let* ((query-buffer (current-buffer))
-              (marker (get-text-property (point) 'helm-realvalue))
+              (marker (get-text-property (point) 'org-marker))
               (buffer (marker-buffer marker)))
 
     (pcase method
@@ -155,11 +126,11 @@ Special commands:
 
       ('other-forward
        (forward-line)
-       (helm-rysco-store-mode-jump-other-window-stay marker))
+       (helm-rysco-store-mode-jump-other-window-stay (get-text-property (point) 'org-marker)))
 
       ('other-backward
        (forward-line -1)
-       (helm-rysco-store-mode-jump-other-window-stay marker))
+       (helm-rysco-store-mode-jump-other-window-stay (get-text-property (point) 'org-marker)))
 
       (_
        (with-current-buffer (pop-to-buffer buffer)
