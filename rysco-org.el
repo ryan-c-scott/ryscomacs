@@ -271,7 +271,7 @@
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (has-note (rysco-org-agenda-entry-has-note marker)))
       (apply 'propertize
-             (concat "⌄" (substring str 1))
+             (concat "▾" (substring str 1))
              (text-properties-at 0 str))
     str))
 
