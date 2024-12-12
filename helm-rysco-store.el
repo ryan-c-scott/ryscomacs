@@ -71,7 +71,8 @@
   (let* ((buf "*squery*")
          (query (with-helm-buffer helm-input-local))
          (files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))))
-  (org-ql-search files query :buffer buf)))
+    (org-ql-search files query :buffer buf)
+    (helm-rysco-store-mode 1)))
 
 ;;;;
 (defvar helm-rysco-store-mode-map
