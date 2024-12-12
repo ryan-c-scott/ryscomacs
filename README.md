@@ -46,6 +46,27 @@ To quote Straight.el's documentation:
 Your user-account needs to be assigned the right to create symbolic links. To do so, run "secpol.msc" and in "Local Policies → User Rights Assignment" assign the right to "Create symbolic links" to your user-account.
 ```
 
+#### Native Compilation
+  1. Install msys2 in chocolatey
+  2. Run msys2
+  3. `pacman -S emacs`
+  4. `pacman -S libgccjit`
+  5. pin `C:\tools\msys64\mingw64\bin\runemacs.exe` to launch bar
+
+Note: `libgccjit` is only present in the `mingw64` and `ucrt64` msys2 environments.
+
+Running `runemacs` outside of the msys2 environment will make allow Emacs to maintain the same paths to pick up Git and other tools.
+
+```text
+(native-comp-available-p)
+system-configuration-options
+system-configuration-features
+```
+
+`native-comp-available-p` will return nil if Emacs hasn't been configured with `--with-native-compilation` /or/ if it can't find `libgccjit-0.dll`
+
+Ensure that `libgccjit-0` is in a place where that particular Emacs binary will load it.
+
 ## Lead Key
 Ryscomacs is designed to utilize a lead key for doing window splitting and other frequently used commands.  This can help to disambiguate special ryscomacs functionality from modes or emacs in general.
 

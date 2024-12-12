@@ -3,6 +3,7 @@
 (require 'cl)
 (require 'dash)
 (require 'helm-source)
+(require 'rysco-system)
 
 (defun rysco-semantic-mode (&optional state)
   (if state
