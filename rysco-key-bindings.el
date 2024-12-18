@@ -102,6 +102,7 @@
 (add-hook 'help-mode-hook 'rysco-help-movement-hook)
 (add-hook 'Info-mode-hook 'rysco-help-movement-hook)
 (add-hook 'helm-grep-mode-hook 'rysco-help-movement-hook)
+(add-hook 'helm-occur-mode-hook 'rysco-help-movement-hook)
 
 (define-key messages-buffer-mode-map "n" 'next-line)
 (define-key messages-buffer-mode-map "p" 'previous-line)
