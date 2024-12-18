@@ -70,6 +70,7 @@
  helm-org-rifle
  helm-projectile
  helm-unicode
+ helm-wikipedia
  hl-todo
  htmlize
  json-mode

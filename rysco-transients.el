@@ -112,7 +112,8 @@
    ["Internet"
     :setup-children rysco-transient--wrap-children
     ("gl" "Links" helm-rysco-goto-common-links)
-    ("gs" "Web Search" rysco-web-query)]
+    ("gs" "Web Search" rysco-web-query)
+    ("gw" "Wikipedia" helm-wikipedia-suggest)]
 
    ["Help"
     :setup-children rysco-transient--wrap-children
