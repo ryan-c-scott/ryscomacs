@@ -377,6 +377,8 @@ background-color: #adffc1;
       org-habit-show-done-always-green t
       org-pretty-entities t
 
+      completions-detailed t
+
       whitespace-line-column nil
       whitespace-style
       '(face
