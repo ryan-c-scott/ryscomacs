@@ -1115,7 +1115,7 @@ With prefix-arg prompt for type if available with your AG version."
             (org-latex-export-to-pdf))))
     (message "No .pdf-master found in directory ancestors.")))
 
-(defun rysco-agenda-revert-files ()
+(defun rysco-org-agenda-revert-files ()
   (interactive)
   (org-release-buffers org-agenda-new-buffers)
   (setq org-agenda-new-buffers nil)

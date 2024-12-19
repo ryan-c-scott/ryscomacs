@@ -133,7 +133,7 @@
 
 (cl-defmacro rysco-org-agenda-files (&rest forms)
   (let ((files (apply 'rysco-flat-concat forms)))
-    `(setq rysco-agenda-files
+    `(setq rysco-org-agenda-files
            ',files
            org-agenda-files
            ',files)))
@@ -141,8 +141,8 @@
 (defmacro rysco-filter-agenda (&optional form)
   `(setq org-agenda-files
          ,(if (not form)
-              'rysco-agenda-files
-            `(--remove ,form rysco-agenda-files))))
+              'rysco-org-agenda-files
+            `(--remove ,form rysco-org-agenda-files))))
 
 ;;;;
 (provide 'rysco-system)

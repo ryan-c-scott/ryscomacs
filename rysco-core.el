@@ -17,7 +17,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vars
-(defvar rysco-agenda-files nil)
+(defvar rysco-org-agenda-files nil)
 (defvar rysco-theme nil)
 (defvar rysco-capslock-mapped nil)
 (defvar rysco-ssh-config-directories nil)
@@ -268,52 +268,52 @@
       org-super-agenda-groups
       '((:name "Triage"
                :tag "triage"
-               :transformer rysco-agenda-entry-header
+               :transformer rysco-org-agenda-entry-header
                :order 2)
         (:name "Unfiled"
                :file-path "unfiled.org"
-               :transformer rysco-agenda-entry-header
+               :transformer rysco-org-agenda-entry-header
                :order 1)
         (:name "NOW"
                :todo "NOW"
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 0)
         (:name "Due Today"
                :deadline today
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 3)
         (:name "Due Soon"
                :deadline t
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 4)
         (:name "DELEGATED"
                :todo "DELEGATED"
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 6)
         (:name "WAITING"
                :todo "WAITING"
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 5)
         (:name "NEXT"
                :todo "NEXT"
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 5)
         (:name "Priority"
                :priority ("A" "B" "C")
-               :transformer rysco-agenda-project-header
+               :transformer rysco-org-agenda-project-header
                :order 5)
         (:name "Work Categories"
                :tag "category"
-               :transformer rysco-agenda-entry-header
+               :transformer rysco-org-agenda-entry-header
                :order 6)
         (:name "Habits"
                :habit t
                :order 7)
         (:todo "INACTIVE"
-               :transformer rysco-agenda-entry-header
+               :transformer rysco-org-agenda-entry-header
                :order 9)
         (:auto-property "ProjectId"
-                        :transformer rysco-agenda-entry-header-auto-grouped
+                        :transformer rysco-org-agenda-entry-header-auto-grouped
                         :order 8))
 
       org-refile-targets

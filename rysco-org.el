@@ -267,7 +267,7 @@
           "\n\n"))))))
 
 ;;;###autoload
-(defun rysco-agenda-entry-header (str)
+(defun rysco-org-agenda-entry-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (has-note (rysco-org-agenda-entry-has-note marker)))
       (apply 'propertize
@@ -276,18 +276,18 @@
     str))
 
 ;;;###autoload
-(defun rysco-agenda-entry-header-auto-grouped (data)
+(defun rysco-org-agenda-entry-header-auto-grouped (data)
   `(:name
     ,(plist-get data :name)
     :items
-    ,(-map 'rysco-agenda-entry-header (plist-get data :items))))
+    ,(-map 'rysco-org-agenda-entry-header (plist-get data :items))))
 
 ;;;###autoload
-(defun rysco-agenda-project-header (str)
+(defun rysco-org-agenda-project-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (face-name (org-entry-get marker "projectface" t))
              (face (intern face-name))
-             (str (rysco-agenda-entry-header str))
+             (str (rysco-org-agenda-entry-header str))
              (header-width (-if-let (header-text (car (s-match "^.*:\s+" str)))
                                (1- (length header-text))
                              (+ 3 (length (format "%s" (get-text-property 0 'org-category str)))))))
@@ -295,7 +295,7 @@
         (add-text-properties 0 header-width `(face ,face) str))
     str))
 
-(defun rysco-agenda-refile-wrapper (old &rest args)
+(defun rysco-org-agenda-refile-wrapper (old &rest args)
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
@@ -323,7 +323,7 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
         (goto-char (point-max))
         (funcall-interactively 'org-capture)))))
 
-(defun rysco-agenda-recapture ()
+(defun rysco-org-agenda-recapture ()
   "Copy node content, excluding headline and properties, into a temp buffer and mark the region
 for use with `%i' in org capture templates (see `org-capture-templates')"
   (interactive)
@@ -699,7 +699,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 (advice-add #'org-agenda-clock-out :after 'org-agenda-redo-all)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 
-(advice-add 'org-agenda-refile :around 'rysco-agenda-refile-wrapper)
+(advice-add 'org-agenda-refile :around 'rysco-org-agenda-refile-wrapper)
 
 (advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
 

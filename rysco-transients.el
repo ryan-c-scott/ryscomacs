@@ -61,10 +61,10 @@
     ("ta" "Agenda" rysco-org-agenda)
     ("tl" "Agenda List" org-agenda-list)
     ("tt" "Agenda Tasks" org-todo-list)
-    ("tr" "Agenda Reload Files" rysco-agenda-revert-files)
+    ("tr" "Agenda Reload Files" rysco-org-agenda-revert-files)
     ("ti" "Clock in Last" bluedot-org-clock-in-last)
     ("tj" "Jump to Clock" bluedot-org-jump-to-clock)
-    ("tc" "Recapture" rysco-agenda-recapture)]
+    ("tc" "Recapture" rysco-org-agenda-recapture)]
 
    ["Data Store"
     :setup-children rysco-transient--wrap-children
