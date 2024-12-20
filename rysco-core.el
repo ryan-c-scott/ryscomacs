@@ -96,6 +96,7 @@
  projectile
  request
  rjsx-mode
+ (rysco-gantt :type git :host github :repo "ryan-c-scott/rysco-gantt")
  (rysco-graph :type git :host github :repo "ryan-c-scott/rysco-graph")
  (rysco-plot :type git :host github :repo "ryan-c-scott/rysco-plot")
  s
