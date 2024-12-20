@@ -5,6 +5,58 @@
 (require 'helm-source)
 (require 'rysco-system)
 
+(defface rysco-magit-diff-added
+  `((((class color) (background light))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#ddffdd"
+     :foreground "#22aa22")
+    (((class color) (background dark))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#00003fff3fff"
+     :foreground "#0000bfffbfff"
+     ))
+  "Face for lines in a diff that have been added."
+  :group 'rysco-magit-faces)
+
+(defface rysco-magit-diff-removed
+  `((((class color) (background light))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#ffdddd"
+     :foreground "#aa2222")
+    (((class color) (background dark))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#3fff3fff0000"
+     :foreground "#bfffbfff0000"
+     ))
+  "Face for lines in a diff that have been removed."
+  :group 'rysco-magit-faces)
+
+(defface rysco-magit-diff-added-highlight
+  `((((class color) (background light))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#ccccee"
+     :foreground "#2222aa")
+    (((class color) (background dark))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#00007fff7fff"
+     :foreground "#0000fffeffff"
+     ))
+  "Face for lines in a diff that have been added."
+  :group 'rysco-magit-faces)
+
+(defface rysco-magit-diff-removed-highlight
+  `((((class color) (background light))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#eeee00"
+     :foreground "#aaaa00")
+    (((class color) (background dark))
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :background "#7fff7fff0000"
+     :foreground "#fffeffff0000"
+     ))
+  "Face for lines in a diff that have been removed."
+  :group 'rysco-magit-faces)
+
 (defun rysco-semantic-mode (&optional state)
   (if state
       (with-demoted-errors

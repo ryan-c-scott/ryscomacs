@@ -738,6 +738,13 @@ background-color: #adffc1;
               (flyspell-mode t))
             (require 'hugo)))
 
+(rysco-add-to-list
+ face-remapping-alist
+ (magit-diff-added . rysco-magit-diff-added)
+ (magit-diff-removed . rysco-magit-diff-removed)
+ (magit-diff-added-highlight . rysco-magit-diff-added-highlight)
+ (magit-diff-removed-highlight . rysco-magit-diff-removed-highlight))
+
 (defun custom-diff-colors ()
   "update the colors for diff faces"
   (set-face-attribute
