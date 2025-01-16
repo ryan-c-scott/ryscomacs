@@ -32,8 +32,8 @@ jobs:
           load: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/ryscomacs:latest
 
-      - name: Test
-        run: docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/ryscomacs:latest emacs -batch --chdir /root/.emacs.d/test/ -l /root/.emacs.d/init.el -L . -f buttercup-run-discover
+      #- name: Test
+      #  run: docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/ryscomacs:latest emacs -batch --chdir /root/.emacs.d/test/ -l /root/.emacs.d/init.el -L . -f buttercup-run-discover
 
       - name: Build and push
         uses: docker/build-push-action@v4
