@@ -99,6 +99,7 @@
  (rysco-gantt :type git :host github :repo "ryan-c-scott/rysco-gantt")
  (rysco-graph :type git :host github :repo "ryan-c-scott/rysco-graph")
  (rysco-plot :type git :host github :repo "ryan-c-scott/rysco-plot")
+ (ledger-lib :type git :host github :repo "ryan-c-scott/ledger-lib")
  s
  shift-number
  transient
