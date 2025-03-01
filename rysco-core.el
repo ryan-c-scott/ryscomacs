@@ -633,6 +633,7 @@ background-color: #adffc1;
    'org-babel-load-languages
    (append org-babel-load-languages
            '((python . t)
+             (C . t)
              (latex . t)
              (dot . t))))
 
