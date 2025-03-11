@@ -1,4 +1,4 @@
-from silex/emacs
+FROM silex/emacs
 COPY example/docker-init.el /root/.emacs.d/init.el
 COPY example/docker-build.el /root/.emacs.d/docker-build.el
 COPY *.el /root/.emacs.d/elisp/
