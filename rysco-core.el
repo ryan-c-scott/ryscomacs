@@ -256,6 +256,7 @@
       org-log-into-drawer t
       org-ellipsis " ➟"
 
+      org-attach-use-inheritance t
       org-download-method 'attach
       org-modern-hide-stars nil
       org-modern-star nil
