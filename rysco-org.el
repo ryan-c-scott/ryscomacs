@@ -288,7 +288,7 @@
              (face-name (org-entry-get marker "projectface" t))
              (face (intern face-name))
              (str (rysco-org-agenda-entry-header str))
-             (header-width (-if-let (header-text (car (s-match "^.*:\s+" str)))
+             (header-width (-if-let (header-text (car (s-match "^.*?:\s+" str)))
                                (1- (length header-text))
                              (+ 3 (length (format "%s" (get-text-property 0 'org-category str)))))))
       (prog1 str
