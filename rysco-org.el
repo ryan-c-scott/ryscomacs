@@ -333,6 +333,13 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
         (goto-char (marker-position marker))
         (funcall-interactively 'rysco-org-recapture)))))
 
+(defun rysco-org-recapture-dwim (arg)
+  "Calls `rysco-org-recapture' or `rysco-org-agenda-recapture' as dictated by the current `major-mode'."
+  (interactive "P")
+  (pcase major-mode
+    ('org-mode (call-interactively 'rysco-org-recapture arg))
+    ('org-agenda-mode (call-interactively 'rysco-org-agenda-recapture arg))))
+
 (defun rysco-org-agenda-goto-last-refile ()
   (interactive)
   (--when-let

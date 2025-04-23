@@ -64,7 +64,7 @@
     ("tr" "Agenda Reload Files" rysco-org-agenda-revert-files)
     ("ti" "Clock in Last" bluedot-org-clock-in-last)
     ("tj" "Jump to Clock" bluedot-org-jump-to-clock)
-    ("tc" "Recapture" rysco-org-agenda-recapture)]
+    ("tc" "Recapture" rysco-org-recapture-dwim)]
 
    ["Data Store"
     :setup-children rysco-transient--wrap-children
