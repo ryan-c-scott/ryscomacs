@@ -125,9 +125,14 @@
 ;;;###autoload
 (defun rysco-store-org-stamp-freshness ()
   (interactive)
-  (when (derived-mode-p 'org-mode)
-    (org-toggle-tag "draft" 'on)
-    (org-schedule nil rysco-store-freshness-schedule)))
+  (if-let ((marker (org-get-at-bol 'org-marker)))
+      (with-current-buffer (marker-buffer marker)
+        (save-excursion
+          (goto-char (marker-position marker))
+          (rysco-store-org-stamp-freshness)))
+    (when (derived-mode-p 'org-mode)
+      (org-toggle-tag "draft" 'on)
+      (org-schedule nil rysco-store-freshness-schedule))))
 
 ;;;###autoload
 (defun rysco-store-rebuild-links ()
