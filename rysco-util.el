@@ -199,6 +199,24 @@
       (seq-let (month day year) (org-get-date-from-calendar)
         (insert (format "%d-%02d-%02d" year month day))))))
 
+(defun rysco-read-date (&rest dates)
+  "Calculates a date by processing each step provided.
+Each date is processed by `org-read-date'.
+operators `+' and `-' are doubled if not specified as such."
+  (cl-loop
+   with current
+   for d in dates
+   as d = (s-replace-regexp "^\\([+-]\\)+" "\\1\\1" d)
+   do
+   (setq current
+         (org-read-date nil t d nil current))
+   finally return
+   (format-time-string "%F" current)))
+
+(defun rysco-read-date-string (str)
+  "Splits STR on whitespace and passes the result to `rysco-read-date'"
+  (apply 'rysco-read-date (s-split " " str t)))
+
 (defvar rysco-document-collections nil)
 (cl-defun helm-rysco-open-pdf ()
   (interactive)
