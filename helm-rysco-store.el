@@ -8,7 +8,8 @@
    :name "Knowledge Store Query"
    :actions `(,@helm-org-ql-actions
               ("Insert as link" . helm-rysco-store--insert-candidates)
-              ("Save as buffer" . helm-rysco-store--save-search-buffer))))
+              ("Save as buffer" . helm-rysco-store--save-search-buffer)
+              ("Export to buffer" . helm-rysco-store--export-to-buffer))))
 
 ;;;###autoload
 (defun helm-rysco-store-query-for-freshness ()
@@ -22,7 +23,8 @@
      :name "Knowledge Store Query"
      :actions `(,@helm-org-ql-actions
                 ("Insert as link" . helm-rysco-store--insert-candidates)
-                ("Save as buffer" . helm-rysco-store--save-search-buffer)))))
+                ("Save as buffer" . helm-rysco-store--save-search-buffer)
+                ("Export to buffer" . helm-rysco-store--export-to-buffer)))))
 
 ;;;###autoload
 (cl-defun helm-rysco-store-ql (&key buffers-files (boolean 'and) (name "helm-org-ql") sources actions)
@@ -66,6 +68,19 @@
                                (rysco-store-kindle-get-books location)))
           :action `(("Insert" . (lambda (&rest _)
                                   (rysco-store-insert-books-kindle (helm-marked-candidates))))))))
+
+(defun helm-rysco-store--save-search-buffer (&optional _)
+  (let* ((buf "*squery*")
+         (query (with-helm-buffer helm-input-local))
+         (files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))))
+    (org-ql-search files query :buffer buf)
+    (with-current-buffer buf
+      (helm-rysco-store-mode 1))))
+
+(defun helm-rysco-store--export-to-buffer (&optional _)
+  (let* ((query (with-helm-buffer helm-input-local))
+         (files (org-ql-search-directories-files :directories (rysco-store-existing-directories rysco-store-directories))))
+    (rysco-store-export-query-to-buffer :files files :query query)))
 
 (defun helm-rysco-store--save-search-buffer (&optional _)
   (let* ((buf "*squery*")
