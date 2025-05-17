@@ -1,0 +1,10 @@
+* Komorebi tiling window manager for Windows
+This is a basic configuration of Komorebi with a whkd for handling the keybindings.
+
+The keybindings themselves are =Win= key focused to leave plenty of room for application specific bindings.
+
+** Running
+#+begin_quote
+komorebic start --whkd --bar
+komorebic stop --whkd --bar
+#+end_quote
