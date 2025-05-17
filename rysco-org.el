@@ -288,7 +288,7 @@
              (face-name (org-entry-get marker "projectface" t))
              (face (intern face-name))
              (str (rysco-org-agenda-entry-header str))
-             (header-width (-if-let (header-text (car (s-match "^.*:\s+" str)))
+             (header-width (-if-let (header-text (car (s-match "^.*?:\s+" str)))
                                (1- (length header-text))
                              (+ 3 (length (format "%s" (get-text-property 0 'org-category str)))))))
       (prog1 str
@@ -332,6 +332,13 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
       (save-excursion
         (goto-char (marker-position marker))
         (funcall-interactively 'rysco-org-recapture)))))
+
+(defun rysco-org-recapture-dwim (arg)
+  "Calls `rysco-org-recapture' or `rysco-org-agenda-recapture' as dictated by the current `major-mode'."
+  (interactive "P")
+  (pcase major-mode
+    ('org-mode (call-interactively 'rysco-org-recapture arg))
+    ('org-agenda-mode (call-interactively 'rysco-org-agenda-recapture arg))))
 
 (defun rysco-org-agenda-goto-last-refile ()
   (interactive)

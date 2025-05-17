@@ -6,6 +6,8 @@
 
 (defvar rysco-store-directories `(,(concat org-directory "store")))
 (defvar rysco-store-default-capture-file (expand-file-name "db.org" (concat org-directory "store")))
+(defvar rysco-store-default-export-buffer-name "*ql results*")
+(defvar rysco-store-default-export-options '("toc:nil" "num:nil" "\\n:t"))
 (defvar rysco-store-freshness-threshold "+7d" "Freshness query threshold as read by `org-read-date'")
 (defvar rysco-store-freshness-schedule "+3m" "Future freshness check date as read by `org-read-date'")
 (defvar rysco-store-initial-query nil)
@@ -115,6 +117,48 @@
   (interactive)
   (funcall-interactively 'org-sidebar-ql :directories (rysco-store-existing-directories rysco-store-directories)))
 
+(cl-defun rysco-store-export-query-to-buffer (&key files query buffer)
+  (let* ((files (or files
+                    (org-ql-search-directories-files
+                     :directories
+                     (rysco-store-existing-directories
+                      rysco-store-directories))))
+         (query (pcase query
+                  ('nil query)
+                  ((pred stringp)
+                   (org-ql--query-string-to-sexp query))
+                  (_ query)))
+         (buffer (or buffer rysco-store-default-export-buffer-name))
+         (content (org-ql-select files query
+                    :action '(let ((el (org-element-headline-parser)))
+                               (buffer-substring-no-properties
+                                (org-element-property :begin el)
+                                (org-element-property :end el))))))
+    (with-current-buffer (get-buffer-create buffer)
+      (erase-buffer)
+      (insert (format "#+title: %s\n" query))
+      (cl-loop
+       initially do (insert "#+options:")
+       for opt in rysco-store-default-export-options do
+       (insert " " opt)
+       finally do (insert "\n\n"))
+
+      (cl-loop
+       for chunk in content do
+       (insert chunk "\n"))
+      (org-mode)
+      (org-fold-show-all)
+
+      ;; Remove all IDs
+      (org-element-map (org-element-parse-buffer) '(property-drawer drawer)
+        (lambda (drawer)
+          (let ((begin (org-element-property :begin drawer))
+                (end (org-element-property :end drawer)))
+            (goto-char begin)
+            (replace-string ":ID: " ":ORIGINAL-ID: ")
+          nil))))
+    (switch-to-buffer-other-window buffer)))
+
 ;;;###autoload
 (defun rysco-store-create-and-insert ()
   (interactive)
@@ -125,9 +169,14 @@
 ;;;###autoload
 (defun rysco-store-org-stamp-freshness ()
   (interactive)
-  (when (derived-mode-p 'org-mode)
-    (org-toggle-tag "draft" 'on)
-    (org-schedule nil rysco-store-freshness-schedule)))
+  (if-let ((marker (org-get-at-bol 'org-marker)))
+      (with-current-buffer (marker-buffer marker)
+        (save-excursion
+          (goto-char (marker-position marker))
+          (rysco-store-org-stamp-freshness)))
+    (when (derived-mode-p 'org-mode)
+      (org-toggle-tag "draft" 'on)
+      (org-schedule nil rysco-store-freshness-schedule))))
 
 ;;;###autoload
 (defun rysco-store-rebuild-links ()
