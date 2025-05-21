@@ -423,9 +423,7 @@ Normally the outline would also be tagged `:noexport:' so that it will be exclud
              (insert-file-contents include)
 
              (if (equal "el" (file-name-extension include))
-                 (eval (car
-                        (read-from-string
-                         (concat "(with-output-to-string " (buffer-string) ")"))) t)
+                 (eval (car (read-from-string (buffer-string))) t)
              (buffer-string)))))))
     (save-buffer)
     (kill-buffer)))
