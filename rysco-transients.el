@@ -26,10 +26,10 @@
 
 (defun rysco-transient--wrap-children (children)
   (cl-loop
-   for (id type data) in children
+   for (type . data) in children
    as cmd = (rysco-transient--wrap-command (plist-get data :command))
    collect
-   `(,id ,type ,(plist-put data :command cmd))))
+   `(,type ,@(plist-put data :command cmd))))
 
 (transient-define-prefix rysco-main-transient ()
   "Miscellany"
