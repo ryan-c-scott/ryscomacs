@@ -462,8 +462,8 @@ The URL is created by calling `format' with the provided QUERY, using the format
     (apply 'browse-url-chrome url args))))
 
 (defun rysco-private-browsing ()
+  "Overrides global browsing settings with local values that will use configured private browsing"
   (interactive)
-  "Makes overrides global browsing settings with local values that will use configured private browsing"
   (set (make-local-variable 'browse-url-chrome-program) rysco-private-browser-program)
   (set (make-local-variable 'browse-url-chrome-arguments) rysco-private-browser-arguments)
   (set (make-local-variable 'browse-url-browser-function) 'rysco-browse-url-private))
