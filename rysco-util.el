@@ -164,6 +164,18 @@
     (comment-line 1)
     (forward-line -1)))
 
+(defvar-local rysco-comment-face-swap-cookie nil)
+(defun rysco-comment-face-swap ()
+  "Swaps comment face to a brighter color temporarily.
+Works per-buffer"
+  (interactive)
+  (setq rysco-comment-face-swap-cookie
+        (if rysco-comment-face-swap-cookie
+            (prog1 nil
+              (face-remap-remove-relative rysco-comment-face-swap-cookie))
+          (face-remap-add-relative
+           'font-lock-comment-face :foreground "palegreen1"))))
+
 (defun rysco-clear-undo ()
   ""
   (interactive)
