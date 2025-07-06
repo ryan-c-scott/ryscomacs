@@ -191,7 +191,7 @@
       'face `(:inherit ,current-face)))))
 
 (defsubst rysco-modeline-process ()
-  mode-line-process)
+  (format-mode-line mode-line-process))
 
 (defsubst rysco-modeline-narrowed ()
   (when (buffer-narrowed-p)
