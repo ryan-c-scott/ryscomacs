@@ -1197,8 +1197,11 @@ With prefix-arg prompt for type if available with your AG version."
 
 (defun rysco-org-agenda-revert-files ()
   (interactive)
-  (org-release-buffers org-agenda-new-buffers)
-  (setq org-agenda-new-buffers nil)
+  (cl-loop
+   for f in org-agenda-files do
+   (with-current-buffer (find-file-noselect f t)
+     (when (funcall buffer-stale-function)
+       (revert-buffer t t))))
   (when (derived-mode-p 'org-agenda-mode)
     (org-agenda-redo-all)))
 
