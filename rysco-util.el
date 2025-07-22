@@ -509,7 +509,7 @@ If region is active, narrow to the region boundaries first."
                     (replace-match value))))))))
 
 (defun rysco-repo-status (&optional dir)
-  "Run either `monky-status' or `magit-status' for hg or git repositories respectively"
+  "Run `magit-status' for git repository."
   (interactive)
   (helm :sources
         (helm-build-sync-source "Projects"
@@ -517,12 +517,10 @@ If region is active, narrow to the region boundaries first."
           :action
           (lambda (dir)
             (cond
-             ((--when-let (vc-find-root dir ".hg")
-                (monky-status it)))
              ((--when-let (vc-find-root dir ".git")
                 (rysco-magit-status it)))
              (t
-              (message "Not a git or hg repository")))))))
+              (message "Not a git repository")))))))
 
 (defun rysco-magit-shell-command-on-file (command)
   "Execute COMMAND asynchronously; display output.
