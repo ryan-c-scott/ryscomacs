@@ -219,6 +219,7 @@
 (add-to-list 'helm-boring-file-regexp-list "\\.org_archive$")
 
 (projectile-mode +1)
+(projectile-known-projects)
 
 (setq projectile-completion-system 'helm
       projectile-indexing-method 'alien
