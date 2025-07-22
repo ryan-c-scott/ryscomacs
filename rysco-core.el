@@ -77,7 +77,6 @@
  json-reformat
  json-snatcher
  kaolin-themes
- (luau-ts-mode :type git :host github :repo "ryan-c-scott/luau-ts-mode")
  macrostep
  magit
  markdown-mode
@@ -191,8 +190,7 @@
 (rysco-add-to-list
  all-the-icons-mode-icon-alist
  (kodi-mode all-the-icons-material "tv")
- (lua-mode all-the-icons-fileicon "lua")
- (luau-ts-mode all-the-icons-fileicon "lua"))
+ (lua-mode all-the-icons-fileicon "lua"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
