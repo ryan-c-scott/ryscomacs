@@ -1,7 +1,10 @@
 (require 'dash)
 
 (defvar rysco-modeline-mode-blacklist
-  '("" "Helm" "Projectile[-]" "Projectile" "ElDoc" "God" "WK" "ARev" "GCMH"))
+  '("" "Helm" "Projectile[-]" "Projectile" "ElDoc" "God" "WK" "ARev" "GCMH" "Abbrev"))
+
+(defvar rysco-modeline-show-project t)
+(defvar rysco-modeline-show-mode-name t)
 
 (defface rysco-modeline-buffer-id
   '((default
@@ -144,7 +147,9 @@
        ((rx "Projectile["
             (let proj (* anything))
             ":" (* anything) "]")
-        (concat "[" proj "]"))
+        (if rysco-modeline-show-project
+            (concat "[" proj "]")
+          ""))
        ("tree-sitter" "ts")
        (_ m))))
    'face current-face))
@@ -184,11 +189,12 @@
     (concat
      (when (not (eq icon major-mode))
        (propertize icon 'display '(raise 0)))
-     (propertize
-      (concat
-       (when icon " ")
-       (format-mode-line mode-name))
-      'face `(:inherit ,current-face)))))
+     (when rysco-modeline-show-mode-name
+       (propertize
+        (concat
+         (when icon " ")
+         (format-mode-line mode-name))
+        'face `(:inherit ,current-face))))))
 
 (defsubst rysco-modeline-process ()
   (format-mode-line mode-line-process))
