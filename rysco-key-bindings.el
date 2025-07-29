@@ -140,6 +140,10 @@
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
+(with-eval-after-load 'calendar-mode
+  (define-key calendar-mode-map (kbd "M-n") 'org-calendar-forward-month)
+  (define-key calendar-mode-map (kbd "M-p") 'org-calendar-backward-month))
+
 (with-eval-after-load 'elisp-mode
   (define-key emacs-lisp-mode-map (kbd "C-c C-e") 'macrostep-expand)
   (define-key emacs-lisp-mode-map (kbd "C-c C-q") 'macrostep-collapse)
