@@ -140,10 +140,6 @@
   (define-key org-agenda-mode-map ")" 'rysco-org-agenda-goto-first-section)
   (define-key org-super-agenda-header-map ")" 'rysco-org-agenda-goto-first-section))
 
-(with-eval-after-load 'calendar-mode
-  (define-key calendar-mode-map (kbd "M-n") 'org-calendar-forward-month)
-  (define-key calendar-mode-map (kbd "M-p") 'org-calendar-backward-month))
-
 (with-eval-after-load 'elisp-mode
   (define-key emacs-lisp-mode-map (kbd "C-c C-e") 'macrostep-expand)
   (define-key emacs-lisp-mode-map (kbd "C-c C-q") 'macrostep-collapse)
@@ -174,7 +170,9 @@
 ;; Timestamp insertion
 (add-hook 'calendar-mode-hook
           (lambda ()
-            (define-key calendar-mode-map (kbd "RET") 'rysco-calendar-exit-and-insert-date)))
+            (define-key calendar-mode-map (kbd "RET") 'rysco-calendar-exit-and-insert-date)
+            (define-key calendar-mode-map (kbd "M-n") 'calendar-forward-month)
+            (define-key calendar-mode-map (kbd "M-p") 'calendar-backward-month)))
 
 (add-hook 'magit-mode-hook
           (lambda ()
