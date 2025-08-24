@@ -1,4 +1,12 @@
+;;; -*- lexical-binding: t; -*-
+
 (require 'rysco-system)
+(require 'org)
+(require 'god-mode)
+(require 'projectile)
+(require 'multiple-cursors)
+(require 'org-super-agenda)
+(require 'ediff)
 
 (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
 (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable)
@@ -120,13 +128,13 @@
    org-read-date-minibuffer-local-map (kbd "C-b")
    (lambda ()
      (interactive)
-     (org-eval-in-calendar '(calendar-backward-day 1))))
+     (org-funcall-in-calendar 'calendar-backward-day nil 1)))
 
   (define-key
    org-read-date-minibuffer-local-map (kbd "C-f")
    (lambda ()
      (interactive)
-     (org-eval-in-calendar '(calendar-forward-day 1)))))
+     (org-funcall-in-calendar 'calendar-forward-day nil 1))))
 
 (with-eval-after-load 'org-agenda
   (define-key org-agenda-mode-map [mouse-1] 'org-agenda-goto)

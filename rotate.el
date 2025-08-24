@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;;; rotate.el --- Rotate the layout of emacs
 
 ;; Copyright (C) 2013  daichirata
@@ -23,7 +25,7 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 
 (defvar rotate-count 0)
 

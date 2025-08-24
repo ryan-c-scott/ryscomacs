@@ -40,7 +40,7 @@
 ;; This is a heavily modified fork of redtick by F. Febles (http://github.com/ferfebles/redtick)
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
 (require 'rysco-util)
 (require 'helm-source)
 

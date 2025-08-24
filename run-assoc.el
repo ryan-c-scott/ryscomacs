@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;;; run-assoc.el --- Run program or lisp function associated with a file.
 ;;
 ;; Filename: run-assoc.el
@@ -60,6 +62,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Code:
+
+(require 'dired)
 
 (defvar associated-program-alist nil
   "Associated program/function list depending on file name regexp.")

@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (require 'org-agenda)
 (require 'helm)
 
@@ -691,7 +693,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
     (rysco-org-agenda-goto-first-section)))
 
 (defun rysco-org-clock-out-switch-state (status)
-  "Callback for `org-clock-out-switch-to-state' which sets to TODO if the last clock entry has the tag 'category'"
+  "Callback for `org-clock-out-switch-to-state' which sets to TODO if the last clock entry has the tag `category'"
   (or
    (--when-let (car org-clock-history)
      (with-current-buffer (marker-buffer it)

@@ -12,7 +12,7 @@
       rysco-file-name-handler-alist file-name-handler-alist
       file-name-handler-alist nil)
 
-(require 'cl)
+(require 'cl-lib)
 (require 'rysco-system)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -103,12 +103,10 @@
  shift-number
  transient
  transpose-frame
- tree-sitter-langs
  use-package
  websocket
  with-editor
  writegood-mode
- which-key
  xmlgen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -491,7 +489,7 @@ background-color: #adffc1;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Hooks/setups
-(eval-after-load 'dash '(dash-enable-font-lock))
+(eval-after-load 'dash '(global-dash-fontify-mode))
 
 (defun eshell/w32-explorer-path ()
   (s-replace "/" "\\" (eshell/pwd)))
@@ -552,8 +550,6 @@ background-color: #adffc1;
 
 ;; Do not use tabs
 (setq-default indent-tabs-mode nil)
-
-(require 'tree-sitter-langs)
 
 (add-hook 'prog-mode-hook
           (lambda ()

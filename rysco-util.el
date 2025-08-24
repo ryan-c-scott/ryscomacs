@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
-(require 'cl)
+(require 'cl-lib)
 (require 'dash)
 (require 'helm-source)
 (require 'rysco-system)

@@ -1,6 +1,10 @@
 ;;; -*- lexical-binding: t; -*-
 
 (require 'transient)
+(require 'all-the-icons)
+(require 's)
+(require 'magit)
+(require 'multiple-cursors)
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Main ryscomacs transient
