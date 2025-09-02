@@ -134,7 +134,19 @@
    org-read-date-minibuffer-local-map (kbd "C-f")
    (lambda ()
      (interactive)
-     (org-funcall-in-calendar 'calendar-forward-day nil 1))))
+     (org-funcall-in-calendar 'calendar-forward-day nil 1)))
+
+  (define-key
+   org-read-date-minibuffer-local-map (kbd "M-p")
+   (lambda ()
+     (interactive)
+     (org-funcall-in-calendar 'calendar-backward-week nil 1)))
+
+  (define-key
+   org-read-date-minibuffer-local-map (kbd "M-n")
+   (lambda ()
+     (interactive)
+     (org-funcall-in-calendar 'calendar-forward-week nil 1))))
 
 (with-eval-after-load 'org-agenda
   (define-key org-agenda-mode-map [mouse-1] 'org-agenda-goto)
