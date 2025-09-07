@@ -1292,7 +1292,7 @@ With prefix-arg prompt for type if available with your AG version."
                            (not (f-exists? file))
                            (y-or-n-p (format "Overwrite '%s'?" file))))
               (file (expand-file-name file))
-              (qr-cmd (format "zint.exe --scalexdimdp=0.2,30 -b 58 --border=6 --box -d \"%s\" --vers=5 --vwhitesp=4 -w 4 -o \"%s\"" data file))
+              (qr-cmd (format "zint --scalexdimdp=0.2,30 -b 58 --border=6 --box -d \"%s\" --vers=5 --vwhitesp=4 -w 4 -o \"%s\"" data file))
               (label-cmd (format "magick \"%s\" -gravity south -fill red -pointsize 44 -annotate 0,0 \"%s\" \"%s\"" file label file)))
 
     (--when-let (shell-command-to-string qr-cmd)
