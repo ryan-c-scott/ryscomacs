@@ -2,10 +2,6 @@
 
 (add-to-list 'straight-profiles '(rysco . "rysco.el"))
 
-;; HACK:  Org needs to be included as early as possible to avoid the built-in version getting used
-(let ((straight-current-profile 'rysco))
-  (straight-use-package 'org))
-
 ;; Disable some features for setup duration
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
       gc-cons-percentage 0.6
@@ -84,7 +80,6 @@
  molokai-theme
  multiple-cursors
  nginx-mode
- org
  (org-download :type git :host github :repo "ryan-c-scott/org-download")
  org-modern
  org-ql
@@ -103,6 +98,7 @@
  shift-number
  transient
  transpose-frame
+ tree-sitter-langs
  use-package
  websocket
  with-editor
@@ -550,6 +546,8 @@ background-color: #adffc1;
 
 ;; Do not use tabs
 (setq-default indent-tabs-mode nil)
+
+(require 'tree-sitter-langs)
 
 (add-hook 'prog-mode-hook
           (lambda ()
