@@ -480,6 +480,12 @@ The URL is created by calling `format' with the provided QUERY, using the format
   (set (make-local-variable 'browse-url-chrome-arguments) rysco-private-browser-arguments)
   (set (make-local-variable 'browse-url-browser-function) 'rysco-browse-url-private))
 
+(defun rysco-private-browser (&optional url)
+  (interactive)
+  (with-temp-buffer
+    (rysco-private-browsing)
+    (browse-url (or url "https://5pmcasual.com"))))
+
 (defun rysco-make-buffer-utf8 (&optional buf)
   "Tidy up a buffer by replacing all special Unicode characters
    (smart quotes, etc.) with their more sane cousins.
