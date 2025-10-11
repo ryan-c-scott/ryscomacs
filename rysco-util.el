@@ -699,14 +699,14 @@ Quoted strings are returned as a single element."
 
 (cl-defun rysco-rolling-average (period &aux
     (sum 0) (count 0) (values (make-list period 0)) (pointer values))
-  (setf (rest (last values)) values)  ; construct circularity
+  (setf (cl-rest (last values)) values)  ; construct circularity
   (lambda (n)
-    (when (first pointer)
-      (cl-decf sum (first pointer)))     ; subtract old value
+    (when (cl-first pointer)
+      (cl-decf sum (cl-first pointer)))     ; subtract old value
     (cl-incf sum n)                      ; add new value
     (cl-incf count)
-    (setf (first pointer) n)
-    (setf pointer (rest pointer))     ; advance pointer
+    (setf (cl-first pointer) n)
+    (setf pointer (cl-rest pointer))     ; advance pointer
     (/ sum (min count period))))
 
 (defun rysco-ido-fix ()
