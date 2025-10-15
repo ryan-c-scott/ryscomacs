@@ -215,7 +215,7 @@
 
 (add-hook 'c-mode-common-hook
           (lambda ()
-            (local-set-key (kbd "C-c o") 'ff-find-related-file-ignore-include)
+            (local-set-key (kbd "C-c o") 'helm-rysco-related-files)
             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
 (add-hook 'csharp-mode-hook

@@ -1328,5 +1328,29 @@ With prefix-arg prompt for type if available with your AG version."
 (advice-add #'hl-todo--inside-comment-or-string-p :around 'rysco-hl-todo-in-comment-p)
 (advice-remove #'hl-todo--inside-comment-or-string-p 'rysco-hl-todo-in-comment-p)
 
+(defvar-local rysco-project-related-files
+    nil)
+
+(defun helm-rysco-related-files ()
+  (interactive)
+  (helm :sources
+        `(,(helm-build-sync-source "Related"
+             :candidates (--map
+                          (f-relative
+                           (concat (projectile-project-root) it))
+                          (projectile-get-other-files (buffer-name)))
+             :action 'find-file)
+
+          ,(helm-build-sync-source "Static Project Files"
+             :candidates (--map
+                          (cons
+                           it
+                           (f-relative
+                            (concat (projectile-project-root) it)))
+                          rysco-project-related-files)
+             :action 'find-file))
+        :buffer "*helm projectile files*"))
+
+
 ;;
 (provide 'rysco-util)
