@@ -130,7 +130,7 @@
 
 ;; Magit integration
 (transient-define-prefix rysco-magit-transient ()
-  "GitHub/Bitbucket helper transient for Magit"
+  "GitHub helper transient for Magit"
   [["Goto"
     ("o" "Origin" rysco-magit-goto-origin)
     ("b" "Branch" rysco-magit-goto-branch)
@@ -143,9 +143,13 @@
 
 (with-eval-after-load 'magit
   (define-key magit-mode-map ">" 'rysco-magit-transient)
+  (define-key magit-mode-map "<" 'magit-reflog-other)
   (transient-append-suffix 'magit-dispatch
     "!"
-    '(">" "Goto GH/BB" rysco-magit-transient))
+    '(">" "Goto GH" rysco-magit-transient))
+  (transient-append-suffix 'magit-dispatch
+    "!"
+    '("<" "Reflog" magit-reflog-other))
   (transient-append-suffix 'magit-run
     "S"
     '("f" "with current file as %" rysco-magit-shell-command-on-file)))
