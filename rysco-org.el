@@ -742,8 +742,13 @@ VALUE-COLUMN can be specified to use a different column of data for processing
                   (forward-line -1)
                   (org-element-at-point)))))
           (when drawer
-            (goto-char (org-element-property :contents-begin drawer))
-            (insert txt "\n")))))))
+            (--if-let (org-element-property :contents-begin drawer)
+                (progn
+                  (goto-char it)
+                  (insert txt "\n"))
+              (goto-char (org-element-property :begin drawer))
+              (forward-line)
+              (insert txt))))))))
 
 (defun rysco-org-insert-clock-entry (&optional minutes)
   ""
