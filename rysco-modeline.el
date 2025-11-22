@@ -6,6 +6,14 @@
 (defvar rysco-modeline-show-project t)
 (defvar rysco-modeline-show-mode-name t)
 
+(defun rysco-modeline-toggle-project ()
+  (interactive)
+  (setq rysco-modeline-show-project (not rysco-modeline-show-project)))
+
+(defun rysco-modeline-toggle-mode-name ()
+  (interactive)
+  (setq rysco-modeline-show-mode-name (not rysco-modeline-show-mode-name)))
+
 (defface rysco-modeline-buffer-id
   '((default
       (:slant italic

@@ -54,6 +54,11 @@
     ("wy" "Repo path to kill ring" rysco-magit-path-to-kill-ring)
     ("ws" "Select Frame" rysco-frame-by-name)]
 
+   ["Interface"
+    :setup-children rysco-transient--wrap-children
+    ("tp" "Toggle Project Name" rysco-modeline-toggle-project)
+    ("tm" "Toggle Mode Name" rysco-modeline-toggle-mode-name)]
+
    ["Buffer Killing"
     :setup-children rysco-transient--wrap-children
     ("kc" "Clones" rysco-kill-all-clones)
