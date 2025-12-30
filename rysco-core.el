@@ -542,6 +542,8 @@ background-color: #adffc1;
   (add-to-list 'default-frame-alist `(font . ,font))
   (set-face-attribute 'default t :font font))
 
+(set-face-attribute 'header-line nil :box "black")
+
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
 
 ;; Do not use tabs
@@ -761,6 +763,15 @@ background-color: #adffc1;
      (concat
       (ediff-get-region-contents ediff-current-difference 'A ediff-control-buffer)
       (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer)))))
+
+(defun rysco-stickyfunc-lines (str)
+  (concat
+   (all-the-icons-fileicon "terminal")
+   " "
+   (substring-no-properties str)))
+
+(with-eval-after-load 'semantic/util-modes
+  (advice-add 'semantic-stickyfunc-fetch-stickyline :filter-return 'rysco-stickyfunc-lines))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme/Modeline

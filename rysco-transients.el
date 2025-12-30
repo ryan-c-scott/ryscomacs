@@ -57,7 +57,8 @@
    ["Interface"
     :setup-children rysco-transient--wrap-children
     ("tp" "Toggle Project Name" rysco-modeline-toggle-project)
-    ("tm" "Toggle Mode Name" rysco-modeline-toggle-mode-name)]
+    ("tm" "Toggle Mode Name" rysco-modeline-toggle-mode-name)
+    ("tf" "Toggle Sticky Func" global-semantic-stickyfunc-mode)]
 
    ["Buffer Killing"
     :setup-children rysco-transient--wrap-children
