@@ -542,8 +542,6 @@ background-color: #adffc1;
   (add-to-list 'default-frame-alist `(font . ,font))
   (set-face-attribute 'default t :font font))
 
-(set-face-attribute 'header-line nil :box "black")
-
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function) ;We don't want buffers opened with emacsclient to give us that warning...
 
 ;; Do not use tabs
@@ -765,12 +763,72 @@ background-color: #adffc1;
       (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer)))))
 
 (defun rysco-stickyfunc-lines (str)
-  (concat
-   (all-the-icons-fileicon "terminal")
-   " "
-   (substring-no-properties str)))
+  (propertize
+   (concat
+    (all-the-icons-fileicon "terminal")
+    " "
+    (string-trim
+     (substring-no-properties str))
+    )
+   'face '(:box "black" :height 0.8)))
 
 (with-eval-after-load 'semantic/util-modes
+  ;; HACK: Had to re-implement this function to stop it from using window-start instead of the point 
+  (defun rysco-semantic-stickyfunc-fetch-stickyline ()
+    "Make the function at the top of the current window sticky.
+Capture its function declaration, and place it in the header line.
+If there is no function, disable the header line.
+
+Changed to show function at point and not top of `window-start'.
+
+SEE `semantic-stickyfunc-fetch-stickyline'"
+    (save-excursion
+      ;; (goto-char (window-start (selected-window)))
+      (let* ((noshow (bobp))
+	     (str
+	      (progn
+	        (forward-line -1)
+	        (end-of-line)
+	        ;; Capture this function
+	        (let* ((tag (semantic-stickyfunc-tag-to-stick)))
+		  ;; TAG is nil if there was nothing of the appropriate type there.
+		  (if (not tag)
+		      ;; Set it to be the text under the header line
+		      (if noshow
+			  ""
+		        (if semantic-stickyfunc-show-only-functions-p ""
+                          (buffer-substring (line-beginning-position) (line-end-position))
+			  ))
+		    ;; Go get the first line of this tag.
+		    (goto-char (semantic-tag-start tag))
+		    ;; Klaus Berndl <klaus.berndl@sdm.de>:
+		    ;; goto the tag name; this is especially needed for languages
+		    ;; like c++ where an often used style is like:
+		    ;;     void
+		    ;;     ClassX::methodM(arg1...)
+		    ;;     {
+		    ;;       ...
+		    ;;     }
+		    ;; Without going to the tag-name we would get"void" in the
+		    ;; header line which is IMHO not really useful
+		    (search-forward (semantic-tag-name tag) nil t)
+                    (buffer-substring (line-beginning-position) (line-end-position))
+		    ))))
+	     (start 0))
+        (while (string-match "%" str start)
+	  (setq str (replace-match "%%" t t str 0)
+	        start (1+ (match-end 0)))
+	  )
+        ;; In 21.4 (or 22.1) the header doesn't expand tabs.  Hmmmm.
+        ;; We should replace them here.
+        ;;
+        ;; This hack assumes that tabs are kept smartly at tab boundaries
+        ;; instead of in a tab boundary where it might only represent 4 spaces.
+        (while (string-match "\t" str start)
+	  (setq str (replace-match "        " t t str 0)))
+        str)))
+
+  (advice-add 'semantic-stickyfunc-fetch-stickyline :override 'rysco-semantic-stickyfunc-fetch-stickyline)
   (advice-add 'semantic-stickyfunc-fetch-stickyline :filter-return 'rysco-stickyfunc-lines))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
