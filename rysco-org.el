@@ -531,7 +531,34 @@ VALUE-COLUMN can be specified to use a different column of data for processing
           when completion collect `(,completion))))
       periods))))
 
-(cl-defun rysco-org-clocking-data (&optional start-date)
+(cl-defun rysco-org-clocking-data-raw (&optional start-date end-date)
+  (--sort
+   (string< (car it) (car other))
+   (let (output total)
+     (with-rysco-files
+      (org-agenda-files t t)
+      (org-element-map (org-element-parse-buffer) 'clock
+        (lambda (clock)
+          (let* ((entry (rysco-org-element-get-ancestor
+                         clock
+                         (eq (org-element-type it) 'headline)))
+                 (timestamp-obj (org-element-property :value clock))
+                 (timestamp (org-read-date
+                             t nil
+                             (org-element-property :raw-value timestamp-obj)))
+                 (period (org-read-date t nil (or start-date "-3m"))))
+            (when (and (string> timestamp period)
+                       (or (not end-date) (string< timestamp end-date)))
+              (push
+               (list
+                timestamp
+                (org-element-property :duration clock)
+                (org-element-property :raw-value entry)
+                (buffer-file-name))
+               output))))))
+     output)))
+
+(cl-defun rysco-org-clocking-data (&optional start-date &key (group-by :date))
   (--sort
    (string< (car it) (car other))
    (let (output total)
@@ -548,18 +575,23 @@ VALUE-COLUMN can be specified to use a different column of data for processing
                                     (org-element-property :month-end timestamp-obj)
                                     (org-element-property :day-end timestamp-obj)))
                  (period (org-read-date t nil (or start-date "-3m"))))
-
             (when (string> timestamp period)
               (push
                (list
                 timestamp
-                (org-element-property :duration clock))
+                (org-element-property :duration clock)
+                (org-element-property :raw-value entry)
+                (buffer-file-name))
                output))))))
-
      (cl-loop
-      for (proj . data) in (--group-by (car it) output)
+      for (proj . data) in (--group-by
+                             (pcase group-by
+                               (:date (nth 0 it))
+                               (:heading (nth 2 it))
+                               (:file (nth 3 it)))
+                             output)
       as proj-sum = (cl-loop
-                     for (_ duration) in data
+                     for (_ duration . _) in data
                      when duration sum
                      (rysco-org-duration-string-to-minutes duration))
       do (setq total (+ (or total 0) proj-sum))
