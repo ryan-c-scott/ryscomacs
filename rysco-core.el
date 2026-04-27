@@ -32,6 +32,7 @@
 ;; Packages
 (rysco-packages
  (alert-toast :type git :host github :repo "gkowzan/alert-toast")
+ project
  alert
  all-the-icons
  async
