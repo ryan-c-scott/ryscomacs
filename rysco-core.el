@@ -561,6 +561,12 @@ background-color: #adffc1;
             (setq tab-width 4
                   indent-tabs-mode nil)))
 
+(add-hook 'eglot-managed-mode-hook
+          (lambda ()
+            (flymake-mode -1)
+            (eldoc-mode -1)
+            (eglot-inlay-hints-mode -1)))
+
 (add-hook 'csharp-mode-hook
           (lambda ()
             ;; for hide/show support

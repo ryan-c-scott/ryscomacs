@@ -4,6 +4,7 @@
 (require 'dash)
 (require 'helm-source)
 (require 'rysco-system)
+(require 'helm-rysco-imenu)
 
 (defface rysco-magit-diff-added
   `((((class color) (background light))
@@ -787,12 +788,6 @@ With prefix-arg prompt for type if available with your AG version."
      (delete-other-windows)
      (rysco-frames-layout--process ,layout)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun helm-rysco-semantic-or-imenu (arg)
-  (interactive "P")
-  (if arg
-      (call-interactively 'helm-imenu-in-all-buffers)
-    (call-interactively 'helm-semantic-or-imenu)))
 
 (defvar helm-rysco-insert-icon--last nil)
 
