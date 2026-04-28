@@ -433,6 +433,8 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
    (org-edit-special)))
 
 (add-hook 'org-ctrl-c-ctrl-c-final-hook 'rysco-org-result-execute-src)
+(add-hook 'org-babel-after-execute-hook
+          (lambda () (org-display-inline-images t t)))
 
 ;;;###autoload
 (defun rysco-org-table-to-kill (&optional sep)
