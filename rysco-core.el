@@ -32,6 +32,7 @@
 ;; Packages
 (rysco-packages
  (alert-toast :type git :host github :repo "gkowzan/alert-toast")
+ project
  alert
  all-the-icons
  async
@@ -47,6 +48,7 @@
  docker-compose-mode
  dockerfile-mode
  doom-themes
+ eglot
  eimp
  eldev
  epl
@@ -87,6 +89,7 @@
  org-sidebar
  org-super-agenda
  pkg-info
+ project
  projectile
  request
  rjsx-mode
@@ -110,6 +113,7 @@
 (setq load-prefer-newer t)
 (setq inhibit-compacting-font-caches t) ;; Fixes hiccups on certain unicode characters
 
+(require 'project)
 (require 'rysco-util)
 (require 'tramp)
 
@@ -558,7 +562,23 @@ background-color: #adffc1;
             (c-set-style "stroustrup")
             (rysco-semantic-mode t)
             (setq tab-width 4
-                  indent-tabs-mode nil)))
+                  indent-tabs-mode nil)
+            (when (and buffer-file-name
+                       (fboundp 'eglot-current-server)
+                       (not (eglot-current-server)))
+              (eglot-ensure))))
+
+(add-hook 'eglot-managed-mode-hook
+          (lambda ()
+            (flymake-mode -1)
+            (eldoc-mode -1)
+            (eglot-inlay-hints-mode -1)))
+
+(add-hook 'eglot-managed-mode-hook
+          (lambda ()
+            (flymake-mode -1)
+            (eldoc-mode -1)
+            (eglot-inlay-hints-mode -1)))
 
 (add-hook 'csharp-mode-hook
           (lambda ()
