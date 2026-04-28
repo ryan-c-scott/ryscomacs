@@ -570,6 +570,7 @@ background-color: #adffc1;
 
 (add-hook 'eglot-managed-mode-hook
           (lambda ()
+            (setq eglot-mode-line-format nil)
             (flymake-mode -1)
             (eldoc-mode -1)
             (eglot-inlay-hints-mode -1)))

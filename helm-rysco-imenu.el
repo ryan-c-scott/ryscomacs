@@ -2,6 +2,19 @@
 (require 'eglot)
 (require 'helm)
 
+(defun rysco-imenu--first-real-descendant (data)
+  "Traverse the tree until a cdr that's a number or marker is found"
+  (let ((child (cdr data)))
+    (cond
+     ((numberp child)
+      child)
+     ((listp child)
+      (cl-loop
+       with val
+       for el in child
+       until val do (setq val (rysco-imenu--first-real-descendant el))
+       finally return val)))))
+
 (defun rysco-imenu-eglot-items (&optional alist path results)
   (let* ((alist (or alist (eglot-imenu))))
     (dolist (entry alist)
@@ -15,7 +28,7 @@
                                                     ("ENUM" . font-lock-type-face)
                                                     ("FUNC" . font-lock-function-name-face)
                                                     )))
-                            font-lock-constant-face))
+                            'eglot-semantic-namespace))
              (has-sub (imenu--subalist-p entry))
              (stop (member type '("Enum")))
              (parent (member type '("Class" "Struct")))
@@ -29,11 +42,13 @@
         (when (and include (or (not parent) has-sub))
           (push (cons
                  (concat
-                  (s-pad-right 10 " "
-                               (propertize (format "[%s]" type-name) 'face type-face))
+                  (propertize
+                   (s-center 8 (format "%s" type-name))
+                   'face 'gnus-emphasis-underline-italic)
+                  " "
                   (s-join "." (reverse path)))
                  (if has-sub
-                     (cdadr entry)
+                     (rysco-imenu--first-real-descendant entry)
                    (cdr entry)))
                 results))
 
