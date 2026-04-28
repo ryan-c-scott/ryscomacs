@@ -40,7 +40,6 @@
         (when (and has-sub (not stop))
           (setq results (rysco-imenu-eglot-items (cdr entry) path results)))
         (pop path))))
-          
   results)
 
 ;;;###autoload
