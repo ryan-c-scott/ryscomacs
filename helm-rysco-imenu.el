@@ -18,7 +18,8 @@
 (defun rysco-imenu-eglot-items (&optional alist path results)
   (let* ((alist (or alist (eglot-imenu))))
     (dolist (entry alist)
-      (let* ((type (get-text-property 0 'imenu-kind (car entry)))
+      (let* ((name (car entry))
+             (type (get-text-property 0 'imenu-kind (car entry)))
              (type-name (upcase (or
                                  (cdr (assoc type '(("Class" . "STRUCT")
                                                     ("Method" . "FUNC")
@@ -32,10 +33,12 @@
              (has-sub (imenu--subalist-p entry))
              (stop (member type '("Enum")))
              (parent (member type '("Class" "Struct")))
-             (include (member type '("Method" "Enum" "Class" "Function" "Struct"))))
+             (include (and
+                       (not (member name '("(anonymous union)" "(anonymous struct)")))
+                       (member type '("Method" "Enum" "Class" "Function" "Struct")))))
 
         (push
-         (propertize (car entry) 'face type-face)
+         (propertize name 'face type-face)
          path)
 
         ;; NOTE: Parent entries have no position of their own, so we're using their first child's position
@@ -66,8 +69,8 @@
         :candidates
         (lambda ()
           (--sort
-           (string< (format "%s_%s" (substring (car it) 0 12) (cdr it))
-                    (format "%s_%s" (substring (car other) 0 12) (cdr other)))
+           (string< (format "%s_%s" (substring (car it) 0 8) (cdr it))
+                    (format "%s_%s" (substring (car other) 0 8) (cdr other)))
            (with-helm-current-buffer
              (rysco-imenu-eglot-items))))
 
