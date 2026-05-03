@@ -735,16 +735,22 @@ VALUE-COLUMN can be specified to use a different column of data for processing
          "TODO")))
    "NEXT"))
 
-(advice-add #'org-agenda-redo-all :after 'rysco-org-agenda-insert-status)
-(advice-add #'org-agenda-redo :after 'rysco-org-agenda-insert-status)
-(advice-add #'org-agenda-todo :after 'org-agenda-redo-all)
 (advice-add #'org-agenda-clock-in :after 'rysco-org-agenda-post-clock-in)
-(advice-add #'org-agenda-clock-out :after 'org-agenda-redo-all)
 (advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
-
 (advice-add 'org-agenda-refile :around 'rysco-org-agenda-refile-wrapper)
-
 (advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
+
+(add-hook 'org-agenda-finalize-hook #'rysco-org-agenda-insert-status)
+
+(advice-add #'org-agenda-todo :after
+  (lambda (&rest _) (org-agenda-redo))
+  '((name . "rysco-redo-on-todo")))
+
+(add-hook 'org-clock-out-hook
+  (lambda ()
+    (when (get-buffer org-agenda-buffer-name)
+      (with-current-buffer org-agenda-buffer-name
+        (org-agenda-redo)))))
 
 (defun rysco-org-clock-heading ()
   (or
