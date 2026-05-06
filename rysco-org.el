@@ -2,6 +2,7 @@
 
 (require 'org-agenda)
 (require 'helm)
+(require 'org-ql)
 
 (defvar rysco-org-effective-time-override nil)
 
@@ -970,6 +971,19 @@ VALUE-COLUMN can be specified to use a different column of data for processing
       (with-current-buffer (marker-buffer it)
         (goto-char (marker-position it))
         (rysco-org-add-triage-tag))))
+
+
+(defun rysco-org-query-completed (&optional arg)
+  (interactive "P")
+  (org-ql-search
+    (append
+     org-agenda-files
+     (--map
+      (concat it "_archive")
+      org-agenda-files))
+    (concat
+     "closed:from="
+     (org-read-date))))
 
 ;;
 (provide 'rysco-org)
