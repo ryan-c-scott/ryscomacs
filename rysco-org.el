@@ -216,58 +216,59 @@
 (defun rysco-org-agenda-insert-status (&rest _)
   (interactive)
   (save-excursion
-    (when rysco-org-agenda-status-overlay
-      (setq rysco-org-agenda-status-overlay
-            (delete-overlay rysco-org-agenda-status-overlay)))
+    (without-restriction
+      (when rysco-org-agenda-status-overlay
+        (setq rysco-org-agenda-status-overlay
+              (delete-overlay rysco-org-agenda-status-overlay)))
 
-    (rysco-org-agenda-goto-first-section)
-    (forward-line -2)
+      (rysco-org-agenda-goto-first-section)
+      (forward-line -2)
 
-    (unless org-agenda-current-span
-      (setq rysco-org-agenda-status-overlay
-            (make-overlay (point) (+ (point) 2)))
+      (unless org-agenda-current-span
+        (setq rysco-org-agenda-status-overlay
+              (make-overlay (point) (+ (point) 2)))
 
-      (let* ((last-args-prop (get-char-property 1 'org-last-args))
-             (show-status (or
-                           (not last-args-prop)
-                           (and (numberp last-args-prop)
-                                (= last-args-prop 0))))
-             (status (and show-status (rysco-org-agenda-get-projects)))
-             (buffer-read-only nil)
-             (status-overlay rysco-org-agenda-status-overlay)
-             (col-count rysco-org-agenda-columns)
-             (margin-col rysco-org-agenda-margin-col)
-             (margin-col-str (make-string margin-col ?\s))
-             (margin-left rysco-org-agenda-margin-left)
-             (margin-left-str (concat "\n" (make-string margin-left ?\s)))
-             (margin-right-str ""))
+        (let* ((last-args-prop (get-char-property 1 'org-last-args))
+               (show-status (or
+                             (not last-args-prop)
+                             (and (numberp last-args-prop)
+                                  (= last-args-prop 0))))
+               (status (and show-status (rysco-org-agenda-get-projects)))
+               (buffer-read-only nil)
+               (status-overlay rysco-org-agenda-status-overlay)
+               (col-count rysco-org-agenda-columns)
+               (margin-col rysco-org-agenda-margin-col)
+               (margin-col-str (make-string margin-col ?\s))
+               (margin-left rysco-org-agenda-margin-left)
+               (margin-left-str (concat "\n" (make-string margin-left ?\s)))
+               (margin-right-str ""))
 
-        (overlay-put rysco-org-agenda-status-overlay 'invisible t)
-        (overlay-put rysco-org-agenda-status-overlay 'display
-                     'rysco-org-agenda-status-title)
+          (overlay-put rysco-org-agenda-status-overlay 'invisible t)
+          (overlay-put rysco-org-agenda-status-overlay 'display
+                       'rysco-org-agenda-status-title)
 
-        (overlay-put
-         rysco-org-agenda-status-overlay 'before-string
-         (concat
-          (when show-status
-            (cl-loop
-             with i = 0
-             for (k state count) in status
-             as col = (% i col-count)
+          (overlay-put
+           rysco-org-agenda-status-overlay 'before-string
+           (concat
+            (when show-status
+              (cl-loop
+               with i = 0
+               for (k state count) in status
+               as col = (% i col-count)
 
-             when k do (cl-incf i)
+               when k do (cl-incf i)
 
-             when k concat
-             (if (= col 0)
-                 margin-left-str
-               margin-col-str)
+               when k concat
+               (if (= col 0)
+                   margin-left-str
+                 margin-col-str)
 
-             when k concat
-             (rysco-org-agenda--status-entry k state count)
+               when k concat
+               (rysco-org-agenda--status-entry k state count)
 
-             when (= col (1- col-count)) concat margin-right-str))
+               when (= col (1- col-count)) concat margin-right-str))
 
-          "\n\n"))))))
+            "\n\n")))))))
 
 ;;;###autoload
 (defun rysco-org-agenda-entry-header (str)
@@ -737,7 +738,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
    "NEXT"))
 
 (advice-add #'org-agenda-clock-in :after 'rysco-org-agenda-post-clock-in)
-(advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
+;;(advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 (advice-add 'org-agenda-refile :around 'rysco-org-agenda-refile-wrapper)
 (advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
 
