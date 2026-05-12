@@ -48,7 +48,6 @@
  docker-compose-mode
  dockerfile-mode
  doom-themes
- eglot
  eimp
  eldev
  epl
@@ -552,6 +551,7 @@ background-color: #adffc1;
 (setq-default indent-tabs-mode nil)
 
 (require 'tree-sitter-langs)
+(add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
 
 (add-hook 'prog-mode-hook
           (lambda ()
@@ -562,24 +562,7 @@ background-color: #adffc1;
             (c-set-style "stroustrup")
             (rysco-semantic-mode t)
             (setq tab-width 4
-                  indent-tabs-mode nil)
-            (when (and buffer-file-name
-                       (fboundp 'eglot-current-server)
-                       (not (eglot-current-server)))
-              (eglot-ensure))))
-
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (setq eglot-mode-line-format nil)
-            (flymake-mode -1)
-            (eldoc-mode -1)
-            (eglot-inlay-hints-mode -1)))
-
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (flymake-mode -1)
-            (eldoc-mode -1)
-            (eglot-inlay-hints-mode -1)))
+                  indent-tabs-mode nil)))
 
 (add-hook 'csharp-mode-hook
           (lambda ()

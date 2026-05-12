@@ -218,6 +218,11 @@
             (local-set-key (kbd "C-c o") 'helm-rysco-related-files)
             (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
 
+(add-hook 'c++-ts-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c o") 'helm-rysco-related-files)
+            (local-set-key "\C-c\C-c" 'rysco-comment-dwim)))
+
 (add-hook 'csharp-mode-hook
           (lambda ()
             ;; No idea why this isn't the default, but here we are...
