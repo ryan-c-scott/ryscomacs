@@ -564,6 +564,12 @@ background-color: #adffc1;
             (setq tab-width 4
                   indent-tabs-mode nil)))
 
+(add-hook 'c++-ts-mode-hook
+          (lambda ()
+            (setq tab-width 4
+                  c-ts-mode-indent-offset 4
+                  indent-tabs-mode nil)))
+
 (add-hook 'csharp-mode-hook
           (lambda ()
             ;; for hide/show support
