@@ -26,20 +26,37 @@
          (treesit-query-capture
           (treesit-buffer-root-node 'cpp)
           '((function_definition
-             declarator: (function_declarator
-                          declarator: (_) @func.name)) @func.def
+             declarator:
+             (function_declarator
+              declarator: (_) @func.name)) @func.def
 
-                          (class_specifier
-                           name: (_) @class.name) @class.def
+              (function_definition
+               declarator:
+               (pointer_declarator
+                declarator:
+                (function_declarator
+                 declarator: (_) @func.name))) @func.def
 
-                          (struct_specifier
-                           name: (_) @struct.name) @struct.def
+              (function_definition
+               declarator:
+               (pointer_declarator
+                declarator:
+                (pointer_declarator
+                 declarator:
+                 (function_declarator
+                  declarator: (_) @func.name)))) @func.def
 
-                          (enum_specifier
-                           name: (_) @enum.name) @enum.def
+              (function_definition
+               declarator:
+               (reference_declarator
+                (function_declarator
+                 declarator: (_) @func.name))) @func.def
 
-                          (namespace_definition
-                           name: (_) @ns.name) @ns.def))))
+              (class_specifier     name: (_) @class.name)  @class.def
+              (struct_specifier    name: (_) @struct.name) @struct.def
+              (enum_specifier      name: (_) @enum.name)   @enum.def
+              (namespace_definition name: (_) @ns.name)    @ns.def))))
+
     (nreverse
      (cl-loop
       for ((def-sym . def-node) (name-sym . name-node)) on captures by 'cddr
