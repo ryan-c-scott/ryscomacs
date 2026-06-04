@@ -5,6 +5,7 @@
 (require 's)
 (require 'magit)
 (require 'multiple-cursors)
+(require 'semantic)
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Main ryscomacs transient
@@ -82,7 +83,7 @@
     :setup-children rysco-transient--wrap-children
     ("sq" "Query" helm-rysco-store-query)
     ("sd" "Dired" rysco-store-directory-dired)
-    ("sl" "Last captured" org-capture-goto-last-stored)
+    ("sl" "Last captured" org-refile-goto-last-stored)
     ("sf" "Stamp Freshness" rysco-store-org-stamp-freshness)
     ("sc" "Check Freshness" helm-rysco-store-query-for-freshness)
     ("ss" "Store Load" rysco-store-load)
