@@ -300,7 +300,7 @@
         (:name "Priority"
                :priority ("A" "B" "C")
                :transformer rysco-org-agenda-project-header
-               :order 5)
+               :order 6)
         (:name "Work Categories"
                :tag "category"
                :transformer rysco-org-agenda-entry-header
