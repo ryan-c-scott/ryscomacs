@@ -781,6 +781,15 @@ With prefix-arg prompt for type if available with your AG version."
                   (unless (= size 0.5)
                     `(floor (* ,size window-size)))))
               (other-window 1)))
+          (`(:agenda . ,filters)
+           `(progn
+              (with-try-switch-existing-buffer "*Org Agenda*"
+                (org-todo-list))
+              (with-current-buffer "*Org Agenda*"
+                (org-agenda-filter-apply
+                 (setq org-agenda-category-filter (list ,@filters))
+                 'category)
+                (org-agenda-redo-all))))
           (_ f)))))
 
 (cl-defmacro rysco-frames-layout (&rest layout)
