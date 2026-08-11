@@ -379,6 +379,10 @@ for use with `%i' in org capture templates (see `org-capture-templates')"
                    (org-element-property :value (org-element-at-point)))
     (kill-new it)))
 
+(defun rysco-org-src-insert-no-eval ()
+  (interactive)
+  (org-babel-insert-header-arg "eval" "never"))
+
 (defun rysco-org-src-execute (&rest _)
   (interactive)
   (let ((block-point org-src--beg-marker))
