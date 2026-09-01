@@ -3,6 +3,7 @@
 (require 'org-agenda)
 (require 'helm)
 (require 'org-ql)
+(require 'org-capture)
 
 (defvar rysco-org-effective-time-override nil)
 
@@ -304,28 +305,33 @@
     (apply old args)))
 
 (defun rysco-org-recapture ()
-  "Narrow to node content, excluding headline and properties, and mark the region
-for use with `%i' in org capture templates (see `org-capture-templates')"
+  "Capture node content, excluding headline and properties, for use with
+`%i' in org capture templates (see `org-capture-templates')."
   (interactive)
-  (-when-let* ((element (org-element-at-point)))
-    (save-restriction
-      (narrow-to-region (org-element-contents-begin element)
-                        (org-element-contents-end element))
+  (save-excursion
+    (org-back-to-heading t)
+    (-when-let* ((element (org-element-at-point)))
+      (let (begin)
+        (save-restriction
+          (narrow-to-region (org-element-contents-begin element)
+                             (org-element-contents-end element))
 
-      (let ((data (org-element-parse-buffer))
-            begin)
+          ;; Skip implicit starting section/paragraph as well as certain node types
+          (let ((data (org-element-parse-buffer))
+                (depth 0))
+            (org-element-map data org-element-all-elements
+              (lambda (el)
+                (pcase (org-element-type el)
+                  ((and (or 'section 'paragraph) (guard (< depth 2)))
+                   (cl-incf depth)
+                   nil)
+                  ((or 'drawer 'property-drawer 'planning 'clock 'deadline 'scheduled 'closed) nil)
+                  (_ (setq begin (org-element-begin el)))))
+              nil t
+              '(drawer property-drawer)))
 
-        (org-element-map data org-element-all-elements
-          (lambda (el)
-            (pcase (org-element-type el)
-              ((or 'drawer 'property-drawer 'section) nil)
-              (_ (setq begin (org-element-begin el)))))
-          nil t
-          '(drawer property-drawer))
-
-        (set-mark begin)
-        (goto-char (point-max))
-        (funcall-interactively 'org-capture)))))
+          (let ((content (buffer-substring-no-properties (or begin (point-min)) (point-max))))
+            (org-capture-string content)))))))
 
 (defun rysco-org-agenda-recapture ()
   "Copy node content, excluding headline and properties, into a temp buffer and mark the region
