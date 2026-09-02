@@ -325,24 +325,29 @@ the WRONG (visible) subtree gets archived instead of the intended entry."
     (-when-let* ((element (org-element-at-point)))
       (let (begin)
         (save-restriction
-          (narrow-to-region (org-element-contents-begin element)
+          ;; Keep the headline itself in the parsed region (rather than
+          ;; narrowing to just `org-element-contents-begin'): `org-element'
+          ;; only recognizes a SCHEDULED/DEADLINE/CLOSED line as `planning'
+          ;; when it immediately follows a real headline in the parse.
+          (narrow-to-region (org-element-begin element)
                              (org-element-contents-end element))
 
-          ;; Skip implicit starting section/paragraph as well as certain node types
-          (let ((data (org-element-parse-buffer))
-                (depth 0))
+          ;; Skip the headline, its implicit section wrapper, and certain
+          ;; node types
+          (let ((data (org-element-parse-buffer)))
             (org-element-map data org-element-all-elements
               (lambda (el)
                 (pcase (org-element-type el)
-                  ((and (or 'section 'paragraph) (guard (< depth 2)))
-                   (cl-incf depth)
+                  ((or 'headline 'section
+                       'drawer 'property-drawer 'planning 'clock 'deadline 'scheduled 'closed)
                    nil)
-                  ((or 'drawer 'property-drawer 'planning 'clock 'deadline 'scheduled 'closed) nil)
                   (_ (setq begin (org-element-begin el)))))
               nil t
               '(drawer property-drawer)))
 
-          (let ((content (buffer-substring-no-properties (or begin (point-min)) (point-max))))
+          (let ((content (buffer-substring-no-properties
+                           (or begin (org-element-contents-begin element))
+                           (point-max))))
             (org-capture-string content)))))))
 
 (defun rysco-org-agenda-recapture ()
