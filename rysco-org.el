@@ -304,6 +304,18 @@ across `org-agenda-files', queried via `org-ql'."
   (let ((org-refile-targets (or rysco-org-refile-targets org-refile-targets)))
     (apply old args)))
 
+(defun rysco-org-agenda-archive-widen-target (&rest _)
+  "Widen the target buffer before `org-agenda-archive-with' runs.
+That function navigates the target buffer with a raw integer position
+rather than a marker (`(goto-char pos)'), with no widen first.  If the
+buffer happens to already be narrowed to some other subtree, `goto-char'
+silently clamps into the narrowed region instead of signaling an error, so
+the WRONG (visible) subtree gets archived instead of the intended entry."
+  (-when-let* ((marker (org-get-at-bol 'org-marker))
+               (buffer (marker-buffer marker)))
+    (with-current-buffer buffer
+      (widen))))
+
 (defun rysco-org-recapture ()
   "Capture node content, excluding headline and properties, for use with
 `%i' in org capture templates (see `org-capture-templates')."
@@ -750,6 +762,7 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 (advice-add #'org-agenda-clock-in :after 'rysco-org-agenda-post-clock-in)
 ;;(advice-add #'org-todo-list :after 'rysco-org-agenda-insert-status)
 (advice-add 'org-agenda-refile :around 'rysco-org-agenda-refile-wrapper)
+(advice-add #'org-agenda-archive-with :before #'rysco-org-agenda-archive-widen-target)
 (advice-add 'org-edit-src-save :after 'rysco-org-src-execute)
 
 (add-hook 'org-agenda-finalize-hook #'rysco-org-agenda-insert-status)
