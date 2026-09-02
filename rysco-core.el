@@ -719,6 +719,7 @@ background-color: #adffc1;
 
 (with-eval-after-load 'org-agenda
   (require 'rysco-org)
+  (setq org-super-agenda-hide-empty-groups t)
   (org-super-agenda-mode 1)
 
   (copy-face 'org-level-2 'org-super-agenda-header )

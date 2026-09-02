@@ -3,6 +3,7 @@
 (require 'org-agenda)
 (require 'helm)
 (require 'org-ql)
+(require 'helm-org-ql)
 (require 'org-capture)
 
 (defvar rysco-org-effective-time-override nil)
@@ -68,54 +69,71 @@
 
 (set-face-attribute 'org-agenda-clocking nil :box "cyan4")
 
+(defun rysco-org-agenda--filter-terms-to-ql (predicate filters)
+  "Translate a list of `org-agenda' +/- FILTERS strings (as in
+`org-agenda-category-filter'/`org-agenda-tag-filter') into org-ql
+plain-text query terms using PREDICATE (\"category\" or \"tags\")."
+  (--map (concat (and (string-prefix-p "-" it) "!")
+                 predicate ":" (substring it 1))
+         filters))
+
+(defun rysco-org-agenda-active-filter-query ()
+  "Translate the current agenda buffer's active category/tag filter into an
+equivalent org-ql plain-text query string, or nil when no filter is active."
+  (-when-let (terms (append
+                     (rysco-org-agenda--filter-terms-to-ql "category" org-agenda-category-filter)
+                     (rysco-org-agenda--filter-terms-to-ql "tags" org-agenda-tag-filter)))
+    (concat (s-join " " terms) " ")))
+
+(defun rysco-org-agenda-goto-marker-in-agenda (marker)
+  "Move point to the line in the current `org-agenda-buffer-name' buffer
+whose `org-hd-marker' is `equal' to MARKER, switching to that buffer.  If no
+such line is found (e.g. MARKER's entry is filtered out or not part of the
+current agenda view), falls back to visiting MARKER directly in its own
+buffer."
+  (or
+   (-when-let* ((agenda-buffer (get-buffer org-agenda-buffer-name))
+                (pos (with-current-buffer agenda-buffer
+                       (save-excursion
+                         (goto-char (point-min))
+                         (cl-loop
+                          until (eobp)
+                          when (equal (org-get-at-bol 'org-hd-marker) marker)
+                          return (point)
+                          do (forward-line 1))))))
+     (pop-to-buffer agenda-buffer)
+     (goto-char pos))
+   (progn
+     (switch-to-buffer (marker-buffer marker))
+     (goto-char marker))))
+
 (defun helm-rysco-org-agenda-buffer-items (&optional arg)
   (interactive "P")
-  (--when-let
-      (and (derived-mode-p 'org-agenda-mode)
-           (save-excursion
-             (goto-char (point-min))
-             (cl-loop
-              with action = `(("Go to item" . (lambda (pos) (goto-char pos)))
-                              ("Go to heading" . (lambda (pos)
-                                                   (goto-char pos)
-                                                   (org-agenda-goto)))
-                              ("TODO" . (lambda (pos)
-                                          (save-excursion
-                                            (goto-char pos)
-                                            (org-agenda-todo))))
-                              ("Refile" . (lambda (pos)
-                                            (save-excursion
-                                              (goto-char pos)
-                                              (org-agenda-refile)))))
-
-              do (org-agenda-forward-block)
-              as heading = (s-replace "\n" "" (thing-at-point 'line))
-              do (forward-line 1)
-              while (< (point) (point-max))
-              as end = (save-excursion
-                         (org-agenda-forward-block)
-                         (if (= (point) (point-max))
-                             (point-max)
-                           (forward-line -1)
-                           (point)))
-
-              collect
-              (helm-build-sync-source heading
-                :candidates
-                (save-excursion
-                  (cl-loop
-                   while (< (point) end)
-                   collect
-                   (cons
-                    (s-replace "\n" "" (thing-at-point 'line))
-                    (point))
-                   do (forward-line 1)))
-
-                :action action))))
-
-    (or
-     (helm :sources it)
-     t)))
+  (when (derived-mode-p 'org-agenda-mode)
+    (let ((helm-org-ql-actions
+           `(("Go to item" . (lambda (marker)
+                               (rysco-org-agenda-goto-marker-in-agenda marker)))
+             ("Go to heading" . (lambda (marker)
+                                  (switch-to-buffer (marker-buffer marker))
+                                  (goto-char marker)
+                                  (helm-org-ql--show-entry)))
+             ("TODO" . (lambda (marker)
+                         (with-current-buffer (marker-buffer marker)
+                           (save-excursion
+                             (goto-char marker)
+                             (org-todo)))))
+             ("Refile" . (lambda (marker)
+                           (with-current-buffer (marker-buffer marker)
+                             (save-excursion
+                               (goto-char marker)
+                               (let ((org-refile-targets
+                                      (or rysco-org-refile-targets org-refile-targets)))
+                                 (org-refile)))))))))
+      (or
+       (helm :sources (helm-org-ql-source (org-agenda-files)
+                                           :name "Agenda Items")
+             :input (rysco-org-agenda-active-filter-query))
+       t))))
 
 (defun rysco-org-agenda ()
   (interactive)
@@ -123,58 +141,36 @@
     (org-agenda)))
 
 (defun rysco-org-agenda-get-projects ()
-  "Return status of all projects, as specified by the org property `projectid' listed in the buffer"
+  "Return status of all projects, as specified by the org property `projectid'
+across `org-agenda-files', queried via `org-ql'."
   (interactive)
-  (--when-let
-      (and (derived-mode-p 'org-agenda-mode)
-           (save-excursion
-             (goto-char (point-min))
-             (org-agenda-forward-block)
-             (forward-line 1)
+  (when (derived-mode-p 'org-agenda-mode)
+    (let ((now/next (make-hash-table :test 'equal))
+          (waiting (make-hash-table :test 'equal))
+          (projects nil))
+      (cl-loop
+       for (todo . project) in
+       (org-ql-select (org-agenda-files)
+         '(and (todo) (property "PROJECTID" nil :inherit t))
+         :action '(cons (org-get-todo-state)
+                        (org-entry-get (point) "PROJECTID" t)))
+       when project do
+       (progn
+         (unless (gethash project now/next) (puthash project 0 now/next))
+         (unless (member project projects) (push project projects))
+         (pcase todo
+           ((or "NOW" "NEXT") (cl-incf (gethash project now/next)))
+           ("WAITING" (puthash project t waiting)))))
 
-             (cl-loop
-              with status = (make-hash-table :test 'equal)
-              with next-count = (make-hash-table :test 'equal)
-
-              until (eobp)
-              as marker = (org-get-at-bol 'org-marker)
-              when marker do
-              (let* ((project (org-entry-get marker "PROJECTID" t))
-                     (todo (substring-no-properties
-                            (org-get-at-bol 'todo-state)))
-                     (state (gethash project status))
-                     (count (or (gethash project next-count) 0)))
-
-
-                (when (or (equal todo "NOW")
-                          (equal todo "NEXT"))
-                  (cl-incf count)
-                  (puthash project count next-count))
-
-                (unless (or (equal state 'ACTIVE)
-                            (equal state 'EXCESS))
-                  (setq state
-                        (puthash
-                         project
-                         (pcase todo
-                           ((or "NOW" "NEXT") 'ACTIVE)
-                           ("WAITING" 'BLOCKED))
-                         status)))
-
-                (when (and (equal state 'ACTIVE)
-                           (or (equal todo "NOW")
-                               (equal todo "NEXT")))
-
-                  (when (> count rysco-org-agenda-excess-threshold)
-                    (puthash project 'EXCESS status))))
-
-              do (forward-line 1)
-              finally return
-              (cl-loop
-               for k being the hash-keys of status
-               collect
-               `(,k ,(gethash k status) ,(or (gethash k next-count) 0))))))
-    it))
+      (cl-loop
+       for project in (nreverse projects)
+       as count = (gethash project now/next)
+       as status = (cond
+                    ((> count rysco-org-agenda-excess-threshold) 'EXCESS)
+                    ((> count 0) 'ACTIVE)
+                    ((gethash project waiting) 'BLOCKED)
+                    (t nil))
+       collect `(,project ,status ,count)))))
 
 (defun rysco-org-agenda-goto-first-section ()
   (interactive)
@@ -275,9 +271,8 @@
 (defun rysco-org-agenda-entry-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (has-note (rysco-org-agenda-entry-has-note marker)))
-      (apply 'propertize
-             (concat "▾" (substring str 1))
-             (text-properties-at 0 str))
+      (concat (apply 'propertize "▾" (text-properties-at 0 str))
+              (substring str 1))
     str))
 
 ;;;###autoload
@@ -291,7 +286,12 @@
 (defun rysco-org-agenda-project-header (str)
   (-if-let* ((marker (get-text-property 0 'org-marker str))
              (face-name (org-entry-get marker "projectface" t))
-             (face (intern face-name))
+             (face (let ((f (intern face-name)))
+                     (if (facep f)
+                         f
+                       (display-warning 'rysco-org-agenda
+                                        (format "projectface %S is not a defined face" face-name))
+                       nil)))
              (str (rysco-org-agenda-entry-header str))
              (header-width (-if-let (header-text (car (s-match "^.*?:\s+" str)))
                                (1- (length header-text))
@@ -754,15 +754,26 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 
 (add-hook 'org-agenda-finalize-hook #'rysco-org-agenda-insert-status)
 
-(advice-add #'org-agenda-todo :after
-  (lambda (&rest _) (org-agenda-redo))
-  '((name . "rysco-redo-on-todo")))
+(defvar rysco-org--agenda-redo-pending nil
+  "Non-nil when a TODO state change has requested an agenda refresh.
+Consumed by `rysco-org-agenda-redo-pending-maybe' on `post-command-hook',
+so the refresh always runs after the triggering command has fully
+finished -- never synchronously inside `org-todo' itself, which can race
+a caller's own post-processing (e.g. `org-agenda-todo' updating its
+display line, or `org-clock-out' finishing its own bookkeeping) and pull
+the entry's buffer out from under it.")
 
-(add-hook 'org-clock-out-hook
-  (lambda ()
+(defun rysco-org-agenda-redo-pending-maybe ()
+  (when rysco-org--agenda-redo-pending
+    (setq rysco-org--agenda-redo-pending nil)
     (when (get-buffer org-agenda-buffer-name)
       (with-current-buffer org-agenda-buffer-name
         (org-agenda-redo)))))
+
+(add-hook 'post-command-hook #'rysco-org-agenda-redo-pending-maybe)
+
+(add-hook 'org-after-todo-state-change-hook
+  (lambda () (setq rysco-org--agenda-redo-pending t)))
 
 (defun rysco-org-clock-heading ()
   (or
@@ -941,13 +952,11 @@ VALUE-COLUMN can be specified to use a different column of data for processing
        (org-todo arg)
        (rysco-org-todo-yesterday--fix-scheduled-date))
       ('org-agenda-mode
-       (let* ((marker (or (org-get-at-bol 'org-marker)
-                          (org-agenda-error)))
-              (buffer (marker-buffer marker))
-              (pos (marker-position marker)))
+       (let ((marker (or (org-get-at-bol 'org-marker)
+                         (org-agenda-error))))
          (org-agenda-todo arg)
-         (with-current-buffer buffer
-           (goto-char pos)
+         (with-current-buffer (marker-buffer marker)
+           (goto-char marker)
            (rysco-org-todo-yesterday--fix-scheduled-date)))))))
 
 ;; Embedded images in HTML export as new backend
