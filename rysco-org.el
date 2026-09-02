@@ -755,13 +755,14 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 (add-hook 'org-agenda-finalize-hook #'rysco-org-agenda-insert-status)
 
 (defvar rysco-org--agenda-redo-pending nil
-  "Non-nil when a TODO state change has requested an agenda refresh.
-Consumed by `rysco-org-agenda-redo-pending-maybe' on `post-command-hook',
-so the refresh always runs after the triggering command has fully
-finished -- never synchronously inside `org-todo' itself, which can race
-a caller's own post-processing (e.g. `org-agenda-todo' updating its
-display line, or `org-clock-out' finishing its own bookkeeping) and pull
-the entry's buffer out from under it.")
+  "Non-nil when a TODO state change or capture has requested an agenda
+refresh. Consumed by `rysco-org-agenda-redo-pending-maybe' on
+`post-command-hook', so the refresh always runs after the triggering
+command has fully finished -- never synchronously inside `org-todo' or
+`org-capture-finalize' themselves, which can race a caller's own
+post-processing (e.g. `org-agenda-todo' updating its display line, or
+`org-clock-out' finishing its own bookkeeping) and pull the entry's buffer
+out from under it.")
 
 (defun rysco-org-agenda-redo-pending-maybe ()
   (when rysco-org--agenda-redo-pending
@@ -774,6 +775,11 @@ the entry's buffer out from under it.")
 
 (add-hook 'org-after-todo-state-change-hook
   (lambda () (setq rysco-org--agenda-redo-pending t)))
+
+(add-hook 'org-capture-after-finalize-hook
+  (lambda ()
+    (unless org-note-abort
+      (setq rysco-org--agenda-redo-pending t))))
 
 (defun rysco-org-clock-heading ()
   (or
