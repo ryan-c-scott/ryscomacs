@@ -1,10 +1,16 @@
 ;;; -*- lexical-binding: t; -*-
 
-(require 'org-agenda)
 (require 'helm)
+(require 'org-agenda)
 (require 'org-ql)
 (require 'helm-org-ql)
 (require 'org-capture)
+(require 'ox)
+(require 'ox-html)
+(require 'ox-html)
+(require 'rysco-util)
+(require 'rysco-util)
+(require 'rysco-system)
 
 (defvar rysco-org-effective-time-override nil)
 
