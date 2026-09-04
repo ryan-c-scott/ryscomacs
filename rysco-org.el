@@ -5,6 +5,7 @@
 (require 'org-ql)
 (require 'helm-org-ql)
 (require 'org-capture)
+(require 'org-archive)
 (require 'ox)
 (require 'ox-html)
 (require 'ox-html)
@@ -804,6 +805,16 @@ out from under it.")
   (lambda ()
     (unless org-note-abort
       (setq rysco-org--agenda-redo-pending t))))
+
+(defun rysco-org-stamp-projectid (&rest _)
+  "Save the effective PROJECTID:SUBPROJECTID for this entry."
+  (when-let* ((id (org-entry-get (point) "PROJECTID" t)))
+    (org-entry-put
+     (point) "ARCHIVE_PROJECTID"
+     (concat id (--when-let (org-entry-get (point) "SUBPROJECTID" t) (concat ":" it))))))
+
+;; Immediately before `org-archive-subtree' because `org-archive-finalize-hook' is too late
+(advice-add 'org-archive-subtree :before #'rysco-org-stamp-projectid)
 
 (defun rysco-org-clock-heading ()
   (or
