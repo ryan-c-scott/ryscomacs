@@ -26,6 +26,10 @@
 (defvar rysco-private-browser-arguments nil)
 (defvar rysco-web-search-engine-string "https://duckduckgo.com/?q=%s")
 (defvar rysco-imagemagick-executable nil)
+(defvar rysco-auto-save-visited-modes '(org-mode)
+  "Major modes whose file buffers are saved by `auto-save-visited-mode'.")
+(defvar-local rysco-auto-save-visited-opt-out nil
+  "Skip auto-saving for this buffer.")
 (defvar-local org-export-directory "org-export")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -422,6 +426,11 @@ background-color: #adffc1;
       mac-command-modifier 'meta
       mac-option-modifier nil)
 
+(defun rysco-auto-save-buffer-p ()
+  (and
+   (not rysco-auto-save-visited-opt-out)
+   (derived-mode-p rysco-auto-save-visited-modes)))
+
 (transient-mark-mode t)
 (global-font-lock-mode t)
 (global-org-modern-mode)
@@ -447,7 +456,16 @@ background-color: #adffc1;
       uniquify-after-kill-buffer-p t
       uniquify-ignore-buffers-re "^\\*"
       ispell-program-name "aspell"
-      kill-do-not-save-duplicate t)
+      kill-do-not-save-duplicate t
+      auto-save-visited-interval 30
+      remote-file-name-inhibit-auto-save-visited t
+      auto-save-visited-predicate 'rysco-auto-save-buffer-p
+      global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil
+      auto-revert-avoid-polling t)
+
+(auto-save-visited-mode 1)
+(global-auto-revert-mode 1)
 
 ;;;;
 (require 'rysco-transients)
