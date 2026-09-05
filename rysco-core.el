@@ -24,7 +24,7 @@
 (defvar rysco-common-links nil)
 (defvar rysco-private-browser-program nil)
 (defvar rysco-private-browser-arguments nil)
-(defvar rysco-web-search-engine-string "https://duckduckgo.com/?q=%s")
+(defvar rysco-web-search-engine-string "https://search.brave.com/search?q=%s")
 (defvar rysco-imagemagick-executable nil)
 (defvar rysco-auto-save-visited-modes '(org-mode)
   "Major modes whose file buffers are saved by `auto-save-visited-mode'.")
