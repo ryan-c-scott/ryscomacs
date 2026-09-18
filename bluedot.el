@@ -89,6 +89,8 @@
 ;; stores the number of completed pomodoros
 (defvar bluedot--completed-pomodoros 0)
 
+(defvar bluedot--carried-elapsed 0)
+
 ;; intervals, bars & colours
 (defvar bluedot--bars)
 
@@ -144,6 +146,10 @@ OS notification settings may suppress messages"
   "Seconds since TIME."
   (truncate (- (float-time (current-time)) (float-time time))))
 
+(defun bluedot--elapsed-offset (pom)
+  (let ((val (org-entry-get pom "BLUEDOT_ELAPSED")))
+    (if val (string-to-number val) 0)))
+
 (defun bluedot--format-seconds (seconds)
   (format-time-string
    (concat
@@ -153,7 +159,8 @@ OS notification settings may suppress messages"
 
 (defun bluedot--popup-message (time desc)
   "TIME since start, DESC(ription) and instructions."
-  (let* ((elapsed (float (bluedot--seconds-since time)))
+  (let* ((elapsed (float (+ (if (org-clocking-p) (bluedot--elapsed-offset org-clock-marker) 0)
+                            (bluedot--seconds-since time))))
          (working (min 1 (/ elapsed bluedot-work-interval)))
          (resting (/ (max 0 (- elapsed bluedot-work-interval))
                      bluedot-rest-interval)))
@@ -206,7 +213,8 @@ OS notification settings may suppress messages"
 (defun bluedot--update-current-bar (&optional bluedot--current-bars)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
 
-  (let* ((elapsed (float (bluedot--seconds-since org-clock-start-time)))
+  (let* ((elapsed (float (+ (bluedot--elapsed-offset org-clock-marker)
+                            (bluedot--seconds-since org-clock-start-time))))
          (working (min 1 (/ elapsed bluedot-work-interval)))
          (resting (/ (max 0 (- elapsed bluedot-work-interval))
                      bluedot-rest-interval)))
@@ -236,7 +244,11 @@ OS notification settings may suppress messages"
                 (run-at-time
                  (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
                  nil #'bluedot--update-current-bar)))
-      ;;
+
+      ;; NOTE: `bluedot-org-clock-out' below calls `org-clock-out' directly
+      ;; (not via `org-clock-in'), so `org-clock-clocking-in' is nil and
+      ;; `bluedot--stamp-remove' already discards the carry -- this is a
+      ;; standalone stop, not a switch to another task.
       (run-hooks 'bluedot-after-rest-hook)
       (setq bluedot--completed-pomodoros
             (1+ bluedot--completed-pomodoros)))
@@ -252,13 +264,43 @@ OS notification settings may suppress messages"
   "Little pomodoro timer in the mode-line."
   :global t)
 
+(defun bluedot--stamp-add ()
+  (unless (eq org-clock-in-resume 'auto-restart)
+    (if (> bluedot--carried-elapsed 0)
+        (progn
+          (org-entry-put org-clock-marker "BLUEDOT_ELAPSED"
+                          (number-to-string (round bluedot--carried-elapsed)))
+          (setq bluedot--carried-elapsed 0))
+      (org-entry-delete org-clock-marker "BLUEDOT_ELAPSED"))))
+
+(defun bluedot--stamp-remove ()
+  (setq bluedot--carried-elapsed
+        (if org-clock-clocking-in
+            (+ (bluedot--elapsed-offset (point))
+               (bluedot--seconds-since org-clock-start-time))
+          0))
+  (org-entry-delete (point) "BLUEDOT_ELAPSED"))
+
 (defun bluedot-org-clock-in ()
-  (bluedot-mode 1))
+  (bluedot-mode 1)
+  (when (org-clocking-p)
+    (bluedot--stamp-add)))
 
 (defun bluedot-org-clock-out ()
   (org-clock-out nil t))
 
+(defun bluedot-org-clock-stopped ()
+  "Run on `org-clock-out-hook': carry the elapsed period time forward in
+case the next clock-in resumes it, then stop bluedot's timer/mode."
+  (bluedot--stamp-remove)
+  (bluedot--cancel-timer)
+  (bluedot-mode 0))
+
 (defun bluedot-org-clock-cancel ()
+  "Run on `org-clock-cancel-hook': the clock was cancelled outright (its
+CLOCK line removed), so discard any carried-over elapsed time instead of
+resuming it on the next clock-in."
+  (setq bluedot--carried-elapsed 0)
   (bluedot--cancel-timer)
   (bluedot-mode 0))
 
@@ -301,14 +343,14 @@ Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
   (if enable
       (progn
         (add-hook 'org-clock-in-hook 'bluedot-org-clock-in)
-        (add-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
+        (add-hook 'org-clock-out-hook 'bluedot-org-clock-stopped)
         (add-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
         (add-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
         (add-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
         (advice-add 'org-clock-update-mode-line :after 'bluedot--update-current-bar))
 
     (remove-hook 'org-clock-in-hook 'bluedot-org-clock-in)
-    (remove-hook 'org-clock-out-hook 'bluedot-org-clock-cancel)
+    (remove-hook 'org-clock-out-hook 'bluedot-org-clock-stopped)
     (remove-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
     (remove-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
     (remove-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
