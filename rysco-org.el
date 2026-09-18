@@ -796,10 +796,13 @@ out from under it.")
       (with-current-buffer org-agenda-buffer-name
         (org-agenda-redo)))))
 
+(defun rysco-org-after-todo-state-change ()
+  (setq rysco-org--agenda-redo-pending (or (not (string-empty-p org-last-state))
+                                           (not (string= org-state "TODO")))))
+
 (add-hook 'post-command-hook #'rysco-org-agenda-redo-pending-maybe)
 
-(add-hook 'org-after-todo-state-change-hook
-  (lambda () (setq rysco-org--agenda-redo-pending t)))
+(add-hook 'org-after-todo-state-change-hook #'rysco-org-after-todo-state-change)
 
 (add-hook 'org-capture-after-finalize-hook
   (lambda ()
