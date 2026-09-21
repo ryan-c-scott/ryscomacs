@@ -183,6 +183,12 @@ OS notification settings may suppress messages"
           (* (- 1 working) bluedot-work-interval))
          desc))))))
 
+(defun bluedot--timer-clicked ()
+  (interactive)
+  (message (bluedot--popup-message
+            org-clock-start-time
+            org-clock-current-task)))
+
 (defun bluedot--propertize (bar bar-color)
   "Propertize BAR with BAR-COLOR, help echo, and click action."
   (propertize bar
@@ -190,7 +196,7 @@ OS notification settings may suppress messages"
               'help-echo '(bluedot--popup-message org-clock-start-time
                                                   org-clock-current-task)
               'pointer 'hand
-              'local-map (make-mode-line-mouse-map 'mouse-1 'bluedot)))
+              'local-map (make-mode-line-mouse-map 'mouse-1 'bluedot--timer-clicked)))
 
 ;; initializing current bar
 (defvar bluedot--current-bar (apply #'bluedot--propertize (car (last bluedot--bars))))
