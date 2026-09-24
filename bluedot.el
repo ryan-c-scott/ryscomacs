@@ -216,7 +216,7 @@ OS notification settings may suppress messages"
   (setq bluedot--timer nil))
 
 ;;;###autoload
-(defun bluedot--update-current-bar (&optional bluedot--current-bars)
+(defun bluedot--update-current-bar (&optional no-timer)
   "Update current bar, and program next update using BLUEDOT--CURRENT-BARS."
 
   (let* ((elapsed (float (+ (bluedot--elapsed-offset org-clock-marker)
@@ -247,9 +247,10 @@ OS notification settings may suppress messages"
         (setq bluedot--timer
               (progn
                 (bluedot--cancel-timer)
-                (run-at-time
-                 (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
-                 nil #'bluedot--update-current-bar)))
+                (unless no-timer
+                  (run-at-time
+                   (/ (if (< working 1) bluedot-work-interval bluedot-rest-interval) 16.0)
+                   nil #'bluedot--update-current-bar))))
 
       ;; NOTE: `bluedot-org-clock-out' below calls `org-clock-out' directly
       ;; (not via `org-clock-in'), so `org-clock-clocking-in' is nil and
@@ -290,7 +291,8 @@ OS notification settings may suppress messages"
 (defun bluedot-org-clock-in ()
   (bluedot-mode 1)
   (when (org-clocking-p)
-    (bluedot--stamp-add)))
+    (bluedot--stamp-add)
+    (bluedot--update-current-bar t)))
 
 (defun bluedot-org-clock-out ()
   (org-clock-out nil t))
