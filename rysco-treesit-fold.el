@@ -22,15 +22,16 @@ namespace's \"declaration_list\" body)."
   (not (member (treesit-node-type node)
                '("expression_statement" "compound_statement"))))
 
-(defun rysco-treesit-fold--defun-at-point (tactic)
-  "Return the defun node at point using TACTIC."
+(defun rysco-treesit-fold--defun-pred ()
+  "Return the `treesit-node-match-p' predicate for foldable defuns."
   (if (and (derived-mode-p 'c-ts-base-mode)
            (consp treesit-defun-type-regexp))
-      (treesit-thing-at-point
-       (cons (car treesit-defun-type-regexp) #'rysco-treesit-fold--c-valid-p)
-       tactic)
-    (let ((treesit-defun-tactic tactic))
-      (treesit-defun-at-point))))
+      (cons (car treesit-defun-type-regexp) #'rysco-treesit-fold--c-valid-p)
+    (or treesit-defun-type-regexp 'defun)))
+
+(defun rysco-treesit-fold--defun-at-point (tactic)
+  "Return the defun node at point using TACTIC."
+  (treesit-thing-at-point (rysco-treesit-fold--defun-pred) tactic))
 
 (defun rysco-treesit-fold--header-p (node pos)
   "Return non-nil if POS is within the header lines of NODE.
@@ -52,6 +53,79 @@ isn't brace-delimited, e.g. Python)."
         pos
         header-end)))
 
+
+;; A fold hides everything from the end of NODE's first line to NODE's end.
+(defun rysco-treesit-fold--beg (node)
+  "Return the position where NODE's fold starts."
+  (save-excursion
+    (goto-char (treesit-node-start node))
+    (line-end-position)))
+
+(defun rysco-treesit-fold--own-overlay (node tactic)
+  "Return NODE's own fold overlay made with TACTIC, if any.
+Folds of NODE's children fall within NODE's range but start elsewhere,
+so they aren't matched."
+  (let ((beg (rysco-treesit-fold--beg node)))
+    (seq-find (lambda (ov)
+                (and (overlay-get ov 'treesit-fold)
+                     (= (overlay-start ov) beg)
+                     (eq (overlay-get ov 'treesit-fold-tactic) tactic)))
+              (overlays-in beg (treesit-node-end node)))))
+
+(defun rysco-treesit-fold--make (node tactic)
+  "Fold NODE with a TACTIC overlay and return it."
+  (let ((fold-face 'custom-variable-button)
+        (ov (make-overlay (rysco-treesit-fold--beg node)
+                          (treesit-node-end node) nil t nil)))
+    (overlay-put ov 'treesit-fold t)
+    (overlay-put ov 'treesit-fold-tactic tactic)
+    (overlay-put ov 'display
+                 (concat
+                  " "
+                  (propertize
+                   (or
+                    (bound-and-true-p org-ellipsis)
+                    "...")
+                   'face fold-face)))
+    (overlay-put ov 'after-string
+                 (propertize
+                  "."
+                  'display '(space :align-to right)
+                  'face
+                  fold-face))
+    ov))
+
+(defun rysco-treesit-fold--foldable-p (node)
+  "Return non-nil if NODE spans more than one line."
+  (< (rysco-treesit-fold--beg node) (treesit-node-end node)))
+
+(defun rysco-treesit-fold--child-defuns (node)
+  "Return the foldable defuns nearest below NODE.
+Defuns nested inside those children aren't included."
+  (let* ((pred (rysco-treesit-fold--defun-pred))
+         (tree (treesit-induce-sparse-tree
+                node (lambda (n) (treesit-node-match-p n pred t)))))
+    ;; Each entry is (NODE . SUBTREE).  The top is a nil-rooted entry, so
+    ;; when NODE itself matches, TREE is (nil (NODE . CHILDREN)).
+    (when (and (null (car tree))
+               (cadr tree)
+               (treesit-node-eq (car (cadr tree)) node))
+      (setq tree (cadr tree)))
+    (seq-filter #'rysco-treesit-fold--foldable-p
+                (mapcar #'car (cdr tree)))))
+
+(defun rysco-treesit-fold--header-node ()
+  "Return the defun whose header point is on, or signal an error."
+  (let* ((pos (save-excursion (back-to-indentation) (point)))
+         (node (save-excursion
+                 (goto-char pos)
+                 (rysco-treesit-fold--defun-at-point 'nested))))
+    (unless node
+      (user-error "No defun at point"))
+    (unless (rysco-treesit-fold--header-p node pos)
+      (user-error "Not on a defun header"))
+    node))
+
 ;;;###autoload
 (defun rysco-treesit-fold-toggle (arg)
   "Toggle folding for the defun at point.
@@ -59,75 +133,54 @@ isn't brace-delimited, e.g. Python)."
 The first and last line of the defun are preserved, the rest are
 folded.
 
-If called interactively with argument (ARG), toggle the top-level
-defun. Top-level folding and non-top-level folding are on
-separate channels, meaning top-level toggle wouldn’t unfold
-non-top-level folding, and vice versa.
+If called interactively with argument (ARG), unfold all folded
+regions with `rysco-treesit-fold-unfold-all'
 
 What constitutes as a defun is determined by the major mode.
 This command only works in a tree-sitter major mode."
   (interactive "p")
-  (let* ((fold-face 'custom-variable-button)
-         (tactic (if (eq arg 4) 'top-level 'nested))
-         (starting-point (point))
-         (pos (save-excursion (back-to-indentation) (point)))
-         (node (save-excursion
-                 (goto-char pos)
-                 (rysco-treesit-fold--defun-at-point tactic)))
-         (start (and node (treesit-node-start node)))
-         (end (and node (treesit-node-end node))))
 
-    (if (null node)
-        (user-error "No defun at point")
-      (let ((indent (save-excursion
-                      (goto-char start)
-                      (current-indentation)))
-            (beg (save-excursion
-                   (goto-char start)
-                   (end-of-line)
-                   (point)))
-            (has-fold nil))
-        ;; If this defun has its own fold, unfold it.  Only match an
-        ;; overlay starting at this defun's header, so a parent doesn't
-        ;; unfold its folded children.  But if the folding overlay has
-        ;; different tactic than the one we are using now, leave it.
-        (dolist (ov (overlays-in beg end))
-          (when (and (overlay-get ov 'treesit-fold)
-                     (= (overlay-start ov) beg)
-                     (eq (overlay-get ov 'treesit-fold-tactic)
-                         tactic))
-            (setq has-fold t)
-            (delete-overlay ov)))
-
-        ;; If there aren’t existing overlay with the same tactic, add
-        ;; new folding.  Nested folds only start from the defun's
-        ;; header, so point in a body doesn't fold the parent.
-        (when (and (null has-fold)
-                   (eq tactic 'nested)
-                   (not (rysco-treesit-fold--header-p node pos)))
+  (if (eq arg 4)
+      (rysco-treesit-fold-unfold-all)
+    (let* ((tactic 'nested)
+           (pos (save-excursion (back-to-indentation) (point)))
+           (node (save-excursion
+                   (goto-char pos)
+                   (rysco-treesit-fold--defun-at-point tactic))))
+      (unless node
+        (user-error "No defun at point"))
+      (let ((ov (rysco-treesit-fold--own-overlay node tactic)))
+        (cond
+         ;; If this defun has its own fold, unfold it.  A fold with a
+         ;; different tactic than the one we are using now is left alone.
+         (ov (delete-overlay ov))
+         ;; Nested folds only start from the defun's header, so point in
+         ;; a body doesn't fold the parent.
+         ((and (eq tactic 'nested)
+               (not (rysco-treesit-fold--header-p node pos)))
           (user-error "Not on a defun header"))
-        (when (null has-fold)
-          (let ((ov (make-overlay beg end nil t nil)))
-            (overlay-put ov 'treesit-fold t)
-            (overlay-put ov 'treesit-fold-tactic tactic)
-            (overlay-put ov 'display
-                         (concat
-                          " "
-                          (propertize
-                           (or
-                            (bound-and-true-p org-ellipsis)
-                            "..."
-                            )
-                           'face fold-face)))
-                          
-            (overlay-put ov 'after-string
-                         (propertize
-                          "."
-                          'display '(space :align-to right)
-                          'face
-                          fold-face)))
+         ((not (rysco-treesit-fold--foldable-p node))
+          (user-error "Defun is only one line"))
+         (t (rysco-treesit-fold--make node tactic)))))))
 
-          (goto-char starting-point))))))
+;;;###autoload
+(defun rysco-treesit-fold-toggle-children ()
+  "Toggle folding for every child defun of the defun at point.
+If any child is folded, unfold them all; otherwise fold them all.
+Children are folded with the nested tactic, so
+`rysco-treesit-fold-toggle' on a child's header unfolds just that
+child.  Point must be on the parent's header."
+  (interactive)
+  (let* ((kids (rysco-treesit-fold--child-defuns
+                (rysco-treesit-fold--header-node)))
+         (folds (delq nil (mapcar (lambda (kid)
+                                    (rysco-treesit-fold--own-overlay kid 'nested))
+                                  kids))))
+    (cond
+     ((null kids) (user-error "No child defuns"))
+     (folds (mapc #'delete-overlay folds))
+     (t (dolist (kid kids)
+          (rysco-treesit-fold--make kid 'nested))))))
 
 ;;;###autoload
 (defun rysco-treesit-fold-unfold-all ()
