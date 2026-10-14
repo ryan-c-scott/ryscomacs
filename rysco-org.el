@@ -117,7 +117,8 @@ buffer."
 (defun helm-rysco-org-agenda-buffer-items (&optional arg)
   (interactive "P")
   (when (derived-mode-p 'org-agenda-mode)
-    (let ((helm-org-ql-actions
+    (let ((org-ql-default-predicate 'heading)
+          (helm-org-ql-actions
            `(("Go to item" . (lambda (marker)
                                (rysco-org-agenda-goto-marker-in-agenda marker)))
              ("Go to heading" . (lambda (marker)
@@ -137,10 +138,44 @@ buffer."
                                       (or rysco-org-refile-targets org-refile-targets)))
                                  (org-refile)))))))))
       (or
-       (helm :sources (helm-org-ql-source (org-agenda-files)
-                                           :name "Agenda Items")
+       (helm :sources (let ((entries (rysco-org-agenda-view-entries)))
+                        `((candidate-transformer
+                           . ,(lambda (candidates)
+                                (cl-loop
+                                 for (_ . marker) in candidates
+                                 as line = (gethash (cons (marker-buffer marker)
+                                                          (marker-position marker))
+                                                    entries)
+                                 when line collect (cons line marker))))
+                          ,@(helm-org-ql-source (org-agenda-files)
+                                                :name "Agenda Items")))
              :input (rysco-org-agenda-active-filter-query))
        t))))
+
+(defun rysco-org-agenda-view-entries ()
+  "Return a hash table keyed by (BUFFER . POS) of every org heading that
+appears in the current agenda buffer, so a search can be limited to what the
+view actually contains (e.g. honoring a view that hides DONE items).  Values
+are the heading's agenda line text, for use as a display string."
+  (let ((entries (make-hash-table :test 'equal)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (-when-let* ((marker (or (org-get-at-bol 'org-hd-marker)
+                                 (org-get-at-bol 'org-marker)))
+                     (buffer (marker-buffer marker)))
+          (let ((key (cons buffer (with-current-buffer buffer
+                                    (org-with-wide-buffer
+                                     (goto-char marker)
+                                     (org-back-to-heading t)
+                                     (point))))))
+            (unless (gethash key entries)
+              (let ((line (buffer-substring (pos-bol) (pos-eol))))
+                ;; Lines hidden by an agenda filter are `invisible'.
+                (remove-text-properties 0 (length line) '(invisible nil) line)
+                (puthash key line entries)))))
+        (forward-line 1)))
+    entries))
 
 (defun rysco-org-agenda ()
   (interactive)
