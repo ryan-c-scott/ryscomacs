@@ -214,7 +214,7 @@
 
 (defun rysco-store-capture-add-timestamp ()
   (when (org-capture-get :add-timestamp)
-    (org-set-property "CREATED" (format-time-string "%F"))))
+    (org-set-property "CREATED" (format-time-string (org-time-stamp-format t t)))))
 
 (defun rysco-store-post-capture ()
   (when (and rysco-store-insert-after-capture (not org-note-abort))
