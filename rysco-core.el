@@ -315,9 +315,9 @@
         (:todo "INACTIVE"
                :transformer rysco-org-agenda-entry-header
                :order 9)
-        (:auto-property "ProjectId"
-                        :transformer rysco-org-agenda-entry-header-auto-grouped
-                        :order 8))
+        (:auto-map rysco-org-agenda-get-project-name-from-item
+                   :transformer rysco-org-agenda-entry-header-auto-grouped
+                   :order 8))
 
       org-refile-targets
       '((nil :maxlevel . 9)

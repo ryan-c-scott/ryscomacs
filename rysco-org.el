@@ -22,6 +22,7 @@
 (defvar rysco-org-agenda-margin-col 2)
 (defvar rysco-org-agenda-margin-left 2)
 (defvar rysco-org-agenda-excess-threshold 4)
+(defvar rysco-org-agenda-friendly-names nil "List of friendly names to map project IDs to.")
 
 (defface rysco-org-agenda-status-title
   '((t :underline "grey20"))
@@ -182,6 +183,20 @@ are the heading's agenda line text, for use as a display string."
   (with-try-switch-existing-buffer "*Org Agenda*"
     (org-agenda)))
 
+(defun rysco-org-agenda-get-project-name (id)
+  (--if-let (assoc id rysco-org-agenda-friendly-names 'string=)
+      (cdr it)
+    id))
+
+(defun rysco-org-agenda-get-project-name-at-point ()
+  (rysco-org-agenda-get-project-name (org-entry-get (point) "PROJECTID" t)))
+
+(defun rysco-org-agenda-get-project-name-from-item (item)
+  (when-let ((id (org-entry-get (org-super-agenda--get-marker item)
+                                "ProjectId"
+                                org-super-agenda-properties-inherit)))
+  (rysco-org-agenda-get-project-name id)))
+
 (defun rysco-org-agenda-get-projects ()
   "Return status of all projects, as specified by the org property `projectid'
 across `org-agenda-files', queried via `org-ql'."
@@ -195,7 +210,7 @@ across `org-agenda-files', queried via `org-ql'."
        (org-ql-select (org-agenda-files)
          '(and (todo) (property "PROJECTID" nil :inherit t))
          :action '(cons (org-get-todo-state)
-                        (org-entry-get (point) "PROJECTID" t)))
+                        (rysco-org-agenda-get-project-name-at-point)))
        when project do
        (progn
          (unless (gethash project now/next) (puthash project 0 now/next))
@@ -856,7 +871,7 @@ out from under it.")
 
 (defun rysco-org-clock-heading ()
   (or
-   (org-entry-get (point) "PROJECTID" t)
+   (rysco-org-agenda-get-project-name-at-point)
    ""))
 
 (setq org-clock-heading-function 'rysco-org-clock-heading)
