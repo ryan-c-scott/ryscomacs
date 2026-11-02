@@ -865,6 +865,35 @@ VALUE-COLUMN can be specified to use a different column of data for processing
 
 (add-hook 'org-agenda-finalize-hook #'rysco-org-agenda-insert-status)
 
+(defun rysco-org-agenda--line-filtered-p ()
+  "Non-nil if the current line is hidden by an agenda filter.
+`org-agenda-filter-hide-line' marks the range from the previous line's
+newline up to the hidden line's end as invisible, so the hidden line's
+first character carries the `org-filtered' property."
+  (eq (get-text-property (line-beginning-position) 'invisible) 'org-filtered))
+
+(defun rysco-org-agenda-snap-to-bol ()
+  "Keep point at the beginning of a visible agenda line.
+When a filter is active, point at the end of a visible line can actually
+sit at the end of the filtered line that follows it, because the
+invisible stretch lies between them. Commands that read
+`org-get-at-bol' then act on the hidden item. Moving to the beginning
+of the line, and backing off any filtered lines, rules that out."
+  (unless (or (bound-and-true-p isearch-mode)
+              (region-active-p)
+              (minibufferp))
+    (forward-line 0)
+    (while (and (rysco-org-agenda--line-filtered-p)
+                (zerop (forward-line -1))))
+    ;; Filtered lines at the very top of the buffer: go forward instead.
+    (while (and (rysco-org-agenda--line-filtered-p)
+                (zerop (forward-line 1))
+                (not (eobp))))))
+
+(add-hook 'org-agenda-mode-hook
+          (lambda ()
+            (add-hook 'post-command-hook #'rysco-org-agenda-snap-to-bol 90 t)))
+
 (defvar rysco-org--agenda-redo-pending nil
   "Non-nil when a TODO state change or capture has requested an agenda
 refresh. Consumed by `rysco-org-agenda-redo-pending-maybe' on
