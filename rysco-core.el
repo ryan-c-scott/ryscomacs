@@ -712,6 +712,7 @@ background-color: #adffc1;
  '(org-src-window-setup 'other-window))
 
 (add-hook 'org-mode-hook 'rysco-org-hook)
+(add-hook 'org-mode-hook 'rysco-org-notes-header-mode)
 
 (defun rysco-org-latex-export-list-newline-fixup (output)
   "Kills the trailing latex newline for any \\item lines"

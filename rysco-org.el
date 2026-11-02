@@ -991,6 +991,173 @@ out from under it.")
                     (not (member (org-element-type el) '(drawer clock))))
                   nil t)))))))))
 
+;;;; LOGBOOK notes
+
+(defun rysco-org-entry-notes ()
+  "Return the notes in the LOGBOOK of the entry at point, newest first.
+Each note is a plist (:pos POS :time TIME :state STATE :text TEXT).
+Only list items carrying note text are included, so state changes logged
+without a note (and CLOCK lines) are skipped.  Child entries' LOGBOOKs
+are not included."
+  (org-with-wide-buffer
+   (unless (org-before-first-heading-p)
+     (org-back-to-heading t)
+     (let ((entry-end (save-excursion (outline-next-heading) (point)))
+           notes)
+       (when-let* (((re-search-forward "^[ \t]*:LOGBOOK:[ \t]*$" entry-end t))
+                   (drawer-end (save-excursion
+                                 (and (re-search-forward "^[ \t]*:END:[ \t]*$" entry-end t)
+                                      (line-beginning-position)))))
+         (forward-line)
+         (while (re-search-forward "^\\([ \t]*\\)- \\(.*\\)$" drawer-end t)
+           (let* ((pos (match-beginning 0))
+                  (indent (length (match-string 1)))
+                  (head (match-string 2))
+                  (body-start (min drawer-end (1+ (line-end-position))))
+                  ;; The body is the following lines indented deeper than
+                  ;; the item (blank lines included), so unindented CLOCK
+                  ;; lines and sibling items end it.
+                  (body-end (save-excursion
+                              (goto-char body-start)
+                              (while (and (< (point) drawer-end)
+                                          (or (looking-at-p "[ \t]*$")
+                                              (> (current-indentation) indent)))
+                                (forward-line))
+                              (min (point) drawer-end)))
+                  (body (string-trim
+                         (replace-regexp-in-string
+                          (format "^[ \t]\\{0,%d\\}" (+ indent 2)) ""
+                          (buffer-substring-no-properties body-start body-end))))
+                  (time (and (string-match "\\[[^]]+\\]" head)
+                             (match-string 0 head)))
+                  (state (and (string-match "\\`State \"\\([^\"]+\\)\"" head)
+                              (match-string 1 head))))
+             (unless (string-empty-p body)
+               (push (list :pos pos :time time :state state :text body) notes))
+             (goto-char body-end))))
+       (sort notes (lambda (a b) (string> (or (plist-get a :time) "")
+                                          (or (plist-get b :time) ""))))))))
+
+(defun rysco-org--notes-target-marker ()
+  "Marker for the entry whose notes should be shown, from an org or agenda buffer."
+  (cond
+   ((derived-mode-p 'org-agenda-mode)
+    (or (org-get-at-bol 'org-hd-marker)
+        (user-error "No entry on this agenda line")))
+   ((derived-mode-p 'org-mode)
+    (when (org-before-first-heading-p)
+      (user-error "Not inside an org entry"))
+    (point-marker))
+   (t (user-error "Not in an org or org-agenda buffer"))))
+
+(defun rysco-org--format-note (note &optional one-line)
+  "Display string for NOTE (see `rysco-org-entry-notes').
+With ONE-LINE, only the first line of the note text is used."
+  (let ((text (plist-get note :text))
+        (state (plist-get note :state)))
+    (concat
+     (propertize (or (plist-get note :time) "[no time]") 'face 'org-date)
+     (when state
+       (concat " " (propertize state 'face (or (org-get-todo-face state) 'org-todo))))
+     (if one-line
+         (concat " " (car (split-string text "\n")))
+       (concat "\n" (replace-regexp-in-string "^\\(.\\)" "  \\1" text))))))
+
+(defun rysco-org--goto-note (marker)
+  "Jump to the note at MARKER, revealing it even inside a folded LOGBOOK."
+  (pop-to-buffer-same-window (marker-buffer marker))
+  (when (or (< marker (point-min)) (> marker (point-max)))
+    (widen))
+  (goto-char marker)
+  (org-fold-show-context 'agenda)
+  (save-excursion
+    (org-back-to-heading t)
+    (org-fold-show-entry))
+  (goto-char marker))
+
+;;;###autoload
+(defun helm-rysco-org-entry-notes ()
+  "Pop up the LOGBOOK notes of the current entry (org or agenda buffer) in helm."
+  (interactive)
+  (let* ((marker (rysco-org--notes-target-marker))
+         (buffer (marker-buffer marker))
+         heading notes)
+    (org-with-point-at marker
+      (setq heading (save-excursion (org-back-to-heading t)
+                                    (org-get-heading t t t t))
+            notes (rysco-org-entry-notes)))
+    (if (not notes)
+        (message "No notes for \"%s\"" heading)
+      (helm :sources
+            (helm-build-sync-source (format "Notes: %s (%d)" heading (length notes))
+              :candidates (--map (cons (rysco-org--format-note it)
+                                       (with-current-buffer buffer
+                                         (copy-marker (plist-get it :pos))))
+                                 notes)
+              :multiline t
+              :action `(("Go to note" . rysco-org--goto-note)
+                        ("Copy note text" .
+                         ,(lambda (m)
+                            (kill-new (plist-get
+                                       (--first (= (plist-get it :pos) (marker-position m))
+                                                notes)
+                                       :text))
+                            (message "Copied note")))))
+            :buffer "*helm org notes*"))))
+
+;;;; Header-line hint
+
+(defvar rysco-org-notes-header-persistent nil
+  "When non-nil, keep the header line visible in entries without notes, so
+the text doesn't shift by a line when moving between entries.")
+
+(defvar-local rysco-org-notes-header--cache nil
+  "(KEY . STRING) for the last computed header; KEY is (HEADING-POS . TICK).")
+
+(defvar-local rysco-org-notes-header--saved nil
+  "`header-line-format' from before `rysco-org-notes-header-mode' was enabled.")
+
+(defun rysco-org-notes-header--compute ()
+  (when-let ((notes (rysco-org-entry-notes)))
+    (concat
+     (propertize (format " ✎ %d note%s · " (length notes)
+                         (if (cdr notes) "s" ""))
+                 'face 'org-drawer)
+     (rysco-org--format-note (car notes) t)
+     (when-let ((key (where-is-internal #'helm-rysco-org-entry-notes nil t)))
+       (propertize (format "  (%s)" (key-description key)) 'face 'shadow)))))
+
+(defun rysco-org-notes-header-update ()
+  "Refresh the header line for the entry at point, if it changed."
+  (let* ((heading-pos (and (not (org-before-first-heading-p))
+                           (save-excursion (org-back-to-heading t) (point))))
+         (key (cons heading-pos (buffer-chars-modified-tick))))
+    (unless (equal key (car rysco-org-notes-header--cache))
+      (let ((str (and heading-pos
+                      (condition-case err
+                          (rysco-org-notes-header--compute)
+                        (error (message "rysco-org-notes-header: %S" err) nil)))))
+        (setq rysco-org-notes-header--cache (cons key str)
+              header-line-format
+              (cond (str (list "" (string-replace "%" "%%" str)))
+                    (rysco-org-notes-header-persistent
+                     (or rysco-org-notes-header--saved ""))
+                    (t rysco-org-notes-header--saved)))))))
+
+;;;###autoload
+(define-minor-mode rysco-org-notes-header-mode
+  "Show the current entry's note count and latest LOGBOOK note in the header line."
+  :lighter nil
+  (if rysco-org-notes-header-mode
+      (progn
+        (setq rysco-org-notes-header--saved header-line-format
+              rysco-org-notes-header--cache nil)
+        (add-hook 'post-command-hook #'rysco-org-notes-header-update nil t)
+        (rysco-org-notes-header-update))
+    (remove-hook 'post-command-hook #'rysco-org-notes-header-update t)
+    (setq header-line-format rysco-org-notes-header--saved
+          rysco-org-notes-header--cache nil)))
+
 (defun rysco-org-agenda-entry-text-show-here ()
   "Add logbook from the entry as context to the current line."
   (let (m txt o)
