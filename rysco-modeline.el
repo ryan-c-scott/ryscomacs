@@ -217,7 +217,7 @@
 
 (defsubst rysco-modeline-bluedot ()
   (when bluedot-mode
-    (cl-incf width-adjustment 0.1)
+    (cl-incf width-adjustment (if bluedot--close-pending 0.2 0.1))
     (format-mode-line
      bluedot--current-bar current-face)))
 

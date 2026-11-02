@@ -78,6 +78,11 @@
   "States which will not cause the active clock to be stopped for an entry"
   :type 'sexp)
 
+(defcustom bluedot-close-pending-indicator "✓"
+  "Appended to the mode-line bar while the clocked task has been closed
+during rest and is waiting for the rest period to end to clock out."
+  :type 'string)
+
 (defvar bluedot-bar-characters nil)
 
 (require 'which-func)
@@ -90,6 +95,11 @@
 (defvar bluedot--completed-pomodoros 0)
 
 (defvar bluedot--carried-elapsed 0)
+
+(defvar bluedot--close-pending nil
+  "Non-nil when the clocked task left `bluedot-clocked-org-todo-states'
+during the rest period.  The clock keeps running so the rest time is
+attributed to the task, and is stopped when rest ends.")
 
 ;; intervals, bars & colours
 (defvar bluedot--bars)
@@ -150,6 +160,16 @@ OS notification settings may suppress messages"
   (let ((val (org-entry-get pom "BLUEDOT_ELAPSED")))
     (if val (string-to-number val) 0)))
 
+(defun bluedot--elapsed ()
+  "Seconds elapsed in the current pomodoro period, including carried time."
+  (+ (bluedot--elapsed-offset org-clock-marker)
+     (bluedot--seconds-since org-clock-start-time)))
+
+(defun bluedot--resting-p ()
+  "Non-nil when a clock is running and its pomodoro is in the rest period."
+  (and (org-clocking-p)
+       (>= (bluedot--elapsed) bluedot-work-interval)))
+
 (defun bluedot--format-seconds (seconds)
   (format-time-string
    (concat
@@ -172,7 +192,9 @@ OS notification settings may suppress messages"
 
       ((>= working 1)
        (format
-        "[Resting] %s remaining"
+        (if bluedot--close-pending
+            "[Resting → closing] %s remaining"
+          "[Resting] %s remaining")
         (bluedot--format-seconds
          (* (- 1 resting) bluedot-rest-interval))))
 
@@ -225,14 +247,16 @@ OS notification settings may suppress messages"
          (resting (/ (max 0 (- elapsed bluedot-work-interval))
                      bluedot-rest-interval)))
     (setq bluedot--current-bar
-          (apply #'bluedot--propertize
-                 (--if-let
-                     (nth
-                      (truncate (+ (* working 8)
-                                   (* resting 8)))
-                      bluedot--bars)
-                     it
-                   (nth 16 bluedot--bars))))
+          (cl-destructuring-bind (icon color)
+              (or (nth (truncate (+ (* working 8)
+                                    (* resting 8)))
+                       bluedot--bars)
+                  (nth 16 bluedot--bars))
+            (bluedot--propertize
+             (if bluedot--close-pending
+                 (concat icon bluedot-close-pending-indicator)
+               icon)
+             color)))
 
     (when (< working 1)
       (setq bluedot--notified-done nil))
@@ -289,6 +313,7 @@ OS notification settings may suppress messages"
   (org-entry-delete (point) "BLUEDOT_ELAPSED"))
 
 (defun bluedot-org-clock-in ()
+  (setq bluedot--close-pending nil)
   (bluedot-mode 1)
   (when (org-clocking-p)
     (bluedot--stamp-add)
@@ -301,6 +326,7 @@ OS notification settings may suppress messages"
   "Run on `org-clock-out-hook': carry the elapsed period time forward in
 case the next clock-in resumes it, then stop bluedot's timer/mode."
   (bluedot--stamp-remove)
+  (setq bluedot--close-pending nil)
   (bluedot--cancel-timer)
   (bluedot-mode 0))
 
@@ -308,7 +334,8 @@ case the next clock-in resumes it, then stop bluedot's timer/mode."
   "Run on `org-clock-cancel-hook': the clock was cancelled outright (its
 CLOCK line removed), so discard any carried-over elapsed time instead of
 resuming it on the next clock-in."
-  (setq bluedot--carried-elapsed 0)
+  (setq bluedot--carried-elapsed 0
+        bluedot--close-pending nil)
   (bluedot--cancel-timer)
   (bluedot-mode 0))
 
@@ -322,20 +349,24 @@ resuming it on the next clock-in."
   (unless (org-clocking-p)
     (org-clock-in-last 1)))
 
+(defun bluedot--at-clocked-entry-p ()
+  "Non-nil when point is in the entry holding the running clock."
+  (and (org-clocking-p)
+       (marker-buffer org-clock-marker)
+       (equal (or (buffer-base-buffer (org-clocking-buffer))
+                  (org-clocking-buffer))
+              (or (buffer-base-buffer (current-buffer))
+                  (current-buffer)))
+       (< (point) org-clock-marker)
+       (> (org-with-wide-buffer (org-entry-end-position))
+          org-clock-marker)))
+
 (defun bluedot-org-clock-out-if-current ()
   "Detects whether current entry is the running clock and clocks out if so.
 
 Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
-  (when (and (org-clocking-p)
-             org-clock-out-when-done
-             (marker-buffer org-clock-marker)
-             (equal (or (buffer-base-buffer (org-clocking-buffer))
-                        (org-clocking-buffer))
-                    (or (buffer-base-buffer (current-buffer))
-                        (current-buffer)))
-             (< (point) org-clock-marker)
-             (> (org-with-wide-buffer (org-entry-end-position))
-                org-clock-marker))
+  (when (and org-clock-out-when-done
+             (bluedot--at-clocked-entry-p))
     ;; Clock out, but don't accept a logging message for this.
     (let ((org-log-note-clock-out nil)
           (org-clock-out-switch-to-state nil))
@@ -343,8 +374,31 @@ Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
 
 (defun bluedot-org-todo-change ()
   (when (org-clocking-p)
-    (unless (member org-state bluedot-clocked-org-todo-states)
-      (bluedot-org-clock-out-if-current))))
+    (let ((clocked-state (member org-state bluedot-clocked-org-todo-states)))
+      (cond
+       ;; Closed during rest: keep the clock running until rest ends.
+       ((and (bluedot--resting-p) (bluedot--at-clocked-entry-p))
+        (unless (eq (not clocked-state) bluedot--close-pending)
+          (setq bluedot--close-pending (not clocked-state))
+          (bluedot--update-current-bar)))
+
+       ((not clocked-state)
+        (bluedot-org-clock-out-if-current))))))
+
+(defun bluedot--defer-org-clock-out-if-current (&rest _)
+  "`:before-until' advice for `org-clock-out-if-current': while resting,
+skip org's clock-out-on-done; `bluedot-org-todo-change' defers it instead."
+  (bluedot--resting-p))
+
+(defun bluedot--org-clock-out-pending-wrapper (orig &rest args)
+  "`:around' advice for `org-clock-out': when the task was closed during rest,
+don't let `org-clock-out-switch-to-state' reopen it, and skip the
+clock-out note (matching an immediate clock-out on done)."
+  (if bluedot--close-pending
+      (let ((org-clock-out-switch-to-state nil)
+            (org-log-note-clock-out nil))
+        (apply orig args))
+    (apply orig args)))
 
 ;;;###autoload
 (defun bluedot-enable (enable)
@@ -355,6 +409,8 @@ Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
         (add-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
         (add-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
         (add-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
+        (advice-add 'org-clock-out-if-current :before-until 'bluedot--defer-org-clock-out-if-current)
+        (advice-add 'org-clock-out :around 'bluedot--org-clock-out-pending-wrapper)
         (advice-add 'org-clock-update-mode-line :after 'bluedot--update-current-bar))
 
     (remove-hook 'org-clock-in-hook 'bluedot-org-clock-in)
@@ -362,6 +418,8 @@ Based on `org-clock-out-if-current', but ignores `org-clock-out-when-done'"
     (remove-hook 'org-clock-cancel-hook 'bluedot-org-clock-cancel)
     (remove-hook 'org-after-todo-state-change-hook 'bluedot-org-todo-change)
     (remove-hook 'bluedot-after-rest-hook 'bluedot-org-clock-out)
+    (advice-remove 'org-clock-out-if-current 'bluedot--defer-org-clock-out-if-current)
+    (advice-remove 'org-clock-out 'bluedot--org-clock-out-pending-wrapper)
     (advice-remove 'org-clock-update-mode-line 'bluedot--update-current-bar)))
 
 (defun bluedot--default-desc ()
