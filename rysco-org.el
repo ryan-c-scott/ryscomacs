@@ -191,6 +191,42 @@ are the heading's agenda line text, for use as a display string."
 (defun rysco-org-agenda-get-project-name-at-point ()
   (rysco-org-agenda-get-project-name (org-entry-get (point) "PROJECTID" t)))
 
+;;;###autoload
+(defun rysco-org-agenda-prefix-project ()
+  "Agenda prefix label: the entry's friendly project name (via PROJECTID),
+falling back to its category.  Used in `org-agenda-prefix-format' so that
+multiple projects within one file are distinguishable.  Includes a trailing
+colon, since the `:' format modifier isn't applied to %(expr) and
+`rysco-org-agenda-project-header' relies on it to find the label."
+  (concat (or (rysco-org-agenda-get-project-name-at-point)
+              (org-get-category))
+          ":"))
+
+(defun rysco-org-agenda--item-project-key (item)
+  "Project label for agenda ITEM string, as shown by `rysco-org-agenda-prefix-project'."
+  (if-let ((marker (or (get-text-property 0 'org-marker item)
+                       (get-text-property 0 'org-hd-marker item))))
+      (org-with-point-at marker (rysco-org-agenda-prefix-project))
+    ""))
+
+(defun rysco-org-agenda--group-by-project (items args)
+  "org-super-agenda selector `:by-project'.
+ARGS is a group plist of inner selectors, e.g. (:todo \"NEXT\").  Items
+matched by those selectors are stably sorted by project, so the
+existing agenda order (e.g. priority) is kept within each project."
+  (pcase-let* ((`(,name ,non-matching ,matching)
+                (org-super-agenda--group-dispatch items args))
+               (keyed (--map (cons (rysco-org-agenda--item-project-key it) it)
+                             matching)))
+    (list name
+          non-matching
+          (-map #'cdr (cl-stable-sort keyed #'string< :key #'car)))))
+
+(with-eval-after-load 'org-super-agenda
+  (setq org-super-agenda-group-types
+        (plist-put org-super-agenda-group-types
+                   :by-project #'rysco-org-agenda--group-by-project)))
+
 (defun rysco-org-agenda-get-project-name-from-item (item)
   (when-let ((id (org-entry-get (org-super-agenda--get-marker item)
                                 "ProjectId"

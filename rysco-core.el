@@ -268,6 +268,11 @@
                         (?* . "•"))
 
       org-columns-default-format-for-agenda "%25ITEM %TODO %3PRIORITY %EFFORT %DEADLINE %TAGS"
+      org-agenda-prefix-format
+      '((agenda . " %i %-12(rysco-org-agenda-prefix-project)%?-12t% s")
+        (todo . " %i %-12(rysco-org-agenda-prefix-project)")
+        (tags . " %i %-12(rysco-org-agenda-prefix-project)")
+        (search . " %i %-12(rysco-org-agenda-prefix-project)"))
       org-super-agenda-groups
       '((:name "Triage"
                :tag "triage"
@@ -298,7 +303,7 @@
                :transformer rysco-org-agenda-project-header
                :order 5)
         (:name "NEXT"
-               :todo "NEXT"
+               :by-project (:todo "NEXT")
                :transformer rysco-org-agenda-project-header
                :order 5)
         (:name "Priority"
