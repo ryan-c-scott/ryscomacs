@@ -872,27 +872,27 @@ newline up to the hidden line's end as invisible, so the hidden line's
 first character carries the `org-filtered' property."
   (eq (get-text-property (line-beginning-position) 'invisible) 'org-filtered))
 
-(defun rysco-org-agenda-snap-to-bol ()
-  "Keep point at the beginning of a visible agenda line.
-When a filter is active, point at the end of a visible line can actually
-sit at the end of the filtered line that follows it, because the
-invisible stretch lies between them. Commands that read
-`org-get-at-bol' then act on the hidden item. Moving to the beginning
-of the line, and backing off any filtered lines, rules that out."
-  (unless (or (bound-and-true-p isearch-mode)
-              (region-active-p)
-              (minibufferp))
-    (forward-line 0)
+(defun rysco-org-agenda-item-skip-filtered (orig n)
+  "Around advice for `org-agenda-next-item'/`org-agenda-previous-item'.
+Those move by the `org-marker' property and don't care if the item they
+land on is hidden by a filter, leaving point in invisible text. Keep
+moving until a visible item is reached, or stay put if there isn't one.
+Point ends at the beginning of the line: at the end of a visible line it
+can actually sit at the end of the filtered line that follows, and
+commands that read `org-get-at-bol' then act on the hidden item."
+  (let ((start (point))
+        last)
+    (funcall orig n)
     (while (and (rysco-org-agenda--line-filtered-p)
-                (zerop (forward-line -1))))
-    ;; Filtered lines at the very top of the buffer: go forward instead.
-    (while (and (rysco-org-agenda--line-filtered-p)
-                (zerop (forward-line 1))
-                (not (eobp))))))
+                (not (eql last (point))))
+      (setq last (point))
+      (funcall orig 1))
+    (when (rysco-org-agenda--line-filtered-p)
+      (goto-char start))
+    (forward-line 0)))
 
-(add-hook 'org-agenda-mode-hook
-          (lambda ()
-            (add-hook 'post-command-hook #'rysco-org-agenda-snap-to-bol 90 t)))
+(advice-add 'org-agenda-next-item :around #'rysco-org-agenda-item-skip-filtered)
+(advice-add 'org-agenda-previous-item :around #'rysco-org-agenda-item-skip-filtered)
 
 (defvar rysco-org--agenda-redo-pending nil
   "Non-nil when a TODO state change or capture has requested an agenda
