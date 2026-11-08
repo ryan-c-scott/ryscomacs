@@ -16,6 +16,13 @@
 ;;
 ;; Only unencrypted rooms are supported: this talks to the client-server API directly and
 ;; can't decrypt E2EE events.
+;;
+;; Auth: morg authenticates with an application service token rather than a login, so it
+;; works when the homeserver delegates login to SSO/OIDC.  The appservice is registered with
+;; `url: null' (the homeserver never pushes anything to it) and a non-exclusive user namespace
+;; covering `morg-user', and every request is made as that user via the `user_id' query
+;; parameter.  So morg reads and redacts exactly as you would, with no bot to invite and no
+;; power levels to change.  `morg-register' generates the registration; see its docstring.
 
 (require 'json)
 (require 'url)
@@ -42,23 +49,33 @@ level when HEADING is omitted.  TAGS is a list of tag strings; KW a TODO keyword
      :tags (\"movie\"))
     (\"!abcd:example.org\"  :file \"~/personal/org/notes.org\" :todo \"TODO\"))")
 
+(defvar morg-user nil
+  "Matrix user id morg acts as, e.g. \"@me:example.org\".  It must match the user namespace
+of morg's appservice registration (`morg-register' writes one for it).")
+
 (defvar morg-token nil
-  "Matrix access token (a string, or a function returning one).  When nil, looked up with
-auth-source.")
+  "Appservice token (the registration's as_token): a string, or a function returning one.
+When nil, looked up with auth-source.")
 
 (defvar morg-auth-user "morg"
-  "Login auth-source looks up the access token under, e.g. in ~/.authinfo.gpg:
+  "Login auth-source looks up the appservice token under, e.g. in ~/.authinfo.gpg:
 
-  machine matrix.example.org login morg password syt_...
+  machine matrix.example.org login morg password <as_token>
 
-This is just a label for the entry, not your Matrix username.  `morg-login' writes it.")
+This is just a label for the entry, not your Matrix username.  `morg-register' and
+`morg-set-token' write it.")
 
 (defvar morg-auth-file nil
-  "File `morg-login' stores the access token in.  nil means the first .gpg file in
-`auth-sources', else ~/.authinfo.gpg.  It must be one of `auth-sources' to be found again.")
+  "File `morg-register' and `morg-set-token' store the token in.  nil means the first .gpg
+file in `auth-sources', else ~/.authinfo.gpg.  It must be one of `auth-sources' to be found
+again.")
 
-(defvar morg-device-name "morg"
-  "Name of the session `morg-login' creates, as listed in Element's Sessions settings.")
+(defvar morg-appservice-id "morg"
+  "Id of morg's appservice registration.")
+
+(defvar morg-sender-localpart "morg"
+  "Localpart of the appservice's own user (unused by morg, but every registration has one).
+It must not be an existing user.")
 
 (defvar morg-senders nil
   "When non-nil, a list of user ids (`@me:example.org'); only their messages are synced.")
@@ -107,7 +124,11 @@ kept whole in the body.")
                                                        :user morg-auth-user :max 1))
                               :secret))))
     (or (if (functionp token) (funcall token) token)
-        (user-error "morg: no access token for %s (run `morg-login')" (morg--host)))))
+        (user-error "morg: no appservice token for %s (run `morg-register' or `morg-set-token')"
+                    (morg--host)))))
+
+(defun morg--user ()
+  (or morg-user (user-error "morg: set `morg-user'")))
 
 (defun morg--http (method url data token)
   "Send METHOD to URL with DATA (a lisp value, JSON-encoded), authorized by TOKEN when it's
@@ -136,17 +157,16 @@ non-nil.  Return (STATUS RAW-BODY)."
 
 (defun morg--request (method path &optional data query token)
   "Send METHOD to PATH under /_matrix/client/v3 with DATA (JSON-encoded) and QUERY (an alist
-of strings), and return parsed JSON.  Authorized by TOKEN, or the stored token when TOKEN is
-nil, or not at all when it's `:none'.  Rate-limited requests are retried after the delay the
-server asks for; any other non-2xx signals a `user-error' with the status and body."
-  (let ((url (concat (morg--homeserver) "/_matrix/client/v3" path
-                     (when query
-                       (concat "?" (url-build-query-string
-                                    (mapcar (lambda (p) (list (car p) (cdr p))) query))))))
-        (token (pcase token
-                 ('nil (morg--token))
-                 (:none nil)
-                 (_ token))))
+of strings), and return parsed JSON.  Authorized by the appservice TOKEN, or the stored one
+when TOKEN is nil, acting as `morg-user'.  Rate-limited requests are retried after the delay
+the server asks for; any other non-2xx signals a `user-error' with the status and body."
+  (let* ((query (cons (cons "user_id" (morg--user)) query))
+         ;; Not `url-build-query-string': it leaves `+' alone, which decodes as a space.
+         (url (concat (morg--homeserver) "/_matrix/client/v3" path "?"
+                      (mapconcat (lambda (p) (concat (url-hexify-string (car p)) "="
+                                                     (url-hexify-string (cdr p))))
+                                 query "&")))
+         (token (or token (morg--token))))
     (cl-loop for attempt from 1
              for (status raw) = (morg--http method url data token)
              for json = (morg--parse raw)
@@ -225,7 +245,7 @@ Redacted events have empty content, so they drop out here."
                                        (cl-incf morg--txn)))
                  `((reason . ,morg-redact-reason))))
 
-;;;; Login
+;;;; Auth
 
 (defun morg--auth-file ()
   (expand-file-name
@@ -258,51 +278,111 @@ Return the file.  auth-source's own saving is bypassed, so this works even when
     file))
 
 (defun morg--whoami (token)
-  "User id TOKEN belongs to, or nil when it doesn't work."
+  "User id TOKEN acts as, or nil when it doesn't work."
   (ignore-errors
     (alist-get 'user_id (morg--request "GET" "/account/whoami" nil nil token))))
 
-;;;###autoload
-(defun morg-login ()
-  "Log in to Matrix and store an access token for morg in `morg-auth-file'.
+(defun morg--random-token ()
+  "64 hex characters from the system's CSPRNG."
+  (let ((bytes (with-temp-buffer
+                 (set-buffer-multibyte nil)
+                 (let ((coding-system-for-read 'binary))
+                   (call-process "head" "/dev/urandom" t nil "-c" "32"))
+                 (buffer-string))))
+    (unless (= (length bytes) 32)
+      (user-error "morg: couldn't read /dev/urandom"))
+    (mapconcat (lambda (c) (format "%02x" c)) bytes "")))
 
-Prompts for the homeserver (when `morg-homeserver' isn't set), your username and your
-password.  The password is only sent to the homeserver to create a session named
-`morg-device-name'; only the resulting token is stored.  When morg already had a token, the
-session behind it is logged out once the new one is saved."
-  (interactive)
+(defun morg--registration (as-token hs-token)
+  "Appservice registration YAML for AS-TOKEN and HS-TOKEN."
+  (format "# morg: Synapse appservice registration.
+# Reference this file from homeserver.yaml and restart Synapse:
+#   app_service_config_files:
+#     - /path/to/morg-registration.yaml
+id: %s
+url: null
+as_token: %s
+hs_token: %s
+sender_localpart: %s
+rate_limited: false
+namespaces:
+  users:
+    - regex: '^%s$'
+      exclusive: false
+  aliases: []
+  rooms: []
+"
+          morg-appservice-id as-token hs-token morg-sender-localpart
+          (regexp-quote (morg--user))))
+
+(defun morg--report-stored (file)
+  (cond
+   (morg-token "  (but `morg-token' is set and takes precedence)")
+   ((not (member file (mapcar (lambda (s) (and (stringp s) (expand-file-name s)))
+                              auth-sources)))
+    "  (add it to `auth-sources' so morg finds it)")
+   (t "")))
+
+(defun morg--read-config ()
+  "Prompt for `morg-homeserver' and `morg-user' when they're unset."
   (unless morg-homeserver
     (setq morg-homeserver (string-trim (read-string "Homeserver URL: " "https://"))))
-  (let* ((old (ignore-errors (morg--token)))
-         (old-user (and old (morg--whoami old))))
-    (when (and old-user
-               (not (y-or-n-p (format "morg already has a working token for %s; replace it? "
-                                      old-user))))
-      (user-error "Aborted"))
-    (let* ((user (string-trim (read-string "Matrix username: " (or old-user (user-login-name)))))
-           (password (read-passwd (format "Password for %s: " user)))
-           (response
-            (unwind-protect
-                (morg--request "POST" "/login"
-                               `((type . "m.login.password")
-                                 (identifier . ((type . "m.id.user") (user . ,user)))
-                                 (password . ,password)
-                                 (initial_device_display_name . ,morg-device-name))
-                               nil :none)
-              (clear-string password)))
-           (token (or (alist-get 'access_token response)
-                      (user-error "morg: login returned no access token")))
-           (file (morg--store-token (morg--host) token)))
-      (when (and old (not (equal old token)))
-        (ignore-errors (morg--request "POST" "/logout" (make-hash-table) nil old)))
-      (message "morg: logged in as %s; token saved to %s%s"
-               (alist-get 'user_id response) (abbreviate-file-name file)
-               (cond
-                (morg-token "  (but `morg-token' is set and takes precedence)")
-                ((not (member file (mapcar (lambda (s) (and (stringp s) (expand-file-name s)))
-                                           auth-sources)))
-                 "  (add it to `auth-sources' so morg finds it)")
-                (t ""))))))
+  (unless morg-user
+    (setq morg-user (string-trim (read-string "Matrix user id morg acts as: "
+                                              (format "@%s:%s" (user-login-name)
+                                                      (morg--host)))))))
+
+;;;###autoload
+(defun morg-register ()
+  "Generate an appservice registration for morg and store its token.
+
+Generates fresh tokens, stores the as_token in `morg-auth-file' and shows the registration
+YAML in a buffer.  Save that on the homeserver, add it to `app_service_config_files' in
+homeserver.yaml and restart Synapse; morg can then act as `morg-user'.  Running this again
+replaces the stored token, so the registration on the server must be replaced too."
+  (interactive)
+  (morg--read-config)
+  (let ((old (ignore-errors (morg--token))))
+    (when (and old
+               (not (y-or-n-p "morg already has a token; replace it (and the registration)? ")))
+      (user-error "Aborted")))
+  (let* ((as-token (morg--random-token))
+         (file (morg--store-token (morg--host) as-token))
+         (buf (get-buffer-create "*morg-registration*")))
+    (with-current-buffer buf
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert (morg--registration as-token (morg--random-token)))
+        (when (fboundp 'yaml-mode) (yaml-mode))
+        (goto-char (point-min))))
+    (pop-to-buffer buf)
+    (message "morg: token saved to %s%s; install the registration shown and restart Synapse"
+             (abbreviate-file-name file) (morg--report-stored file))))
+
+;;;###autoload
+(defun morg-set-token (token)
+  "Store TOKEN, an existing appservice as_token, for morg in `morg-auth-file'.
+It's checked against the homeserver first, acting as `morg-user'."
+  (interactive
+   (progn (morg--read-config)
+          (list (string-trim (read-passwd "Appservice as_token: ")))))
+  (let ((user (morg--whoami token)))
+    (unless (equal user (morg--user))
+      (user-error "morg: that token can't act as %s (is the registration installed?)"
+                  (morg--user)))
+    (let ((file (morg--store-token (morg--host) token)))
+      (message "morg: acting as %s; token saved to %s%s"
+               user (abbreviate-file-name file) (morg--report-stored file)))))
+
+;;;###autoload
+(defun morg-check ()
+  "Report whether morg's stored token works."
+  (interactive)
+  (let ((user (morg--whoami (morg--token))))
+    (if user
+        (message "morg: OK, acting as %s on %s" user (morg--homeserver))
+      (user-error "morg: the token doesn't work as %s (is the registration installed?)"
+                  (morg--user)))))
 
 ;;;; Org
 
