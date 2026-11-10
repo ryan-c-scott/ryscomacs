@@ -834,7 +834,7 @@ With prefix-arg prompt for type if available with your AG version."
               (,(pcase splitter
                   (:horizontal 'split-window-horizontally)
                   (:vertical 'split-window-vertically))
-               ,(let ((size (plist-get props :size)))
+               ,(let ((size (or (plist-get props :size) 0.5)))
                   (unless (= size 0.5)
                     `(floor (* ,size window-size)))))
               (other-window 1)))
@@ -847,6 +847,14 @@ With prefix-arg prompt for type if available with your AG version."
                  (setq org-agenda-category-filter (list ,@filters))
                  'category)
                 (org-agenda-redo-all))))
+          (`(:org-heading . ,heading-path)
+           `(goto-char (org-find-olp
+                        ',(if (listp heading-path)
+                              heading-path
+                            (list heading-path))
+                        t)))
+          (`(:org-show)
+           '(org-fold-show-subtree))
           (_ f)))))
 
 (cl-defmacro rysco-frames-layout (&rest layout)
