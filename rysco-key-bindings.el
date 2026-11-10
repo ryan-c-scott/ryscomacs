@@ -125,6 +125,7 @@
   (define-key org-mode-map (kbd "C-c t") 'rysco-org-add-triage-tag)
   (define-key org-mode-map (kbd "C-c <") 'rysco-org-recapture-dwim)
   (define-key org-mode-map (kbd (concat rysco-lead-key " m")) 'helm-rysco-org-entry-notes)
+  (define-key org-mode-map (kbd (concat rysco-lead-key " M-m")) 'org-fold-hide-drawer-all)
   (define-key
    org-read-date-minibuffer-local-map (kbd "C-b")
    (lambda ()
