@@ -1104,6 +1104,16 @@ With ONE-LINE, only the first line of the note text is used."
     (org-fold-show-entry))
   (goto-char marker))
 
+(defun rysco-helm-horizontal-window (_window)
+  "Window for helm beside the selected one, for `helm-split-window-preferred-function'.
+Reuse a window to the right or left, splitting the selected window to the
+right only if neither exists."
+  (let ((win (or (window-in-direction 'right)
+                 (window-in-direction 'left)
+                 (split-window (selected-window) nil 'right))))
+    (setq helm-persistent-action-window-buffer (window-buffer win))
+    win))
+
 ;;;###autoload
 (defun helm-rysco-org-entry-notes ()
   "Pop up the LOGBOOK notes of the current entry (org or agenda buffer) in helm."
@@ -1117,22 +1127,24 @@ With ONE-LINE, only the first line of the note text is used."
             notes (rysco-org-entry-notes)))
     (if (not notes)
         (message "No notes for \"%s\"" heading)
-      (helm :sources
-            (helm-build-sync-source (format "Notes: %s (%d)" heading (length notes))
-              :candidates (--map (cons (rysco-org--format-note it)
-                                       (with-current-buffer buffer
-                                         (copy-marker (plist-get it :pos))))
-                                 notes)
-              :multiline t
-              :action `(("Go to note" . rysco-org--goto-note)
-                        ("Copy note text" .
-                         ,(lambda (m)
-                            (kill-new (plist-get
-                                       (--first (= (plist-get it :pos) (marker-position m))
-                                                notes)
-                                       :text))
-                            (message "Copied note")))))
-            :buffer "*helm org notes*"))))
+      (let ((helm-split-window-preferred-function
+             #'rysco-helm-horizontal-window))
+        (helm :sources
+              (helm-build-sync-source (format "Notes: %s (%d)" heading (length notes))
+                :candidates (--map (cons (rysco-org--format-note it)
+                                         (with-current-buffer buffer
+                                           (copy-marker (plist-get it :pos))))
+                                   notes)
+                :multiline t
+                :action `(("Go to note" . rysco-org--goto-note)
+                          ("Copy note text" .
+                           ,(lambda (m)
+                              (kill-new (plist-get
+                                         (--first (= (plist-get it :pos) (marker-position m))
+                                                  notes)
+                                         :text))
+                              (message "Copied note")))))
+              :buffer "*helm org notes*")))))
 
 ;;;; Header-line hint
 
