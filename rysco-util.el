@@ -250,17 +250,74 @@ operators `+' and `-' are doubled if not specified as such."
                 (directory-files-recursively ,dir ,ext)))
       :action '(("Open" . run-associated-program))))))
 
-(defvar rysco-frame-layouts nil)
+(defvar rysco-frame-layouts nil
+  "Layouts offered by `helm-rysco-frame-layouts'.
+Each entry is either a command symbol or a (NAME . COMMAND) cons.")
+
+(defface rysco-frame-layouts-title
+  '((t :inherit font-lock-keyword-face :weight bold :height 2.5))
+  "Title face for `helm-rysco-frame-layouts'."
+  :group 'rysco-faces)
+
+(defface rysco-frame-layouts-candidate
+  '((t :inherit default :weight semi-bold :height 1.4))
+  "Candidate name face for `helm-rysco-frame-layouts'."
+  :group 'rysco-faces)
+
+(defface rysco-frame-layouts-description
+  '((t :inherit font-lock-comment-face :slant italic :height 1.0))
+  "Candidate description face for `helm-rysco-frame-layouts'."
+  :group 'rysco-faces)
+
+(defun rysco-frame-layouts--icon (name &optional face)
+  (if (fboundp 'all-the-icons-material)
+      (concat (all-the-icons-material name :face face :v-adjust -0.15) " ")
+    ""))
+
+(defun rysco-frame-layouts--pretty-name (func)
+  (->> (symbol-name func)
+       (replace-regexp-in-string "^\\(rysco-\\)?\\(frame-\\)?\\(layout-\\)?" "")
+       (replace-regexp-in-string "[-_]" " ")
+       (capitalize)))
+
+(defun rysco-frame-layouts--candidate (entry)
+  (let* ((func (if (consp entry) (cdr entry) entry))
+         (name (if (consp entry) (car entry) (rysco-frame-layouts--pretty-name func)))
+         (doc (when (functionp func)
+                (car (split-string (or (ignore-errors (documentation func t)) "")
+                                   "\n")))))
+    (cons
+     (concat
+      "    "
+      (rysco-frame-layouts--icon "blur_linear" 'rysco-frame-layouts-candidate)
+      (propertize name 'face 'rysco-frame-layouts-candidate)
+      (when (and doc (not (string-empty-p doc)))
+        (concat "\n      " (propertize doc 'face 'rysco-frame-layouts-description))))
+     func)))
+
 (cl-defun helm-rysco-frame-layouts ()
   (interactive)
-  (helm
-   :sources
-   (helm-build-sync-source "Layouts"
-     :candidates
-     rysco-frame-layouts
-     :action
-     (lambda (func)
-       (funcall-interactively func)))))
+  (let ((helm-full-frame t)
+        (helm-candidate-separator " "))
+    (helm
+     :buffer "*helm rysco layouts*"
+     :prompt "Layout: "
+     :sources
+     (helm-build-sync-source "Layouts"
+       :header-name
+       (lambda (_)
+         (concat
+          "\n "
+          (rysco-frame-layouts--icon "dashboard" 'rysco-frame-layouts-title)
+          (propertize "Layout" 'face 'rysco-frame-layouts-title)
+          "\n"))
+       :candidates
+       (lambda ()
+         (mapcar #'rysco-frame-layouts--candidate rysco-frame-layouts))
+       :multiline t
+       :action
+       (lambda (func)
+         (funcall-interactively func))))))
 
 (cl-defun rysco-rotate-windows (arg)
   (interactive "P")

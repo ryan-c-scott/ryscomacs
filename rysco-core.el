@@ -940,7 +940,8 @@ SEE `semantic-stickyfunc-fetch-stickyline'"
      (which-key-mode)
      (bluedot-enable t)
      (org-clock-persistence-insinuate)
-     (rysco-add-hunspell-dictionaries))))
+     (rysco-add-hunspell-dictionaries)
+     (helm-rysco-frame-layouts))))
 
 ;; NOTE:  Special thanks to Doom Emacs for the startup/GC tips
 ;; .https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly
