@@ -289,7 +289,7 @@ Each entry is either a command symbol or a (NAME . COMMAND) cons.")
     (cons
      (concat
       "    "
-      (rysco-frame-layouts--icon "blur_linear" 'rysco-frame-layouts-candidate)
+      (rysco-frame-layouts--icon "crop_7_5" 'rysco-frame-layouts-candidate)
       (propertize name 'face 'rysco-frame-layouts-candidate)
       (when (and doc (not (string-empty-p doc)))
         (concat "\n      " (propertize doc 'face 'rysco-frame-layouts-description))))
